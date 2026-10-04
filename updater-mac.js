@@ -77,7 +77,7 @@ class MacUpdater {
   }
 
   async download(version, url, entry) {
-    const work = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-update-'));
+    const work = fs.mkdtempSync(path.join(os.tmpdir(), 'inquire-update-'));
     const zip = path.join(work, 'update.zip');
     this.set({ status: 'downloading', version, percent: 0 });
     const res = await this.net.fetch(url, { headers: { 'User-Agent': 'Inquire-Updater' } });
@@ -111,6 +111,9 @@ class MacUpdater {
     if (!target) { this.set({ status: 'error', message: 'Updates install only into the packaged app.' }); return false; }
     if (target.includes('AppTranslocation') || target.startsWith('/Volumes/')) { this.set({ status: 'error', message: 'Drag Inquire into your Applications folder, open it from there, then install the update.' }); return false; }
     const backup = path.join(r.work, 'previous.app');
+    // Copies installed as Codex.app move to Inquire.app (the name inside the zip) unless that name is already taken.
+    const named = path.join(path.dirname(target), path.basename(r.appPath));
+    const dest = named !== target && !fs.existsSync(named) ? named : target;
     const result = path.join(this.app.getPath('userData'), 'update-result.json');
     const fallback = path.join(os.homedir(), 'Downloads', `Inquire ${r.version}.app`);
     const q = s => s.replace(/"/g, '\\"');
@@ -118,16 +121,16 @@ class MacUpdater {
     fs.writeFileSync(script, [
       '#!/bin/bash',
       `while kill -0 ${process.pid} 2>/dev/null; do sleep 0.3; done`,
-      `if mv "${q(target)}" "${q(backup)}" && mv "${q(r.appPath)}" "${q(target)}"; then`,
-      `  /usr/bin/xattr -cr "${q(target)}" 2>/dev/null`,
+      `if mv "${q(target)}" "${q(backup)}" && mv "${q(r.appPath)}" "${q(dest)}"; then`,
+      `  /usr/bin/xattr -cr "${q(dest)}" 2>/dev/null`,
       `  echo '{"ok":true,"version":"${r.version}"}' > "${q(result)}"`,
       `  rm -rf "${q(backup)}"`,
       'else',
-      `  [ -d "${q(backup)}" ] && [ ! -d "${q(target)}" ] && mv "${q(backup)}" "${q(target)}"`,
+      `  [ -d "${q(backup)}" ] && [ ! -d "${q(target)}" ] && mv "${q(backup)}" "${q(target)}"; DEST="${q(target)}"`,
       `  rm -rf "${q(fallback)}"; mv "${q(r.appPath)}" "${q(fallback)}"; /usr/bin/xattr -cr "${q(fallback)}" 2>/dev/null`,
       `  echo '{"ok":false,"version":"${r.version}","fallback":"${q(fallback)}"}' > "${q(result)}"`,
       'fi',
-      `/usr/bin/open "${q(target)}"`
+      `/usr/bin/open "\${DEST:-${q(dest)}}"`
     ].join('\n'), { mode: 0o755 });
     spawn('/bin/bash', [script], { detached: true, stdio: 'ignore' }).unref();
     this.set({ status: 'installing', version: r.version });

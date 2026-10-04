@@ -8,7 +8,7 @@
 const sub = DB.subjects.find(s => s.id === "computer-science");
 if (sub) Object.assign(sub, { status: "open", note: "18 fields · Programming Fundamentals charted" });
 
-DB.subjectMaps["computer-science"] = { name: "Computer Science", glyph: "λ", mapLine: "From your first program to machine learning",
+DB.subjectMaps["computer-science"] = { name: "Computer Science", glyph: "<span class=\"gx\">&lt;/&gt;</span>", mapLine: "From your first program to machine learning",
   mapSub: "The standard college computer science major: programming and data structures, the systems and theory core, then upper-division electives. Arrows show the usual prerequisites; each field lists the mathematics it needs.",
   groups: [
     { name: "Foundations", ids: ["programming-1","data-structures","computer-systems"] },

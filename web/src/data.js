@@ -262,19 +262,23 @@ DB.fieldEras = [
 DB.subjectGroups = [
   { id: "stem", name: "STEM", line: "Science, technology, engineering and mathematics" },
   { id: "humanities", name: "Arts & Humanities", line: "Language, literature, the arts and ideas", accent: "magenta" },
-  { id: "social", name: "Social Sciences", line: "How people, markets and societies behave" }
+  { id: "social", name: "Social Sciences", line: "How people, markets and societies behave", accent: "lime" }
 ];
 DB.subjects = [
   { id: "mathematics", group: "stem", name: "Mathematics", glyph: "∑", status: "open", note: "21 fields · Arithmetic, Pre-Algebra, Algebra I and Geometry charted" },
   { id: "physics", group: "stem", name: "Physics", glyph: "⚛", status: "open", note: "17 fields · Mechanics charted" },
   { id: "chemistry", group: "stem", name: "Chemistry", glyph: "⌬", status: "locked", note: "Not yet charted" },
   { id: "biology", group: "stem", name: "Biology", glyph: "❦", status: "locked", note: "Not yet charted" },
-  { id: "computer-science", group: "stem", name: "Computer Science", glyph: "λ", status: "locked", note: "Not yet charted" },
+  { id: "computer-science", group: "stem", name: "Computer Science", glyph: "<span class=\"gx\">&lt;/&gt;</span>", status: "locked", note: "Not yet charted" },
+  { id: "physical-geography", group: "stem", name: "Physical Geography", glyph: "∆", status: "locked", note: "Not yet charted" },
   { id: "english", group: "humanities", name: "English", glyph: "¶", status: "open", note: "20 fields · Grammar & Usage charted" },
   { id: "music-theory", group: "humanities", name: "Music Theory", glyph: "♪", status: "locked", note: "Not yet charted" },
   { id: "visual-arts", group: "humanities", name: "Visual Arts", glyph: "◈", status: "locked", note: "Not yet charted" },
   { id: "philosophy", group: "humanities", name: "Philosophy", glyph: "Φ", status: "locked", note: "Not yet charted" },
-  { id: "economics", group: "social", name: "Economics", glyph: "¤", status: "locked", note: "Not yet charted" }
+  { id: "economics", group: "social", name: "Economics", glyph: "¤", status: "locked", note: "Not yet charted" },
+  { id: "political-science", group: "social", name: "Political Science", glyph: "⚖", status: "locked", note: "Not yet charted" },
+  { id: "human-geography", group: "social", name: "Human Geography", glyph: "⌂", status: "locked", note: "Not yet charted" },
+  { id: "international-relations", group: "social", name: "International Relations", glyph: "⇌", status: "locked", note: "Not yet charted" }
 ];
 
 /* ============ Physics ============

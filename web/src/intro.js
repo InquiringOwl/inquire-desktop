@@ -5,7 +5,7 @@
    Accounts are LOCAL to this computer (PBKDF2-hashed password in localStorage). There is no server, so no password reset. */
 (function () {
 "use strict";
-const desktop = !!window.codexDesktop;
+const desktop = !!window.inquireDesktop;
 const wanted = desktop || /[?&]intro\b/.test(location.search);
 const appEl = document.getElementById("app");
 const who = document.getElementById("whoami");

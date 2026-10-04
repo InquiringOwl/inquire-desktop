@@ -27,7 +27,7 @@ const { desktop, dataFiles, R } = require('./build-web.js');
   const topics = fields.flatMap(f => DB.trees[f].nodes.map(n => n.id));
   const maps = Object.keys(DB.subjectMaps || { mathematics: 1 }).map(sub => sub === 'mathematics' ? 'field-map' : 'field-map-' + sub);
   const planned = Object.keys(DB.fields).filter(f => !DB.trees[f]);
-  let routes = ['menu', 'dict', 'glossary', 'glossary-english', 'glossary-music-theory~root', 'glossary~present', ...maps, ...fields.map(f => 'field-' + f), ...planned.map(f => 'field-' + f), ...topics];
+  let routes = ['menu', 'dict', 'glossary', 'glossary-english', 'glossary-music-theory~root', 'glossary~present', 'field-map~function', 'field-map-english~root', 'eng-parts-of-speech~present', ...maps, ...fields.map(f => 'field-' + f), ...planned.map(f => 'field-' + f), ...topics];
   if (process.env.ONLY) routes = process.env.ONLY.split(',').map(s => s.trim()).filter(Boolean);
 
   const browser = await chromium.launch();

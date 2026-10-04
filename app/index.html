@@ -12,8 +12,8 @@
   color-scheme: dark;
   --void:#070A10; --ink:#0B1019; --panel:#111827; --panel-2:#162033; --panel-3:#1B2740;
   --line:#243149; --line-2:#34445F; --text:#DDE4EF; --muted:#8B97AE; --faint:#58647D;
-  --amber:#F2B84B; --cyan:#5CC8E0; --pink:#F07CA0; --violet:#B49BFF; --green:#7BD88F; --magenta:#D97AE6; --red:#E5675B;
-  --g-stem:#F2B84B; --g-hum:#D97AE6; --g-soc:#7FB4FF; /* glossary subject-group stripes (not content colours) */
+  --amber:#F2B84B; --cyan:#5CC8E0; --pink:#F07CA0; --violet:#B49BFF; --green:#7BD88F; --magenta:#D97AE6; --lime:#B5D65A; --red:#E5675B;
+  --g-stem:#5CC8E0; --g-hum:#D97AE6; --g-soc:#B5D65A; /* subject-group colours: STEM cyan (as its Subjects heading), Arts & Humanities magenta, Social Sciences lime */
   --glow:rgba(92,200,224,.35);
   --math:"STIX Two Text","Cambria Math",Cambria,Georgia,serif;
   --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -89,6 +89,7 @@ table.proof td:first-child{width:55%}
 .hello h1{font:400 clamp(34px,5vw,56px)/1.05 var(--math);margin:0;letter-spacing:-.005em;text-wrap:balance}
 .hello p{color:var(--muted);max-width:60ch;margin:12px 0 0}
 .slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.subj-group .slots{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
 .slot{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:18px;min-height:112px;
   background:linear-gradient(180deg,rgba(27,39,64,.85),rgba(14,21,34,.9));border:1px solid var(--line-2);position:relative;transition:border-color .2s,background .2s}
 .slot:hover{border-color:var(--cyan);background:linear-gradient(180deg,rgba(35,55,86,.9),rgba(14,24,40,.95))}
@@ -381,7 +382,7 @@ input[type=checkbox]{accent-color:var(--amber);width:16px;height:16px}
 [data-accent="magenta"] .slot:hover{border-color:var(--magenta);background:linear-gradient(180deg,rgba(62,37,80,.92),rgba(24,15,36,.95))}
 [data-accent="magenta"] .slot:focus-visible{outline-color:var(--magenta)}
 [data-accent="magenta"] .slot .glyph{color:var(--magenta);border-color:#5f4474;background:radial-gradient(circle at 35% 30%,rgba(217,122,230,.28),rgba(11,16,25,.8) 70%)}
-[data-accent="magenta"] .slot .tag{color:var(--magenta)}
+/* "Open" stays the shared green in every group, like STEM */
 [data-accent="magenta"] .slot.locked:hover{border-color:#4f3a62;background:linear-gradient(180deg,rgba(46,29,60,.88),rgba(19,13,29,.92))}
 [data-accent="magenta"] .slot.locked .glyph{color:#9a7aa8}
 [data-accent="magenta"] .slot.locked .tag{color:#7a6488}
@@ -389,6 +390,20 @@ input[type=checkbox]{accent-color:var(--amber);width:16px;height:16px}
 .work[data-accent="magenta"] .win-h .dot{background:var(--magenta);box-shadow:0 0 8px var(--magenta)}
 .work[data-accent="magenta"] .win::before{border-color:var(--magenta)}
 .work[data-accent="magenta"] .win::after{border-color:var(--magenta)}
+/* Social Sciences accent: lime (yellow-green), between the amber and the green "Open" in hue */
+[data-accent="lime"] .subj-gh{border-bottom-color:#3f4a28}
+[data-accent="lime"] .subj-gh h2{color:var(--lime);text-shadow:0 0 12px rgba(181,214,90,.32)}
+[data-accent="lime"] .slot{background:linear-gradient(180deg,rgba(34,44,22,.88),rgba(14,19,11,.92));border-color:#4a5a2c}
+[data-accent="lime"] .slot:hover{border-color:var(--lime);background:linear-gradient(180deg,rgba(46,60,28,.92),rgba(18,24,12,.95))}
+[data-accent="lime"] .slot:focus-visible{outline-color:var(--lime)}
+[data-accent="lime"] .slot .glyph{color:var(--lime);border-color:#5d6f33;background:radial-gradient(circle at 35% 30%,rgba(181,214,90,.26),rgba(11,16,25,.8) 70%)}
+[data-accent="lime"] .slot.locked:hover{border-color:#4a5a2c;background:linear-gradient(180deg,rgba(34,44,22,.88),rgba(14,19,11,.92))}
+[data-accent="lime"] .slot.locked .glyph{color:#98a874}
+[data-accent="lime"] .slot.locked .tag{color:#6f7a52}
+.work[data-accent="lime"] .nav-title .glyph{color:var(--lime);border-color:#5d6f33;box-shadow:0 0 12px rgba(181,214,90,.22)}
+.work[data-accent="lime"] .win-h .dot{background:var(--lime);box-shadow:0 0 8px var(--lime)}
+.work[data-accent="lime"] .win::before{border-color:var(--lime)}
+.work[data-accent="lime"] .win::after{border-color:var(--lime)}
 
 /* ---------- story panels (English): a framed scene above the passage ---------- */
 .stories{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:18px;margin-top:14px}
@@ -510,7 +525,7 @@ input[type=checkbox]{accent-color:var(--amber);width:16px;height:16px}
 .gl-wrap{max-width:1180px;gap:18px}
 .gl-top{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .gl-top:empty{display:none}
-.gl-menu{display:none}
+.back-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
 .gl-key{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font:500 11px/1 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .gl-key span{display:inline-flex;align-items:center;gap:7px}
 .gl-key i{width:4px;height:14px;display:inline-block}
@@ -587,6 +602,23 @@ button.gl-chip.sm{cursor:pointer}
 .gl-more{justify-self:start}
 .gl-empty{padding:18px 14px;color:var(--muted);font-size:14px}
 .gl-nav .ic{font:600 11px/1 var(--ui)!important;letter-spacing:.02em}
+/* sidebar Glossary list (Field map ⇄ Glossary) and the word pane beside it */
+.nav-gl-tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 12px 10px;border-bottom:1px solid rgba(36,49,73,.6)}
+.nav-gl-full{margin-left:auto}
+.nav-gl-none{width:100%;font:12px/1.4 var(--sans);color:var(--faint)}
+.nav-gl-grp{border-bottom:0}
+.nav-gl-grp .grp-b{padding:0 0 2px}
+.nav-gw{padding-top:4px;padding-bottom:4px}
+.nav-gl-l{cursor:default;padding:8px 12px 3px;font-family:var(--mono);letter-spacing:.1em;color:var(--faint)}
+.nav-gl-l:hover{background:none;color:var(--faint)}
+.nav-gw .ic{color:var(--gc)!important;border-color:color-mix(in srgb,var(--gc) 55%,transparent)!important;border-radius:0!important;background:color-mix(in srgb,var(--gc) 10%,var(--ink))}
+.nav-gw .nm{font:400 15px/1.2 var(--math)}
+.nav-gw .st{display:flex;gap:3px}
+.nav-gw .st i{font:normal 400 11px/1 var(--math);color:var(--gc);width:16px;height:16px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--gc) 55%,transparent)}
+.gl-pane{flex:1;min-height:0;overflow:auto;padding:16px}
+.gl-pane .gl-entry{max-width:880px;margin:0 auto}
+.gl-pane .gl-back{display:none!important}
+.gl-pane-act{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px}
 /* story-panel words with a glossary entry */
 .story .gw{text-decoration:underline dotted var(--faint);text-underline-offset:4px;text-decoration-thickness:1px;cursor:pointer}
 .story .gw:hover{text-decoration-color:var(--text)}
@@ -601,7 +633,6 @@ button.gl-chip.sm{cursor:pointer}
 .gl-pop-o{display:inline-flex;align-items:center;gap:4px;font:500 11px/1 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
 .gl-pop-o i{width:18px;height:18px}
 @media (max-width:760px){
-  .gl-menu{display:inline-flex}
   .gl-body{grid-template-columns:minmax(0,1fr)}
   .gl-list{position:static;max-height:none}
   .gl-body.has-sel .gl-list{display:none}
@@ -611,6 +642,8 @@ button.gl-chip.sm{cursor:pointer}
   .gl-sense{padding:10px 12px 12px}
   .gl-tags{margin-left:0}
 }
+/* multi-character subject glyphs (Computer Science </>) fit the same round badges */
+.gx{font-family:var(--mono);font-size:.74em;font-weight:500;letter-spacing:-.08em;white-space:nowrap}
 
 /* Intro / sign-in screen (web/src/intro.js). Same look as the app: void black, cyan accent, Saira caps, clipped corners.
    Sequence (classes on #intro): is-bg → is-logo → is-form. Everything is skipped for reduced motion or a click/key press. */
@@ -962,19 +995,23 @@ DB.fieldEras = [
 DB.subjectGroups = [
   { id: "stem", name: "STEM", line: "Science, technology, engineering and mathematics" },
   { id: "humanities", name: "Arts & Humanities", line: "Language, literature, the arts and ideas", accent: "magenta" },
-  { id: "social", name: "Social Sciences", line: "How people, markets and societies behave" }
+  { id: "social", name: "Social Sciences", line: "How people, markets and societies behave", accent: "lime" }
 ];
 DB.subjects = [
   { id: "mathematics", group: "stem", name: "Mathematics", glyph: "∑", status: "open", note: "21 fields · Arithmetic, Pre-Algebra, Algebra I and Geometry charted" },
   { id: "physics", group: "stem", name: "Physics", glyph: "⚛", status: "open", note: "17 fields · Mechanics charted" },
   { id: "chemistry", group: "stem", name: "Chemistry", glyph: "⌬", status: "locked", note: "Not yet charted" },
   { id: "biology", group: "stem", name: "Biology", glyph: "❦", status: "locked", note: "Not yet charted" },
-  { id: "computer-science", group: "stem", name: "Computer Science", glyph: "λ", status: "locked", note: "Not yet charted" },
+  { id: "computer-science", group: "stem", name: "Computer Science", glyph: "<span class=\"gx\">&lt;/&gt;</span>", status: "locked", note: "Not yet charted" },
+  { id: "physical-geography", group: "stem", name: "Physical Geography", glyph: "∆", status: "locked", note: "Not yet charted" },
   { id: "english", group: "humanities", name: "English", glyph: "¶", status: "open", note: "20 fields · Grammar & Usage charted" },
   { id: "music-theory", group: "humanities", name: "Music Theory", glyph: "♪", status: "locked", note: "Not yet charted" },
   { id: "visual-arts", group: "humanities", name: "Visual Arts", glyph: "◈", status: "locked", note: "Not yet charted" },
   { id: "philosophy", group: "humanities", name: "Philosophy", glyph: "Φ", status: "locked", note: "Not yet charted" },
-  { id: "economics", group: "social", name: "Economics", glyph: "¤", status: "locked", note: "Not yet charted" }
+  { id: "economics", group: "social", name: "Economics", glyph: "¤", status: "locked", note: "Not yet charted" },
+  { id: "political-science", group: "social", name: "Political Science", glyph: "⚖", status: "locked", note: "Not yet charted" },
+  { id: "human-geography", group: "social", name: "Human Geography", glyph: "⌂", status: "locked", note: "Not yet charted" },
+  { id: "international-relations", group: "social", name: "International Relations", glyph: "⇌", status: "locked", note: "Not yet charted" }
 ];
 
 /* ============ Physics ============
@@ -1330,7 +1367,7 @@ T.planned.forEach(n => { delete n.planned; });
 const sub = DB.subjects.find(s => s.id === "computer-science");
 if (sub) Object.assign(sub, { status: "open", note: "18 fields · Programming Fundamentals charted" });
 
-DB.subjectMaps["computer-science"] = { name: "Computer Science", glyph: "λ", mapLine: "From your first program to machine learning",
+DB.subjectMaps["computer-science"] = { name: "Computer Science", glyph: "<span class=\"gx\">&lt;/&gt;</span>", mapLine: "From your first program to machine learning",
   mapSub: "The standard college computer science major: programming and data structures, the systems and theory core, then upper-division electives. Arrows show the usual prerequisites; each field lists the mathematics it needs.",
   groups: [
     { name: "Foundations", ids: ["programming-1","data-structures","computer-systems"] },
@@ -1437,6 +1474,91 @@ DB.trees["programming-1"] = {
     { id: "cs-modules", col: 12, row: 8, icon: "import", chips: ["math","random"], pre: ["cs-files","cs-2d-data"] }
   ]
 };
+})();
+
+</script>
+<script>/* web/src/data-economics.js */
+/* ============ Economics (Social Sciences, lime accent) ============
+   A standard US college economics program (principles → intermediate theory → econometrics → applied
+   fields, the sequence of a BA/BS in Economics; principles ≈ OpenStax *Principles of Economics 3e*),
+   with a Personal Finance track that starts at zero: earning, spending, saving, credit, risk and
+   investing (≈ the U.S. National Standards for Personal Financial Education, 2021).
+   Fields live in DB.fields with subject: "economics". A field's `math` lists the math fields it uses
+   (informational, never locks). All fields are planned until a tree is charted; Personal Finance first. */
+(function(){
+const sub = DB.subjects.find(s => s.id === "economics");
+if (sub) Object.assign(sub, { status: "open", note: "18 fields · field map drawn" });
+
+DB.subjectMaps.economics = { name: "Economics", glyph: "¤", accent: "lime", mapLine: "From your first paycheck to economic policy",
+  mapSub: "A college economics program plus a personal-finance track: principles of micro and macro, intermediate theory and econometrics, then applied fields. Arrows show the usual prerequisites; each field lists the mathematics it uses.",
+  groups: [
+    { name: "Personal Finance", ids: ["personal-finance","investing","financial-econ"] },
+    { name: "Foundations", ids: ["econ-micro","econ-macro"] },
+    { name: "Core Theory", ids: ["econ-int-micro","econ-int-macro","money-banking","econometrics","game-theory"] },
+    { name: "Applied Fields", ids: ["behavioral-econ","labor-econ","public-econ","industrial-org","international-econ","development-econ","environmental-econ","econ-history"] }
+  ],
+  eras: [
+    { name: "Foundations", from: 0, to: 1 },
+    { name: "Core Theory", from: 2, to: 3 },
+    { name: "Applied Fields", from: 4, to: 5 }
+  ] };
+
+Object.assign(DB.fields, {
+  "personal-finance": { subject: "economics", name: "Personal Finance", icon: "$", level: "College FIN 1xx · financial literacy", col: 0, row: 2, pre: [], math: ["arithmetic"], status: "planned",
+    blurb: "Managing your own money: earning and taxes, budgeting and spending, saving, credit and debt, insurance and risk, and the first steps of investing.",
+    topics: ["Financial goals and decisions","Income, paychecks and payroll taxes","Federal income tax and filing a return","Budgeting and cash flow","Banking: checking, savings and fees","Saving and emergency funds","The time value of money","Credit scores and credit reports","Credit cards and interest","Student loans","Car loans and leasing","Renting versus buying a home","Mortgages","Insurance: health, auto, renters and life","Retirement accounts: 401(k) and IRA","Investing basics: stocks, bonds and funds","Consumer protection, fraud and identity theft"] },
+  "econ-micro": { subject: "economics", name: "Principles of Microeconomics", icon: "D·S", level: "College ECON 1xx · AP Microeconomics", col: 0, row: 5, pre: [], math: ["algebra-1"], status: "planned",
+    blurb: "How households and firms make choices and how markets set prices: scarcity, supply and demand, elasticity, costs, market structures and market failure.",
+    topics: ["Scarcity, choice and opportunity cost","The production possibilities frontier","Comparative advantage and trade","Demand","Supply","Market equilibrium","Elasticity","Price controls and taxes","Consumer and producer surplus","Consumer choice and utility","Costs of production","Perfect competition","Monopoly","Monopolistic competition and oligopoly","Labor markets","Externalities","Public goods","Information and market failure"] },
+  "econ-macro": { subject: "economics", name: "Principles of Macroeconomics", icon: "GDP", level: "College ECON 1xx · AP Macroeconomics", col: 1, row: 5, pre: ["econ-micro"], math: ["algebra-1"], status: "planned",
+    blurb: "The economy as a whole: measuring output, unemployment and inflation, long-run growth, money and the Federal Reserve, business cycles, and fiscal and monetary policy.",
+    topics: ["Measuring GDP","Economic growth","Unemployment","Inflation and price indexes","The international trade balance","Aggregate demand and aggregate supply","The Keynesian expenditure model","Money and banks","The Federal Reserve and monetary policy","Fiscal policy and the budget","Deficits and the national debt","Exchange rates and capital flows","Macroeconomic policy debates"] },
+  "investing": { subject: "economics", name: "Investing & Financial Markets", icon: "↗%", level: "College FIN 2xx · investments for individuals", col: 2, row: 1, pre: ["personal-finance"], math: ["algebra-2"], status: "planned",
+    blurb: "How financial markets work and how individuals invest in them: stocks, bonds and funds, return and risk, diversification, retirement planning and the behavioural traps investors fall into.",
+    topics: ["What financial markets do","Stocks and how they are valued","Bonds and interest rates","Mutual funds, index funds and ETFs","Return, compounding and inflation","Risk and diversification","Asset allocation and rebalancing","Retirement planning and withdrawal rates","Taxes on investments","Fees and their long-run cost","Market efficiency and indexing","Behavioural mistakes investors make"] },
+  "econ-int-micro": { subject: "economics", name: "Intermediate Microeconomics", icon: "∂U", level: "College ECON 3xx · calculus-based price theory", col: 2, row: 4, pre: ["econ-micro"], math: ["calculus-1"], status: "planned",
+    blurb: "Price theory with calculus: utility maximisation and demand, production and cost functions, competitive and strategic markets, general equilibrium and welfare.",
+    topics: ["Preferences and utility","Budget constraints and optimal choice","Demand, income and substitution effects","Choice under uncertainty","Production functions","Cost minimisation and cost curves","Profit maximisation and supply","Competitive equilibrium","Monopoly and price discrimination","Oligopoly models","General equilibrium and efficiency","Welfare economics","Asymmetric information"] },
+  "money-banking": { subject: "economics", name: "Money & Banking", icon: "M2", level: "College ECON 3xx", col: 2, row: 6, pre: ["econ-macro"], math: ["algebra-2"], status: "planned",
+    blurb: "The financial system and the central bank: what money is, how banks create it, interest rates and the yield curve, financial crises and how the Federal Reserve conducts policy.",
+    topics: ["What money is","The financial system","Interest rates and bond prices","The term structure of interest rates","How banks work","The money supply process","Financial regulation","Financial crises","The Federal Reserve System","Tools of monetary policy","Monetary policy strategy","International finance and exchange rates"] },
+  "econometrics": { subject: "economics", name: "Econometrics", icon: "β̂", level: "College ECON 3xx", col: 2, row: 8, pre: ["econ-micro"], math: ["statistics","linear-algebra"], status: "planned",
+    blurb: "Measuring economic relationships with data: regression, hypothesis tests, causal inference with experiments and natural experiments, panel data and time series.",
+    topics: ["Data and economic questions","Review of probability and statistics","Simple linear regression","Multiple regression","Hypothesis tests and confidence intervals","Functional form and dummy variables","Heteroskedasticity","Omitted variables and causality","Instrumental variables","Randomised experiments","Differences-in-differences","Panel data","Time series and forecasting"] },
+  "game-theory": { subject: "economics", name: "Game Theory", icon: "⊞", level: "College ECON 3xx", col: 3, row: 3, pre: ["econ-int-micro"], math: ["probability"], status: "planned",
+    blurb: "Strategic decisions when your best move depends on others' moves: Nash equilibrium, sequential games, repeated games, incomplete information, auctions and bargaining.",
+    topics: ["Strategic-form games","Dominant strategies","Nash equilibrium","Mixed strategies","Sequential games and backward induction","Subgame perfection","Repeated games and cooperation","Games of incomplete information","Signalling","Auctions","Bargaining","Mechanism design"] },
+  "econ-int-macro": { subject: "economics", name: "Intermediate Macroeconomics", icon: "Y=C+I", level: "College ECON 3xx", col: 3, row: 6, pre: ["econ-macro","econ-int-micro"], math: ["calculus-1"], status: "planned",
+    blurb: "Macroeconomic models: long-run growth (Solow), consumption and investment, the labor market, business cycles in the IS–LM and AD–AS frameworks, and modern policy debates.",
+    topics: ["National accounts","The Solow growth model","Endogenous growth","Consumption and saving","Investment","Unemployment and the labor market","Money and inflation in the long run","The IS–LM model","Aggregate demand and aggregate supply","The Phillips curve and expectations","Open-economy macroeconomics","Stabilisation policy","Government debt"] },
+  "financial-econ": { subject: "economics", name: "Financial Economics", icon: "CAPM", level: "College ECON/FIN 4xx", col: 3, row: 1, pre: ["investing","econ-int-micro"], math: ["calculus-1","statistics"], status: "planned",
+    blurb: "The theory behind asset prices: present value, portfolio choice, the capital asset pricing model, efficient markets, derivatives and corporate finance.",
+    topics: ["Present value and discounting","Bond pricing and duration","Stock valuation","Risk, return and utility","Portfolio theory","The capital asset pricing model","Factor models","Efficient markets","Behavioural finance","Options and futures","Corporate finance and capital structure"] },
+  "behavioral-econ": { subject: "economics", name: "Behavioral Economics", icon: "ψ", level: "College ECON 4xx", col: 4, row: 2, pre: ["econ-int-micro"], status: "planned",
+    blurb: "How real people depart from the textbook model: biases and heuristics, prospect theory, present bias, social preferences, and nudges in policy.",
+    topics: ["The rational-choice benchmark","Heuristics and biases","Prospect theory and loss aversion","Mental accounting","Present bias and self-control","Social preferences and fairness","Experiments in economics","Nudges and choice architecture","Behavioural public policy"] },
+  "labor-econ": { subject: "economics", name: "Labor Economics", icon: "W", level: "College ECON 4xx", col: 4, row: 8, pre: ["econ-int-micro","econometrics"], status: "planned",
+    blurb: "How labor markets work: labor supply and demand, human capital, wage differences, discrimination, unions, minimum wages and unemployment.",
+    topics: ["Labor supply","Labor demand","Labor market equilibrium","Human capital and education","Compensating wage differentials","Discrimination","Unions and bargaining","The minimum wage","Migration","Unemployment and job search","Inequality"] },
+  "public-econ": { subject: "economics", name: "Public Economics", icon: "τ", level: "College ECON 4xx · public finance", col: 4, row: 4, pre: ["econ-int-micro"], status: "planned",
+    blurb: "What governments do and how they pay for it: public goods and externalities, taxation and its burden, social insurance, and cost–benefit analysis.",
+    topics: ["Why governments intervene","Public goods","Externalities and corrective taxes","Political economy and voting","Cost–benefit analysis","Social insurance","Health care economics","Tax incidence","Tax efficiency and deadweight loss","Optimal taxation","The income tax and its design"] },
+  "industrial-org": { subject: "economics", name: "Industrial Organization", icon: "HHI", level: "College ECON 4xx", col: 4, row: 3, pre: ["game-theory"], status: "planned",
+    blurb: "How firms compete and how markets are structured: market power, oligopoly, entry, pricing strategies, mergers, platforms and antitrust policy.",
+    topics: ["Market structure and concentration","Market power","Oligopoly: Cournot and Bertrand","Product differentiation","Entry and entry deterrence","Price discrimination and bundling","Vertical relationships","Mergers","Platforms and network effects","Antitrust and regulation"] },
+  "international-econ": { subject: "economics", name: "International Economics", icon: "⇄", level: "College ECON 4xx", col: 4, row: 6, pre: ["econ-int-macro"], status: "planned",
+    blurb: "Trade and money across borders: comparative advantage and trade models, tariffs and trade policy, the balance of payments, exchange rates and international crises.",
+    topics: ["Comparative advantage: the Ricardian model","Factor endowments and trade","Trade and economies of scale","Tariffs and quotas","Trade agreements and the WTO","Globalisation and inequality","The balance of payments","Exchange rate determination","Fixed and floating exchange rates","Currency and debt crises"] },
+  "development-econ": { subject: "economics", name: "Development Economics", icon: "↑", level: "College ECON 4xx", col: 5, row: 7, pre: ["econ-int-macro"], status: "planned",
+    blurb: "Why some countries are rich and others poor: growth and institutions, poverty measurement, health and education, microfinance and field experiments.",
+    topics: ["Measuring development and poverty","Growth and convergence","Institutions","Geography and history","Health and nutrition","Education","Credit and microfinance","Agriculture and land","Aid and its effects","Field experiments"] },
+  "environmental-econ": { subject: "economics", name: "Environmental Economics", icon: "CO₂", level: "College ECON 4xx", col: 5, row: 4, pre: ["public-econ"], status: "planned",
+    blurb: "Economics of the natural world: pollution as an externality, carbon taxes and cap-and-trade, valuing the environment, and the economics of climate change.",
+    topics: ["The environment as an externality","Efficient pollution","Taxes versus cap-and-trade","Valuing the environment","Discounting the future","Common-pool resources","Energy markets","The economics of climate change","International environmental agreements"] },
+  "econ-history": { subject: "economics", name: "Economic History & Thought", icon: "§", level: "College ECON 4xx", col: 5, row: 9, pre: ["econ-int-macro","econ-int-micro"], status: "planned",
+    blurb: "How economies and economic ideas developed: from Adam Smith and the Industrial Revolution through Marx, Keynes and the Great Depression to modern schools of thought.",
+    topics: ["Mercantilism and the physiocrats","Adam Smith and the classical school","The Industrial Revolution","Ricardo, Malthus and Mill","Marx","The marginalist revolution","The Great Depression","Keynes and the Keynesian revolution","Monetarism and rational expectations","The postwar economy","Modern schools of thought"] }
+});
 })();
 
 </script>
@@ -1855,7 +1977,570 @@ DB.addGlossary("mathematics", [
   { w: "measure", field: "geometry", node: "g-angles", pos: "n", ipa: "/ˈmɛʒɚ/",
     senses: ["The size of an angle in degrees, written m∠<i>A</i>; also the length of a segment."], forms: ["measures"] },
   { w: "period", field: "trigonometry", node: "trig-sinusoids", pos: "n", ipa: "/ˈpɪriəd/",
-    senses: ["The length of the shortest interval over which a periodic function repeats: sin <i>x</i> has period 2π."], forms: ["periods"] }
+    senses: ["The length of the shortest interval over which a periodic function repeats: sin <i>x</i> has period 2π."], forms: ["periods"] },
+  /* Arithmetic */
+  { w: "natural number", field: "arithmetic", node: "counting", pos: "n", ipa: "/ˈnætʃɚəl ˈnʌmbɚ/",
+    senses: ["One of the counting numbers 1, 2, 3, …, the set ℕ. Many texts, especially in set theory and computer science, also count 0 as natural and write ℕ = {0, 1, 2, …}, so check a book's convention: 7 is natural under both, 0 under only the second."],
+    forms: ["natural numbers"], see: ["whole number", "successor"] },
+  { w: "whole number", field: "arithmetic", node: "counting", pos: "n", ipa: "/ˈhoʊl ˈnʌmbɚ/",
+    senses: ["One of the numbers 0, 1, 2, 3, …: the natural numbers together with 0, sometimes written 𝕎. 0 and 15 are whole numbers; −2 and ½ are not."],
+    forms: ["whole numbers"], see: ["natural number", "integer"] },
+  { w: "successor", field: "arithmetic", node: "counting", pos: "n", ipa: "/səkˈsɛsɚ/", syl: "suc·ces·sor",
+    senses: ["The natural number that comes right after a given one, <i>n</i> + 1: the successor of 9 is 10 and the successor of 99 is 100. Every natural number has a successor, so the counting numbers never run out."],
+    origin: "Latin <i>successor</i> ‘one who follows’, from <i>succedere</i> ‘to come after’",
+    forms: ["successors"], see: ["successor function"] },
+  { w: "successor function", field: "arithmetic", node: "counting", pos: "n", ipa: "/səkˈsɛsɚ ˈfʌŋkʃən/",
+    senses: ["The function <i>S</i>(<i>n</i>) = <i>n</i> + 1 on the natural numbers, taken as basic in the Peano axioms: it is one-to-one (different inputs give different outputs) and never returns the starting element. Addition can be built from it: <i>a</i> + 0 = <i>a</i> and <i>a</i> + <i>S</i>(<i>b</i>) = <i>S</i>(<i>a</i> + <i>b</i>), so 3 + 2 = <i>S</i>(<i>S</i>(3)) = 5."],
+    forms: ["successor functions"], see: ["successor", "Peano axioms", "function"] },
+  { w: "Peano axioms", field: "arithmetic", node: "counting", pos: "n", ipa: "/peɪˈɑnoʊ ˈæksiəmz/",
+    senses: ["A short list of axioms that characterise the natural numbers: there is a starting element; every number has a successor; the successor function is one-to-one and never gives the starting element; and the axiom of induction holds. All of whole-number arithmetic can be derived from them."],
+    origin: "after the Italian mathematician Giuseppe Peano, who published them in 1889",
+    see: ["successor function", "mathematical induction"] },
+  { w: "cardinality", field: "arithmetic", node: "counting", pos: "n", ipa: "/ˌkɑrdəˈnæləti/", syl: "car·di·nal·i·ty",
+    senses: ["The number of elements in a set, written |<i>A</i>|. A finite set <i>A</i> has cardinality <i>n</i> when its elements can be matched one-to-one with {1, 2, …, <i>n</i>}: |{red, green, blue}| = 3."],
+    origin: "from <i>cardinal</i> (number), Latin <i>cardinalis</i> ‘principal’, from <i>cardo</i> ‘hinge’",
+    forms: ["cardinalities"], see: ["one-to-one correspondence"] },
+  { w: "one-to-one correspondence", field: "arithmetic", node: "counting", pos: "n", ipa: "/ˈwʌn tə ˈwʌn ˌkɔrəˈspɑndəns/",
+    senses: ["A pairing of the elements of two sets in which each element of either set is matched with exactly one element of the other (a <i>bijection</i>). Counting five apples pairs them with {1, 2, 3, 4, 5}; two sets have the same cardinality exactly when such a pairing exists."],
+    forms: ["one-to-one correspondences"], see: ["cardinality"] },
+  { w: "mathematical induction", field: "arithmetic", node: "counting", pos: "n", ipa: "/ˌmæθəˈmætɪkəl ɪnˈdʌkʃən/",
+    senses: ["A method of proof for statements about every natural number: prove the statement for the starting value (base case), then prove that whenever it holds for <i>n</i> it also holds for <i>n</i> + 1 (inductive step). Example: 1 + 2 + ⋯ + <i>n</i> = <i>n</i>(<i>n</i> + 1)/2 holds for <i>n</i> = 1, and adding <i>n</i> + 1 to both sides carries it from <i>n</i> to <i>n</i> + 1.",
+      "The Peano axiom behind this method: any set that contains the starting element and contains the successor of each of its members contains every natural number."],
+    see: ["Peano axioms", "successor"] },
+
+  { w: "digit", field: "arithmetic", node: "place-value", pos: "n", ipa: "/ˈdɪdʒɪt/", syl: "dig·it",
+    senses: ["One of the ten symbols 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 used to write numbers in base ten. The number 4,306 is written with four digits."],
+    origin: "Latin <i>digitus</i> ‘finger, toe’, from counting on the fingers",
+    forms: ["digits"], see: ["numeral", "place value"] },
+  { w: "numeral", field: "arithmetic", node: "place-value", pos: "n", ipa: "/ˈnumɚəl/", syl: "nu·mer·al",
+    senses: ["A written symbol or string of symbols that names a number, as distinct from the number itself: 12, XII and twelve are three numerals for one number."],
+    origin: "Late Latin <i>numeralis</i> ‘of number’, from <i>numerus</i> ‘number’",
+    forms: ["numerals"], see: ["digit"] },
+  { w: "place value", field: "arithmetic", node: "place-value", pos: "n", ipa: "/ˈpleɪs ˌvælju/",
+    senses: ["The amount a digit stands for because of its position: the digit times the power of ten for its place. In 4,306 the 3 has place value 3 × 10² = 300; each place is worth ten times the place to its right."],
+    forms: ["place values"], confused: [["face value", "the digit itself, ignoring its position"]], see: ["face value", "base ten", "digit"] },
+  { w: "face value", field: "arithmetic", node: "place-value", pos: "n", ipa: "/ˈfeɪs ˌvælju/",
+    senses: ["The value of a digit on its own, regardless of where it stands: in 4,306 the 3 has face value 3 but place value 300."],
+    forms: ["face values"], see: ["place value"] },
+  { w: "base ten", field: "arithmetic", node: "place-value", pos: "n", ipa: "/ˈbeɪs ˈtɛn/",
+    senses: ["The decimal positional system, in which each place is worth ten times the place to its right and the digits 0–9 are used: 507 means 5 × 10² + 0 × 10¹ + 7 × 10⁰. Every positive whole number has exactly one base-ten numeral with a nonzero leading digit."],
+    see: ["place value", "expanded form", "digit"] },
+  { w: "expanded form", field: "arithmetic", node: "place-value", pos: "n", ipa: "/ɪkˈspændɪd ˈfɔrm/",
+    senses: ["A number written as the sum of the place values of its digits: 4,306 = 4,000 + 300 + 6, or, with powers of ten, 4 × 10³ + 3 × 10² + 0 × 10¹ + 6 × 10⁰."],
+    see: ["standard form", "place value"] },
+  { w: "standard form", field: "arithmetic", node: "place-value", pos: "n", ipa: "/ˈstændɚd ˈfɔrm/",
+    senses: ["A number written the usual way, as a string of digits: the standard form of 4,000 + 300 + 6 is 4,306.",
+      "In other settings the phrase names other agreed layouts: in algebra a line in standard form is <i>Ax</i> + <i>By</i> = <i>C</i>, and in British usage it means scientific notation, as in 4.306 × 10³."],
+    see: ["expanded form"] },
+
+  { w: "number line", field: "arithmetic", node: "number-line", pos: "n", ipa: "/ˈnʌmbɚ ˌlaɪn/",
+    senses: ["A straight line on which each number is a point, with 0 marked, equal spacing for equal differences, and larger numbers to the right. On it, 3 &lt; 7 because 3 lies to the left of 7, and the distance between them is 4."],
+    forms: ["number lines"], see: ["distance", "inequality"] },
+  { w: "inequality", field: "arithmetic", node: "number-line", pos: "n", ipa: "/ˌɪnɪˈkwɑləti/", syl: "in·e·qual·i·ty",
+    senses: ["A statement that compares two quantities with &lt;, &gt;, ≤, ≥ or ≠: 3 &lt; 7 (3 is less than 7) and <i>x</i> ≥ 2 are inequalities. The open side of &lt; or &gt; faces the larger number."],
+    forms: ["inequalities"], see: ["number line", "trichotomy", "interval"] },
+  { w: "trichotomy", field: "arithmetic", node: "number-line", pos: "n", ipa: "/traɪˈkɑtəmi/", syl: "tri·chot·o·my",
+    senses: ["<b>Trichotomy law</b>: for any two real numbers <i>a</i> and <i>b</i>, exactly one of <i>a</i> &lt; <i>b</i>, <i>a</i> = <i>b</i>, <i>a</i> &gt; <i>b</i> is true. For 5 and 8, only 5 &lt; 8 holds."],
+    origin: "Greek <i>trikha</i> ‘in three’ + <i>-tomia</i> ‘cutting’",
+    forms: ["trichotomies"], see: ["total order", "transitive property"] },
+  { w: "transitive property", field: "arithmetic", node: "number-line", pos: "n", ipa: "/ˈtrænsətɪv ˈprɑpɚti/",
+    senses: ["The rule that a relation carries through a middle term: if <i>a</i> &lt; <i>b</i> and <i>b</i> &lt; <i>c</i>, then <i>a</i> &lt; <i>c</i> (2 &lt; 5 and 5 &lt; 9 give 2 &lt; 9). Equality is transitive too: if <i>a</i> = <i>b</i> and <i>b</i> = <i>c</i>, then <i>a</i> = <i>c</i>."],
+    see: ["trichotomy", "total order"] },
+  { w: "midpoint", field: "arithmetic", node: "number-line", pos: "n", ipa: "/ˈmɪdˌpɔɪnt/", syl: "mid·point",
+    senses: ["The number halfway between two numbers <i>a</i> and <i>b</i>, equal to (<i>a</i> + <i>b</i>) ÷ 2: the midpoint of 3 and 11 is 7, which is 4 from each.",
+      "In geometry, the point that divides a segment into two segments of equal length."],
+    forms: ["midpoints"], see: ["number line", "distance"] },
+  { w: "distance", field: "arithmetic", node: "number-line", pos: "n", ipa: "/ˈdɪstəns/", syl: "dis·tance",
+    senses: ["The length of the gap between two points on a number line, |<i>a</i> − <i>b</i>|, which is the larger minus the smaller and is never negative: the distance between 3 and 7 is 4, and so is the distance between 7 and 3."],
+    forms: ["distances"], see: ["absolute value", "number line"] },
+  { w: "total order", field: "arithmetic", node: "number-line", pos: "n", ipa: "/ˈtoʊtəl ˈɔrdɚ/",
+    senses: ["An ordering of a set in which every two elements can be compared and the comparison is consistent: it obeys trichotomy (exactly one of <i>a</i> &lt; <i>b</i>, <i>a</i> = <i>b</i>, <i>a</i> &gt; <i>b</i>) and is transitive. The usual &lt; is a total order on the whole numbers, integers and reals; it lets every set of numbers be placed on a single line."],
+    forms: ["total orders"], see: ["trichotomy", "transitive property"] },
+
+  { w: "addend", field: "arithmetic", node: "addition", pos: "n", ipa: "/ˈædɛnd/", syl: "ad·dend",
+    senses: ["Any of the numbers being added: in 3 + 4 = 7, the addends are 3 and 4."],
+    origin: "short for Latin <i>addendum</i> ‘thing to be added’, from <i>addere</i> ‘to add’",
+    forms: ["addends"], see: ["sum"] },
+  { w: "sum", field: "arithmetic", node: "addition", pos: "n", ipa: "/sʌm/",
+    senses: ["The result of adding numbers: the sum of 3 and 4 is 7. For sets, the sum of the sizes of two disjoint sets is the size of their union."],
+    origin: "Latin <i>summa</i> ‘the top, the total’; Romans added columns upward and wrote the total at the top",
+    forms: ["sums"], see: ["addend"] },
+  { w: "carry", field: "arithmetic", node: "addition", pos: "v", ipa: "/ˈkæri/", syl: "car·ry",
+    senses: ["In column addition, to move a full group of ten from one place to the next place to the left when the digits in a place add to 10 or more: in 58 + 27, the ones give 15, so write 5 and carry 1 ten to the tens column, giving 85."],
+    forms: ["carries", "carried", "carrying"], see: ["regrouping", "place value"] },
+  { w: "regrouping", field: "arithmetic", node: "addition", pos: "n", ipa: "/riˈɡrupɪŋ/", syl: "re·group·ing",
+    senses: ["Exchanging ten units of one place for one unit of the next place, or the reverse, without changing the number's value. It is the idea behind carrying in addition (15 ones become 1 ten and 5 ones) and borrowing in subtraction (1 ten becomes 10 ones, so 53 is treated as 4 tens and 13 ones)."],
+    see: ["carry", "borrow", "place value"] },
+
+  { w: "round", field: "arithmetic", node: "rounding", pos: "v", ipa: "/raʊnd/",
+    senses: ["To replace a number by the nearest multiple of a chosen place value (ten, hundred, a tenth, …): 4,372 rounded to the nearest hundred is 4,400 because it lies past the halfway point 4,350. The digit just right of the rounding place decides: 0–4 round down, 5–9 round up."],
+    forms: ["rounds", "rounded", "rounding"], see: ["estimate", "rounding error", "round half to even"] },
+  { w: "estimate", field: "arithmetic", node: "rounding", pos: "n", ipa: "/ˈɛstəmət/", syl: "es·ti·mate",
+    senses: ["An approximate value, usually found by computing with rounded numbers: 4,372 + 2,815 is about 4,400 + 2,800 = 7,200, an estimate that shows the exact sum 7,187 is reasonable."],
+    origin: "Latin <i>aestimare</i> ‘to value, appraise’",
+    forms: ["estimates"], see: ["round"] },
+  { w: "estimate", field: "arithmetic", node: "rounding", pos: "v", ipa: "/ˈɛstəˌmeɪt/", syl: "es·ti·mate",
+    senses: ["To find an approximate value, usually by rounding first and then calculating with the easier numbers: estimate 38 × 61 as 40 × 60 = 2,400 (the exact product is 2,318)."],
+    origin: "Latin <i>aestimare</i> ‘to value, appraise’",
+    forms: ["estimates", "estimated", "estimating"], see: ["round"] },
+  { w: "rounding error", field: "arithmetic", node: "rounding", pos: "n", ipa: "/ˈraʊndɪŋ ˌɛrɚ/",
+    senses: ["The difference between a rounded value and the exact value, |round(<i>x</i>) − <i>x</i>|. Rounding 4,372 to the nearest hundred gives error 28; rounding to the nearest multiple of <i>u</i> never errs by more than <i>u</i>/2."],
+    forms: ["rounding errors"], see: ["round"] },
+  { w: "round half to even", field: "arithmetic", node: "rounding", pos: "n", ipa: "/ˈraʊnd ˈhæf tə ˈivən/",
+    senses: ["A tie-breaking rule for rounding that sends a number exactly halfway between two neighbours to the one whose last kept digit is even: 4,350 → 4,400 but 4,250 → 4,200, and 2.5 → 2 but 3.5 → 4. Also called <i>banker's rounding</i>, it avoids the upward bias of always rounding halves up and is the default in IEEE 754 floating-point arithmetic."],
+    see: ["round", "rounding error"] },
+
+  { w: "product", field: "arithmetic", node: "multiplication", pos: "n", ipa: "/ˈprɑdʌkt/", syl: "prod·uct",
+    senses: ["The result of multiplying numbers: the product of 4 and 6 is 24. For sets, <i>a</i> × <i>b</i> counts the ordered pairs that can be formed from sets of sizes <i>a</i> and <i>b</i>."],
+    origin: "Latin <i>productum</i> ‘something brought forth’, from <i>producere</i>",
+    forms: ["products"], confused: [["factor", "one of the numbers being multiplied, not the result"]], see: ["factor", "multiplicand", "partial product"] },
+  { w: "multiplicand", field: "arithmetic", node: "multiplication", pos: "n", ipa: "/ˌmʌltəplɪˈkænd/", syl: "mul·ti·pli·cand",
+    senses: ["The number that is multiplied by another (the multiplier). Read as “<i>a</i> groups of <i>b</i>”, <i>a</i> × <i>b</i> has multiplicand <i>b</i>: in 4 × 6 for 4 bags of 6 marbles, 6 is the multiplicand. Conventions differ between books, and since multiplication is commutative both numbers are usually just called factors."],
+    origin: "Latin <i>multiplicandus</i> ‘to be multiplied’",
+    forms: ["multiplicands"], see: ["multiplier", "factor", "product"] },
+  { w: "multiplier", field: "arithmetic", node: "multiplication", pos: "n", ipa: "/ˈmʌltəˌplaɪɚ/", syl: "mul·ti·pli·er",
+    senses: ["The number by which another is multiplied; in 4 × 6 read as 4 groups of 6, the 4 counts the groups and is the multiplier."],
+    forms: ["multipliers"], see: ["multiplicand", "factor"] },
+  { w: "partial product", field: "arithmetic", node: "multiplication", pos: "n", ipa: "/ˈpɑrʃəl ˈprɑdʌkt/",
+    senses: ["One of the smaller products made by splitting the factors by place value, which add up to the full product: 23 × 47 = 20 × 40 + 20 × 7 + 3 × 40 + 3 × 7 = 800 + 140 + 120 + 21 = 1,081. The method rests on the distributive property."],
+    forms: ["partial products"], see: ["product", "distributive property"] },
+  { w: "zero property", field: "arithmetic", node: "multiplication", pos: "n", ipa: "/ˈzɪroʊ ˈprɑpɚti/",
+    senses: ["<b>Zero property of multiplication</b>: any number times 0 is 0, <i>a</i> × 0 = 0 (so 857 × 0 = 0). It follows from the distributive, identity and additive inverse laws. Not to be confused with the <i>zero-product property</i> of algebra: if <i>ab</i> = 0, then <i>a</i> = 0 or <i>b</i> = 0."],
+    see: ["product", "identity element"] },
+
+  { w: "minuend", field: "arithmetic", node: "subtraction", pos: "n", ipa: "/ˈmɪnjuˌɛnd/", syl: "min·u·end",
+    senses: ["The number from which another is subtracted: in 9 − 4 = 5, the minuend is 9."],
+    origin: "Latin <i>minuendus</i> ‘to be made smaller’, from <i>minuere</i> ‘to lessen’",
+    forms: ["minuends"], see: ["subtrahend", "difference"] },
+  { w: "subtrahend", field: "arithmetic", node: "subtraction", pos: "n", ipa: "/ˈsʌbtrəˌhɛnd/", syl: "sub·tra·hend",
+    senses: ["The number being subtracted: in 9 − 4 = 5, the subtrahend is 4."],
+    origin: "Latin <i>subtrahendus</i> ‘to be drawn away’, from <i>subtrahere</i> ‘to take away’",
+    forms: ["subtrahends"], see: ["minuend", "difference"] },
+  { w: "difference", field: "arithmetic", node: "subtraction", pos: "n", ipa: "/ˈdɪfɚəns/", syl: "dif·fer·ence",
+    senses: ["The result of subtracting one number from another: the difference 9 − 4 is 5, the unique number <i>d</i> with <i>d</i> + 4 = 9. It answers both “how many are left?” and “how many more?”."],
+    forms: ["differences"], see: ["minuend", "subtrahend", "inverse operation"] },
+  { w: "borrow", field: "arithmetic", node: "subtraction", pos: "v", ipa: "/ˈbɑroʊ/", syl: "bor·row",
+    senses: ["In column subtraction, to take one unit from the next place to the left and turn it into ten units of the current place when the top digit is too small: in 53 − 28, 3 − 8 is impossible, so borrow a ten to make 13 − 8 = 5, leaving 4 − 2 = 2 tens, so the answer is 25. The minuend's value does not change."],
+    forms: ["borrows", "borrowed", "borrowing"], see: ["regrouping", "carry"] },
+  { w: "inverse operation", field: "arithmetic", node: "subtraction", pos: "n", ipa: "/ˈɪnvɝs ˌɑpəˈreɪʃən/",
+    senses: ["An operation that undoes another: subtraction undoes addition (7 + 5 − 5 = 7) and division undoes multiplication (6 × 3 ÷ 3 = 6). A subtraction can be checked with its inverse: 9 − 4 = 5 because 5 + 4 = 9."],
+    forms: ["inverse operations"], see: ["difference", "additive inverse"] },
+
+  { w: "commutative property", field: "arithmetic", node: "properties", pos: "n", ipa: "/kəˈmjutətɪv ˈprɑpɚti/",
+    senses: ["The law that the order of two operands does not change the result: <i>a</i> + <i>b</i> = <i>b</i> + <i>a</i> and <i>ab</i> = <i>ba</i>, as in 3 + 5 = 5 + 3 and 3 × 5 = 5 × 3. Subtraction and division are not commutative: 9 − 4 ≠ 4 − 9."],
+    origin: "from <i>commute</i>, Latin <i>commutare</i> ‘to exchange’",
+    see: ["associative property", "distributive property"] },
+  { w: "associative property", field: "arithmetic", node: "properties", pos: "n", ipa: "/əˈsoʊʃiˌeɪtɪv ˈprɑpɚti/",
+    senses: ["The law that grouping does not change the result when the same operation is repeated: (<i>a</i> + <i>b</i>) + <i>c</i> = <i>a</i> + (<i>b</i> + <i>c</i>) and (<i>ab</i>)<i>c</i> = <i>a</i>(<i>bc</i>), so (2 + 7) + 3 = 2 + (7 + 3) = 12. Subtraction and division are not associative: (8 − 4) − 2 = 2 but 8 − (4 − 2) = 6."],
+    see: ["commutative property", "distributive property"] },
+  { w: "distributive property", field: "arithmetic", node: "properties", pos: "n", ipa: "/dɪˈstrɪbjətɪv ˈprɑpɚti/",
+    senses: ["The law linking multiplication and addition: <i>a</i>(<i>b</i> + <i>c</i>) = <i>ab</i> + <i>ac</i>, so 6 × 14 = 6 × 10 + 6 × 4 = 60 + 24 = 84. It underlies the multiplication algorithms and, read right to left, factoring in algebra."],
+    see: ["partial product", "commutative property", "associative property"] },
+  { w: "identity element", field: "arithmetic", node: "properties", pos: "n", ipa: "/aɪˈdɛntəti ˈɛləmənt/",
+    senses: ["A number that leaves every number unchanged under an operation: 0 is the additive identity (<i>a</i> + 0 = <i>a</i>) and 1 is the multiplicative identity (<i>a</i> · 1 = <i>a</i>), as in 8 + 0 = 8 and 8 × 1 = 8."],
+    forms: ["identity elements"], see: ["additive inverse", "multiplicative inverse"] },
+  { w: "multiplicative inverse", field: "arithmetic", node: "properties", pos: "n", ipa: "/ˌmʌltəˈplɪkətɪv ɪnˈvɝs/",
+    senses: ["For a nonzero number <i>a</i>, the number 1/<i>a</i> whose product with <i>a</i> is the identity 1, also called the reciprocal: 5 × 1/5 = 1. It exists in the rationals ℚ and reals ℝ for every number except 0, but not within the integers (1/5 ∉ ℤ)."],
+    forms: ["multiplicative inverses"], see: ["additive inverse", "identity element", "field"] },
+  { w: "field", field: "arithmetic", node: "properties", pos: "n", ipa: "/fild/",
+    senses: ["A set with an addition and a multiplication that obey the commutative, associative and distributive laws, have identities 0 and 1 (with 0 ≠ 1), and give every element an additive inverse and every nonzero element a multiplicative inverse. The rationals ℚ and reals ℝ are fields; the integers ℤ are not, since 2 has no integer reciprocal."],
+    forms: ["fields"], see: ["identity element", "additive inverse", "multiplicative inverse"] },
+
+  { w: "dividend", field: "arithmetic", node: "division", pos: "n", ipa: "/ˈdɪvəˌdɛnd/", syl: "div·i·dend",
+    senses: ["The number being divided: in 12 ÷ 3 = 4, the dividend is 12. In the division algorithm, dividend = divisor × quotient + remainder."],
+    origin: "Latin <i>dividendum</i> ‘thing to be divided’, from <i>dividere</i>",
+    forms: ["dividends"], see: ["divisor", "quotient", "remainder"] },
+  { w: "divisor", field: "arithmetic", node: "division", pos: "n", ipa: "/dɪˈvaɪzɚ/", syl: "di·vi·sor",
+    senses: ["The number by which another is divided: in 12 ÷ 3 = 4, the divisor is 3.",
+      "A number that divides another exactly, with remainder 0; the same as a factor: the divisors of 12 are 1, 2, 3, 4, 6 and 12."],
+    origin: "Latin <i>divisor</i> ‘one who divides’, from <i>dividere</i>",
+    forms: ["divisors"], see: ["dividend", "quotient", "factor"] },
+  { w: "quotient", field: "arithmetic", node: "division", pos: "n", ipa: "/ˈkwoʊʃənt/", syl: "quo·tient",
+    senses: ["The result of a division: 12 ÷ 3 has quotient 4. When the division is not exact, the whole-number quotient counts the complete groups: 14 ÷ 3 has quotient 4 and remainder 2."],
+    origin: "Latin <i>quotiens</i> ‘how many times’",
+    forms: ["quotients"], see: ["dividend", "divisor", "remainder", "division algorithm"] },
+  { w: "remainder", field: "arithmetic", node: "division", pos: "n", ipa: "/rɪˈmeɪndɚ/", syl: "re·main·der",
+    senses: ["The amount left over when a whole number is divided into equal whole groups; it is always at least 0 and less than the divisor. Sharing 14 among 3 gives 4 each with remainder 2, since 14 = 3 × 4 + 2."],
+    forms: ["remainders"], see: ["quotient", "division algorithm"] },
+  { w: "division algorithm", field: "arithmetic", node: "division", pos: "n", ipa: "/dɪˈvɪʒən ˈælɡəˌrɪðəm/",
+    senses: ["The theorem that for any integers <i>a</i> and <i>b</i> with <i>b</i> &gt; 0 there are unique integers <i>q</i> and <i>r</i> with <i>a</i> = <i>bq</i> + <i>r</i> and 0 ≤ <i>r</i> &lt; <i>b</i>: for 47 and 5, 47 = 5 × 9 + 2. Despite the name it is a statement, not a procedure; long division is one way to find <i>q</i> and <i>r</i>."],
+    see: ["quotient", "remainder", "dividend", "divisor"] },
+  { w: "undefined", field: "arithmetic", node: "division", pos: "aj", ipa: "/ˌʌndɪˈfaɪnd/", syl: "un·de·fined",
+    senses: ["Having no value under the rules of the operation. Division by zero is undefined: 5 ÷ 0 would need a number <i>q</i> with 0 × <i>q</i> = 5, and none exists, while 0 ÷ 0 fits every <i>q</i>, so no single answer can be chosen. Likewise 3 − 8 is undefined within the whole numbers."],
+    see: ["divisor", "quotient"] },
+
+  { w: "integer", field: "arithmetic", node: "integers", pos: "n", ipa: "/ˈɪntədʒɚ/", syl: "in·te·ger",
+    senses: ["A whole number or the opposite of one: a member of ℤ = {…, −3, −2, −1, 0, 1, 2, 3, …}. −7, 0 and 12 are integers; ½ and 0.3 are not. ℤ is closed under addition, subtraction and multiplication but not division."],
+    origin: "Latin <i>integer</i> ‘whole, untouched’",
+    forms: ["integers"], see: ["whole number", "negative number", "opposite"] },
+  { w: "negative number", field: "arithmetic", node: "integers", pos: "n", ipa: "/ˈnɛɡətɪv ˈnʌmbɚ/",
+    senses: ["A number less than 0, lying to the left of 0 on the number line and written with a minus sign: −3 °C is 3 degrees below zero. 0 itself is neither positive nor negative."],
+    forms: ["negative numbers"], see: ["integer", "opposite", "number line"] },
+  { w: "opposite", field: "arithmetic", node: "integers", pos: "n", ipa: "/ˈɑpəzɪt/", syl: "op·po·site",
+    senses: ["The number the same distance from 0 on the other side of the number line: the opposite of 5 is −5, the opposite of −5 is 5, and the opposite of 0 is 0. A number plus its opposite is 0."],
+    forms: ["opposites"], syn: [["additive inverse", "the same number, named by the property <i>a</i> + (−<i>a</i>) = 0"]], see: ["additive inverse", "absolute value"] },
+  { w: "additive inverse", field: "arithmetic", node: "integers", pos: "n", ipa: "/ˈædətɪv ɪnˈvɝs/",
+    senses: ["For a number <i>a</i>, the unique number −<i>a</i> with <i>a</i> + (−<i>a</i>) = 0: the additive inverse of 8 is −8 and of −8 is 8. Subtraction is defined by it: <i>a</i> − <i>b</i> = <i>a</i> + (−<i>b</i>), so 6 − (−4) = 6 + 4 = 10."],
+    forms: ["additive inverses"], see: ["opposite", "identity element", "multiplicative inverse"] },
+  { w: "absolute value", field: "arithmetic", node: "integers", pos: "n", ipa: "/ˈæbsəˌlut ˈvælju/",
+    senses: ["The distance of a number from 0 on the number line, written |<i>a</i>|; it is never negative: |−6| = 6 and |6| = 6. Equivalently |<i>a</i>| = <i>a</i> if <i>a</i> ≥ 0 and −<i>a</i> if <i>a</i> &lt; 0, and |<i>a</i> − <i>b</i>| is the distance between <i>a</i> and <i>b</i>."],
+    forms: ["absolute values"], see: ["distance", "opposite"] },
+  { w: "closure", field: "arithmetic", node: "integers", pos: "n", ipa: "/ˈkloʊʒɚ/", syl: "clo·sure",
+    senses: ["The property that an operation on members of a set always gives a member of the same set; the set is then <i>closed</i> under the operation. The integers are closed under subtraction (3 − 8 = −5 ∈ ℤ) but not under division (1 ÷ 2 ∉ ℤ); the whole numbers are not closed under subtraction."],
+    forms: ["closed"], see: ["integer", "whole number"] },
+  { w: "exponent", field: "arithmetic", node: "exponents", pos: "n", ipa: "/ɪkˈspoʊnənt/", syl: "ex·po·nent",
+    senses: ["The small raised number in a power that says how many times the base is used as a factor: in 2<sup>5</sup> = 2 × 2 × 2 × 2 × 2 = 32 the exponent is 5.",
+      "For a nonzero base the definition extends to zero and negative integers so that the laws of exponents still hold: <i>b</i><sup>0</sup> = 1 and 2<sup>−3</sup> = 1/2<sup>3</sup> = 1/8."],
+    origin: "Latin <i>exponent-</i>, present participle of <i>exponere</i> ‘to put out, set forth’",
+    forms: ["exponents"], see: ["base", "power"] },
+  { w: "exponentiation", field: "arithmetic", node: "exponents", pos: "n", ipa: "/ˌɛkspoʊˌnɛnʃiˈeɪʃən/", syl: "ex·po·nen·ti·a·tion",
+    senses: ["The operation of raising a base to an exponent, <i>b</i><sup><i>n</i></sup>. Unlike addition and multiplication it is neither commutative nor associative: 2<sup>3</sup> = 8 but 3<sup>2</sup> = 9, and a tower such as 2<sup>3<sup>2</sup></sup> is read top-down as 2<sup>9</sup>."],
+    see: ["exponent", "power"] },
+  { w: "base", field: "arithmetic", node: "exponents", pos: "n", ipa: "/beɪs/",
+    senses: ["In a power <i>b</i><sup><i>n</i></sup>, the number <i>b</i> that is multiplied by itself: in 5<sup>3</sup> = 125 the base is 5.",
+      "The number of digits a place-value system uses, so that each place is worth that many times the place to its right: in base ten 10 ones make a ten."],
+    forms: ["bases"], see: ["exponent", "power"] },
+  { w: "square", field: "arithmetic", node: "exponents", pos: "n", ipa: "/skwɛr/",
+    senses: ["The second power of a number, the product of the number with itself: 7<sup>2</sup> = 49, so 49 is the square of 7. The name comes from the area of a square with that side length.",
+      "A quadrilateral with four equal sides and four right angles."],
+    forms: ["squares"], see: ["cube", "square root", "perfect square"] },
+  { w: "square", field: "arithmetic", node: "exponents", pos: "v", ipa: "/skwɛr/",
+    senses: ["To raise a number to the second power, that is, multiply it by itself: squaring −3 gives (−3)<sup>2</sup> = 9."],
+    forms: ["squares", "squared", "squaring"], see: ["square root"] },
+  { w: "cube", field: "arithmetic", node: "exponents", pos: "n", ipa: "/kjub/",
+    senses: ["The third power of a number, the number used three times as a factor: 4<sup>3</sup> = 4 × 4 × 4 = 64, the volume of a cube with edge 4.",
+      "A solid with six square faces, all edges equal."],
+    forms: ["cubes", "cubed"], see: ["square", "power"] },
+
+  { w: "order of operations", field: "arithmetic", node: "order-ops", pos: "n", ipa: "/ˈɔrdɚ əv ˌɑpəˈreɪʃənz/",
+    senses: ["The agreed convention for evaluating an expression with several operations: grouping symbols first, then exponents, then multiplication and division from left to right, then addition and subtraction from left to right. So 3 + 4 × 2 = 3 + 8 = 11, not 14."],
+    syn: [["PEMDAS", "a memory aid for the same convention"]], see: ["precedence", "grouping symbol", "left-associative"] },
+  { w: "PEMDAS", field: "arithmetic", node: "order-ops", pos: "n", ipa: "/ˈpɛmdɑs/",
+    senses: ["A memory aid for the order of operations: Parentheses, Exponents, Multiplication and Division, Addition and Subtraction (BODMAS in British usage). M and D share one level, as do A and S, each worked left to right: 12 ÷ 3 × 2 = 4 × 2 = 8."],
+    see: ["order of operations"] },
+  { w: "precedence", field: "arithmetic", node: "order-ops", pos: "n", ipa: "/ˈprɛsɪdəns/", syl: "prec·e·dence",
+    senses: ["The rank of an operation in the order of operations, which decides which is performed first when no grouping symbols say otherwise: multiplication has higher precedence than addition, so 2 + 3 × 5 = 17."],
+    see: ["order of operations", "left-associative"] },
+  { w: "grouping symbol", field: "arithmetic", node: "order-ops", pos: "n", ipa: "/ˈɡrupɪŋ ˈsɪmbəl/",
+    senses: ["A symbol that marks part of an expression to be evaluated first: parentheses ( ), brackets [ ], braces { }, a fraction bar, a radical sign or absolute-value bars. (3 + 4) × 2 = 14, and a fraction bar groups its whole numerator and denominator: (6 + 4)/2 = 5."],
+    forms: ["grouping symbols"], see: ["order of operations"] },
+  { w: "left-associative", field: "arithmetic", node: "order-ops", pos: "aj", ipa: "/ˌlɛft əˈsoʊʃiˌeɪtɪv/",
+    senses: ["Of operations of equal precedence: grouped from the left when written in a row, so <i>a</i> − <i>b</i> + <i>c</i> means (<i>a</i> − <i>b</i>) + <i>c</i> and 12 ÷ 3 × 2 means (12 ÷ 3) × 2 = 8. Exponentiation is the exception: towers are grouped from the right."],
+    see: ["precedence", "order of operations"] },
+
+  { w: "multiple", field: "arithmetic", node: "factors", pos: "n", ipa: "/ˈmʌltəpəl/", syl: "mul·ti·ple",
+    senses: ["A product of a given number and an integer: the multiples of 3 are …, −3, 0, 3, 6, 9, 12, …. In symbols, <i>n</i> is a multiple of <i>a</i> when <i>n</i> = <i>ak</i> for some integer <i>k</i>."],
+    confused: [["factor", "the reverse relation: 12 is a multiple of 3, and 3 is a factor of 12"]],
+    forms: ["multiples"], see: ["divisible", "factor"] },
+  { w: "divisible", field: "arithmetic", node: "factors", pos: "aj", ipa: "/dɪˈvɪzəbəl/", syl: "di·vis·i·ble",
+    senses: ["Of an integer: able to be divided by a given nonzero integer with remainder 0. 84 is divisible by 7 because 84 = 7 × 12; written 7 | 84."],
+    forms: ["divisibility"], see: ["multiple", "divisibility rule", "factor"] },
+  { w: "divisibility rule", field: "arithmetic", node: "factors", pos: "n", ipa: "/dɪˌvɪzəˈbɪlɪti ˌrul/",
+    senses: ["A shortcut that tests whether an integer is divisible by a given number by looking at its digits rather than dividing: a number is divisible by 3 (or 9) when its digit sum is, so 4,617 (digit sum 18) is divisible by 9; by 4 when its last two digits form a multiple of 4."],
+    forms: ["divisibility rules"], see: ["divisible"] },
+  { w: "even", field: "arithmetic", node: "factors", pos: "aj", ipa: "/ˈivən/", syl: "e·ven",
+    senses: ["Of an integer: divisible by 2, that is, of the form 2<i>k</i> for an integer <i>k</i>: −4, 0, 6 and 38 are even. In base ten an integer is even exactly when its last digit is 0, 2, 4, 6 or 8."],
+    ant: ["odd"], see: ["odd", "divisible"] },
+  { w: "odd", field: "arithmetic", node: "factors", pos: "aj", ipa: "/ɑd/",
+    senses: ["Of an integer: not divisible by 2, so that it leaves remainder 1 when divided by 2; of the form 2<i>k</i> + 1: −3, 1 and 27 are odd."],
+    ant: ["even"], see: ["even"] },
+
+  { w: "modular arithmetic", field: "arithmetic", node: "modular", pos: "n", ipa: "/ˈmɑdʒəlɚ əˈrɪθmətɪk/",
+    senses: ["Arithmetic on integers in which numbers that leave the same remainder after division by a fixed modulus <i>m</i> are treated as equal, so counting wraps around after <i>m</i>: mod 12, 9 + 5 = 14 ≡ 2. Sums and products may be reduced before or after the operation with the same result."],
+    syn: [["clock arithmetic", "informal name, after the 12-hour clock"]], see: ["modulus", "congruent", "clock arithmetic"] },
+  { w: "modulus", field: "arithmetic", node: "modular", pos: "n", ipa: "/ˈmɑdʒələs/", syl: "mod·u·lus",
+    senses: ["The positive integer <i>m</i> after which modular arithmetic wraps around; remainders are taken on division by <i>m</i>. Days of the week use modulus 7: 100 days after a Monday is a Tuesday, since 100 = 7 × 14 + 2."],
+    origin: "Latin <i>modulus</i> ‘small measure’, diminutive of <i>modus</i> ‘measure’",
+    forms: ["moduli"], see: ["modular arithmetic", "congruent"] },
+  { w: "congruent", field: "arithmetic", node: "modular", pos: "aj", ipa: "/kənˈɡruənt/", syl: "con·gru·ent",
+    senses: ["<b>Congruent modulo <i>m</i></b>: of two integers <i>a</i> and <i>b</i>, having the same remainder on division by <i>m</i>, equivalently <i>m</i> | (<i>a</i> − <i>b</i>); written <i>a</i> ≡ <i>b</i> (mod <i>m</i>). 38 ≡ 14 (mod 12), since 38 − 14 = 24 = 12 × 2.",
+      "In geometry, of figures: having the same size and shape."],
+    origin: "Latin <i>congruent-</i>, from <i>congruere</i> ‘to agree, come together’",
+    forms: ["congruence", "congruences"], see: ["modulus", "modular arithmetic"] },
+  { w: "clock arithmetic", field: "arithmetic", node: "modular", pos: "n", ipa: "/ˈklɑk əˈrɪθmətɪk/",
+    senses: ["An informal name for modular arithmetic, from reading times on a clock face: on a 12-hour clock, 5 hours after 9 o'clock is 2 o'clock, because 9 + 5 = 14 ≡ 2 (mod 12)."],
+    register: "informal", see: ["modular arithmetic", "modulus"] },
+
+  { w: "square root", field: "arithmetic", node: "roots", pos: "n", ipa: "/ˈskwɛr ˈrut/",
+    senses: ["A number whose square is a given number: 5 and −5 are both square roots of 25. Every positive number has two square roots, opposite in sign; 0 has one; negative numbers have none among the real numbers.",
+      "The non-negative one of these, written with √ (the principal square root): √25 = 5 and √20 ≈ 4.47, the side of a square of area 20."],
+    forms: ["square roots"], see: ["principal square root", "perfect square", "radical", "root"] },
+  { w: "perfect square", field: "arithmetic", node: "roots", pos: "n", ipa: "/ˈpɝfɪkt ˈskwɛr/",
+    senses: ["An integer that is the square of an integer, <i>A</i> = <i>k</i><sup>2</sup>: 0, 1, 4, 9, 16, 25, 36, …. Its square root is a whole number; the square root of any other positive integer, such as √2, is irrational."],
+    forms: ["perfect squares"], see: ["square", "square root"] },
+  { w: "principal square root", field: "arithmetic", node: "roots", pos: "n", ipa: "/ˈprɪnsəpəl ˈskwɛr ˈrut/",
+    senses: ["For a real number <i>A</i> ≥ 0, the unique non-negative number <i>s</i> with <i>s</i><sup>2</sup> = <i>A</i>, written √<i>A</i>: √49 = 7, not −7. So the equation <i>x</i><sup>2</sup> = 49 has two solutions, <i>x</i> = ±√49 = ±7, and √(<i>x</i><sup>2</sup>) = |<i>x</i>|."],
+    forms: ["principal square roots"], see: ["square root", "radical"] },
+  { w: "radical", field: "arithmetic", node: "roots", pos: "n", ipa: "/ˈrædɪkəl/", syl: "rad·i·cal",
+    senses: ["The root symbol √ (the <b>radical sign</b>), or an expression written with it: √36 = 6 and ∛8 = 2 are radicals. The bar over the radicand acts as a grouping symbol: √(9 + 16) = √25 = 5."],
+    origin: "Late Latin <i>radicalis</i>, from Latin <i>radix</i> ‘root’",
+    forms: ["radicals"], see: ["radicand", "square root", "root"] },
+  { w: "radicand", field: "arithmetic", node: "roots", pos: "n", ipa: "/ˈrædɪˌkænd/", syl: "rad·i·cand",
+    senses: ["The number or expression under a radical sign: in √50 the radicand is 50, and √50 = √25 · √2 = 5√2."],
+    origin: "Latin <i>radicandum</i> ‘that which is to be rooted’, from <i>radicari</i> ‘to take root’",
+    forms: ["radicands"], see: ["radical"] },
+  { w: "Babylonian method", field: "arithmetic", node: "roots", pos: "n", ipa: "/ˌbæbəˈloʊniən ˈmɛθəd/",
+    senses: ["An iterative way to approximate √<i>A</i>: from a guess <i>x</i>, take the average of <i>x</i> and <i>A</i>/<i>x</i> as the next guess, <i>x</i><sub><i>k</i>+1</sub> = ½(<i>x</i><sub><i>k</i></sub> + <i>A</i>/<i>x</i><sub><i>k</i></sub>). For √20 from 4: ½(4 + 5) = 4.5, then about 4.4722. It is Newton's method applied to <i>x</i><sup>2</sup> − <i>A</i>."],
+    see: ["square root"] },
+
+  { w: "fraction", field: "arithmetic", node: "fractions", pos: "n", ipa: "/ˈfrækʃən/", syl: "frac·tion",
+    senses: ["A number written <i>a</i>/<i>b</i> (with <i>b</i> ≠ 0) naming <i>a</i> of the <i>b</i> equal parts of a whole: 3/4 of a bar is 3 of its 4 equal pieces.",
+      "The quotient <i>a</i> ÷ <i>b</i>: 3/4 is what each of 4 people gets when 3 pizzas are shared equally."],
+    origin: "Latin <i>fractio</i> ‘a breaking’, from <i>frangere</i> ‘to break’",
+    forms: ["fractions", "fractional"], see: ["numerator", "denominator", "rational number"] },
+  { w: "numerator", field: "arithmetic", node: "fractions", pos: "n", ipa: "/ˈnumɚˌeɪtɚ/", syl: "nu·mer·a·tor",
+    senses: ["The top number of a fraction, which counts how many of the equal parts are taken: in 3/4 the numerator is 3."],
+    origin: "Late Latin <i>numerator</i> ‘counter’, from <i>numerare</i> ‘to count’",
+    confused: [["denominator", "the bottom number, which names the size of the parts"]],
+    forms: ["numerators"], see: ["denominator", "fraction"] },
+  { w: "denominator", field: "arithmetic", node: "fractions", pos: "n", ipa: "/dɪˈnɑməˌneɪtɚ/", syl: "de·nom·i·na·tor",
+    senses: ["The bottom number of a fraction, which says into how many equal parts the whole is divided: in 3/4 the denominator is 4. It can never be 0."],
+    origin: "Medieval Latin, from Latin <i>denominare</i> ‘to name’: it names the kind of part (fourths, eighths)",
+    confused: [["numerator", "the top number, which counts the parts"]],
+    forms: ["denominators"], see: ["numerator", "fraction"] },
+  { w: "equivalent fractions", field: "arithmetic", node: "fractions", pos: "n", ipa: "/ɪˈkwɪvələnt ˈfrækʃənz/",
+    senses: ["Fractions that name the same number, obtained from one another by multiplying or dividing numerator and denominator by the same nonzero number: 3/4 = 6/8 = 9/12. Two fractions <i>a</i>/<i>b</i> and <i>c</i>/<i>d</i> are equivalent exactly when <i>ad</i> = <i>bc</i>."],
+    forms: ["equivalent fraction"], see: ["fraction", "simplest form", "equivalent ratios"] },
+  { w: "simplest form", field: "arithmetic", node: "fractions", pos: "n", ipa: "/ˈsɪmpləst ˈfɔrm/",
+    senses: ["The form of a fraction (with positive denominator) whose numerator and denominator have no common factor except 1: 18/24 in simplest form is 3/4, found by dividing both by their greatest common factor, 6. Every rational number has exactly one."],
+    syn: [["lowest terms", "the same idea; common in college texts"]], see: ["equivalent fractions", "fraction"] },
+  { w: "unit fraction", field: "arithmetic", node: "fractions", pos: "n", ipa: "/ˈjunɪt ˈfrækʃən/",
+    senses: ["A fraction with numerator 1, naming one equal part of a whole: 1/2, 1/3, 1/8. Any fraction <i>a</i>/<i>b</i> is <i>a</i> copies of the unit fraction 1/<i>b</i>: 3/4 = 1/4 + 1/4 + 1/4."],
+    forms: ["unit fractions"], see: ["fraction"] },
+  { w: "rational number", field: "arithmetic", node: "fractions", pos: "n", ipa: "/ˈræʃənəl ˈnʌmbɚ/",
+    senses: ["A number that can be written as a quotient <i>a</i>/<i>b</i> of integers with <i>b</i> ≠ 0; the set of them is written ℚ. Examples: 3/4, −5 = −5/1, 0.125 = 1/8 and 0.333… = 1/3. Its decimal expansion either terminates or repeats."],
+    origin: "from <i>ratio</i>: a number expressible as a ratio of integers",
+    forms: ["rational numbers", "rational", "rationals"], see: ["fraction", "ratio", "repeating decimal"] },
+
+  { w: "prime number", field: "arithmetic", node: "primes", pos: "n", ipa: "/ˈpraɪm ˈnʌmbɚ/",
+    senses: ["An integer greater than 1 whose only positive divisors are 1 and itself: 2, 3, 5, 7, 11, 13, …. 2 is the only even prime, and 1 is not prime. There are infinitely many primes (Euclid)."],
+    origin: "Latin <i>primus</i> ‘first’",
+    forms: ["prime numbers", "prime", "primes"], see: ["composite number", "prime factorization"] },
+  { w: "composite number", field: "arithmetic", node: "primes", pos: "n", ipa: "/kəmˈpɑzɪt ˈnʌmbɚ/",
+    senses: ["An integer greater than 1 that is not prime, so it has a divisor other than 1 and itself: 12 = 3 × 4 is composite. A composite <i>n</i> always has a prime factor no larger than √<i>n</i>; 1 is neither prime nor composite."],
+    origin: "Latin <i>compositus</i> ‘put together’",
+    forms: ["composite numbers", "composite", "composites"], see: ["prime number", "factor tree"] },
+  { w: "prime factorization", field: "arithmetic", node: "primes", pos: "n", ipa: "/ˈpraɪm ˌfæktɚɪˈzeɪʃən/",
+    senses: ["The expression of an integer greater than 1 as a product of primes, usually written with exponents in increasing order of the primes: 360 = 2<sup>3</sup> · 3<sup>2</sup> · 5. By the Fundamental Theorem of Arithmetic it is unique apart from order."],
+    forms: ["prime factorizations"], see: ["Fundamental Theorem of Arithmetic", "factor tree", "prime number"] },
+  { w: "Fundamental Theorem of Arithmetic", field: "arithmetic", node: "primes", pos: "n", ipa: "/ˌfʌndəˈmɛntəl ˈθɪrəm əv əˈrɪθmətɪk/",
+    senses: ["The theorem that every integer greater than 1 can be written as a product of primes, and that this product is unique except for the order of the factors: however 60 is split, it ends as 2<sup>2</sup> · 3 · 5. Uniqueness rests on Euclid's lemma."],
+    see: ["prime factorization", "Euclid's lemma"] },
+  { w: "Euclid's lemma", field: "arithmetic", node: "primes", pos: "n", ipa: "/ˈjuklɪdz ˈlɛmə/",
+    senses: ["If a prime <i>p</i> divides a product <i>ab</i>, then <i>p</i> divides <i>a</i> or <i>p</i> divides <i>b</i>: 7 | 84 = 12 × 7 and 7 divides the factor 7. It fails for composites: 6 | 4 × 9 = 36 but 6 divides neither 4 nor 9."],
+    see: ["Fundamental Theorem of Arithmetic", "prime number"] },
+  { w: "factor tree", field: "arithmetic", node: "primes", pos: "n", ipa: "/ˈfæktɚ ˌtri/",
+    senses: ["A diagram that finds a prime factorization by splitting a number into two factors, then splitting each composite branch again until every leaf is prime: 60 → 6 × 10 → (2 × 3) × (2 × 5), so 60 = 2<sup>2</sup> · 3 · 5. Different first splits give the same leaves."],
+    forms: ["factor trees"], see: ["prime factorization", "composite number"] },
+  { w: "Sieve of Eratosthenes", field: "arithmetic", node: "primes", pos: "n", ipa: "/ˈsɪv əv ˌɛrəˈtɑsθəniz/",
+    senses: ["A method for listing all primes up to a bound <i>N</i>: circle 2 and cross out its other multiples, then circle the next number not crossed out and cross out its multiples, and so on. It suffices to sieve with primes up to √<i>N</i>; the numbers left are the primes."],
+    see: ["prime number", "multiple"] },
+
+  { w: "decimal", field: "arithmetic", node: "decimals", pos: "n", ipa: "/ˈdɛsəməl/", syl: "dec·i·mal",
+    senses: ["A number written in base-ten place value with digits after a decimal point, each place worth one tenth of the place to its left: 3.47 = 3 + 4/10 + 7/100.",
+      "As an adjective, based on ten: the decimal system."],
+    origin: "Medieval Latin <i>decimalis</i>, from Latin <i>decimus</i> ‘tenth’, from <i>decem</i> ‘ten’",
+    forms: ["decimals"], see: ["decimal point", "decimal place", "terminating decimal", "repeating decimal"] },
+  { w: "decimal point", field: "arithmetic", node: "decimals", pos: "n", ipa: "/ˈdɛsəməl ˌpɔɪnt/",
+    senses: ["The dot that separates the ones place from the tenths place in a decimal: in 12.05 the 2 is in the ones place and the 0 and 5 are tenths and hundredths. Many countries use a comma instead (12,05)."],
+    forms: ["decimal points"], see: ["decimal", "decimal place"] },
+  { w: "decimal place", field: "arithmetic", node: "decimals", pos: "n", ipa: "/ˈdɛsəməl ˌpleɪs/",
+    senses: ["A position to the right of the decimal point (tenths, hundredths, thousandths, …), or the count of such digits: 3.142 has three decimal places, and a terminating decimal with <i>n</i> decimal places is a fraction over 10<sup><i>n</i></sup>, so 3.142 = 3142/1000."],
+    forms: ["decimal places"], see: ["decimal", "decimal point"] },
+  { w: "terminating decimal", field: "arithmetic", node: "decimals", pos: "n", ipa: "/ˈtɝməˌneɪtɪŋ ˈdɛsəməl/",
+    senses: ["A decimal with finitely many nonzero digits after the point, such as 3/8 = 0.375. A fraction in lowest terms terminates exactly when its denominator has no prime factors other than 2 and 5."],
+    forms: ["terminating decimals"], see: ["repeating decimal", "decimal"] },
+  { w: "repeating decimal", field: "arithmetic", node: "decimals", pos: "n", ipa: "/rɪˈpitɪŋ ˈdɛsəməl/",
+    senses: ["A decimal in which, after some point, a block of digits repeats forever, marked with a bar or dots: 1/3 = 0.333… and 5/22 = 0.2272727…. Every rational number that does not terminate repeats, and every repeating decimal is rational."],
+    forms: ["repeating decimals"], see: ["terminating decimal", "rational number"] },
+
+  { w: "mixed number", field: "arithmetic", node: "mixed-numbers", pos: "n", ipa: "/ˈmɪkst ˈnʌmbɚ/",
+    senses: ["A whole number written beside a proper fraction to mean their sum: 2 ¾ means 2 + ¾ = 11/4. The juxtaposition means addition, not multiplication, and a minus sign applies to both parts: −2 ¾ = −(2 + ¾)."],
+    forms: ["mixed numbers", "mixed numeral"], see: ["improper fraction", "proper fraction"] },
+  { w: "improper fraction", field: "arithmetic", node: "mixed-numbers", pos: "n", ipa: "/ɪmˈprɑpɚ ˈfrækʃən/",
+    senses: ["A fraction whose numerator is at least as large as its denominator (for positive parts), so its value is at least 1: 11/4 and 5/5. Dividing gives the mixed number: 11 ÷ 4 = 2 remainder 3, so 11/4 = 2 ¾."],
+    forms: ["improper fractions"], ant: ["proper fraction"], see: ["mixed number", "proper fraction"] },
+  { w: "proper fraction", field: "arithmetic", node: "mixed-numbers", pos: "n", ipa: "/ˈprɑpɚ ˈfrækʃən/",
+    senses: ["A fraction whose numerator is smaller than its denominator (for positive parts), so its value lies between 0 and 1: 3/4 and 2/9. The fraction part of a mixed number is proper."],
+    forms: ["proper fractions"], ant: ["improper fraction"], see: ["improper fraction", "mixed number"] },
+
+  { w: "ratio", field: "arithmetic", node: "ratios", pos: "n", ipa: "/ˈreɪʃioʊ/", syl: "ra·ti·o",
+    senses: ["A comparison of two quantities by division, written <i>a</i> : <i>b</i> or <i>a</i>/<i>b</i> (<i>b</i> ≠ 0), saying how much of one there is for each amount of the other: 2 cups of concentrate to 5 cups of water is the ratio 2 : 5. Order matters: 2 : 5 is not 5 : 2."],
+    origin: "Latin <i>ratio</i> ‘reckoning, calculation’, from <i>reri</i> ‘to reckon, think’",
+    forms: ["ratios"], see: ["rate", "equivalent ratios", "rational number"] },
+  { w: "rate", field: "arithmetic", node: "ratios", pos: "n", ipa: "/reɪt/",
+    senses: ["A ratio of two quantities measured in different units, whose unit is the quotient of the two units: 150 miles in 3 hours is a rate of 150 mi : 3 h, or 50 mi/h."],
+    forms: ["rates"], see: ["ratio", "unit rate"] },
+  { w: "unit rate", field: "arithmetic", node: "ratios", pos: "n", ipa: "/ˈjunɪt ˌreɪt/",
+    senses: ["A rate rescaled so the second quantity is 1, found by dividing: $3.48 for 12 ounces is a unit rate of $0.29 per ounce. Unit rates make it easy to compare prices or speeds."],
+    forms: ["unit rates"], see: ["rate", "ratio"] },
+  { w: "equivalent ratios", field: "arithmetic", node: "ratios", pos: "n", ipa: "/ɪˈkwɪvələnt ˈreɪʃioʊz/",
+    senses: ["Ratios obtained from one another by multiplying or dividing both parts by the same nonzero number, so they describe the same mix: 2 : 5 = 4 : 10 = 6 : 15. <i>a</i> : <i>b</i> and <i>c</i> : <i>d</i> are equivalent exactly when <i>ad</i> = <i>bc</i>."],
+    forms: ["equivalent ratio"], see: ["ratio", "equivalent fractions"] },
+  { w: "greatest common factor", field: "arithmetic", node: "gcf-lcm", pos: "n", ipa: "/ˈɡreɪtəst ˈkɑmən ˈfæktɚ/",
+    senses: ["The largest integer that divides each of two or more integers (not all zero), abbreviated GCF and also called the greatest common divisor, gcd: the factors of 12 are 1, 2, 3, 4, 6, 12 and of 18 are 1, 2, 3, 6, 9, 18, so gcd(12, 18) = 6. For positive integers, gcd(<i>a</i>, <i>b</i>) · lcm(<i>a</i>, <i>b</i>) = <i>ab</i>."],
+    syn: [["greatest common divisor","the usual name in number theory, written gcd"]],
+    confused: [["least common multiple","the smallest number both divide, not the largest number dividing both"]],
+    forms: ["greatest common factors", "GCF", "gcd"], see: ["least common multiple", "Euclidean algorithm", "relatively prime"] },
+  { w: "least common multiple", field: "arithmetic", node: "gcf-lcm", pos: "n", ipa: "/ˈlist ˈkɑmən ˈmʌltəpəl/",
+    senses: ["The smallest positive integer that is a multiple of each of two or more nonzero integers, abbreviated LCM: counting by 6s (6, 12, 18, 24) and by 8s (8, 16, 24) first meet at 24, so lcm(6, 8) = 24. In prime factorizations it takes each prime to its highest power."],
+    confused: [["greatest common factor","the largest number dividing both, not the smallest number both divide"]],
+    forms: ["least common multiples", "LCM", "lcm"], see: ["greatest common factor", "least common denominator"] },
+  { w: "Euclidean algorithm", field: "arithmetic", node: "gcf-lcm", pos: "n", ipa: "/juˈklɪdiən ˈælɡərɪðəm/",
+    senses: ["A method for finding the greatest common factor by repeated division: if <i>a</i> = <i>bq</i> + <i>r</i> with 0 ≤ <i>r</i> &lt; <i>b</i>, then gcd(<i>a</i>, <i>b</i>) = gcd(<i>b</i>, <i>r</i>), and the last nonzero remainder is the answer. For 48 and 18: 48 = 2 · 18 + 12, 18 = 1 · 12 + 6, 12 = 2 · 6 + 0, so gcd(48, 18) = 6."],
+    origin: "Named after Euclid of Alexandria, who describes it in Book VII of the <i>Elements</i> (c. 300 BC); it is one of the oldest algorithms still in everyday use.",
+    forms: ["Euclidean algorithms", "Euclid's algorithm"], see: ["greatest common factor", "Bezout's identity"] },
+  { w: "relatively prime", field: "arithmetic", node: "gcf-lcm", pos: "aj", ipa: "/ˈrɛlətɪvli ˈpraɪm/",
+    senses: ["Of two integers: having no common factor except 1, so that their greatest common factor is 1. Neither number needs to be prime: 8 and 15 are relatively prime, while 8 and 14 are not (both are even)."],
+    syn: [["coprime","the same meaning; common in number theory"]],
+    see: ["greatest common factor"] },
+  { w: "Bezout's identity", field: "arithmetic", node: "gcf-lcm", pos: "n", ipa: "/beɪˈzuz aɪˈdɛntəti/",
+    senses: ["Bézout's identity: for integers <i>a</i> and <i>b</i>, not both zero, there are integers <i>x</i> and <i>y</i> with <i>ax</i> + <i>by</i> = gcd(<i>a</i>, <i>b</i>). For 12 and 18: 12 · (−1) + 18 · 1 = 6. The extended Euclidean algorithm finds such <i>x</i> and <i>y</i>."],
+    origin: "Named after the French mathematician Étienne Bézout (1730–1783), who proved a version for polynomials; the integer statement was known earlier, to Claude-Gaspard Bachet de Méziriac (1624).",
+    forms: ["Bézout's identity", "Bezout identity", "Bézout's lemma"], see: ["Euclidean algorithm", "greatest common factor", "relatively prime"] },
+
+  { w: "scientific notation", field: "arithmetic", node: "sci-notation", pos: "n", ipa: "/ˌsaɪənˈtɪfɪk noʊˈteɪʃən/",
+    senses: ["A way of writing a nonzero number as <i>c</i> × 10<sup><i>n</i></sup>, where the coefficient satisfies 1 ≤ |<i>c</i>| &lt; 10 and <i>n</i> is an integer: 149,600,000,000 = 1.496 × 10<sup>11</sup> and 0.00052 = 5.2 × 10<sup>−4</sup>. To multiply, multiply the coefficients and add the exponents, then renormalise the coefficient."],
+    forms: ["E notation"], see: ["coefficient", "significant figures", "order of magnitude"] },
+  { w: "coefficient", field: "arithmetic", node: "sci-notation", pos: "n", ipa: "/ˌkoʊəˈfɪʃənt/", syl: "co·ef·fi·cient",
+    senses: ["In scientific notation, the number <i>c</i> with 1 ≤ |<i>c</i>| &lt; 10 that multiplies the power of ten: in 1.496 × 10<sup>11</sup> the coefficient is 1.496.",
+      "In algebra, a numerical factor multiplying a variable part of a term: in 4<i>x</i><sup>3</sup> − 7<i>x</i>, the coefficient of <i>x</i><sup>3</sup> is 4 and the coefficient of <i>x</i> is −7."],
+    origin: "New Latin <i>coefficiens</i>, from Latin <i>co-</i> ‘together’ + <i>efficiens</i> ‘bringing about’: a quantity that acts together with another.",
+    forms: ["coefficients"], see: ["scientific notation", "variable"] },
+  { w: "significant figures", field: "arithmetic", node: "sci-notation", pos: "n", ipa: "/sɪɡˈnɪfɪkənt ˈfɪɡjɚz/",
+    senses: ["The digits of a measured value that carry information about its precision: all nonzero digits, zeros between them, and trailing zeros after a decimal point, but not leading zeros. 0.00340 has three significant figures (3, 4 and the final 0), which scientific notation shows directly: 3.40 × 10<sup>−3</sup>."],
+    syn: [["significant digits","the same meaning"]],
+    forms: ["significant figure", "significant digits", "sig figs"], see: ["scientific notation", "coefficient"] },
+  { w: "order of magnitude", field: "arithmetic", node: "sci-notation", pos: "n", ipa: "/ˈɔrdɚ əv ˈmæɡnəˌtud/",
+    senses: ["The power of ten in a number's scientific notation, a rough measure of its size: 1.496 × 10<sup>11</sup> has order of magnitude 11. For <i>x</i> ≠ 0 it equals ⌊log<sub>10</sub>|<i>x</i>|⌋.",
+      "A factor of about ten: a quantity 1,000 times larger than another is three orders of magnitude larger."],
+    forms: ["orders of magnitude"], see: ["scientific notation", "power"] },
+
+  { w: "percent", field: "arithmetic", node: "percents", pos: "n", ipa: "/pɚˈsɛnt/", syl: "per·cent",
+    senses: ["A ratio expressed as a number of parts per hundred, written with the sign %: <i>p</i>% means <i>p</i>/100, so 35% = 35/100 = 0.35. Percents above 100 and below 1 are valid: 250% = 2.5 and 0.4% = 0.004."],
+    origin: "From Latin <i>per centum</i> ‘by the hundred’, through Italian <i>per cento</i>; the % sign grew out of handwritten abbreviations of <i>per cento</i>.",
+    confused: [["percentage point","the arithmetic difference between two percents, not a relative change"]],
+    forms: ["percents", "per cent", "percentage"], see: ["percent equation", "percent change", "percentage point"] },
+  { w: "percent equation", field: "arithmetic", node: "percents", pos: "n", ipa: "/pɚˈsɛnt ɪˈkweɪʒən/",
+    senses: ["The equation <i>A</i> = (<i>p</i>/100) · <i>B</i> linking a part <i>A</i>, a whole <i>B</i> and a percent <i>p</i>; knowing any two gives the third. 20% of 45 is (20/100) · 45 = 9, and 9 is what percent of 45? <i>p</i> = 100 · 9/45 = 20."],
+    forms: ["percent equations"], see: ["percent"] },
+
+  { w: "common denominator", field: "arithmetic", node: "fraction-ops", pos: "n", ipa: "/ˈkɑmən dɪˈnɑməˌneɪtɚ/",
+    senses: ["A denominator shared by two or more fractions after they are rewritten as equivalent fractions; any common multiple of the original denominators works. To add 2/3 + 3/4, rewrite both over 12: 8/12 + 9/12 = 17/12."],
+    forms: ["common denominators"], see: ["least common denominator", "least common multiple"] },
+  { w: "least common denominator", field: "arithmetic", node: "fraction-ops", pos: "n", ipa: "/ˈlist ˈkɑmən dɪˈnɑməˌneɪtɚ/",
+    senses: ["The smallest common denominator of two or more fractions, equal to the least common multiple of their denominators, abbreviated LCD: for 1/6 + 3/8 it is lcm(6, 8) = 24, giving 4/24 + 9/24 = 13/24."],
+    forms: ["least common denominators", "LCD"], see: ["common denominator", "least common multiple"] },
+  { w: "reciprocal", field: "arithmetic", node: "fraction-ops", pos: "n", ipa: "/rɪˈsɪprəkəl/", syl: "re·cip·ro·cal",
+    senses: ["The number that multiplies a given nonzero number to give 1, its multiplicative inverse: the reciprocal of 3/4 is 4/3 and of 5 is 1/5. Zero has no reciprocal. Dividing by a fraction is multiplying by its reciprocal: 2/3 ÷ 3/4 = 2/3 × 4/3 = 8/9."],
+    origin: "From Latin <i>reciprocus</i> ‘returning, going back and forth’; turning a fraction upside down and back again returns the original.",
+    syn: [["multiplicative inverse","the formal name used in algebra"]],
+    forms: ["reciprocals"], see: ["common denominator"] },
+
+  { w: "percent change", field: "arithmetic", node: "percent-apps", pos: "n", ipa: "/pɚˈsɛnt ˈtʃeɪndʒ/",
+    senses: ["The change in a quantity as a percent of its original value: 100 · (<i>V</i><sub>1</sub> − <i>V</i><sub>0</sub>)/<i>V</i><sub>0</sub>. From 40 to 50 is a 25% increase, but from 50 back to 40 is a 20% decrease, because the original value differs."],
+    confused: [["percentage point","a plain difference of two percents: 4% to 5% is 1 percentage point but a 25% change"]],
+    forms: ["percent changes", "percent increase", "percent decrease", "percentage change"], see: ["percent", "percentage point"] },
+  { w: "percentage point", field: "arithmetic", node: "percent-apps", pos: "n", ipa: "/pɚˈsɛntɪdʒ ˌpɔɪnt/",
+    senses: ["A unit for the arithmetic difference between two percents: a rate that rises from 4% to 5% has risen 1 percentage point, which is a 25% increase in the rate."],
+    forms: ["percentage points"], see: ["percent change", "percent"] },
+  { w: "simple interest", field: "arithmetic", node: "percent-apps", pos: "n", ipa: "/ˈsɪmpəl ˈɪntrəst/",
+    senses: ["Interest computed on the principal alone, so the same amount is added each period: <i>I</i> = <i>Prt</i> and <i>A</i> = <i>P</i>(1 + <i>rt</i>). $1,000 at 5% for 3 years earns 1000 · 0.05 · 3 = $150. It grows linearly in time."],
+    confused: [["compound interest","earns interest on earlier interest as well"]],
+    see: ["compound interest", "principal"] },
+  { w: "compound interest", field: "arithmetic", node: "percent-apps", pos: "n", ipa: "/ˈkɑmpaʊnd ˈɪntrəst/",
+    senses: ["Interest that is added to the balance each period, so later interest is earned on earlier interest: <i>A</i> = <i>P</i>(1 + <i>r</i>/<i>n</i>)<sup><i>nt</i></sup> for <i>n</i> compounding periods a year, or <i>A</i> = <i>Pe</i><sup><i>rt</i></sup> when compounded continuously. $1,000 at 5% compounded yearly for 3 years grows to 1000 · 1.05<sup>3</sup> ≈ $1,157.63. It grows exponentially in time."],
+    confused: [["simple interest","earns interest on the principal only"]],
+    see: ["simple interest", "principal"] },
+  { w: "principal", field: "arithmetic", node: "percent-apps", pos: "n", ipa: "/ˈprɪnsəpəl/", syl: "prin·ci·pal",
+    senses: ["The original amount of money deposited or borrowed, on which interest is computed, written <i>P</i>: in <i>A</i> = <i>P</i>(1 + <i>rt</i>), a $1,000 deposit is the principal."],
+    confused: [["principle","a basic rule or law, not a sum of money"]],
+    forms: ["principals"], see: ["simple interest", "compound interest"] },
+  { w: "discount", field: "arithmetic", node: "percent-apps", pos: "n", ipa: "/ˈdɪskaʊnt/", syl: "dis·count",
+    senses: ["A reduction from a price, often stated as a percent of the original price; a discount at rate <i>d</i> multiplies the price by 1 − <i>d</i>. 30% off $80 leaves 80 × 0.70 = $56."],
+    forms: ["discounts", "discounted"], see: ["markup", "percent change"] },
+  { w: "markup", field: "arithmetic", node: "percent-apps", pos: "n", ipa: "/ˈmɑrkˌʌp/", syl: "mark·up",
+    senses: ["An increase added to a cost to set a selling price, often stated as a percent of the cost; a markup at rate <i>r</i> multiplies the cost by 1 + <i>r</i>. A 25% markup on a $40 item gives 40 × 1.25 = $50."],
+    forms: ["markups", "mark-up"], see: ["discount", "percent change"] },
+  { w: "sales tax", field: "arithmetic", node: "percent-apps", pos: "n", ipa: "/ˈseɪlz ˌtæks/",
+    senses: ["A tax charged as a percent of a purchase price; at rate <i>s</i> the total is <i>x</i>(1 + <i>s</i>). A $50 purchase with 8% sales tax costs 50 × 1.08 = $54."],
+    forms: ["sales taxes"], see: ["markup", "percent"] },
+
+  { w: "mean", field: "arithmetic", node: "averages", pos: "n", ipa: "/min/",
+    senses: ["The sum of a set of data values divided by how many there are, written <i>x̄</i>: the mean of 2, 3, 3, 5, 12 is 25/5 = 5. The deviations from the mean sum to zero, so it is the data's balance point; it is pulled toward extreme values."],
+    syn: [["arithmetic mean","the full name, distinguishing it from geometric and other means"], ["average","the everyday word, usually meaning the mean"]],
+    confused: [["median","the middle value in order, which resists extreme values"]],
+    forms: ["means", "arithmetic mean"], see: ["median", "mode", "average", "outlier"] },
+  { w: "median", field: "arithmetic", node: "averages", pos: "n", ipa: "/ˈmidiən/", syl: "me·di·an",
+    senses: ["The middle value of a data set listed in order, or the mean of the two middle values when the count is even: the median of 2, 3, 3, 5, 12 is 3, and of 1, 4, 6, 9 it is (4 + 6)/2 = 5. Extreme values barely move it, which is why incomes and house prices are usually reported by median."],
+    origin: "From Latin <i>medianus</i> ‘of the middle’, from <i>medius</i> ‘middle’.",
+    confused: [["mean","the sum divided by the count, which uses every value and is pulled by outliers"]],
+    forms: ["medians"], see: ["mean", "mode", "outlier"] },
+  { w: "mode", field: "arithmetic", node: "averages", pos: "n", ipa: "/moʊd/",
+    senses: ["A value that occurs most often in a data set: the mode of 2, 3, 3, 5, 12 is 3. A data set can have one mode, several, or none when every value occurs equally often."],
+    origin: "From French <i>mode</i>, Latin <i>modus</i> ‘measure, manner’; the statistical sense was introduced by Karl Pearson in 1895.",
+    forms: ["modes", "modal"], see: ["mean", "median"] },
+  { w: "range", field: "arithmetic", node: "averages", pos: "n", ipa: "/reɪndʒ/",
+    senses: ["In statistics, the largest data value minus the smallest, a simple measure of spread: the range of 2, 3, 3, 5, 12 is 12 − 2 = 10.",
+      "The set of all outputs of a function: the range of <i>f</i>(<i>x</i>) = <i>x</i><sup>2</sup> on the real numbers is all <i>y</i> ≥ 0."],
+    forms: ["ranges"], see: ["outlier", "function"] },
+  { w: "outlier", field: "arithmetic", node: "averages", pos: "n", ipa: "/ˈaʊtˌlaɪɚ/", syl: "out·li·er",
+    senses: ["A data value far from the rest of the data. In commute times of 22, 25, 24, 23 and 90 minutes, 90 is an outlier: it pulls the mean up to 36.8 while the median stays at 24."],
+    forms: ["outliers"], see: ["mean", "median", "range"] },
+  { w: "average", field: "arithmetic", node: "averages", pos: "n", ipa: "/ˈævrɪdʒ/", syl: "av·er·age",
+    senses: ["A single number that represents a typical value of a data set, a measure of center; in everyday use it nearly always means the mean: the average of 4, 7 and 10 is 21/3 = 7.",
+      "More broadly, any of the measures of center (mean, median or mode), so a stated ‘average’ should say which one it is."],
+    origin: "From Middle French <i>avarie</i> and Italian <i>avaria</i>, ‘damage to a ship or its cargo’; the loss was shared out evenly among the owners, which gave the sense of an even share.",
+    forms: ["averages"], see: ["mean", "median", "mode"] },
+
+  { w: "proportion", field: "arithmetic", node: "proportions", pos: "n", ipa: "/prəˈpɔrʃən/", syl: "pro·por·tion",
+    senses: ["An equation stating that two ratios are equal, <i>a</i>/<i>b</i> = <i>c</i>/<i>d</i> with <i>b</i>, <i>d</i> ≠ 0; if three of the four numbers are known, the fourth follows. If 9 gallons drive 252 miles, then 9/252 = <i>x</i>/420 gives <i>x</i> = 15 gallons for 420 miles."],
+    origin: "From Latin <i>proportio</i>, from the phrase <i>pro portione</i> ‘according to its share’.",
+    forms: ["proportions"], see: ["cross product", "directly proportional", "constant of proportionality"] },
+  { w: "cross product", field: "arithmetic", node: "proportions", pos: "n", ipa: "/ˈkrɔs ˌprɑdəkt/",
+    senses: ["In a proportion <i>a</i>/<i>b</i> = <i>c</i>/<i>d</i>, either of the diagonal products <i>ad</i> and <i>bc</i>; the proportion holds exactly when they are equal (multiply both sides by <i>bd</i>). For 3/4 = 6/8: 3 · 8 = 24 = 4 · 6.",
+      "In vector algebra, a different operation: the vector <b>u</b> × <b>v</b> perpendicular to two vectors in space."],
+    forms: ["cross products", "cross-multiplication", "cross-multiply"], see: ["proportion"] },
+  { w: "constant of proportionality", field: "arithmetic", node: "proportions", pos: "n", ipa: "/ˈkɑnstənt əv prəˌpɔrʃəˈnæləti/",
+    senses: ["The fixed nonzero number <i>k</i> in a direct variation <i>y</i> = <i>kx</i>, equal to <i>y</i>/<i>x</i> for every pair, or in an inverse variation <i>xy</i> = <i>k</i>. A car that drives 252 miles on 9 gallons has <i>k</i> = 252/9 = 28 miles per gallon."],
+    forms: ["constants of proportionality"], see: ["directly proportional", "inversely proportional", "proportion"] },
+  { w: "directly proportional", field: "arithmetic", node: "proportions", pos: "aj", ipa: "/dɪˈrɛktli prəˈpɔrʃənəl/",
+    senses: ["Of two quantities: related by <i>y</i> = <i>kx</i> for a constant <i>k</i> ≠ 0, so that doubling one doubles the other and <i>y</i>/<i>x</i> is the same for every pair. Fuel used is directly proportional to distance at a steady rate."],
+    confused: [["inversely proportional","doubling one halves the other: <i>xy</i> is constant"]],
+    forms: ["proportional", "direct variation"], see: ["constant of proportionality", "inversely proportional"] },
+  { w: "inversely proportional", field: "arithmetic", node: "proportions", pos: "aj", ipa: "/ɪnˈvɝsli prəˈpɔrʃənəl/",
+    senses: ["Of two quantities: related by <i>xy</i> = <i>k</i> for a constant <i>k</i> ≠ 0, so that doubling one halves the other. If 6 workers take 4 days, 12 workers take 2 days (6 · 4 = 12 · 2 = 24)."],
+    confused: [["directly proportional","doubling one doubles the other: <i>y</i>/<i>x</i> is constant"]],
+    forms: ["inverse variation"], see: ["constant of proportionality", "directly proportional"] },
+
+  { w: "real number", field: "arithmetic", node: "real-numbers", pos: "n", ipa: "/ˈril ˈnʌmbɚ/",
+    senses: ["Any number that corresponds to a point on the number line, rational or irrational; the set is written ℝ. −3, 0.75, √2 and π are all real numbers. ℝ is a complete ordered field."],
+    forms: ["real numbers", "reals"], see: ["irrational number", "completeness", "dense", "countable"] },
+  { w: "irrational number", field: "arithmetic", node: "real-numbers", pos: "n", ipa: "/ɪˈræʃənəl ˈnʌmbɚ/",
+    senses: ["A real number that cannot be written as a quotient <i>p</i>/<i>q</i> of integers; its decimal expansion neither terminates nor repeats. √2 = 1.41421356… and π = 3.14159265… are irrational, and √<i>n</i> for a positive integer <i>n</i> is irrational unless <i>n</i> is a perfect square."],
+    origin: "From Latin <i>irrationalis</i>, used to translate Greek <i>alogos</i> ‘without ratio’: such a length has no ratio of whole numbers to a unit length.",
+    forms: ["irrational numbers", "irrational", "irrationals"], see: ["real number", "dense"] },
+  { w: "dense", field: "arithmetic", node: "real-numbers", pos: "aj", ipa: "/dɛns/",
+    senses: ["Of a set of numbers: having a member between any two distinct real numbers, however close. The rationals are dense in ℝ (between 0.1 and 0.11 lies 0.105), and so are the irrationals."],
+    forms: ["denser", "density"], see: ["real number", "irrational number"] },
+  { w: "completeness", field: "arithmetic", node: "real-numbers", pos: "n", ipa: "/kəmˈplitnəs/", syl: "com·plete·ness",
+    senses: ["The property of the real numbers that every nonempty set bounded above has a least upper bound in the set of reals; it is what leaves no gaps on the number line. The rationals lack it: {<i>x</i> ∈ ℚ : <i>x</i><sup>2</sup> &lt; 2} has no least upper bound in ℚ, while in ℝ its least upper bound is √2."],
+    forms: ["complete", "completeness axiom"], see: ["real number", "dense"] },
+  { w: "countable", field: "arithmetic", node: "real-numbers", pos: "aj", ipa: "/ˈkaʊntəbəl/", syl: "count·a·ble",
+    senses: ["Of an infinite set: able to be listed as a first, second, third, … element, that is, matched one to one with the natural numbers. The integers and the rationals are countable; Georg Cantor proved in 1874 that the real numbers are uncountable."],
+    forms: ["uncountable", "countably"], see: ["real number"] },
+
+  { w: "unit", field: "arithmetic", node: "units", pos: "n", ipa: "/ˈjunɪt/", syl: "u·nit",
+    senses: ["A fixed, agreed quantity used as a standard of measurement, such as the metre, kilogram or second; a measurement is a number times a unit, as in 60 kg. Units multiply, divide and cancel like algebraic factors: miles ÷ hours gives miles per hour."],
+    forms: ["units", "SI unit"], see: ["conversion factor", "dimensional analysis", "measure"] },
+  { w: "conversion factor", field: "arithmetic", node: "units", pos: "n", ipa: "/kənˈvɝʒən ˈfæktɚ/",
+    senses: ["A ratio of two equal quantities expressed in different units, so its value is 1: 5280 ft / 1 mi. Multiplying by it changes the units without changing the quantity: 3 mi × (5280 ft / 1 mi) = 15,840 ft. For area or volume, square or cube the factor."],
+    forms: ["conversion factors"], see: ["dimensional analysis", "unit"] },
+  { w: "dimensional analysis", field: "arithmetic", node: "units", pos: "n", ipa: "/dɪˈmɛnʃənəl əˈnæləsɪs/",
+    senses: ["Converting units by multiplying by conversion factors chosen so that unwanted units cancel: 60 mi/h × (5280 ft / 1 mi) × (1 h / 3600 s) = 88 ft/s.",
+      "Checking that an equation is dimensionally consistent, with every term having the same dimension (length, mass, time and so on); a wrong final unit signals a setup error."],
+    syn: [["factor-label method","the same conversion technique, the name used in many chemistry courses"]],
+    see: ["conversion factor", "unit"] }
 ]);
 
 </script>
@@ -63342,7 +64027,7 @@ function stateOf(id){
 }
 
 /* ---------- app state + routing ---------- */
-const S = { view: "menu", subject: "mathematics", field: "arithmetic", topic: null, openGroups: store.get("groups", ["Foundations","Core Sequence"]), pan: {} };
+const S = { view: "menu", subject: "mathematics", field: "arithmetic", topic: null, gword: null, navMode: "fields", glScope: null, openGroups: store.get("groups", ["Foundations","Core Sequence"]), pan: {} };
 const app = $("#app");
 const viewEl = $("#view");
 let cleanup = [];
@@ -63350,20 +64035,26 @@ function clearView(){ cleanup.forEach(f => { try{ f(); }catch(e){} }); cleanup =
 
 function go(next, push = true){
   if (next.g) { Object.assign(G, next.g); next = { ...next }; delete next.g; }
+  if (!("gword" in next)) next = { ...next, gword: null };
   Object.assign(S, next);
+  if (S.gword) { if (S.view === "math" && GWORDS[S.gword]) S.navMode = "glossary"; else S.gword = null; }
   if (S.topic && NODE[S.topic]) S.field = fieldOf(S.topic);
   if (S.field !== "map" && DB.fields[S.field]) S.subject = subjOf(S.field);
   if (!SM[S.subject]) S.subject = "mathematics";
   render();
-  const tok = S.view === "glossary" ? gTok() : S.topic ? S.topic : (S.view === "math" ? (S.field === "map" ? "field-map" + (S.subject !== "mathematics" ? "-" + S.subject : "") : "field-" + S.field) : S.view);
-  if (push) { try { history.pushState({ ...next, view: S.view, subject: S.subject, field: S.field, topic: S.topic, ...(S.view === "glossary" ? { g: { sub: G.sub, word: G.word, field: G.field } } : {}) }, "", "#" + tok); } catch(e){} }
+  const tok = (S.view === "glossary" ? gTok() : S.topic ? S.topic : (S.view === "math" ? (S.field === "map" ? "field-map" + (S.subject !== "mathematics" ? "-" + S.subject : "") : "field-" + S.field) : S.view)) + (S.view === "math" && S.gword ? "~" + encodeURIComponent(S.gword) : "");
+  if (push) { try { history.pushState({ ...next, view: S.view, subject: S.subject, field: S.field, topic: S.topic, gword: S.gword, ...(S.view === "glossary" ? { g: { sub: G.sub, word: G.word, field: G.field } } : {}) }, "", "#" + tok); } catch(e){} }
   store.set("last", { view: S.view, subject: S.subject, field: S.field, topic: S.topic });
 }
 window.addEventListener("popstate", e => { if (e.state) go(e.state, false); });
 window.addEventListener("hashchange", () => { const s = fromHash(); if (s) go(s, false); });
-function fromHash(){
-  const t = (location.hash || "").slice(1);
+function fromHash(tok){
+  const t = tok != null ? tok : (location.hash || "").slice(1);
   if (!t) return null;
+  if (!t.startsWith("glossary") && t.includes("~")) {
+    const i = t.indexOf("~"); let w = null; try { w = decodeURIComponent(t.slice(i + 1)).toLowerCase(); } catch(e){}
+    const base = fromHash(t.slice(0, i)); return base && base.view === "math" ? { ...base, gword: w && GWORDS[w] ? w : null } : base;
+  }
   if (NODE[t]) return { view: "math", field: fieldOf(t), topic: t };
   if (t === "field-map" || t.startsWith("field-map-")) { const sub = t.slice(10) || "mathematics"; if (SM[sub]) return { view: "math", subject: sub, field: "map", topic: null }; }
   if (t.startsWith("field-")) { const f = t.slice(6); if (DB.fields[f]) return { view: "math", subject: subjOf(f), field: f, topic: null }; }
@@ -63396,7 +64087,8 @@ function crumbs(){
   if (S.view === "math") {
     parts.push([SM[S.subject].name, () => go({ view: "math", subject: S.subject, field: "map", topic: null })]);
     if (S.field !== "map") parts.push([DB.fields[S.field].name, () => go({ view: "math", topic: null })]);
-    if (S.topic) parts.push([T[S.topic] ? T[S.topic].title : S.topic, null]);
+    if (S.topic) parts.push([T[S.topic] ? T[S.topic].title : S.topic, S.gword ? () => go({ view: "math", topic: S.topic }) : null]);
+    if (S.gword && GWORDS[S.gword]) parts.push([GWORDS[S.gword][0].w, null]);
   }
   parts.forEach(([label, fn], i) => {
     if (i) c.appendChild(h("span", { class: "sep" + (i < parts.length - 2 ? " hide-s" : "") }, "›"));
@@ -63429,10 +64121,10 @@ function renderMenu(){
     <div class="verline" id="verline"></div></div>`;
   viewEl.appendChild(s);
   const slots = $("#slots", s);
-  if (window.codexDesktop) {
+  if (window.inquireDesktop) {
     const vl = $("#verline", s);
     vl.innerHTML = `<span>Inquire <span class="num">v${esc(DESK_VERSION || "")}</span></span><button type="button" class="btn-s" id="chk">Check for updates</button>`;
-    $("#chk", s).onclick = () => window.codexDesktop.checkForUpdates();
+    $("#chk", s).onclick = () => window.inquireDesktop.checkForUpdates();
   }
   const d = h("button", { type: "button", class: "slot big", onclick: () => go({ view: "dict", topic: null }) },
     `<span class="glyph">Ⅾ</span><span><h3>Dictionary</h3><p>Subjects broken into fields and topics, ordered as a path to mastery. Mathematics, Physics and English are open.</p></span><span class="tag">Online</span>`);
@@ -63447,10 +64139,11 @@ function renderMenu(){
 function renderDict(){
   const s = h("div", { class: "screen" });
   s.innerHTML = `<div class="screen-in">
-    <div class="hello"><p class="eyebrow">Dictionary</p><h1>Subjects</h1>
+    <div class="hello"><div class="back-row"><button type="button" class="btn-s" id="dback">◀ Menu</button></div><p class="eyebrow">Dictionary</p><h1>Subjects</h1>
     <p>Pick a subject to open its navigator. Fields appear on the left and the selected field's skill tree on the right.</p></div>
     <div class="subj-groups" id="subj"></div></div>`;
   viewEl.appendChild(s);
+  $("#dback", s).onclick = () => go({ view: "menu", topic: null });
   (DB.subjectGroups || [{ id: "all", name: "Subjects", line: "" }]).forEach(g => {
     const subs = DB.subjects.filter(x => (x.group || "all") === g.id);
     if (!subs.length) return;
@@ -63473,37 +64166,78 @@ function renderWork(){
   const main = h("section", { class: "main" });
   w.append(nav, main); viewEl.appendChild(w);
   buildNav(nav, w);
-  if (S.topic) renderTopic(main);
+  if (S.gword && GWORDS[S.gword]) renderWordPane(main);
+  else if (S.topic) renderTopic(main);
   else if (S.field === "map") renderFieldMap(main);
   else if (charted(S.field)) renderFieldTree(main, S.field);
   else renderDossier(main);
 }
 
 function buildNav(nav, w){
+  const gn = Object.keys(GWORDS).filter(k => GWORDS[k].some(e => e.subject === S.subject));
+  const glMode = S.navMode === "glossary";
+  // glossary scope: this subject's words (default) or every subject's
+  const scope = () => (S.glScope === "all" || !gn.length) ? "all" : S.subject;
   nav.innerHTML = `<div class="nav-top">
       <div class="nav-title"><span class="glyph">${SM[S.subject].glyph}</span><div><h2>${esc(SM[S.subject].name)}</h2><small>${subjFields(S.subject).length} fields · ${subjTrees(S.subject).length} charted</small></div></div>
       <label class="search"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="none" stroke="#8B97AE" stroke-width="1.4"/><path d="M9.5 9.5 13 13" stroke="#8B97AE" stroke-width="1.4"/></svg>
-      <input id="navq" type="text" placeholder="Search fields and topics" aria-label="Search fields and topics"></label>
+      <input id="navq" type="text" placeholder="${glMode ? "Search words and definitions" : "Search fields and topics"}" aria-label="${glMode ? "Search the glossary" : "Search fields and topics"}"></label>
     </div><div class="nav-list" id="navlist"></div>
-    <div class="nav-foot">Gold nodes are ready to study. Green nodes are mastered. Mark a topic mastered from its page.</div>`;
+    <div class="nav-foot">${glMode ? "Pick a word to read it here. The full glossary has field, letter and mastered filters." : "Gold nodes are ready to study. Green nodes are mastered. Mark a topic mastered from its page."}</div>`;
   const list = $("#navlist", nav);
   const q = $("#navq", nav);
+  const fromHere = () => ({ label: SM[S.subject].name + (S.topic && T[S.topic] ? " · " + T[S.topic].title : S.field !== "map" && DB.fields[S.field] ? " · " + DB.fields[S.field].name : ""), subject: S.subject, state: { view: "math", subject: S.subject, field: S.field, topic: S.topic } });
+  const setMode = m => { S.navMode = m; buildNav(nav, w); };
+  function tabs(){
+    // Field map and Glossary switch what the sidebar lists
+    list.appendChild(h("button", { type: "button", class: "item" + (!glMode && S.field === "map" && !S.topic && !S.gword ? " sel" : ""), onclick: () => {
+        if (glMode) { setMode("fields"); if (S.gword) go({ view: "math" }); return; }
+        w.classList.remove("navopen"); go({ view: "math", subject: S.subject, field: "map", topic: null }); } },
+      `<span class="ic">⌗</span><span style="min-width:0"><span class="nm">Field map</span><span class="lv">${glMode ? "Back to fields and topics" : esc(SM[S.subject].mapLine)}</span></span><span class="st"></span>`));
+    list.appendChild(h("button", { type: "button", class: "item gl-nav" + (glMode ? " sel" : ""), "aria-pressed": String(glMode), onclick: () => { if (!glMode) setMode("glossary"); } },
+      `<span class="ic">Aa</span><span style="min-width:0"><span class="nm">Glossary</span><span class="lv">${gn.length ? `${gn.length} ${esc(SM[S.subject].name)} word${gn.length === 1 ? "" : "s"}` : "Words from every subject"}</span></span><span class="st"></span>`));
+  }
+  function buildWords(){
+    const term = q.value.trim().toLowerCase();
+    list.innerHTML = "";
+    if (!term) tabs();
+    const sc = scope();
+    const tools = h("div", { class: "nav-gl-tools" });
+    const all = Object.keys(GWORDS).length;
+    tools.innerHTML = (gn.length ? [[S.subject, SM[S.subject].name, gGlyph(S.subject), gColour(S.subject), gn.length], ["all", "All subjects", "◎", "var(--line-2)", all]]
+      .map(([id, nm, gl, c, n]) => `<button type="button" class="gl-chip sm" data-scope="${id}" aria-pressed="${sc === id}" style="--gc:${c}"><span class="g">${gl}</span>${esc(nm)}<span class="n">${n}</span></button>`).join("")
+      : `<span class="nav-gl-none">No ${esc(SM[S.subject].name)} words yet. Showing every subject.</span>`)
+      + `<button type="button" class="btn-s nav-gl-full" data-full>Full glossary ↗</button>`;
+    tools.addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b) return;
+      if (b.dataset.scope) { S.glScope = b.dataset.scope === "all" ? "all" : null; buildWords(); if (S.gword) render(); return; }
+      if (b.dataset.full != null) { w.classList.remove("navopen"); openGlossary({ from: fromHere(), sub: sc, word: S.gword && GWORDS[S.gword].some(e => sc === "all" || e.subject === sc) ? S.gword : null }); }
+    });
+    list.appendChild(tools);
+    const vis = Object.keys(GWORDS).map(k => { const blocks = GWORDS[k].filter(e => sc === "all" || e.subject === sc); return { k, blocks, score: blocks.length ? gScore(k, blocks, term) : 0 }; })
+      .filter(x => x.score > 0).sort((a, b) => term ? b.score - a.score || a.k.localeCompare(b.k) : a.k.localeCompare(b.k));
+    if (!vis.length) { list.appendChild(h("div", { class: "gl-empty" }, term ? "No words match." : "No words yet.")); return; }
+    let letter = null, body = null;
+    vis.forEach(({ k, blocks }) => {
+      const l = term ? "" : k[0].toUpperCase();
+      if (!body || l !== letter) { letter = l; const g = h("div", { class: "grp open nav-gl-grp" }); if (l) g.appendChild(h("div", { class: "grp-h nav-gl-l" }, esc(l))); body = h("div", { class: "grp-b" }); g.appendChild(body); list.appendChild(g); }
+      const subs = [...new Set(blocks.map(e => e.subject))];
+      body.appendChild(h("button", { type: "button", class: "item sub nav-gw" + (S.gword === k ? " sel" : ""), "data-gword": k, onclick: () => { w.classList.remove("navopen"); go({ view: "math", gword: k }); } },
+        `<span class="ic" style="--gc:${gColour(subs[0])}">${gGlyph(subs[0])}</span><span class="nm">${esc(GWORDS[k][0].w)}</span><span class="st">${subs.length > 1 ? subs.slice(1).map(x => `<i style="--gc:${gColour(x)}" title="${esc(gName(x))}">${gGlyph(x)}</i>`).join("") : ""}</span>`));
+    });
+    const sel = list.querySelector(".item.sel.nav-gw");
+    if (sel && !term) requestAnimationFrame(() => { const r = sel.getBoundingClientRect(), lr = list.getBoundingClientRect(); if (r.top < lr.top || r.bottom > lr.bottom) sel.scrollIntoView({ block: "center" }); });
+  }
   function build(){
     const term = q.value.trim().toLowerCase();
     list.innerHTML = "";
-    const mapItem = h("button", { type: "button", class: "item" + (S.field === "map" && !S.topic ? " sel" : ""), onclick: () => { w.classList.remove("navopen"); go({ view: "math", subject: S.subject, field: "map", topic: null }); } },
-      `<span class="ic">⌗</span><span style="min-width:0"><span class="nm">Field map</span><span class="lv">${esc(SM[S.subject].mapLine)}</span></span><span class="st"></span>`);
-    if (!term) list.appendChild(mapItem);
-    const gn = Object.keys(GWORDS).filter(k => GWORDS[k].some(e => e.subject === S.subject));
-    const fromHere = () => ({ label: SM[S.subject].name + (S.topic && T[S.topic] ? " · " + T[S.topic].title : S.field !== "map" && DB.fields[S.field] ? " · " + DB.fields[S.field].name : ""), subject: S.subject, state: { view: "math", subject: S.subject, field: S.field, topic: S.topic } });
-    if (!term) list.appendChild(h("button", { type: "button", class: "item gl-nav", onclick: () => { w.classList.remove("navopen"); openGlossary({ from: fromHere(), sub: gn.length ? S.subject : "all", word: null }); } },
-      `<span class="ic">Aa</span><span style="min-width:0"><span class="nm">Glossary</span><span class="lv">${gn.length ? `${gn.length} ${esc(SM[S.subject].name)} words · all subjects one tap away` : "Words from every subject"}</span></span><span class="st"></span>`));
+    if (!term) tabs();
     if (term) {
       const hits = gn.filter(k => k.includes(term) || GWORDS[k].some(e => e.subject === S.subject && (e.forms || []).some(f => f.toLowerCase().includes(term)))).slice(0, 6);
       if (hits.length) {
         const grp = h("div", { class: "grp open" }), body = h("div", { class: "grp-b" });
         grp.appendChild(h("div", { class: "grp-h" }, `<span class="car"></span>Glossary<span class="n">${hits.length}</span>`));
-        hits.forEach(k => body.appendChild(h("button", { type: "button", class: "item sub", onclick: () => { w.classList.remove("navopen"); openGlossary({ from: fromHere(), sub: S.subject, word: k }); } },
+        hits.forEach(k => body.appendChild(h("button", { type: "button", class: "item sub", onclick: () => { w.classList.remove("navopen"); S.navMode = "glossary"; go({ view: "math", gword: k }); } },
           `<span class="ic">Aa</span><span class="nm">${esc(GWORDS[k][0].w)}</span><span class="st"></span>`)));
         grp.appendChild(body); list.appendChild(grp);
       }
@@ -63547,8 +64281,8 @@ function buildNav(nav, w){
     const sel = list.querySelector(".item.sel");
     if (sel && !term) requestAnimationFrame(() => { const r = sel.getBoundingClientRect(), lr = list.getBoundingClientRect(); if (r.top < lr.top || r.bottom > lr.bottom) sel.scrollIntoView({ block: "center" }); });
   }
-  q.addEventListener("input", build);
-  build();
+  q.addEventListener("input", glMode ? buildWords : build);
+  (glMode ? buildWords : build)();
 }
 
 /* ---------- generic pannable tree (Civ-style) ---------- */
@@ -63664,10 +64398,11 @@ function renderFieldTree(main, f){
   const head = h("div", { class: "tree-head" });
   const done = doneIn(f);
   const hrs = FN.reduce((s, n) => s + (T[n.id]?.hours || 0), 0);
-  head.innerHTML = `<button type="button" class="btn-s navtoggle" id="navtoggle2">☰ Fields</button><div><h2>${esc(F.name)}</h2><div class="sub">${FN.length ? `${FN.length} topic${FN.length === 1 ? "" : "s"}${TR.planned && TR.planned.length ? ` written, ${TR.planned.length} planned` : ""} · about ${hrs} study hours · ${done} mastered` : `${(TR.planned || []).length} planned topics · the tree is mapped and the pages are being written`}</div></div>
+  head.innerHTML = `<button type="button" class="btn-s navtoggle" id="navtoggle2">☰ Fields</button><button type="button" class="btn-s" id="tback">◀ ${esc(SM[subjOf(f)].name)} field map</button><div><h2>${esc(F.name)}</h2><div class="sub">${FN.length ? `${FN.length} topic${FN.length === 1 ? "" : "s"}${TR.planned && TR.planned.length ? ` written, ${TR.planned.length} planned` : ""} · about ${hrs} study hours · ${done} mastered` : `${(TR.planned || []).length} planned topics · the tree is mapped and the pages are being written`}</div></div>
    <div class="legend-chips"><span><i class="lg-m"></i>Mastered</span><span><i class="lg-a"></i>Ready</span><span><i class="lg-l"></i>Locked</span>${TR.planned && TR.planned.length ? '<span><i class="lg-p"></i>Planned</span>' : ""}<span><i class="lg-s"></i>Last opened</span></div>`;
   main.appendChild(head);
   $("#navtoggle2", head).onclick = () => main.parentElement.classList.toggle("navopen");
+  $("#tback", head).onclick = () => go({ view: "math", subject: subjOf(f), field: "map", topic: null });
   const inTree = new Set(FN.map(n => n.id));
   // Planned nodes (TR.planned) show the rest of a partly written tree, dashed and not openable.
   const PL = TR.planned || [], PLAN = Object.fromEntries(PL.map(n => [n.id, n]));
@@ -63695,10 +64430,11 @@ function renderFieldTree(main, f){
 function renderFieldMap(main){
   const head = h("div", { class: "tree-head" });
   const sm = SM[S.subject];
-  head.innerHTML = `<button type="button" class="btn-s navtoggle" id="navtoggle2">☰ Fields</button><div><h2>${esc(sm.name)} field map</h2><div class="sub">${esc(sm.mapSub)}</div></div>
+  head.innerHTML = `<button type="button" class="btn-s navtoggle" id="navtoggle2">☰ Fields</button><button type="button" class="btn-s" id="mback">◀ Subjects</button><div><h2>${esc(sm.name)} field map</h2><div class="sub">${esc(sm.mapSub)}</div></div>
     <div class="legend-chips"><span><i class="lg-a"></i>Charted</span><span><i class="lg-l"></i>Planned</span></div>`;
   main.appendChild(head);
   $("#navtoggle2", head).onclick = () => main.parentElement.classList.toggle("navopen");
+  $("#mback", head).onclick = () => go({ view: "dict", topic: null });
   const nodes = subjFields(S.subject).map(id => [id, DB.fields[id]]).map(([id, f]) => ({ id, col: f.col, row: f.row, pre: f.pre, icon: f.icon, label: f.name, right: "", chips: [f.level.split("·")[0].trim()] }));
   buildTree(main, {
     nodes, eras: sm.eras, key: "map-" + S.subject, title: sm.name + " field map",
@@ -63714,7 +64450,7 @@ function renderDossier(main){
   const next = Object.entries(DB.fields).filter(([k, v]) => v.pre.includes(id)).map(([k]) => k);
   const d = h("div", { class: "dossier" });
   d.innerHTML = `<div class="dossier-in">
-    <div><button type="button" class="btn-s navtoggle" id="navtoggle2" style="margin-bottom:12px">☰ Fields</button><p class="eyebrow">${esc(f.level)}</p><h1>${esc(f.name)}</h1><p class="lede">${esc(f.blurb)}</p>
+    <div><div class="back-row"><button type="button" class="btn-s navtoggle" id="navtoggle2">☰ Fields</button><button type="button" class="btn-s" id="fback">◀ ${esc(SM[subjOf(id)].name)} field map</button></div><p class="eyebrow">${esc(f.level)}</p><h1>${esc(f.name)}</h1><p class="lede">${esc(f.blurb)}</p>
       <div class="meta"><span class="pill l">Skill tree not yet charted</span>${subjTrees(subjOf(id)).length ? `<span class="pill a">${subjTrees(subjOf(id)).map(k => esc(DB.fields[k].name)).join(", ")} charted</span>` : ""}</div></div>
     <div class="dgrid">
       <div class="win"><div class="win-h"><span class="dot"></span>Core topics</div><div class="in"><ol>${f.topics.map(t => `<li>${esc(t)}</li>`).join("")}</ol></div></div>
@@ -63729,6 +64465,7 @@ function renderDossier(main){
   main.appendChild(d);
   d.querySelectorAll("[data-f]").forEach(b => b.onclick = () => go({ view: "math", field: b.dataset.f, topic: null }));
   $("#navtoggle2", d).onclick = () => main.parentElement.classList.toggle("navopen");
+  $("#fback", d).onclick = () => go({ view: "math", subject: subjOf(id), field: "map", topic: null });
 }
 
 /* ---------- story panels (English topics) ---------- */
@@ -63928,19 +64665,42 @@ function gSense(e, headIpa){
     ${gNodeLink(e) ? `<div class="gl-links">${gNodeLink(e)}</div>` : ""}
   </article>`;
 }
-function gEntry(k){
-  const blocks = gBlocks(k, G.sub !== "all" ? G.sub : (G.ret && G.ret.subject));
+function gEntry(k, sub = G.sub, pref = sub !== "all" ? sub : (G.ret && G.ret.subject)){
+  const blocks = gBlocks(k, pref);
   if (!blocks.length) return `<div class="gl-empty">Pick a word from the list.</div>`;
   const head = blocks[0], subs = [...new Set(blocks.map(e => e.subject))];
   const see = [...new Set(blocks.flatMap(e => e.see || []))].filter(w => w.toLowerCase() !== k);
-  const hidden = G.sub !== "all" ? GWORDS[k].filter(e => e.subject !== G.sub).length : 0;
-  const shown = G.sub !== "all" ? blocks.filter(e => e.subject === G.sub) : blocks;
+  const hidden = sub !== "all" ? GWORDS[k].filter(e => e.subject !== sub).length : 0;
+  const shown = sub !== "all" ? blocks.filter(e => e.subject === sub) : blocks;
   return `<button type="button" class="btn-s gl-back" id="glback">◀ All words</button>
     <header class="gl-head"><h2>${esc(head.w)}</h2><div class="gl-say"><span class="ipa">${esc(head.ipa)}</span>${head.syl ? `<span class="syl">${esc(head.syl)}</span>` : ""}</div>
       <div class="gl-in">${subs.map(s => `<span class="gl-chip sm" style="--gc:${gColour(s)}"><span class="g">${gGlyph(s)}</span>${esc(gName(s))}</span>`).join("")}</div></header>
     ${shown.map(e => gSense(e, head.ipa)).join("")}
     ${hidden ? `<button type="button" class="btn-s gl-more" id="glall">Show ${hidden} more sense${hidden === 1 ? "" : "s"} from other subjects</button>` : ""}
     ${see.length ? `<div class="gl-rel gl-see"><span class="lb">See also</span>${see.map(w => `<button type="button" class="gl-a" data-gword="${esc(w.toLowerCase())}">${esc(w)}</button>`).join("")}</div>` : ""}`;
+}
+// a glossary word read inside a subject (sidebar Glossary list), beside its field map, tree or topic
+function renderWordPane(main){
+  const k = S.gword, gn = GWORDS[k].some(e => e.subject === S.subject);
+  const sub = S.glScope === "all" || !gn ? "all" : S.subject;
+  const under = S.topic && T[S.topic] ? T[S.topic].title : S.field !== "map" && DB.fields[S.field] ? DB.fields[S.field].name : SM[S.subject].name + " field map";
+  const head = h("div", { class: "tree-head" });
+  head.innerHTML = `<button type="button" class="btn-s navtoggle" id="navtoggle2">☰ Words</button><div><h2>Glossary</h2><div class="sub">${esc(sub === "all" ? "Every subject" : SM[S.subject].name)} · ${esc(GWORDS[k][0].w)}</div></div>
+    <div class="gl-pane-act"><button type="button" class="btn-s" id="wpback">◀ ${esc(under)}</button><button type="button" class="btn-s" id="wpfull">Full glossary ↗</button></div>`;
+  main.appendChild(head);
+  $("#navtoggle2", head).onclick = () => main.parentElement.classList.toggle("navopen");
+  const pane = h("div", { class: "gl-pane" });
+  const entry = h("section", { class: "gl-entry win", "aria-live": "polite" }, gEntry(k, sub, S.subject));
+  pane.appendChild(entry); main.appendChild(pane);
+  $("#wpback", head).onclick = () => go({ view: "math" });
+  $("#wpfull", head).onclick = () => openGlossary({ from: { label: SM[S.subject].name + " · " + under, subject: S.subject, state: { view: "math", subject: S.subject, field: S.field, topic: S.topic } }, sub, word: k });
+  entry.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.id === "glall") { S.glScope = "all"; render(); return; }
+    if (b.dataset.gword != null) { go({ view: "math", gword: b.dataset.gword }); return; }
+    if (b.dataset.t) { go({ view: "math", field: fieldOf(b.dataset.t), topic: b.dataset.t }); return; }
+    if (b.dataset.f) { go({ view: "math", field: b.dataset.f, topic: null }); return; }
+  });
 }
 function renderGlossary(){
   const subs = gSubjects();
@@ -64039,8 +64799,8 @@ function glossaryPopover(root, subject){
 
 /* ---------- desktop shell (only inside the Inquire app) ---------- */
 let DESK_VERSION = "";
-if (window.codexDesktop) {
-  const D = window.codexDesktop;
+if (window.inquireDesktop) {
+  const D = window.inquireDesktop;
   document.documentElement.classList.add("desktop", "os-" + D.platform);
   D.version().then(v => { DESK_VERSION = v; const el = document.querySelector("#verline .num"); if (el) el.textContent = "v" + v; });
   const bar = $("#upd");
@@ -64073,7 +64833,8 @@ if (S.view === "math" && S.field !== "map" && !DB.fields[S.field]) S.field = "ar
 if (S.field !== "map" && DB.fields[S.field]) S.subject = subjOf(S.field);
 if (!SM[S.subject]) S.subject = "mathematics";
 if (S.topic && !NODE[S.topic]) S.topic = null;
-try { history.replaceState({ view: S.view, field: S.field, topic: S.topic }, ""); } catch(e){}
+if (S.gword) S.navMode = "glossary";
+try { history.replaceState({ view: S.view, field: S.field, topic: S.topic, gword: S.gword }, ""); } catch(e){}
 render();
 })();
 
@@ -64086,7 +64847,7 @@ render();
    Accounts are LOCAL to this computer (PBKDF2-hashed password in localStorage). There is no server, so no password reset. */
 (function () {
 "use strict";
-const desktop = !!window.codexDesktop;
+const desktop = !!window.inquireDesktop;
 const wanted = desktop || /[?&]intro\b/.test(location.search);
 const appEl = document.getElementById("app");
 const who = document.getElementById("whoami");

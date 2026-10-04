@@ -2,7 +2,7 @@
 
 Inquire is a knowledge console that maps subjects as skill trees. v1 holds the Mathematics dictionary with the full Arithmetic tree (30 interactive topics).
 
-- **Repo (public):** `InquiringOwl/codex-desktop` holds the source code and, under Releases, the installers and update files. Installed copies of Inquire check it at launch and every 4 hours.
+- **Repo (public):** `InquiringOwl/inquire-desktop` holds the source code and, under Releases, the installers and update files. Installed copies of Inquire check it at launch and every 4 hours.
 
 ## Project layout
 
@@ -23,14 +23,14 @@ Inquire is a knowledge console that maps subjects as skill trees. v1 holds the M
 
 ## One-time GitHub setup
 
-1. On github.com, create **`codex-desktop`** as a **Public** repository. Leave it empty (no README).
+1. On github.com, create **`inquire-desktop`** as a **Public** repository. Leave it empty (no README).
 2. Push this folder (Terminal):
    ```
    cd ~/Documents/codex-desktop
    git init -b main
    git add .
    git commit -m "Inquire 1.0.0"
-   git remote add origin https://github.com/InquiringOwl/codex-desktop.git
+   git remote add origin https://github.com/InquiringOwl/inquire-desktop.git
    git push -u origin main
    git tag v1.0.0
    git push origin v1.0.0
@@ -40,7 +40,7 @@ Inquire is a knowledge console that maps subjects as skill trees. v1 holds the M
 
 ## First install on a Mac
 
-1. From `github.com/InquiringOwl/codex-desktop/releases`, download `Inquire-1.0.0-arm64.dmg` (Apple Silicon) or `Inquire-1.0.0-x64.dmg` (Intel).
+1. From `github.com/InquiringOwl/inquire-desktop/releases`, download `Inquire-1.0.0-arm64.dmg` (Apple Silicon) or `Inquire-1.0.0-x64.dmg` (Intel).
 2. Open it and drag **Inquire** into **Applications**.
 3. The app is not signed with an Apple Developer ID, so clear the download flag once in Terminal:
    ```

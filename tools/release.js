@@ -43,4 +43,4 @@ console.log('▸ Pushing…');
 sh('git push -q origin main');
 sh(`git tag v${next}`);
 sh(`git push -q origin v${next}`);
-console.log(`\n✓ Inquire ${next} is on its way. GitHub is building it now (about 5 minutes):\n  https://github.com/InquiringOwl/codex-desktop/actions\nInstalled copies update themselves after that.`);
+console.log(`\n✓ Inquire ${next} is on its way. GitHub is building it now (about 5 minutes):\n  https://github.com/InquiringOwl/inquire-desktop/actions\nInstalled copies update themselves after that.`);

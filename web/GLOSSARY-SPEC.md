@@ -37,12 +37,13 @@ dotted-underlined; clicking one shows a short card with a link to the full entry
 blocks in English). Keep definitions original (no copying from a dictionary) and accurate at college level.
 
 ## Colour and categorisation (fixed)
-- **Group colour** = the stripe on a sense block's left edge and the border of its subject chip: STEM amber `#F2B84B`,
-  Arts & Humanities magenta `#D97AE6`, Social Sciences `#7FB4FF` (`--g-stem`, `--g-hum`, `--g-soc` in `style.css`).
+- **Group colour** = the stripe on a sense block's left edge and the border of its subject chip, the same colour as the
+  group's heading on the Subjects screen: STEM cyan `#5CC8E0`, Arts & Humanities magenta `#D97AE6`, Social Sciences lime
+  `#B5D65A` (`--g-stem`, `--g-hum`, `--g-soc` in `style.css`).
 - **Subject glyph** (from `DB.subjects`: ∑ ⚛ λ ¶ ♪ …) in the chip and on the block, so subjects in the same group differ.
 - **Subject · field text** on every block, linked to the node when `node` is set.
 - Inside an entry the content colours keep their usual jobs only: the part-of-speech pill is neutral with a small square in
-  its `DB.posTags` colour. Never use c1–c5 to mean a subject.
+  its `DB.posTags` colour. Apart from the group colours, never use c1–c5 to mean a subject.
 - Story panels: a word links to the glossary only if an entry has the same part of speech as the word's tag (verb *work*
   does not open the noun *work*); stories with their own `tags` link by spelling alone.
 

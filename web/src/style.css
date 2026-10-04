@@ -4,8 +4,8 @@
   color-scheme: dark;
   --void:#070A10; --ink:#0B1019; --panel:#111827; --panel-2:#162033; --panel-3:#1B2740;
   --line:#243149; --line-2:#34445F; --text:#DDE4EF; --muted:#8B97AE; --faint:#58647D;
-  --amber:#F2B84B; --cyan:#5CC8E0; --pink:#F07CA0; --violet:#B49BFF; --green:#7BD88F; --magenta:#D97AE6; --red:#E5675B;
-  --g-stem:#F2B84B; --g-hum:#D97AE6; --g-soc:#7FB4FF; /* glossary subject-group stripes (not content colours) */
+  --amber:#F2B84B; --cyan:#5CC8E0; --pink:#F07CA0; --violet:#B49BFF; --green:#7BD88F; --magenta:#D97AE6; --lime:#B5D65A; --red:#E5675B;
+  --g-stem:#5CC8E0; --g-hum:#D97AE6; --g-soc:#B5D65A; /* subject-group colours: STEM cyan (as its Subjects heading), Arts & Humanities magenta, Social Sciences lime */
   --glow:rgba(92,200,224,.35);
   --math:"STIX Two Text","Cambria Math",Cambria,Georgia,serif;
   --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -81,6 +81,7 @@ table.proof td:first-child{width:55%}
 .hello h1{font:400 clamp(34px,5vw,56px)/1.05 var(--math);margin:0;letter-spacing:-.005em;text-wrap:balance}
 .hello p{color:var(--muted);max-width:60ch;margin:12px 0 0}
 .slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.subj-group .slots{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
 .slot{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:18px;min-height:112px;
   background:linear-gradient(180deg,rgba(27,39,64,.85),rgba(14,21,34,.9));border:1px solid var(--line-2);position:relative;transition:border-color .2s,background .2s}
 .slot:hover{border-color:var(--cyan);background:linear-gradient(180deg,rgba(35,55,86,.9),rgba(14,24,40,.95))}
@@ -373,7 +374,7 @@ input[type=checkbox]{accent-color:var(--amber);width:16px;height:16px}
 [data-accent="magenta"] .slot:hover{border-color:var(--magenta);background:linear-gradient(180deg,rgba(62,37,80,.92),rgba(24,15,36,.95))}
 [data-accent="magenta"] .slot:focus-visible{outline-color:var(--magenta)}
 [data-accent="magenta"] .slot .glyph{color:var(--magenta);border-color:#5f4474;background:radial-gradient(circle at 35% 30%,rgba(217,122,230,.28),rgba(11,16,25,.8) 70%)}
-[data-accent="magenta"] .slot .tag{color:var(--magenta)}
+/* "Open" stays the shared green in every group, like STEM */
 [data-accent="magenta"] .slot.locked:hover{border-color:#4f3a62;background:linear-gradient(180deg,rgba(46,29,60,.88),rgba(19,13,29,.92))}
 [data-accent="magenta"] .slot.locked .glyph{color:#9a7aa8}
 [data-accent="magenta"] .slot.locked .tag{color:#7a6488}
@@ -381,6 +382,20 @@ input[type=checkbox]{accent-color:var(--amber);width:16px;height:16px}
 .work[data-accent="magenta"] .win-h .dot{background:var(--magenta);box-shadow:0 0 8px var(--magenta)}
 .work[data-accent="magenta"] .win::before{border-color:var(--magenta)}
 .work[data-accent="magenta"] .win::after{border-color:var(--magenta)}
+/* Social Sciences accent: lime (yellow-green), between the amber and the green "Open" in hue */
+[data-accent="lime"] .subj-gh{border-bottom-color:#3f4a28}
+[data-accent="lime"] .subj-gh h2{color:var(--lime);text-shadow:0 0 12px rgba(181,214,90,.32)}
+[data-accent="lime"] .slot{background:linear-gradient(180deg,rgba(34,44,22,.88),rgba(14,19,11,.92));border-color:#4a5a2c}
+[data-accent="lime"] .slot:hover{border-color:var(--lime);background:linear-gradient(180deg,rgba(46,60,28,.92),rgba(18,24,12,.95))}
+[data-accent="lime"] .slot:focus-visible{outline-color:var(--lime)}
+[data-accent="lime"] .slot .glyph{color:var(--lime);border-color:#5d6f33;background:radial-gradient(circle at 35% 30%,rgba(181,214,90,.26),rgba(11,16,25,.8) 70%)}
+[data-accent="lime"] .slot.locked:hover{border-color:#4a5a2c;background:linear-gradient(180deg,rgba(34,44,22,.88),rgba(14,19,11,.92))}
+[data-accent="lime"] .slot.locked .glyph{color:#98a874}
+[data-accent="lime"] .slot.locked .tag{color:#6f7a52}
+.work[data-accent="lime"] .nav-title .glyph{color:var(--lime);border-color:#5d6f33;box-shadow:0 0 12px rgba(181,214,90,.22)}
+.work[data-accent="lime"] .win-h .dot{background:var(--lime);box-shadow:0 0 8px var(--lime)}
+.work[data-accent="lime"] .win::before{border-color:var(--lime)}
+.work[data-accent="lime"] .win::after{border-color:var(--lime)}
 
 /* ---------- story panels (English): a framed scene above the passage ---------- */
 .stories{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:18px;margin-top:14px}
@@ -502,7 +517,7 @@ input[type=checkbox]{accent-color:var(--amber);width:16px;height:16px}
 .gl-wrap{max-width:1180px;gap:18px}
 .gl-top{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .gl-top:empty{display:none}
-.gl-menu{display:none}
+.back-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
 .gl-key{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font:500 11px/1 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .gl-key span{display:inline-flex;align-items:center;gap:7px}
 .gl-key i{width:4px;height:14px;display:inline-block}
@@ -579,6 +594,23 @@ button.gl-chip.sm{cursor:pointer}
 .gl-more{justify-self:start}
 .gl-empty{padding:18px 14px;color:var(--muted);font-size:14px}
 .gl-nav .ic{font:600 11px/1 var(--ui)!important;letter-spacing:.02em}
+/* sidebar Glossary list (Field map ⇄ Glossary) and the word pane beside it */
+.nav-gl-tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 12px 10px;border-bottom:1px solid rgba(36,49,73,.6)}
+.nav-gl-full{margin-left:auto}
+.nav-gl-none{width:100%;font:12px/1.4 var(--sans);color:var(--faint)}
+.nav-gl-grp{border-bottom:0}
+.nav-gl-grp .grp-b{padding:0 0 2px}
+.nav-gw{padding-top:4px;padding-bottom:4px}
+.nav-gl-l{cursor:default;padding:8px 12px 3px;font-family:var(--mono);letter-spacing:.1em;color:var(--faint)}
+.nav-gl-l:hover{background:none;color:var(--faint)}
+.nav-gw .ic{color:var(--gc)!important;border-color:color-mix(in srgb,var(--gc) 55%,transparent)!important;border-radius:0!important;background:color-mix(in srgb,var(--gc) 10%,var(--ink))}
+.nav-gw .nm{font:400 15px/1.2 var(--math)}
+.nav-gw .st{display:flex;gap:3px}
+.nav-gw .st i{font:normal 400 11px/1 var(--math);color:var(--gc);width:16px;height:16px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--gc) 55%,transparent)}
+.gl-pane{flex:1;min-height:0;overflow:auto;padding:16px}
+.gl-pane .gl-entry{max-width:880px;margin:0 auto}
+.gl-pane .gl-back{display:none!important}
+.gl-pane-act{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px}
 /* story-panel words with a glossary entry */
 .story .gw{text-decoration:underline dotted var(--faint);text-underline-offset:4px;text-decoration-thickness:1px;cursor:pointer}
 .story .gw:hover{text-decoration-color:var(--text)}
@@ -593,7 +625,6 @@ button.gl-chip.sm{cursor:pointer}
 .gl-pop-o{display:inline-flex;align-items:center;gap:4px;font:500 11px/1 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
 .gl-pop-o i{width:18px;height:18px}
 @media (max-width:760px){
-  .gl-menu{display:inline-flex}
   .gl-body{grid-template-columns:minmax(0,1fr)}
   .gl-list{position:static;max-height:none}
   .gl-body.has-sel .gl-list{display:none}
@@ -603,3 +634,5 @@ button.gl-chip.sm{cursor:pointer}
   .gl-sense{padding:10px 12px 12px}
   .gl-tags{margin-left:0}
 }
+/* multi-character subject glyphs (Computer Science </>) fit the same round badges */
+.gx{font-family:var(--mono);font-size:.74em;font-weight:500;letter-spacing:-.08em;white-space:nowrap}

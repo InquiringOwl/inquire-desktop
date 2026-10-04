@@ -40,7 +40,7 @@ function stateOf(id){
 }
 
 /* ---------- app state + routing ---------- */
-const S = { view: "menu", subject: "mathematics", field: "arithmetic", topic: null, openGroups: store.get("groups", ["Foundations","Core Sequence"]), pan: {} };
+const S = { view: "menu", subject: "mathematics", field: "arithmetic", topic: null, gword: null, navMode: "fields", glScope: null, openGroups: store.get("groups", ["Foundations","Core Sequence"]), pan: {} };
 const app = $("#app");
 const viewEl = $("#view");
 let cleanup = [];
@@ -48,20 +48,26 @@ function clearView(){ cleanup.forEach(f => { try{ f(); }catch(e){} }); cleanup =
 
 function go(next, push = true){
   if (next.g) { Object.assign(G, next.g); next = { ...next }; delete next.g; }
+  if (!("gword" in next)) next = { ...next, gword: null };
   Object.assign(S, next);
+  if (S.gword) { if (S.view === "math" && GWORDS[S.gword]) S.navMode = "glossary"; else S.gword = null; }
   if (S.topic && NODE[S.topic]) S.field = fieldOf(S.topic);
   if (S.field !== "map" && DB.fields[S.field]) S.subject = subjOf(S.field);
   if (!SM[S.subject]) S.subject = "mathematics";
   render();
-  const tok = S.view === "glossary" ? gTok() : S.topic ? S.topic : (S.view === "math" ? (S.field === "map" ? "field-map" + (S.subject !== "mathematics" ? "-" + S.subject : "") : "field-" + S.field) : S.view);
-  if (push) { try { history.pushState({ ...next, view: S.view, subject: S.subject, field: S.field, topic: S.topic, ...(S.view === "glossary" ? { g: { sub: G.sub, word: G.word, field: G.field } } : {}) }, "", "#" + tok); } catch(e){} }
+  const tok = (S.view === "glossary" ? gTok() : S.topic ? S.topic : (S.view === "math" ? (S.field === "map" ? "field-map" + (S.subject !== "mathematics" ? "-" + S.subject : "") : "field-" + S.field) : S.view)) + (S.view === "math" && S.gword ? "~" + encodeURIComponent(S.gword) : "");
+  if (push) { try { history.pushState({ ...next, view: S.view, subject: S.subject, field: S.field, topic: S.topic, gword: S.gword, ...(S.view === "glossary" ? { g: { sub: G.sub, word: G.word, field: G.field } } : {}) }, "", "#" + tok); } catch(e){} }
   store.set("last", { view: S.view, subject: S.subject, field: S.field, topic: S.topic });
 }
 window.addEventListener("popstate", e => { if (e.state) go(e.state, false); });
 window.addEventListener("hashchange", () => { const s = fromHash(); if (s) go(s, false); });
-function fromHash(){
-  const t = (location.hash || "").slice(1);
+function fromHash(tok){
+  const t = tok != null ? tok : (location.hash || "").slice(1);
   if (!t) return null;
+  if (!t.startsWith("glossary") && t.includes("~")) {
+    const i = t.indexOf("~"); let w = null; try { w = decodeURIComponent(t.slice(i + 1)).toLowerCase(); } catch(e){}
+    const base = fromHash(t.slice(0, i)); return base && base.view === "math" ? { ...base, gword: w && GWORDS[w] ? w : null } : base;
+  }
   if (NODE[t]) return { view: "math", field: fieldOf(t), topic: t };
   if (t === "field-map" || t.startsWith("field-map-")) { const sub = t.slice(10) || "mathematics"; if (SM[sub]) return { view: "math", subject: sub, field: "map", topic: null }; }
   if (t.startsWith("field-")) { const f = t.slice(6); if (DB.fields[f]) return { view: "math", subject: subjOf(f), field: f, topic: null }; }
@@ -94,7 +100,8 @@ function crumbs(){
   if (S.view === "math") {
     parts.push([SM[S.subject].name, () => go({ view: "math", subject: S.subject, field: "map", topic: null })]);
     if (S.field !== "map") parts.push([DB.fields[S.field].name, () => go({ view: "math", topic: null })]);
-    if (S.topic) parts.push([T[S.topic] ? T[S.topic].title : S.topic, null]);
+    if (S.topic) parts.push([T[S.topic] ? T[S.topic].title : S.topic, S.gword ? () => go({ view: "math", topic: S.topic }) : null]);
+    if (S.gword && GWORDS[S.gword]) parts.push([GWORDS[S.gword][0].w, null]);
   }
   parts.forEach(([label, fn], i) => {
     if (i) c.appendChild(h("span", { class: "sep" + (i < parts.length - 2 ? " hide-s" : "") }, "›"));
@@ -127,10 +134,10 @@ function renderMenu(){
     <div class="verline" id="verline"></div></div>`;
   viewEl.appendChild(s);
   const slots = $("#slots", s);
-  if (window.codexDesktop) {
+  if (window.inquireDesktop) {
     const vl = $("#verline", s);
     vl.innerHTML = `<span>Inquire <span class="num">v${esc(DESK_VERSION || "")}</span></span><button type="button" class="btn-s" id="chk">Check for updates</button>`;
-    $("#chk", s).onclick = () => window.codexDesktop.checkForUpdates();
+    $("#chk", s).onclick = () => window.inquireDesktop.checkForUpdates();
   }
   const d = h("button", { type: "button", class: "slot big", onclick: () => go({ view: "dict", topic: null }) },
     `<span class="glyph">Ⅾ</span><span><h3>Dictionary</h3><p>Subjects broken into fields and topics, ordered as a path to mastery. Mathematics, Physics and English are open.</p></span><span class="tag">Online</span>`);
@@ -145,10 +152,11 @@ function renderMenu(){
 function renderDict(){
   const s = h("div", { class: "screen" });
   s.innerHTML = `<div class="screen-in">
-    <div class="hello"><p class="eyebrow">Dictionary</p><h1>Subjects</h1>
+    <div class="hello"><div class="back-row"><button type="button" class="btn-s" id="dback">◀ Menu</button></div><p class="eyebrow">Dictionary</p><h1>Subjects</h1>
     <p>Pick a subject to open its navigator. Fields appear on the left and the selected field's skill tree on the right.</p></div>
     <div class="subj-groups" id="subj"></div></div>`;
   viewEl.appendChild(s);
+  $("#dback", s).onclick = () => go({ view: "menu", topic: null });
   (DB.subjectGroups || [{ id: "all", name: "Subjects", line: "" }]).forEach(g => {
     const subs = DB.subjects.filter(x => (x.group || "all") === g.id);
     if (!subs.length) return;
@@ -171,37 +179,78 @@ function renderWork(){
   const main = h("section", { class: "main" });
   w.append(nav, main); viewEl.appendChild(w);
   buildNav(nav, w);
-  if (S.topic) renderTopic(main);
+  if (S.gword && GWORDS[S.gword]) renderWordPane(main);
+  else if (S.topic) renderTopic(main);
   else if (S.field === "map") renderFieldMap(main);
   else if (charted(S.field)) renderFieldTree(main, S.field);
   else renderDossier(main);
 }
 
 function buildNav(nav, w){
+  const gn = Object.keys(GWORDS).filter(k => GWORDS[k].some(e => e.subject === S.subject));
+  const glMode = S.navMode === "glossary";
+  // glossary scope: this subject's words (default) or every subject's
+  const scope = () => (S.glScope === "all" || !gn.length) ? "all" : S.subject;
   nav.innerHTML = `<div class="nav-top">
       <div class="nav-title"><span class="glyph">${SM[S.subject].glyph}</span><div><h2>${esc(SM[S.subject].name)}</h2><small>${subjFields(S.subject).length} fields · ${subjTrees(S.subject).length} charted</small></div></div>
       <label class="search"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="none" stroke="#8B97AE" stroke-width="1.4"/><path d="M9.5 9.5 13 13" stroke="#8B97AE" stroke-width="1.4"/></svg>
-      <input id="navq" type="text" placeholder="Search fields and topics" aria-label="Search fields and topics"></label>
+      <input id="navq" type="text" placeholder="${glMode ? "Search words and definitions" : "Search fields and topics"}" aria-label="${glMode ? "Search the glossary" : "Search fields and topics"}"></label>
     </div><div class="nav-list" id="navlist"></div>
-    <div class="nav-foot">Gold nodes are ready to study. Green nodes are mastered. Mark a topic mastered from its page.</div>`;
+    <div class="nav-foot">${glMode ? "Pick a word to read it here. The full glossary has field, letter and mastered filters." : "Gold nodes are ready to study. Green nodes are mastered. Mark a topic mastered from its page."}</div>`;
   const list = $("#navlist", nav);
   const q = $("#navq", nav);
+  const fromHere = () => ({ label: SM[S.subject].name + (S.topic && T[S.topic] ? " · " + T[S.topic].title : S.field !== "map" && DB.fields[S.field] ? " · " + DB.fields[S.field].name : ""), subject: S.subject, state: { view: "math", subject: S.subject, field: S.field, topic: S.topic } });
+  const setMode = m => { S.navMode = m; buildNav(nav, w); };
+  function tabs(){
+    // Field map and Glossary switch what the sidebar lists
+    list.appendChild(h("button", { type: "button", class: "item" + (!glMode && S.field === "map" && !S.topic && !S.gword ? " sel" : ""), onclick: () => {
+        if (glMode) { setMode("fields"); if (S.gword) go({ view: "math" }); return; }
+        w.classList.remove("navopen"); go({ view: "math", subject: S.subject, field: "map", topic: null }); } },
+      `<span class="ic">⌗</span><span style="min-width:0"><span class="nm">Field map</span><span class="lv">${glMode ? "Back to fields and topics" : esc(SM[S.subject].mapLine)}</span></span><span class="st"></span>`));
+    list.appendChild(h("button", { type: "button", class: "item gl-nav" + (glMode ? " sel" : ""), "aria-pressed": String(glMode), onclick: () => { if (!glMode) setMode("glossary"); } },
+      `<span class="ic">Aa</span><span style="min-width:0"><span class="nm">Glossary</span><span class="lv">${gn.length ? `${gn.length} ${esc(SM[S.subject].name)} word${gn.length === 1 ? "" : "s"}` : "Words from every subject"}</span></span><span class="st"></span>`));
+  }
+  function buildWords(){
+    const term = q.value.trim().toLowerCase();
+    list.innerHTML = "";
+    if (!term) tabs();
+    const sc = scope();
+    const tools = h("div", { class: "nav-gl-tools" });
+    const all = Object.keys(GWORDS).length;
+    tools.innerHTML = (gn.length ? [[S.subject, SM[S.subject].name, gGlyph(S.subject), gColour(S.subject), gn.length], ["all", "All subjects", "◎", "var(--line-2)", all]]
+      .map(([id, nm, gl, c, n]) => `<button type="button" class="gl-chip sm" data-scope="${id}" aria-pressed="${sc === id}" style="--gc:${c}"><span class="g">${gl}</span>${esc(nm)}<span class="n">${n}</span></button>`).join("")
+      : `<span class="nav-gl-none">No ${esc(SM[S.subject].name)} words yet. Showing every subject.</span>`)
+      + `<button type="button" class="btn-s nav-gl-full" data-full>Full glossary ↗</button>`;
+    tools.addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b) return;
+      if (b.dataset.scope) { S.glScope = b.dataset.scope === "all" ? "all" : null; buildWords(); if (S.gword) render(); return; }
+      if (b.dataset.full != null) { w.classList.remove("navopen"); openGlossary({ from: fromHere(), sub: sc, word: S.gword && GWORDS[S.gword].some(e => sc === "all" || e.subject === sc) ? S.gword : null }); }
+    });
+    list.appendChild(tools);
+    const vis = Object.keys(GWORDS).map(k => { const blocks = GWORDS[k].filter(e => sc === "all" || e.subject === sc); return { k, blocks, score: blocks.length ? gScore(k, blocks, term) : 0 }; })
+      .filter(x => x.score > 0).sort((a, b) => term ? b.score - a.score || a.k.localeCompare(b.k) : a.k.localeCompare(b.k));
+    if (!vis.length) { list.appendChild(h("div", { class: "gl-empty" }, term ? "No words match." : "No words yet.")); return; }
+    let letter = null, body = null;
+    vis.forEach(({ k, blocks }) => {
+      const l = term ? "" : k[0].toUpperCase();
+      if (!body || l !== letter) { letter = l; const g = h("div", { class: "grp open nav-gl-grp" }); if (l) g.appendChild(h("div", { class: "grp-h nav-gl-l" }, esc(l))); body = h("div", { class: "grp-b" }); g.appendChild(body); list.appendChild(g); }
+      const subs = [...new Set(blocks.map(e => e.subject))];
+      body.appendChild(h("button", { type: "button", class: "item sub nav-gw" + (S.gword === k ? " sel" : ""), "data-gword": k, onclick: () => { w.classList.remove("navopen"); go({ view: "math", gword: k }); } },
+        `<span class="ic" style="--gc:${gColour(subs[0])}">${gGlyph(subs[0])}</span><span class="nm">${esc(GWORDS[k][0].w)}</span><span class="st">${subs.length > 1 ? subs.slice(1).map(x => `<i style="--gc:${gColour(x)}" title="${esc(gName(x))}">${gGlyph(x)}</i>`).join("") : ""}</span>`));
+    });
+    const sel = list.querySelector(".item.sel.nav-gw");
+    if (sel && !term) requestAnimationFrame(() => { const r = sel.getBoundingClientRect(), lr = list.getBoundingClientRect(); if (r.top < lr.top || r.bottom > lr.bottom) sel.scrollIntoView({ block: "center" }); });
+  }
   function build(){
     const term = q.value.trim().toLowerCase();
     list.innerHTML = "";
-    const mapItem = h("button", { type: "button", class: "item" + (S.field === "map" && !S.topic ? " sel" : ""), onclick: () => { w.classList.remove("navopen"); go({ view: "math", subject: S.subject, field: "map", topic: null }); } },
-      `<span class="ic">⌗</span><span style="min-width:0"><span class="nm">Field map</span><span class="lv">${esc(SM[S.subject].mapLine)}</span></span><span class="st"></span>`);
-    if (!term) list.appendChild(mapItem);
-    const gn = Object.keys(GWORDS).filter(k => GWORDS[k].some(e => e.subject === S.subject));
-    const fromHere = () => ({ label: SM[S.subject].name + (S.topic && T[S.topic] ? " · " + T[S.topic].title : S.field !== "map" && DB.fields[S.field] ? " · " + DB.fields[S.field].name : ""), subject: S.subject, state: { view: "math", subject: S.subject, field: S.field, topic: S.topic } });
-    if (!term) list.appendChild(h("button", { type: "button", class: "item gl-nav", onclick: () => { w.classList.remove("navopen"); openGlossary({ from: fromHere(), sub: gn.length ? S.subject : "all", word: null }); } },
-      `<span class="ic">Aa</span><span style="min-width:0"><span class="nm">Glossary</span><span class="lv">${gn.length ? `${gn.length} ${esc(SM[S.subject].name)} words · all subjects one tap away` : "Words from every subject"}</span></span><span class="st"></span>`));
+    if (!term) tabs();
     if (term) {
       const hits = gn.filter(k => k.includes(term) || GWORDS[k].some(e => e.subject === S.subject && (e.forms || []).some(f => f.toLowerCase().includes(term)))).slice(0, 6);
       if (hits.length) {
         const grp = h("div", { class: "grp open" }), body = h("div", { class: "grp-b" });
         grp.appendChild(h("div", { class: "grp-h" }, `<span class="car"></span>Glossary<span class="n">${hits.length}</span>`));
-        hits.forEach(k => body.appendChild(h("button", { type: "button", class: "item sub", onclick: () => { w.classList.remove("navopen"); openGlossary({ from: fromHere(), sub: S.subject, word: k }); } },
+        hits.forEach(k => body.appendChild(h("button", { type: "button", class: "item sub", onclick: () => { w.classList.remove("navopen"); S.navMode = "glossary"; go({ view: "math", gword: k }); } },
           `<span class="ic">Aa</span><span class="nm">${esc(GWORDS[k][0].w)}</span><span class="st"></span>`)));
         grp.appendChild(body); list.appendChild(grp);
       }
@@ -245,8 +294,8 @@ function buildNav(nav, w){
     const sel = list.querySelector(".item.sel");
     if (sel && !term) requestAnimationFrame(() => { const r = sel.getBoundingClientRect(), lr = list.getBoundingClientRect(); if (r.top < lr.top || r.bottom > lr.bottom) sel.scrollIntoView({ block: "center" }); });
   }
-  q.addEventListener("input", build);
-  build();
+  q.addEventListener("input", glMode ? buildWords : build);
+  (glMode ? buildWords : build)();
 }
 
 /* ---------- generic pannable tree (Civ-style) ---------- */
@@ -362,10 +411,11 @@ function renderFieldTree(main, f){
   const head = h("div", { class: "tree-head" });
   const done = doneIn(f);
   const hrs = FN.reduce((s, n) => s + (T[n.id]?.hours || 0), 0);
-  head.innerHTML = `<button type="button" class="btn-s navtoggle" id="navtoggle2">☰ Fields</button><div><h2>${esc(F.name)}</h2><div class="sub">${FN.length ? `${FN.length} topic${FN.length === 1 ? "" : "s"}${TR.planned && TR.planned.length ? ` written, ${TR.planned.length} planned` : ""} · about ${hrs} study hours · ${done} mastered` : `${(TR.planned || []).length} planned topics · the tree is mapped and the pages are being written`}</div></div>
+  head.innerHTML = `<button type="button" class="btn-s navtoggle" id="navtoggle2">☰ Fields</button><button type="button" class="btn-s" id="tback">◀ ${esc(SM[subjOf(f)].name)} field map</button><div><h2>${esc(F.name)}</h2><div class="sub">${FN.length ? `${FN.length} topic${FN.length === 1 ? "" : "s"}${TR.planned && TR.planned.length ? ` written, ${TR.planned.length} planned` : ""} · about ${hrs} study hours · ${done} mastered` : `${(TR.planned || []).length} planned topics · the tree is mapped and the pages are being written`}</div></div>
    <div class="legend-chips"><span><i class="lg-m"></i>Mastered</span><span><i class="lg-a"></i>Ready</span><span><i class="lg-l"></i>Locked</span>${TR.planned && TR.planned.length ? '<span><i class="lg-p"></i>Planned</span>' : ""}<span><i class="lg-s"></i>Last opened</span></div>`;
   main.appendChild(head);
   $("#navtoggle2", head).onclick = () => main.parentElement.classList.toggle("navopen");
+  $("#tback", head).onclick = () => go({ view: "math", subject: subjOf(f), field: "map", topic: null });
   const inTree = new Set(FN.map(n => n.id));
   // Planned nodes (TR.planned) show the rest of a partly written tree, dashed and not openable.
   const PL = TR.planned || [], PLAN = Object.fromEntries(PL.map(n => [n.id, n]));
@@ -393,10 +443,11 @@ function renderFieldTree(main, f){
 function renderFieldMap(main){
   const head = h("div", { class: "tree-head" });
   const sm = SM[S.subject];
-  head.innerHTML = `<button type="button" class="btn-s navtoggle" id="navtoggle2">☰ Fields</button><div><h2>${esc(sm.name)} field map</h2><div class="sub">${esc(sm.mapSub)}</div></div>
+  head.innerHTML = `<button type="button" class="btn-s navtoggle" id="navtoggle2">☰ Fields</button><button type="button" class="btn-s" id="mback">◀ Subjects</button><div><h2>${esc(sm.name)} field map</h2><div class="sub">${esc(sm.mapSub)}</div></div>
     <div class="legend-chips"><span><i class="lg-a"></i>Charted</span><span><i class="lg-l"></i>Planned</span></div>`;
   main.appendChild(head);
   $("#navtoggle2", head).onclick = () => main.parentElement.classList.toggle("navopen");
+  $("#mback", head).onclick = () => go({ view: "dict", topic: null });
   const nodes = subjFields(S.subject).map(id => [id, DB.fields[id]]).map(([id, f]) => ({ id, col: f.col, row: f.row, pre: f.pre, icon: f.icon, label: f.name, right: "", chips: [f.level.split("·")[0].trim()] }));
   buildTree(main, {
     nodes, eras: sm.eras, key: "map-" + S.subject, title: sm.name + " field map",
@@ -412,7 +463,7 @@ function renderDossier(main){
   const next = Object.entries(DB.fields).filter(([k, v]) => v.pre.includes(id)).map(([k]) => k);
   const d = h("div", { class: "dossier" });
   d.innerHTML = `<div class="dossier-in">
-    <div><button type="button" class="btn-s navtoggle" id="navtoggle2" style="margin-bottom:12px">☰ Fields</button><p class="eyebrow">${esc(f.level)}</p><h1>${esc(f.name)}</h1><p class="lede">${esc(f.blurb)}</p>
+    <div><div class="back-row"><button type="button" class="btn-s navtoggle" id="navtoggle2">☰ Fields</button><button type="button" class="btn-s" id="fback">◀ ${esc(SM[subjOf(id)].name)} field map</button></div><p class="eyebrow">${esc(f.level)}</p><h1>${esc(f.name)}</h1><p class="lede">${esc(f.blurb)}</p>
       <div class="meta"><span class="pill l">Skill tree not yet charted</span>${subjTrees(subjOf(id)).length ? `<span class="pill a">${subjTrees(subjOf(id)).map(k => esc(DB.fields[k].name)).join(", ")} charted</span>` : ""}</div></div>
     <div class="dgrid">
       <div class="win"><div class="win-h"><span class="dot"></span>Core topics</div><div class="in"><ol>${f.topics.map(t => `<li>${esc(t)}</li>`).join("")}</ol></div></div>
@@ -427,6 +478,7 @@ function renderDossier(main){
   main.appendChild(d);
   d.querySelectorAll("[data-f]").forEach(b => b.onclick = () => go({ view: "math", field: b.dataset.f, topic: null }));
   $("#navtoggle2", d).onclick = () => main.parentElement.classList.toggle("navopen");
+  $("#fback", d).onclick = () => go({ view: "math", subject: subjOf(id), field: "map", topic: null });
 }
 
 /* ---------- story panels (English topics) ---------- */
@@ -626,19 +678,42 @@ function gSense(e, headIpa){
     ${gNodeLink(e) ? `<div class="gl-links">${gNodeLink(e)}</div>` : ""}
   </article>`;
 }
-function gEntry(k){
-  const blocks = gBlocks(k, G.sub !== "all" ? G.sub : (G.ret && G.ret.subject));
+function gEntry(k, sub = G.sub, pref = sub !== "all" ? sub : (G.ret && G.ret.subject)){
+  const blocks = gBlocks(k, pref);
   if (!blocks.length) return `<div class="gl-empty">Pick a word from the list.</div>`;
   const head = blocks[0], subs = [...new Set(blocks.map(e => e.subject))];
   const see = [...new Set(blocks.flatMap(e => e.see || []))].filter(w => w.toLowerCase() !== k);
-  const hidden = G.sub !== "all" ? GWORDS[k].filter(e => e.subject !== G.sub).length : 0;
-  const shown = G.sub !== "all" ? blocks.filter(e => e.subject === G.sub) : blocks;
+  const hidden = sub !== "all" ? GWORDS[k].filter(e => e.subject !== sub).length : 0;
+  const shown = sub !== "all" ? blocks.filter(e => e.subject === sub) : blocks;
   return `<button type="button" class="btn-s gl-back" id="glback">◀ All words</button>
     <header class="gl-head"><h2>${esc(head.w)}</h2><div class="gl-say"><span class="ipa">${esc(head.ipa)}</span>${head.syl ? `<span class="syl">${esc(head.syl)}</span>` : ""}</div>
       <div class="gl-in">${subs.map(s => `<span class="gl-chip sm" style="--gc:${gColour(s)}"><span class="g">${gGlyph(s)}</span>${esc(gName(s))}</span>`).join("")}</div></header>
     ${shown.map(e => gSense(e, head.ipa)).join("")}
     ${hidden ? `<button type="button" class="btn-s gl-more" id="glall">Show ${hidden} more sense${hidden === 1 ? "" : "s"} from other subjects</button>` : ""}
     ${see.length ? `<div class="gl-rel gl-see"><span class="lb">See also</span>${see.map(w => `<button type="button" class="gl-a" data-gword="${esc(w.toLowerCase())}">${esc(w)}</button>`).join("")}</div>` : ""}`;
+}
+// a glossary word read inside a subject (sidebar Glossary list), beside its field map, tree or topic
+function renderWordPane(main){
+  const k = S.gword, gn = GWORDS[k].some(e => e.subject === S.subject);
+  const sub = S.glScope === "all" || !gn ? "all" : S.subject;
+  const under = S.topic && T[S.topic] ? T[S.topic].title : S.field !== "map" && DB.fields[S.field] ? DB.fields[S.field].name : SM[S.subject].name + " field map";
+  const head = h("div", { class: "tree-head" });
+  head.innerHTML = `<button type="button" class="btn-s navtoggle" id="navtoggle2">☰ Words</button><div><h2>Glossary</h2><div class="sub">${esc(sub === "all" ? "Every subject" : SM[S.subject].name)} · ${esc(GWORDS[k][0].w)}</div></div>
+    <div class="gl-pane-act"><button type="button" class="btn-s" id="wpback">◀ ${esc(under)}</button><button type="button" class="btn-s" id="wpfull">Full glossary ↗</button></div>`;
+  main.appendChild(head);
+  $("#navtoggle2", head).onclick = () => main.parentElement.classList.toggle("navopen");
+  const pane = h("div", { class: "gl-pane" });
+  const entry = h("section", { class: "gl-entry win", "aria-live": "polite" }, gEntry(k, sub, S.subject));
+  pane.appendChild(entry); main.appendChild(pane);
+  $("#wpback", head).onclick = () => go({ view: "math" });
+  $("#wpfull", head).onclick = () => openGlossary({ from: { label: SM[S.subject].name + " · " + under, subject: S.subject, state: { view: "math", subject: S.subject, field: S.field, topic: S.topic } }, sub, word: k });
+  entry.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.id === "glall") { S.glScope = "all"; render(); return; }
+    if (b.dataset.gword != null) { go({ view: "math", gword: b.dataset.gword }); return; }
+    if (b.dataset.t) { go({ view: "math", field: fieldOf(b.dataset.t), topic: b.dataset.t }); return; }
+    if (b.dataset.f) { go({ view: "math", field: b.dataset.f, topic: null }); return; }
+  });
 }
 function renderGlossary(){
   const subs = gSubjects();
@@ -737,8 +812,8 @@ function glossaryPopover(root, subject){
 
 /* ---------- desktop shell (only inside the Inquire app) ---------- */
 let DESK_VERSION = "";
-if (window.codexDesktop) {
-  const D = window.codexDesktop;
+if (window.inquireDesktop) {
+  const D = window.inquireDesktop;
   document.documentElement.classList.add("desktop", "os-" + D.platform);
   D.version().then(v => { DESK_VERSION = v; const el = document.querySelector("#verline .num"); if (el) el.textContent = "v" + v; });
   const bar = $("#upd");
@@ -771,6 +846,7 @@ if (S.view === "math" && S.field !== "map" && !DB.fields[S.field]) S.field = "ar
 if (S.field !== "map" && DB.fields[S.field]) S.subject = subjOf(S.field);
 if (!SM[S.subject]) S.subject = "mathematics";
 if (S.topic && !NODE[S.topic]) S.topic = null;
-try { history.replaceState({ view: S.view, field: S.field, topic: S.topic }, ""); } catch(e){}
+if (S.gword) S.navMode = "glossary";
+try { history.replaceState({ view: S.view, field: S.field, topic: S.topic, gword: S.gword }, ""); } catch(e){}
 render();
 })();

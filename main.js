@@ -1,5 +1,5 @@
 // Inquire desktop shell: serves the app from a private codex:// scheme and keeps itself up to date.
-// Source code, installers and update files all live in the public repo InquiringOwl/codex-desktop.
+// Source code, installers and update files all live in the public repo InquiringOwl/inquire-desktop.
 const { app, BrowserWindow, protocol, net, ipcMain, shell, Menu, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -8,7 +8,7 @@ const log = require('electron-log');
 const { MacUpdater } = require('./updater-mac');
 
 const OWNER = 'InquiringOwl';
-const RELEASES_REPO = 'codex-desktop';
+const RELEASES_REPO = 'inquire-desktop';
 const APP_DIR = path.join(__dirname, 'app');
 const CHECK_EVERY_MS = 4 * 60 * 60 * 1000; // every 4 hours while Inquire is open
 const IS_MAC = process.platform === 'darwin';
