@@ -70,3 +70,48 @@
   .inqi-world,.inqi-logo,.inqi-form{transition-duration:.01s!important;transition-delay:0s!important}
   .inqi-logo{filter:none;transform:none}
 }
+
+/* sign-in footer links (Settings, EULA) and the social corner */
+.inqi-links{display:flex;justify-content:space-between;gap:12px;margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line)}
+.inqi-lnk{background:none;border:0;padding:2px 0;cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  font:600 11px/1 var(--ui);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.inqi-lnk:hover{color:var(--cyan)}
+.inqi-lnk svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.inqi-note .inqi-lnk{font:inherit;letter-spacing:0;text-transform:none;color:var(--muted);text-decoration:underline;text-underline-offset:2px}
+.inqi-corner{position:absolute;left:18px;bottom:16px;display:flex;gap:8px;opacity:0;transition:opacity 1.2s ease .3s}
+.inqi.is-form .inqi-corner{opacity:1}
+.inqi-soc{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line-2);color:var(--muted);background:rgba(7,10,16,.55);
+  clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px));transition:color .15s,border-color .15s,box-shadow .15s}
+a.inqi-soc:hover{color:#fff;border-color:var(--cyan);box-shadow:0 0 14px var(--glow)}
+.inqi-soc svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.inqi-soc.off{opacity:.38;cursor:default}
+@media (max-width:520px){.inqi-corner{left:12px;bottom:10px}.inqi-soc{width:30px;height:30px}}
+
+/* unlock moment after sign-in (intro.js unlock()) */
+.inqi-form{position:relative}
+.inqi-form>*:not(.inqi-unlock){transition:opacity .45s ease}
+.inqi-form.is-unlocking>*:not(.inqi-unlock){opacity:0;pointer-events:none}
+.inqi-unlock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;pointer-events:none;opacity:0;visibility:hidden}
+.inqi-form.is-unlocking .inqi-unlock{opacity:1;visibility:visible;transition:opacity .45s ease .3s}
+.inqi-lock{width:104px;height:auto;overflow:visible;transform:scale(.9);opacity:0;transition:transform .55s cubic-bezier(.2,.8,.2,1) .3s,opacity .45s ease .3s}
+.inqi-form.is-unlocking .inqi-lock{transform:none;opacity:1}
+.inqi-ring{fill:none;stroke:var(--cyan);stroke-width:1.5;opacity:0;transform-origin:60px 84px;transform:scale(.7)}
+.inqi-shackle{fill:none;stroke:url(#inqi-lk);stroke-width:9;stroke-linecap:round;transform-origin:86px 66px}
+.inqi-body{fill:url(#inqi-lk);stroke:rgba(255,255,255,.5);stroke-width:1}
+.inqi-hole{fill:#0A1220;transition:fill .4s ease}
+.inqi-glint{stroke:rgba(255,255,255,.8);stroke-width:1.5;stroke-linecap:round;opacity:.5}
+/* the key turns (small shake), then the shackle springs up and swings open */
+.inqi-form.is-unlocking .inqi-lock{animation:inqi-turn .3s ease-in-out .85s 1}
+.inqi-form.is-open .inqi-shackle{animation:inqi-open .55s cubic-bezier(.3,1.5,.5,1) forwards}
+.inqi-form.is-open .inqi-hole{fill:var(--cyan)}
+.inqi-form.is-open .inqi-ring{animation:inqi-ring .9s ease-out forwards}
+.inqi-form.is-open .inqi-lock{filter:drop-shadow(0 0 14px var(--glow))}
+@keyframes inqi-turn{25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}
+@keyframes inqi-open{0%{transform:none}55%{transform:translateY(-16px)}100%{transform:translateY(-14px) rotate(28deg)}}
+@keyframes inqi-ring{0%{opacity:.9;transform:scale(.7)}100%{opacity:0;transform:scale(1.35)}}
+.inqi-welcome{margin:0;font:400 24px/1.2 var(--math);color:var(--text);opacity:0;transform:translateY(6px);transition:opacity .6s ease,transform .6s ease;text-align:center;padding:0 12px}
+.inqi-welcome b{font-weight:600;color:#fff;text-shadow:0 0 14px var(--glow)}
+.inqi-form.is-open .inqi-welcome{opacity:1;transform:none;transition-delay:.15s}
+.inqi-msg.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:0}
+@media (prefers-reduced-motion:reduce){.inqi-form.is-open .inqi-shackle{animation:none;transform:translateY(-14px) rotate(28deg)}.inqi-form.is-unlocking .inqi-lock{animation:none}}
+:root[data-reduce-motion] .inqi-form.is-open .inqi-shackle{animation:none;transform:translateY(-14px) rotate(28deg)}

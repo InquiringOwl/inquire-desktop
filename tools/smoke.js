@@ -1,5 +1,5 @@
 // Smoke test: opens the built page in headless Chromium and visits every screen:
-// menu, dictionary, each subject's field map, every field page (tree or planned dossier), and every topic page.
+// menu, My notes, dictionary, each subject's field map, every field page (tree or planned dossier), and every topic page.
 // On each topic page it checks the dossier and lab rendered, clicks the first two
 // lab buttons, and fails on any JavaScript error or console error/warning.
 // Run: node tools/smoke.js          (needs playwright; exit code 1 on any failure)
@@ -27,7 +27,7 @@ const { desktop, dataFiles, R } = require('./build-web.js');
   const topics = fields.flatMap(f => DB.trees[f].nodes.map(n => n.id));
   const maps = Object.keys(DB.subjectMaps || { mathematics: 1 }).map(sub => sub === 'mathematics' ? 'field-map' : 'field-map-' + sub);
   const planned = Object.keys(DB.fields).filter(f => !DB.trees[f]);
-  let routes = ['menu', 'dict', 'glossary', 'glossary-english', 'glossary-music-theory~root', 'glossary~present', 'field-map~function', 'field-map-english~root', 'eng-parts-of-speech~present', ...maps, ...fields.map(f => 'field-' + f), ...planned.map(f => 'field-' + f), ...topics];
+  let routes = ['menu', 'notes', 'dict', 'glossary', 'glossary-english', 'glossary-music-theory~root', 'glossary~present', 'field-map~function', 'field-map-english~root', 'eng-parts-of-speech~present', ...maps, ...fields.map(f => 'field-' + f), ...planned.map(f => 'field-' + f), ...topics];
   if (process.env.ONLY) routes = process.env.ONLY.split(',').map(s => s.trim()).filter(Boolean);
 
   const browser = await chromium.launch();
@@ -59,6 +59,31 @@ const { desktop, dataFiles, R } = require('./build-web.js');
         await p.waitForTimeout(150);
       }
       for (const e of [...new Set(errs)]) failures.push(`${label} #${r}: ${e}`);
+      process.stdout.write(errs.length ? 'x' : '.');
+    }
+    // Windows that are not routes: the settings window (every tab), the Assist dock (both tabs, a note made from a
+    // topic page, which then shows on My notes) and the menu's display box arrows. Skipped when ONLY names screens.
+    if (!process.env.ONLY) {
+      errs = [];
+      try {
+        await p.evaluate(() => { location.hash = 'pa-variables'; }); await p.waitForTimeout(300);
+        for (const t of ['look', 'display', 'account', 'data', 'about']) { await p.evaluate(t => InquireSettings.open(t), t); await p.waitForTimeout(120); }
+        await p.evaluate(() => InquireSettings.openDoc('eula')); await p.waitForTimeout(120);
+        await p.evaluate(() => InquireSettings.close());
+        await p.click('.dk-tab'); await p.waitForTimeout(150);
+        await p.fill('.dk-ask textarea', 'test'); await p.click('.dk-ask button'); await p.waitForTimeout(200);
+        await p.click('.dk-tabs [data-t=notes]'); await p.click('.dk-pane [data-a=gen]'); await p.waitForTimeout(500);
+        const body = await p.$eval('.dk-nbody', el => el.value.length);
+        if (body < 100) errs.push('note from this page came out empty');
+        await p.click('.dk-x');
+        await p.evaluate(() => { location.hash = 'notes'; }); await p.waitForTimeout(300);
+        if (!(await p.$('.nb-it'))) errs.push('My notes does not list the new note');
+        await p.evaluate(() => { location.hash = 'menu'; }); await p.waitForTimeout(300);
+        await p.click('.mx-arrow[data-d="1"]'); await p.waitForTimeout(200);
+        if (!(await p.$('.mnote'))) errs.push('menu notes strip is empty');
+        await p.evaluate(() => { localStorage.clear(); });
+      } catch (e) { errs.push('windows: ' + e.message.split('\n')[0]); }
+      for (const e of [...new Set(errs)]) failures.push(`${label} windows: ${e}`);
       process.stdout.write(errs.length ? 'x' : '.');
     }
     process.stdout.write(' done\n');

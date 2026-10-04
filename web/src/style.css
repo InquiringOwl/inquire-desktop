@@ -7,6 +7,10 @@
   --amber:#F2B84B; --cyan:#5CC8E0; --pink:#F07CA0; --violet:#B49BFF; --green:#7BD88F; --magenta:#D97AE6; --lime:#B5D65A; --red:#E5675B;
   --g-stem:#5CC8E0; --g-hum:#D97AE6; --g-soc:#B5D65A; /* subject-group colours: STEM cyan (as its Subjects heading), Arts & Humanities magenta, Social Sciences lime */
   --glow:rgba(92,200,224,.35);
+  /* theme surfaces (Settings → Appearance rewrites these; defaults = "Capsuleer") */
+  --tint-1:rgba(92,200,224,.10); --tint-2:rgba(180,155,255,.08); --chrome-1:#0F1624; --chrome-2:#0A0F18;
+  --win-1:rgba(22,32,51,.92); --win-2:rgba(13,19,31,.94); --slot-1:rgba(27,39,64,.85); --slot-2:rgba(14,21,34,.9);
+  --slot-h1:rgba(35,55,86,.9); --slot-h2:rgba(14,24,40,.95); --wash:rgba(11,16,25,.7); --sky:#101A2C; --stage-sky:#16203A; --frame:var(--cyan); --blur:0px;
   --math:"STIX Two Text","Cambria Math",Cambria,Georgia,serif;
   --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
@@ -45,11 +49,11 @@ table.proof td:first-child{width:55%}
 /* ---------- app frame ---------- */
 #app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr);grid-template-columns:minmax(0,1fr);
   background:
-   radial-gradient(1200px 600px at 78% -10%, rgba(92,200,224,.10), transparent 60%),
-   radial-gradient(900px 700px at -10% 110%, rgba(180,155,255,.08), transparent 60%),
+   radial-gradient(1200px 600px at 78% -10%, var(--tint-1), transparent 60%),
+   radial-gradient(900px 700px at -10% 110%, var(--tint-2), transparent 60%),
    var(--void)}
 .topbar{display:flex;align-items:center;gap:16px;padding:8px 16px;padding-top:calc(8px + env(safe-area-inset-top,0px));
-  border-bottom:1px solid var(--line);background:linear-gradient(180deg,#0F1624,#0A0F18);min-height:44px}
+  border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--chrome-1),var(--chrome-2));min-height:44px;backdrop-filter:blur(var(--blur))}
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer;background:none;border:0;padding:0}
 .brand-mark{width:26px;height:26px;border:1px solid var(--cyan);display:grid;place-items:center;font:600 14px/1 var(--math);color:var(--cyan);
   clip-path:polygon(0 0,80% 0,100% 20%,100% 100%,20% 100%,0 80%);background:rgba(92,200,224,.08)}
@@ -67,12 +71,12 @@ table.proof td:first-child{width:55%}
 .view{min-height:0;position:relative}
 
 /* EVE window panel */
-.win{background:linear-gradient(180deg,rgba(22,32,51,.92),rgba(13,19,31,.94));border:1px solid var(--line);position:relative}
-.win::before{content:"";position:absolute;left:-1px;top:-1px;width:14px;height:14px;border-left:2px solid var(--cyan);border-top:2px solid var(--cyan);opacity:.7;pointer-events:none}
-.win::after{content:"";position:absolute;right:-1px;bottom:-1px;width:14px;height:14px;border-right:2px solid var(--cyan);border-bottom:2px solid var(--cyan);opacity:.35;pointer-events:none}
+.win{background:linear-gradient(180deg,var(--win-1),var(--win-2));border:1px solid var(--line);position:relative;backdrop-filter:blur(var(--blur))}
+.win::before{content:"";position:absolute;left:-1px;top:-1px;width:14px;height:14px;border-left:2px solid var(--frame);border-top:2px solid var(--frame);opacity:.7;pointer-events:none}
+.win::after{content:"";position:absolute;right:-1px;bottom:-1px;width:14px;height:14px;border-right:2px solid var(--frame);border-bottom:2px solid var(--frame);opacity:.35;pointer-events:none}
 .win-h{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.04),transparent);
   font:600 12px/1 var(--ui);letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
-.win-h .dot{width:6px;height:6px;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.win-h .dot{width:6px;height:6px;background:var(--frame);box-shadow:0 0 8px var(--frame)}
 .eyebrow{font:500 12px/1 var(--ui);letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
 
 /* ---------- menu screens ---------- */
@@ -83,8 +87,8 @@ table.proof td:first-child{width:55%}
 .slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
 .subj-group .slots{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
 .slot{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:18px;min-height:112px;
-  background:linear-gradient(180deg,rgba(27,39,64,.85),rgba(14,21,34,.9));border:1px solid var(--line-2);position:relative;transition:border-color .2s,background .2s}
-.slot:hover{border-color:var(--cyan);background:linear-gradient(180deg,rgba(35,55,86,.9),rgba(14,24,40,.95))}
+  background:linear-gradient(180deg,var(--slot-1),var(--slot-2));border:1px solid var(--line-2);position:relative;backdrop-filter:blur(var(--blur));transition:border-color .2s,background .2s}
+.slot:hover{border-color:var(--cyan);background:linear-gradient(180deg,var(--slot-h1),var(--slot-h2))}
 .slot:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 .slot .glyph{width:56px;height:56px;display:grid;place-items:center;font:400 28px/1 var(--math);color:var(--cyan);border:1px solid var(--line-2);border-radius:50%;
   background:radial-gradient(circle at 35% 30%,rgba(92,200,224,.25),rgba(11,16,25,.8) 70%)}
@@ -92,14 +96,14 @@ table.proof td:first-child{width:55%}
 .slot p{margin:4px 0 0;color:var(--muted);font-size:13px;line-height:1.45}
 .slot .tag{position:absolute;right:10px;bottom:8px;font:500 10px/1 var(--ui);letter-spacing:.18em;text-transform:uppercase;color:var(--green)}
 .slot.locked{cursor:default;opacity:.5;border-style:dashed}
-.slot.locked:hover{border-color:var(--line-2);background:linear-gradient(180deg,rgba(27,39,64,.85),rgba(14,21,34,.9))}
+.slot.locked:hover{border-color:var(--line-2);background:linear-gradient(180deg,var(--slot-1),var(--slot-2))}
 .slot.locked .glyph{color:var(--faint)}
 .slot.locked .tag{color:var(--faint)}
 .slot.big{min-height:150px}
 
 /* ---------- workspace (sidebar + main) ---------- */
 .work{height:100%;display:grid;grid-template-columns:288px minmax(0,1fr);min-height:0}
-.nav{min-height:0;display:flex;flex-direction:column;border-right:1px solid var(--line);background:linear-gradient(180deg,#0E1522,#0A0F18)}
+.nav{min-height:0;display:flex;flex-direction:column;border-right:1px solid var(--line);background:linear-gradient(180deg,var(--chrome-1),var(--chrome-2));backdrop-filter:blur(var(--blur))}
 .nav-top{padding:12px;border-bottom:1px solid var(--line);display:grid;gap:10px}
 .nav-title{display:flex;align-items:center;gap:10px}
 .nav-title .glyph{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line-2);border-radius:50%;font:400 18px/1 var(--math);color:var(--cyan)}
@@ -141,7 +145,7 @@ table.proof td:first-child{width:55%}
 .main{min-width:0;min-height:0;position:relative;display:flex;flex-direction:column}
 
 /* ---------- tree ---------- */
-.tree-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;padding:10px 16px;border-bottom:1px solid var(--line);background:rgba(11,16,25,.7)}
+.tree-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--wash)}
 .tree-head h2{margin:0;font:400 24px/1.1 var(--math)}
 .tree-head .sub{color:var(--muted);font-size:13px}
 .legend-chips{display:flex;gap:14px;margin-left:auto;flex-wrap:wrap;font:500 11px/1 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
@@ -156,7 +160,7 @@ table.proof td:first-child{width:55%}
   background:
    linear-gradient(rgba(36,49,73,.18) 1px,transparent 1px) 0 0/40px 40px,
    linear-gradient(90deg,rgba(36,49,73,.18) 1px,transparent 1px) 0 0/40px 40px,
-   radial-gradient(100% 80% at 50% 0%,#101A2C,var(--ink) 80%)}
+   radial-gradient(100% 80% at 50% 0%,var(--sky),var(--ink) 80%)}
 .tree-vp.drag{cursor:grabbing}
 .tree-canvas{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
 .tree-canvas svg{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
@@ -190,7 +194,7 @@ table.proof td:first-child{width:55%}
 .edge{fill:none;stroke:rgba(214,222,236,.55);stroke-width:2}
 .edge.hl{stroke:var(--cyan);stroke-width:2.5;filter:drop-shadow(0 0 4px var(--glow))}
 .edge.done{stroke:rgba(123,216,143,.7)}
-.tree-bar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-top:1px solid var(--line);background:rgba(11,16,25,.85)}
+.tree-bar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-top:1px solid var(--line);background:var(--wash)}
 .tree-bar .btn-s{min-width:0}
 .track{flex:1;height:14px;border:1px solid var(--line-2);background:var(--ink);position:relative;cursor:pointer}
 .thumb{position:absolute;top:1px;bottom:1px;background:linear-gradient(180deg,#3F6A8A,#23405A);border:1px solid #5B8FB5;cursor:grab;min-width:24px}
@@ -244,7 +248,7 @@ table.proof td:first-child{width:55%}
 .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .lab{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px}
 .stage{position:relative;height:clamp(380px,60vh,620px);border:1px solid var(--line);border-radius:6px;overflow:hidden;
-  background:radial-gradient(120% 90% at 30% 20%,#16203A 0%,var(--ink) 70%)}
+  background:radial-gradient(120% 90% at 30% 20%,var(--stage-sky) 0%,var(--ink) 70%)}
 .stage canvas{display:block;width:100%;height:100%;touch-action:none}
 .stage .dom{position:absolute;inset:0;overflow:auto;padding:18px}
 .stage .hintc{position:absolute;right:12px;bottom:10px;font-size:12px;color:var(--faint);pointer-events:none}

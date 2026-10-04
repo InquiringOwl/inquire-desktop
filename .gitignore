@@ -6,3 +6,4 @@ dist-web/
 __pycache__/
 .sync/
 .snap/
+web/glossary/*.tmp

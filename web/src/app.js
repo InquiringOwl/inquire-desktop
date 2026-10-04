@@ -32,8 +32,13 @@ const store = {
   get(k, d){ try { const v = localStorage.getItem("codex." + k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } },
   set(k, v){ try { localStorage.setItem("codex." + k, JSON.stringify(v)); } catch(e){} }
 };
-let mastered = new Set(store.get("mastered", []));
-const saveMastered = () => store.set("mastered", [...mastered]);
+// Progress belongs to the signed-in account (InquireKeys in notes.js; "codex.mastered" when nobody is signed in).
+const progKey = () => (window.InquireKeys ? InquireKeys.progress() : "codex.mastered");
+const loadMastered = () => { try { const v = JSON.parse(localStorage.getItem(progKey()) || "[]"); return new Set(Array.isArray(v) ? v : []); } catch(e){ return new Set(); } };
+let mastered = loadMastered();
+const saveMastered = () => { try { localStorage.setItem(progKey(), JSON.stringify([...mastered])); } catch(e){} };
+// Settings → Data & progress (import / reset) rewrites the progress: reload it and redraw.
+window.addEventListener("inquire:progress-changed", () => { mastered = loadMastered(); render(); });
 function stateOf(id){
   if (mastered.has(id)) return "mastered";
   return NODE[id].pre.every(p => mastered.has(p)) ? "avail" : "locked";
@@ -58,6 +63,7 @@ function go(next, push = true){
   const tok = (S.view === "glossary" ? gTok() : S.topic ? S.topic : (S.view === "math" ? (S.field === "map" ? "field-map" + (S.subject !== "mathematics" ? "-" + S.subject : "") : "field-" + S.field) : S.view)) + (S.view === "math" && S.gword ? "~" + encodeURIComponent(S.gword) : "");
   if (push) { try { history.pushState({ ...next, view: S.view, subject: S.subject, field: S.field, topic: S.topic, gword: S.gword, ...(S.view === "glossary" ? { g: { sub: G.sub, word: G.word, field: G.field } } : {}) }, "", "#" + tok); } catch(e){} }
   store.set("last", { view: S.view, subject: S.subject, field: S.field, topic: S.topic });
+  window.dispatchEvent(new CustomEvent("inquire:route"));
 }
 window.addEventListener("popstate", e => { if (e.state) go(e.state, false); });
 window.addEventListener("hashchange", () => { const s = fromHash(); if (s) go(s, false); });
@@ -71,7 +77,7 @@ function fromHash(tok){
   if (NODE[t]) return { view: "math", field: fieldOf(t), topic: t };
   if (t === "field-map" || t.startsWith("field-map-")) { const sub = t.slice(10) || "mathematics"; if (SM[sub]) return { view: "math", subject: sub, field: "map", topic: null }; }
   if (t.startsWith("field-")) { const f = t.slice(6); if (DB.fields[f]) return { view: "math", subject: subjOf(f), field: f, topic: null }; }
-  if (t === "menu" || t === "dict") return { view: t, topic: null };
+  if (t === "menu" || t === "dict" || t === "notes") return { view: t, topic: null };
   if (t === "glossary" || t.startsWith("glossary-") || t.startsWith("glossary~")) {
     const m = t.match(/^glossary(?:-([a-z0-9-]+))?(?:~(.*))?$/); if (!m) return null;
     let w = null; try { w = m[2] ? decodeURIComponent(m[2]).toLowerCase() : null; } catch(e){}
@@ -96,7 +102,8 @@ function crumbs(){
     $("#stat-m").style.width = "0%";
     return;
   }
-  if (S.view !== "menu") parts.push(["Dictionary", () => go({ view: "dict", topic: null })]);
+  if (S.view === "notes") parts.push(["My notes", null]);
+  else if (S.view !== "menu") parts.push(["Dictionary", () => go({ view: "dict", topic: null })]);
   if (S.view === "math") {
     parts.push([SM[S.subject].name, () => go({ view: "math", subject: S.subject, field: "map", topic: null })]);
     if (S.field !== "map") parts.push([DB.fields[S.field].name, () => go({ view: "math", topic: null })]);
@@ -120,17 +127,35 @@ function render(){
   if (S.view === "menu") renderMenu();
   else if (S.view === "dict") renderDict();
   else if (S.view === "glossary") renderGlossary();
+  else if (S.view === "notes") renderNotes();
   else renderWork();
   viewEl.focus({ preventScroll: true });
 }
 
-/* ---------- main menu ---------- */
+/* ---------- main menu ----------
+   Top: the display box, a slow carousel of subjects with real lab screenshots (app/menu/*.jpg, inlined by build-web
+   into window.InquireArt). Each slide opens its subject's field map; "All subjects" opens the Dictionary.
+   Below: Games and Plans (uncharted) and the Glossary. Then the signed-in user's recent notes (web/src/notes.js). */
+const MENU_SLIDES = [
+  { sub: "mathematics", art: ["math-1", "math-2", "math-3"], kicker: "STEM · 6 fields charted", line: "Equations, variables and graphs you can drag. From counting to trigonometry, every topic has a live model.", tags: ["Arithmetic", "Algebra", "Geometry", "Trigonometry"] },
+  { sub: "english", art: ["eng-1", "eng-2", "eng-3"], kicker: "Arts & Humanities", line: "Grammar and usage read through real stories: tag the parts of speech in Austen, Dickens and Twain.", tags: ["Grammar & Usage", "Story panels", "Vocabulary"] },
+  { sub: "computer-science", art: ["cs-1", "cs-2", "cs-3"], kicker: "STEM · Programming Fundamentals", line: "Real Python, stepped line by line: watch variables change, frames stack up and lists alias.", tags: ["Python", "Tracing", "Recursion"] },
+  { sub: "physics", art: ["phys-1", "phys-2"], kicker: "STEM · Mechanics", line: "Calculus-based mechanics: launch projectiles, trace orbits and see the math each idea needs.", tags: ["Kinematics", "Forces", "Energy", "Orbits"] },
+  { sub: "music-theory", art: ["mus-1", "mus-2"], kicker: "Arts & Humanities", line: "Pitch, rhythm and the staff, with a keyboard that plays what you read.", tags: ["Pitch", "Staff", "Meter"] }
+].filter(x => SM[x.sub]);
+let menuTimer = null;
 function renderMenu(){
   const s = h("div", { class: "screen" });
   s.innerHTML = `<div class="screen-in">
-    <div class="hello"><p class="eyebrow">Inquire · knowledge console</p><h1>Choose a section</h1>
-    <p>Inquire maps each subject as a skill tree. Every node is a full dossier with an interactive model, the exact definitions, a worked example, and where the idea is used.</p></div>
-    <div class="slots" id="slots"></div>
+    <div class="hello"><p class="eyebrow">Inquire · knowledge console</p><h1>Choose a section</h1></div>
+    <section class="mx win" aria-roledescription="carousel" aria-label="Subjects">
+      <header class="win-h mx-h"><span class="dot"></span><span>Featured subject</span><span class="mx-count num" aria-live="polite"></span>
+        <button type="button" class="btn-s mx-all">All subjects ▸</button></header>
+      <div class="mx-stage"></div>
+      <footer class="mx-foot"><button type="button" class="mx-arrow" data-d="-1" aria-label="Previous subject">◀</button><div class="mx-dots" role="tablist"></div><button type="button" class="mx-arrow" data-d="1" aria-label="Next subject">▶</button><span class="mx-bar"><i></i></span></footer>
+    </section>
+    <div class="slots three" id="slots"></div>
+    <section class="mnotes" id="mnotes"></section>
     <div class="verline" id="verline"></div></div>`;
   viewEl.appendChild(s);
   const slots = $("#slots", s);
@@ -139,13 +164,117 @@ function renderMenu(){
     vl.innerHTML = `<span>Inquire <span class="num">v${esc(DESK_VERSION || "")}</span></span><button type="button" class="btn-s" id="chk">Check for updates</button>`;
     $("#chk", s).onclick = () => window.inquireDesktop.checkForUpdates();
   }
-  const d = h("button", { type: "button", class: "slot big", onclick: () => go({ view: "dict", topic: null }) },
-    `<span class="glyph">Ⅾ</span><span><h3>Dictionary</h3><p>Subjects broken into fields and topics, ordered as a path to mastery. Mathematics, Physics and English are open.</p></span><span class="tag">Online</span>`);
-  slots.appendChild(d);
+  $(".mx-all", s).onclick = () => go({ view: "dict", topic: null });
+  menuCarousel($(".mx", s));
+  slots.appendChild(h("div", { class: "slot big locked", "aria-disabled": "true" },
+    `<span class="glyph">◇</span><span><h3>Games</h3><p>Practice through play: timed drills, puzzles and challenges built from the topics you have mastered.</p></span><span class="tag">Uncharted</span>`));
+  slots.appendChild(h("div", { class: "slot big locked", "aria-disabled": "true" },
+    `<span class="glyph">⌖</span><span><h3>Plans</h3><p>Lay out a learning venture: pick goals, order the topics, set a pace and track the route to mastery.</p></span><span class="tag">Uncharted</span>`));
   slots.appendChild(h("button", { type: "button", class: "slot big", onclick: () => { G.sub = "all"; G.field = null; G.word = null; G.ret = null; openGlossary({}); } },
     `<span class="glyph">Aa</span><span><h3>Glossary</h3><p>Every subject’s words in one place, with each subject’s meaning marked. ${Object.keys(GWORDS).length} words so far.</p></span><span class="tag">Online</span>`));
-  for (let i = 3; i <= 4; i++) slots.appendChild(h("div", { class: "slot big locked", "aria-disabled": "true" },
-    `<span class="glyph">·</span><span><h3>Slot 0${i}</h3><p>Reserved for a future section.</p></span><span class="tag">Empty</span>`));
+  menuNotes($("#mnotes", s));
+}
+function menuCarousel(box){
+  const stage = $(".mx-stage", box), dots = $(".mx-dots", box), count = $(".mx-count", box), bar = $(".mx-bar i", box);
+  const ART = window.InquireArt || {}, N = MENU_SLIDES.length;
+  const reduce = () => document.documentElement.hasAttribute("data-reduce-motion") || (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  MENU_SLIDES.forEach((x, i) => {
+    const sub = DB.subjects.find(d => d.id === x.sub) || { name: SM[x.sub].name, glyph: "·" };
+    const grp = (DB.subjectGroups || []).find(g => g.id === sub.group);
+    const imgs = x.art.filter(a => ART[a]).map((a, k) => `<img class="mx-i mx-i${k}" src="${ART[a]}" alt="" loading="lazy" decoding="async">`).join("");
+    const sl = h("button", { type: "button", class: "mx-slide", "data-accent": grp && grp.accent ? grp.accent : "", "aria-label": `Open ${sub.name}`, tabindex: i ? "-1" : "0",
+      onclick: () => go({ view: "math", subject: x.sub, field: "map", topic: null }) },
+      `<span class="mx-text"><span class="mx-kicker">${esc(x.kicker)}</span>
+        <span class="mx-title"><span class="mx-glyph">${sub.glyph}</span>${esc(sub.name)}</span>
+        <span class="mx-line">${esc(x.line)}</span>
+        <span class="mx-tags">${x.tags.map(t => `<i>${esc(t)}</i>`).join("")}</span>
+        <span class="mx-go">Open ${esc(sub.name)} ▸</span></span>
+       <span class="mx-art n${Math.min(3, x.art.length)}">${imgs}<span class="mx-scan" aria-hidden="true"></span></span>`);
+    stage.appendChild(sl);
+    const d = h("button", { type: "button", role: "tab", class: "mx-dot", "aria-label": sub.name, onclick: () => { show(i); restart(); } }, `<span>${esc(sub.name)}</span>`);
+    dots.appendChild(d);
+  });
+  let cur = -1, t0 = 0, raf = 0, paused = false; const DUR = 7000;
+  function show(i){
+    cur = (i + N) % N;
+    [...stage.children].forEach((el, k) => { el.classList.toggle("on", k === cur); el.tabIndex = k === cur ? 0 : -1; el.setAttribute("aria-hidden", String(k !== cur)); });
+    [...dots.children].forEach((el, k) => el.setAttribute("aria-selected", String(k === cur)));
+    count.textContent = String(cur + 1).padStart(2, "0") + " / " + String(N).padStart(2, "0");
+  }
+  function restart(){ t0 = performance.now(); bar.style.width = "0%"; }
+  function tick(now){
+    raf = requestAnimationFrame(tick);
+    if (paused || reduce() || document.hidden) { t0 = now - (parseFloat(bar.style.width) || 0) / 100 * DUR; return; }
+    const p = (now - t0) / DUR;
+    if (p >= 1) { show(cur + 1); restart(); return; }
+    bar.style.width = (p * 100).toFixed(2) + "%";
+  }
+  box.querySelectorAll(".mx-arrow").forEach(b => b.onclick = () => { show(cur + +b.dataset.d); restart(); });
+  box.addEventListener("pointerenter", () => paused = true); box.addEventListener("pointerleave", () => paused = false);
+  box.addEventListener("focusin", () => paused = true); box.addEventListener("focusout", () => paused = false);
+  box.addEventListener("keydown", e => { if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); show(cur + (e.key === "ArrowRight" ? 1 : -1)); restart(); const on = $(".mx-slide.on", box); if (on) on.focus(); } });
+  show(0); restart(); raf = requestAnimationFrame(tick);
+  cleanup.push(() => cancelAnimationFrame(raf));
+}
+const when = ms => { const d = new Date(ms), now = new Date(); return d.toDateString() === now.toDateString() ? d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : d.toLocaleDateString([], { month: "short", day: "numeric", year: d.getFullYear() === now.getFullYear() ? undefined : "numeric" }); };
+function menuNotes(el){
+  const NS = window.InquireNotes; if (!NS) { el.hidden = true; return; }
+  const draw = () => {
+    const all = NS.list(), top = all.slice(0, 3);
+    el.innerHTML = `<header class="mnotes-h"><h2>My notes</h2><span class="num">${all.length}</span>
+      <button type="button" class="btn-s" data-a="new">＋ New note</button><button type="button" class="btn-s" data-a="all">Open notes ▸</button></header>
+      <div class="mnotes-list">${top.length ? top.map(n => `<button type="button" class="mnote" data-id="${n.id}"><span class="mnote-t">${esc(n.title)}</span><span class="mnote-b">${esc(n.body.slice(0, 160))}</span><span class="mnote-m">${n.src && n.src.title !== n.title ? esc(n.src.title) + " · " : ""}${when(n.updated)}</span></button>`).join("")
+        : `<p class="mnotes-empty">No notes yet. Write one here, or open the <b>Assist</b> tab at the bottom right on any topic and choose <b>Note from this page</b>.</p>`}</div>`;
+    $('[data-a="new"]', el).onclick = () => { const n = NS.create({}); NOTES.sel = n.id; go({ view: "notes", topic: null }); };
+    $('[data-a="all"]', el).onclick = () => go({ view: "notes", topic: null });
+    el.querySelectorAll(".mnote").forEach(b => b.onclick = () => { NOTES.sel = b.dataset.id; go({ view: "notes", topic: null }); });
+  };
+  draw();
+  window.addEventListener("inquire:notes-changed", draw); cleanup.push(() => window.removeEventListener("inquire:notes-changed", draw));
+}
+
+/* ---------- notes screen (#notes) ---------- */
+const NOTES = { sel: null, q: "" };
+function renderNotes(){
+  const NS = window.InquireNotes;
+  const s = h("div", { class: "screen notes-screen" });
+  s.innerHTML = `<div class="screen-in">
+    <div class="hello"><div class="back-row"><button type="button" class="btn-s" id="nback">◀ Menu</button></div><p class="eyebrow">Notes</p><h1>My notes</h1>
+    <p>Notes are saved on this computer${window.InquireUser ? ` for <b>${esc(window.InquireUser)}</b>` : ""}. Write here, or make one from any topic with the Assist tab.</p></div>
+    <div class="nb win"><aside class="nb-list"><div class="nb-tools"><label class="search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Search notes" aria-label="Search notes"></label><button type="button" class="btn-s" data-a="new">＋ New</button></div><div class="nb-items" role="listbox" aria-label="Notes"></div></aside>
+    <section class="nb-ed"></section></div></div>`;
+  viewEl.appendChild(s);
+  $("#nback", s).onclick = () => go({ view: "menu", topic: null });
+  const items = $(".nb-items", s), ed = $(".nb-ed", s), q = $('input[type="search"]', s);
+  q.value = NOTES.q;
+  q.oninput = () => { NOTES.q = q.value; drawList(); };
+  $('[data-a="new"]', s).onclick = () => { const n = NS.create({}); NOTES.sel = n.id; drawList(); drawEd(true); };
+  function drawList(){
+    const all = NS.list(NOTES.q);
+    if (!NOTES.sel || !NS.get(NOTES.sel)) NOTES.sel = all[0] ? all[0].id : null;
+    items.innerHTML = all.length ? all.map(n => `<button type="button" role="option" class="nb-it" aria-selected="${n.id === NOTES.sel}" data-id="${n.id}"><span class="nb-t">${esc(n.title)}</span><span class="nb-m">${n.src && n.src.title !== n.title ? esc(n.src.title) + " · " : ""}${when(n.updated)}</span></button>`).join("")
+      : `<p class="nb-empty">${NOTES.q ? "No notes match." : "No notes yet."}</p>`;
+    items.querySelectorAll(".nb-it").forEach(b => b.onclick = () => { NOTES.sel = b.dataset.id; drawList(); drawEd(); });
+  }
+  let saveT = null;
+  function drawEd(focusTitle){
+    const n = NOTES.sel && NS.get(NOTES.sel);
+    if (!n) { ed.innerHTML = `<div class="nb-none"><p>Select a note, or start a new one.</p></div>`; return; }
+    ed.innerHTML = `<div class="nb-bar">${n.src ? `<button type="button" class="btn-s" data-a="src">↗ ${esc(n.src.title)}</button>` : ""}<span class="nb-saved" aria-live="polite">Saved ${when(n.updated)}</span>
+      <button type="button" class="btn-s" data-a="md">Save as .md</button><button type="button" class="btn-s set-warn" data-a="del">Delete</button></div>
+      <input class="nb-title" value="${esc(n.title)}" aria-label="Title" maxlength="140">
+      <textarea class="nb-body" aria-label="Note" spellcheck="true" placeholder="Write…">${esc(n.body)}</textarea>`;
+    const ti = $(".nb-title", ed), bo = $(".nb-body", ed), sv = $(".nb-saved", ed);
+    const save = () => { clearTimeout(saveT); saveT = setTimeout(() => { NS.update(n.id, { title: ti.value.trim() || "Untitled note", body: bo.value }); sv.textContent = "Saved"; const it = items.querySelector(`[data-id="${n.id}"] .nb-t`); if (it) it.textContent = ti.value.trim() || "Untitled note"; }, 400); sv.textContent = "Editing…"; };
+    ti.oninput = save; bo.oninput = save;
+    const src = $('[data-a="src"]', ed); if (src) src.onclick = () => go({ view: "math", topic: n.src.topic });
+    $('[data-a="md"]', ed).onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["# " + ti.value + "\n\n" + bo.value], { type: "text/markdown" })); a.download = (ti.value.replace(/[^\w\- ]+/g, "").trim() || "note") + ".md"; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); };
+    const del = $('[data-a="del"]', ed); let armed = 0;
+    del.onclick = () => { if (!armed) { del.textContent = "Click again to delete"; armed = setTimeout(() => { armed = 0; del.textContent = "Delete"; }, 3500); return; } clearTimeout(armed); NS.remove(n.id); NOTES.sel = null; drawList(); drawEd(); };
+    if (focusTitle) { ti.focus(); ti.select(); }
+  }
+  drawList(); drawEd();
+  cleanup.push(() => { if (saveT) { clearTimeout(saveT); const ti = $(".nb-title", ed), bo = $(".nb-body", ed); if (ti && NOTES.sel) NS.update(NOTES.sel, { title: ti.value.trim() || "Untitled note", body: bo.value }); } });
 }
 
 /* ---------- dictionary ---------- */
@@ -835,6 +964,14 @@ if (window.inquireDesktop) {
     if (!keep) hideT = setTimeout(() => bar.hidden = true, 6000);
   });
 }
+
+/* ---------- hooks for the corner dock (web/src/dock.js) ---------- */
+window.InquireApp = {
+  context(){ const t = S.topic && T[S.topic]; return { userName: window.InquireUserName || window.InquireUser || "", view: S.view, subject: S.subject, subjectName: SM[S.subject] ? SM[S.subject].name : "", field: S.view === "math" ? S.field : null,
+    fieldName: S.view === "math" && DB.fields[S.field] ? DB.fields[S.field].name : "", topic: S.topic || null, topicTitle: t ? t.title : "" }; },
+  openTopic: id => go({ view: "math", topic: id }), openNotes: id => { if (id) NOTES.sel = id; go({ view: "notes", topic: null }); }
+};
+window.addEventListener("inquire:signed-in", () => { mastered = loadMastered(); render(); }); // that account's progress and notes
 
 /* ---------- boot ---------- */
 $("#brand").onclick = () => go({ view: "menu", topic: null });
