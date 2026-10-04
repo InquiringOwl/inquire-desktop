@@ -1,6 +1,6 @@
 # Content brief, round 3: Physics · Mechanics
 
-You write topic dossiers (and their labs and saved checks) for the **Physics** subject of Codex. The schema, markup and style rules are **exactly** those in `web/CONTENT-BRIEF.md` plus round 2's additions in `web/CONTENT-BRIEF-2.md` (read both fully). Tree, prerequisites, **math prerequisites**, unlocks, lab idea and colour keys per topic are in `web/TREE-SPEC-PHYSICS.md`. For tone and depth, read two finished Algebra I topics (`web/content/algebra-1/a1-literal.js`, `web/content/algebra-1/a1-quad-apps.js`) and match their quality.
+You write topic dossiers (and their labs and saved checks) for the **Physics** subject of Inquire. The schema, markup and style rules are **exactly** those in `web/CONTENT-BRIEF.md` plus round 2's additions in `web/CONTENT-BRIEF-2.md` (read both fully). Tree, prerequisites, **math prerequisites**, unlocks, lab idea and colour keys per topic are in `web/TREE-SPEC-PHYSICS.md`. For tone and depth, read two finished Algebra I topics (`web/content/algebra-1/a1-literal.js`, `web/content/algebra-1/a1-quad-apps.js`) and match their quality.
 
 ## Level and standard
 - **Calculus-based college physics** (physics and engineering majors). Reference text: OpenStax *University Physics Volume 1* (Ling, Sanny, Moebs). Use its terminology, notation, sign conventions and section order. Everything must be correct at that level; where the calculus form is the real definition (v = dx/dt, W = ∫F·dr), state it in `formal`, and give the algebra form as the special case.
@@ -19,7 +19,7 @@ with **one entry per math entry, key copied exactly**. HTML allowed (math spans)
 
 ## Other fields, physics-specific
 - `prereqWhy` / `unlocksWhy`: one entry per physics prerequisite / unlock id listed in the spec (unlocks "(none in charted trees)" → `{}`).
-- `beyond` (**Vital in later fields**, 2–4 entries): later **physics fields** by their Codex names (Waves & Fluids; Thermodynamics; Electricity & Magnetism; Optics; Modern Physics; Classical Mechanics; Electrodynamics; Quantum Mechanics; Thermal & Statistical Physics; Computational Physics; General Relativity; Astrophysics & Cosmology; Nuclear & Particle Physics; Condensed Matter Physics; Quantum Field Theory) and/or engineering fields (Statics, Dynamics, Mechanical/Civil/Aerospace Engineering…), each with the specific reason the topic is vital there. Plain text.
+- `beyond` (**Vital in later fields**, 2–4 entries): later **physics fields** by their Inquire names (Waves & Fluids; Thermodynamics; Electricity & Magnetism; Optics; Modern Physics; Classical Mechanics; Electrodynamics; Quantum Mechanics; Thermal & Statistical Physics; Computational Physics; General Relativity; Astrophysics & Cosmology; Nuclear & Particle Physics; Condensed Matter Physics; Quantum Field Theory) and/or engineering fields (Statics, Dynamics, Mechanical/Civil/Aerospace Engineering…), each with the specific reason the topic is vital there. Plain text.
 - `fields`: academic/professional subjects that rely on it (plain text).
 - `careers`: 5–7 real, specific uses.
 - **Worked example**: a realistic problem (vehicles, sports, engineering, space, medicine), solved step by step in 4–8 lines, units carried, ending with a sanity check (units, sign, order of magnitude or limiting case).

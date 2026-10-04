@@ -1,4 +1,4 @@
-# Content brief: "Codex" math database — Arithmetic skill tree
+# Content brief: "Inquire" math database — Arithmetic skill tree
 
 You are writing the content for topic pages of an educational database app. Each topic is one node of the Arithmetic skill tree. The page layout mirrors an existing "Euler's formula" explainer: a hero formula, an interactive lab (built separately by someone else — you do NOT write lab code), then notes sections. You write ONLY the content objects described below.
 

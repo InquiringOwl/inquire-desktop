@@ -1,5 +1,5 @@
 /* ============ Story art: Prepositions & Conjunctions ============
-   Original inline-SVG scenes drawn for Codex (480 × 180). No covers, stills or other artists' designs. */
+   Original inline-SVG scenes drawn for Inquire (480 × 180). No covers, stills or other artists' designs. */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};

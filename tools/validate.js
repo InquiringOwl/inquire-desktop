@@ -1,4 +1,4 @@
-// Checks the Codex data and content for structural mistakes before a build or release.
+// Checks the Inquire data and content for structural mistakes before a build or release.
 // Run: node tools/validate.js        (exit code 1 on any error; warnings don't fail)
 // Covers: skill trees (ids, prereqs, cycles, layout), field map, every topic dossier's
 // fields and types, raw-HTML tag balance, escaped-text fields, and lab coverage.

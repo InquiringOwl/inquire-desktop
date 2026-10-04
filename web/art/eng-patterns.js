@@ -1,5 +1,5 @@
 /* ============ Story art: Complements & Sentence Patterns (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: frankenstein-lab (Frankenstein, ch. 5). */
+   Original scene drawn for Inquire, 480 × 180: frankenstein-lab (Frankenstein, ch. 5). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};

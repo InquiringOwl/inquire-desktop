@@ -1,5 +1,5 @@
 /* ============ Story art: Misplaced & Dangling Modifiers (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: admiral-benbow (Stevenson, Treasure Island). */
+   Original scene drawn for Inquire, 480 × 180: admiral-benbow (Stevenson, Treasure Island). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};

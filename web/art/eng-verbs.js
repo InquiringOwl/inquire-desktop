@@ -1,5 +1,5 @@
 /* ============ Story art: Verbs: Tense, Aspect & Mood (inline SVG, offline) ============
-   Original scenes drawn for Codex, 480 × 180: two-cities (A Tale of Two Cities), battlefield (Gettysburg Address). */
+   Original scenes drawn for Inquire, 480 × 180: two-cities (A Tale of Two Cities), battlefield (Gettysburg Address). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};

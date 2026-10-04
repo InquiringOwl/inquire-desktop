@@ -1,5 +1,5 @@
-# Builds Codex for macOS, Windows and Linux and publishes a GitHub Release in this repo.
-# Installed copies of Codex find that release and update themselves.
+# Builds Inquire for macOS, Windows and Linux and publishes a GitHub Release in this repo.
+# Installed copies of Inquire find that release and update themselves.
 # Trigger: push a tag like v1.0.1   (git tag v1.0.1 && git push origin v1.0.1)
 name: Release
 on:

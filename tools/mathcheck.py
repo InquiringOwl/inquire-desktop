@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Saved math checks for Codex topic pages.
+"""Saved math checks for Inquire topic pages.
 
 Every topic has a file checks/<field>/<topic-id>.py that re-computes, with sympy, each
 number the page states: the worked example and all practice answers (plus any formal

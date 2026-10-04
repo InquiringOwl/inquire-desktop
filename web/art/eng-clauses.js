@@ -1,5 +1,5 @@
 /* ============ Story art: Clauses (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: raft-river (Twain, Adventures of Huckleberry Finn). */
+   Original scene drawn for Inquire, 480 × 180: raft-river (Twain, Adventures of Huckleberry Finn). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};

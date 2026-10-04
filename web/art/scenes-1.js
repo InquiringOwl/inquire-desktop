@@ -1,6 +1,6 @@
 /* ============ Story art: original illustrated scenes (inline SVG, offline) ============
    DB.scenes[key] = svg string. Banner shape 480 × 180. Used by story panels on English topic pages.
-   Every scene is drawn for Codex: no book covers, film stills or other artists' illustrations. */
+   Every scene is drawn for Inquire: no book covers, film stills or other artists' illustrations. */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};

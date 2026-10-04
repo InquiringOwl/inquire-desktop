@@ -1,6 +1,6 @@
 # Lab brief: interactive models for Pre-Algebra and Algebra I
 
-Every topic page in Codex opens with an interactive model ("lab"): a stage (canvas or DOM) on the left, a readout panel on the right, and a controls bar below. The style follows an "Euler's formula" explainer: a live picture of the idea, readouts that update as you drag, and one highlighted "landmark" box that explains what the current state means.
+Every topic page in Inquire opens with an interactive model ("lab"): a stage (canvas or DOM) on the left, a readout panel on the right, and a controls bar below. The style follows an "Euler's formula" explainer: a live picture of the idea, readouts that update as you drag, and one highlighted "landmark" box that explains what the current state means.
 
 Read these before writing anything:
 - `web/src/labkit.js` — the toolkit (API below).

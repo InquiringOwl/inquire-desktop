@@ -1,8 +1,8 @@
-# Codex (desktop)
+# Inquire (desktop)
 
-Codex is a knowledge console that maps subjects as skill trees. v1 holds the Mathematics dictionary with the full Arithmetic tree (30 interactive topics).
+Inquire is a knowledge console that maps subjects as skill trees. v1 holds the Mathematics dictionary with the full Arithmetic tree (30 interactive topics).
 
-- **Repo (public):** `InquiringOwl/codex-desktop` holds the source code and, under Releases, the installers and update files. Installed copies of Codex check it at launch and every 4 hours.
+- **Repo (public):** `InquiringOwl/codex-desktop` holds the source code and, under Releases, the installers and update files. Installed copies of Inquire check it at launch and every 4 hours.
 
 ## Project layout
 
@@ -29,7 +29,7 @@ Codex is a knowledge console that maps subjects as skill trees. v1 holds the Mat
    cd ~/Documents/codex-desktop
    git init -b main
    git add .
-   git commit -m "Codex 1.0.0"
+   git commit -m "Inquire 1.0.0"
    git remote add origin https://github.com/InquiringOwl/codex-desktop.git
    git push -u origin main
    git tag v1.0.0
@@ -40,15 +40,15 @@ Codex is a knowledge console that maps subjects as skill trees. v1 holds the Mat
 
 ## First install on a Mac
 
-1. From `github.com/InquiringOwl/codex-desktop/releases`, download `Codex-1.0.0-arm64.dmg` (Apple Silicon) or `Codex-1.0.0-x64.dmg` (Intel).
-2. Open it and drag **Codex** into **Applications**.
+1. From `github.com/InquiringOwl/codex-desktop/releases`, download `Inquire-1.0.0-arm64.dmg` (Apple Silicon) or `Inquire-1.0.0-x64.dmg` (Intel).
+2. Open it and drag **Inquire** into **Applications**.
 3. The app is not signed with an Apple Developer ID, so clear the download flag once in Terminal:
    ```
-   xattr -cr /Applications/Codex.app
+   xattr -cr /Applications/Inquire.app
    ```
-4. Open Codex from Applications. From now on it updates itself.
+4. Open Inquire from Applications. From now on it updates itself.
 
-Windows: run `Codex-Setup-1.0.0.exe` (SmartScreen: More info › Run anyway). Linux: `Codex-1.0.0.AppImage`.
+Windows: run `Inquire-Setup-1.0.0.exe` (SmartScreen: More info › Run anyway). Linux: `Inquire-1.0.0.AppImage`.
 
 ## Shipping an update
 
@@ -57,19 +57,19 @@ Windows: run `Codex-Setup-1.0.0.exe` (SmartScreen: More info › Run anyway). Li
    ```
    cd ~/Documents/codex-desktop
    git add .
-   git commit -m "Codex 1.0.1"
+   git commit -m "Inquire 1.0.1"
    git push
    git tag v1.0.1
    git push origin v1.0.1
    ```
 3. GitHub Actions builds it and publishes the release.
-4. Each running copy of Codex finds it within 4 hours (or right away with **Codex › Check for Updates…**), downloads it, and shows **Install & Relaunch**.
+4. Each running copy of Inquire finds it within 4 hours (or right away with **Inquire › Check for Updates…**), downloads it, and shows **Install & Relaunch**.
 
 The tag must match the version in `package.json`. If a build fails, fix it and bump the version rather than re-running an old tag.
 
 ## How updates work
 
-- **Mac (ad-hoc signed):** `updater-mac.js` reads the latest release of this repo, picks the zip for the Mac's chip from `latest-mac.yml`, checks its sha512, unzips it with `ditto`, and after Codex quits swaps the new `Codex.app` into place and reopens it. If macOS blocks the swap (System Settings › Privacy & Security › App Management), the old app is restored and the new one is left in Downloads with a banner saying so. Allowing Codex under App Management avoids this.
+- **Mac (ad-hoc signed):** `updater-mac.js` reads the latest release of this repo, picks the zip for the Mac's chip from `latest-mac.yml`, checks its sha512, unzips it with `ditto`, and after Inquire quits swaps the new `Inquire.app` into place and reopens it. If macOS blocks the swap (System Settings › Privacy & Security › App Management), the old app is restored and the new one is left in Downloads with a banner saying so. Allowing Inquire under App Management avoids this.
 - **Windows and Linux:** `electron-updater` installs updates on restart.
 - If you get an Apple Developer ID later: add the `MAC_CERT_*` / `APPLE_*` secrets and remove `"identity": null` from `package.json`.
 

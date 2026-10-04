@@ -1,5 +1,5 @@
 /* ============ Story art: Subject–Verb Agreement (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: hound-moor (The Hound of the Baskervilles). */
+   Original scene drawn for Inquire, 480 × 180: hound-moor (The Hound of the Baskervilles). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};

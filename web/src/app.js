@@ -121,15 +121,15 @@ function render(){
 function renderMenu(){
   const s = h("div", { class: "screen" });
   s.innerHTML = `<div class="screen-in">
-    <div class="hello"><p class="eyebrow">Codex · knowledge console</p><h1>Choose a section</h1>
-    <p>Codex maps each subject as a skill tree. Every node is a full dossier with an interactive model, the exact definitions, a worked example, and where the idea is used.</p></div>
+    <div class="hello"><p class="eyebrow">Inquire · knowledge console</p><h1>Choose a section</h1>
+    <p>Inquire maps each subject as a skill tree. Every node is a full dossier with an interactive model, the exact definitions, a worked example, and where the idea is used.</p></div>
     <div class="slots" id="slots"></div>
     <div class="verline" id="verline"></div></div>`;
   viewEl.appendChild(s);
   const slots = $("#slots", s);
   if (window.codexDesktop) {
     const vl = $("#verline", s);
-    vl.innerHTML = `<span>Codex <span class="num">v${esc(DESK_VERSION || "")}</span></span><button type="button" class="btn-s" id="chk">Check for updates</button>`;
+    vl.innerHTML = `<span>Inquire <span class="num">v${esc(DESK_VERSION || "")}</span></span><button type="button" class="btn-s" id="chk">Check for updates</button>`;
     $("#chk", s).onclick = () => window.codexDesktop.checkForUpdates();
   }
   const d = h("button", { type: "button", class: "slot big", onclick: () => go({ view: "dict", topic: null }) },
@@ -735,7 +735,7 @@ function glossaryPopover(root, subject){
   cleanup.push(() => { close(); document.removeEventListener("click", outside); document.removeEventListener("keydown", esc2); window.removeEventListener("resize", close); });
 }
 
-/* ---------- desktop shell (only inside the Codex app) ---------- */
+/* ---------- desktop shell (only inside the Inquire app) ---------- */
 let DESK_VERSION = "";
 if (window.codexDesktop) {
   const D = window.codexDesktop;
@@ -747,11 +747,11 @@ if (window.codexDesktop) {
     clearTimeout(hideT);
     const v = s.version ? esc(s.version) : "";
     let html = "", keep = true;
-    if (s.status === "downloading") html = `<span class="dot"></span>Downloading Codex ${v}… <span class="num">${s.percent || 0}%</span>`;
-    else if (s.status === "ready") html = `<span class="dot"></span>Codex ${v} is ready.<button type="button" class="btn good" id="upd-go">Install &amp; Relaunch</button><button type="button" class="btn-s" id="upd-x">Later</button>`;
-    else if (s.status === "installing") html = `<span class="dot"></span>Installing Codex ${v}…`;
-    else if (s.status === "installed") { html = `<span class="dot"></span>Updated to Codex ${v}.`; keep = false; }
-    else if (s.status === "blocked") html = `<span class="dot"></span>macOS blocked the update. Codex ${v} is in your Downloads folder: drag it into Applications and replace the old copy.<button type="button" class="btn-s" id="upd-rev">Show in Finder</button><button type="button" class="btn-s" id="upd-x">Dismiss</button>`;
+    if (s.status === "downloading") html = `<span class="dot"></span>Downloading Inquire ${v}… <span class="num">${s.percent || 0}%</span>`;
+    else if (s.status === "ready") html = `<span class="dot"></span>Inquire ${v} is ready.<button type="button" class="btn good" id="upd-go">Install &amp; Relaunch</button><button type="button" class="btn-s" id="upd-x">Later</button>`;
+    else if (s.status === "installing") html = `<span class="dot"></span>Installing Inquire ${v}…`;
+    else if (s.status === "installed") { html = `<span class="dot"></span>Updated to Inquire ${v}.`; keep = false; }
+    else if (s.status === "blocked") html = `<span class="dot"></span>macOS blocked the update. Inquire ${v} is in your Downloads folder: drag it into Applications and replace the old copy.<button type="button" class="btn-s" id="upd-rev">Show in Finder</button><button type="button" class="btn-s" id="upd-x">Dismiss</button>`;
     else if (s.status === "error" && s.message) html = `<span class="dot err"></span>Update problem: ${esc(s.message)}<button type="button" class="btn-s" id="upd-x">Dismiss</button>`;
     bar.hidden = !html; bar.innerHTML = html;
     const go = $("#upd-go"); if (go) go.onclick = () => { go.disabled = true; D.installUpdate(); };
@@ -763,7 +763,7 @@ if (window.codexDesktop) {
 
 /* ---------- boot ---------- */
 $("#brand").onclick = () => go({ view: "menu", topic: null });
-// Codex always opens on the main menu (a link with #topic still opens that page directly).
+// Inquire always opens on the main menu (a link with #topic still opens that page directly).
 const initial = fromHash() || { view: "menu" };
 if (initial.g) { Object.assign(G, initial.g); delete initial.g; }
 Object.assign(S, initial);

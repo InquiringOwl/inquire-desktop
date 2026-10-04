@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' codex:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' codex:; img-src 'self' data: codex:">
-<title>Codex</title>
+<title>Inquire</title>
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
 /* Layout: EVE-style capsuleer console. Top chrome bar; menu screens; field workspace = left navigator + right Civ-style pannable tree; topic dossier replaces the tree. Single dark look by design. */
@@ -61,6 +61,8 @@ table.proof td:first-child{width:55%}
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer;background:none;border:0;padding:0}
 .brand-mark{width:26px;height:26px;border:1px solid var(--cyan);display:grid;place-items:center;font:600 14px/1 var(--math);color:var(--cyan);
   clip-path:polygon(0 0,80% 0,100% 20%,100% 100%,20% 100%,0 80%);background:rgba(92,200,224,.08)}
+.brand-mark{width:30px;height:30px;border:0;clip-path:none;background:none;display:block}
+.brand-mark img{display:block;width:30px;height:30px}
 .brand-name{font:600 15px/1 var(--ui);letter-spacing:.28em;text-transform:uppercase}
 .crumbs{display:flex;align-items:center;gap:6px;font:500 13px/1 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);min-width:0;overflow:hidden;white-space:nowrap}
 .crumbs button{background:none;border:0;padding:4px 2px;color:var(--muted);cursor:pointer;letter-spacing:inherit;text-transform:inherit}
@@ -610,13 +612,87 @@ button.gl-chip.sm{cursor:pointer}
   .gl-tags{margin-left:0}
 }
 
+/* Intro / sign-in screen (web/src/intro.js). Same look as the app: void black, cyan accent, Saira caps, clipped corners.
+   Sequence (classes on #intro): is-bg → is-logo → is-form. Everything is skipped for reduced motion or a click/key press. */
+.inqi{position:fixed;inset:0;z-index:1000;background:#03060B;color:var(--text);overflow:hidden;display:grid;place-items:center;
+  opacity:1;transition:opacity .9s ease}
+.inqi.is-leaving{opacity:0;pointer-events:none}
+.inqi[hidden]{display:none!important}
+
+/* background world: clean plate (or video) + neuron sparks, all drifting together */
+.inqi-world{position:absolute;inset:-3%;transform-origin:50% 45%;opacity:0;transition:opacity 2.6s ease 0.2s;
+  animation:intro-drift 46s ease-in-out infinite alternate}
+.inqi.is-bg .inqi-world{opacity:1}
+.inqi-plate,.inqi-video,.inqi-fx{position:absolute;inset:0;width:100%;height:100%}
+.inqi-plate{background:#050a14 url("intro/inq-intro-clean.jpg") center/cover no-repeat}
+.inqi-video{object-fit:cover;opacity:0;transition:opacity 1.6s ease}
+.inqi.has-video .inqi-video{opacity:1}
+.inqi-fx{pointer-events:none}
+.inqi.has-video .inqi-fx{display:none}
+@keyframes intro-drift{from{transform:scale(1.02) translate3d(-.6%,.3%,0)}to{transform:scale(1.08) translate3d(.8%,-.5%,0)}}
+.inqi-shade{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 55% at 50% 48%,rgba(3,6,11,.55),transparent 70%),radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(3,6,11,.7))}
+
+/* centre column: logo, then the form */
+.inqi-stage{position:relative;display:flex;flex-direction:column;align-items:center;gap:clamp(14px,3.4vh,30px);width:min(420px,calc(100% - 32px));
+  padding:16px 0;max-height:100%}
+.inqi-logo{display:block;height:min(34vh,320px);width:auto;max-width:78vw;mix-blend-mode:screen;opacity:0;transform:scale(.97);filter:blur(6px);
+  transition:opacity 3.4s ease,transform 4.2s cubic-bezier(.2,.7,.2,1),filter 3.4s ease}
+.inqi.is-logo .inqi-logo{opacity:1;transform:none;filter:none}
+
+.inqi-form{width:100%;opacity:0;transform:translateY(14px);visibility:hidden;
+  transition:opacity 1.2s ease,transform 1.2s cubic-bezier(.2,.7,.2,1),visibility 0s linear 1.2s;
+  background:linear-gradient(180deg,rgba(15,22,36,.78),rgba(8,12,20,.82));border:1px solid var(--line-2);border-top-color:var(--cyan);
+  clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px));
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:18px 22px 16px}
+.inqi.is-form .inqi-form{opacity:1;transform:none;visibility:visible;transition-delay:0s}
+.inqi-tabs{display:flex;gap:18px;margin:0 0 14px;border-bottom:1px solid var(--line)}
+.inqi-tab{background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:2px 0 8px;cursor:pointer;
+  font:600 12px/1 var(--ui);letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.inqi-tab:hover{color:var(--text)}
+.inqi-tab[aria-selected="true"]{color:var(--cyan);border-bottom-color:var(--cyan)}
+.inqi-field{display:block;margin:0 0 12px}
+.inqi-field>span{display:block;font:600 11px/1 var(--ui);letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.inqi-field input{width:100%;background:rgba(7,10,16,.85);color:var(--text);border:1px solid var(--line-2);border-radius:2px;
+  padding:9px 11px;font:400 15px/1.3 var(--sans);transition:border-color .15s,box-shadow .15s}
+.inqi-field input:hover{border-color:var(--faint)}
+.inqi-field input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan),0 0 14px var(--glow)}
+.inqi-field input[aria-invalid="true"]{border-color:var(--red)}
+.inqi-check{display:flex;align-items:center;gap:8px;margin:2px 0 14px;font:500 13px/1 var(--sans);color:var(--muted);cursor:pointer}
+.inqi-check input{accent-color:var(--cyan);width:15px;height:15px;margin:0}
+.inqi-go{width:100%;cursor:pointer;padding:11px 14px;border:1px solid var(--cyan);color:var(--cyan);background:rgba(92,200,224,.10);
+  font:600 13px/1 var(--ui);letter-spacing:.24em;text-transform:uppercase;border-radius:2px;transition:background .15s,box-shadow .15s,color .15s}
+.inqi-go:hover:not(:disabled){background:rgba(92,200,224,.2);box-shadow:0 0 18px var(--glow);color:#fff}
+.inqi-go:disabled{opacity:.55;cursor:progress}
+.inqi-msg{min-height:20px;margin:10px 0 0;font:500 13px/1.4 var(--sans);color:var(--red)}
+.inqi-msg.ok{color:var(--green)}
+.inqi-note{margin:6px 0 0;font:400 12px/1.45 var(--sans);color:var(--faint)}
+.inqi-skip{position:absolute;right:18px;bottom:16px;background:none;border:0;cursor:pointer;color:var(--faint);
+  font:600 11px/1 var(--ui);letter-spacing:.2em;text-transform:uppercase;padding:6px;transition:opacity .6s}
+.inqi-skip:hover{color:var(--text)}
+.inqi.is-form .inqi-skip{opacity:0;pointer-events:none}
+.inqi.is-fast .inqi-world,.inqi.is-fast .inqi-logo,.inqi.is-fast .inqi-form{transition-duration:.01s!important;transition-delay:0s!important}
+
+/* signed-in chip in the top bar */
+.whoami{background:none;border:1px solid var(--line-2);color:var(--muted);cursor:pointer;padding:4px 10px;border-radius:2px;
+  font:600 11px/1 var(--ui);letter-spacing:.16em;text-transform:uppercase;white-space:nowrap}
+.whoami:hover{color:var(--text);border-color:var(--cyan)}
+
+@media (max-height:640px){.inqi-logo{height:26vh}.inqi-form{padding:12px 18px 12px}.inqi-field{margin-bottom:8px}}
+@media (prefers-reduced-motion:reduce){
+  .inqi-world{animation:none}
+  .inqi-world,.inqi-logo,.inqi-form{transition-duration:.01s!important;transition-delay:0s!important}
+  .inqi-logo{filter:none;transform:none}
+}
+
 </style>
 </head><body>
 <div id="app">
   <header class="topbar">
-    <button type="button" class="brand" id="brand" aria-label="Codex main menu"><span class="brand-mark">∑</span><span class="brand-name">Codex</span></button>
+    <button type="button" class="brand" id="brand" aria-label="Inquire main menu"><span class="brand-mark"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAWfmNhQlgAABZ+anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFlhqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOjFiYWI4ODc5LWM4MmYtNGVlMi1iMTkxLWNmZDAwMzRmZGI3MQAAAAOTanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuGp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNon4f338ECuEljqld0DiQZzgAAAGxjYm9yo2lkYzpmb3JtYXRpaW1hZ2UvcG5namluc3RhbmNlSUR4LHhtcDppaWQ6NzljMjYzODgtNTY5YS00NDNmLTllOWMtMmUwMzA0NjVkZTM4bHJlbGF0aW9uc2hpcGhwYXJlbnRPZgAAAeJqdW1iAAAAQWp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuYWN0aW9ucy52MgAAAAAYYzJzaAuFnIkAnxVsxjXxdN8ZVbkAAAGZY2JvcqJnYWN0aW9uc4KiZmFjdGlvbmtjMnBhLm9wZW5lZGpwYXJhbWV0ZXJzoWtpbmdyZWRpZW50c4GiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYIJaCdyvQjLab4oS2w2kN7O1Twh/76/u7iLFof1Ejfy3wpGZhY3Rpb254HWNvbS5hbnRocm9waWMuY2xhdWRlLnByb3ZpZGVkanBhcmFtZXRlcnOheB9jb20uYW50aHJvcGljLm9yaWdpbi1jb25maWRlbmNlZ3Vua25vd25rZGVzY3JpcHRpb254ZkNsYXVkZSBwcm92aWRlZCB0aGlzIGZpbGUgYXQgdGhlIHJlcXVlc3Qgb2YgYSB1c2VyIGFuZCBtYXkgaGF2ZSBjcmVhdGVkIG9yIG1vZGlmaWVkIHRoZSBmaWxlIGNvbnRlbnRzLm1zb2Z0d2FyZUFnZW50oWRuYW1lZkNsYXVkZXJhbGxBY3Rpb25zSW5jbHVkZWT1AAAAyGp1bWIAAABAanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5oYXNoLmRhdGEAAAAAGGMyc2gqtSEKIsNONQ8buFdfhbvWAAAAgGNib3KlY2FsZ2ZzaGEyNTZjcGFkTQAAAAAAAAAAAAAAAABkaGFzaFggbA3I5KoG7W2N+/1mcsnCQu7GebdOrCxYVfJilkDpVKRkbmFtZW5qdW1iZiBtYW5pZmVzdGpleGNsdXNpb25zgaJlc3RhcnQYIWZsZW5ndGgZFooAAAI+anVtYgAAACdqdW1kYzJjbAARABCAAACqADibcQNjMnBhLmNsYWltLnYyAAAAAg9jYm9ypWNhbGdmc2hhMjU2aXNpZ25hdHVyZXhNc2VsZiNqdW1iZj0vYzJwYS91cm46YzJwYToxYmFiODg3OS1jODJmLTRlZTItYjE5MS1jZmQwMDM0ZmRiNzEvYzJwYS5zaWduYXR1cmVqaW5zdGFuY2VJRHgseG1wOmlpZDo0NmFhMDk5MS05YmQ1LTQ0MDAtOTU1My1jOGZhZDIyMGQ2OTJyY3JlYXRlZF9hc3NlcnRpb25zg6JjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggloJ3K9CMtpvihLbDaQ3s7VPCH/vr+7uIsWh/USN/LfCiY3VybHgqc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5hY3Rpb25zLnYyZGhhc2hYIJP5rXELA1sGz2kyAx5LL65YMUuh0GHBn2SnpCRe11P2omN1cmx4KXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaGFzaC5kYXRhZGhhc2hYIEUSV1ZrjkGMrKnBQT6yhjU6AKCBNl6fxp1T3RxzlTgBdGNsYWltX2dlbmVyYXRvcl9pbmZvo2RuYW1lb0FudGhyb3BpYyBGaWxlc2d2ZXJzaW9uZTEuMC4wa3NwZWNWZXJzaW9uZTIuNC4wAAAQOGp1bWIAAAAoanVtZGMyY3MAEQAQgAAAqgA4m3EDYzJwYS5zaWduYXR1cmUAAAAQCGNib3LShFkCEqIBJhghWQIKMIICBjCCAY2gAwIBAgIUQOWgCu7COdC+uIP6BkIFPWdVEwAwCgYIKoZIzj0EAwMwSTEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxLjAsBgNVBAMTJUFudGhyb3BpYyBDb250ZW50IENyZWRlbnRpYWxzIFJvb3QgQ0EwHhcNMjYwODA3MTg0MzU2WhcNMjgwODA2MTk0MzU2WjBEMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEpMCcGA1UEAxMgQW50aHJvcGljIENsYXVkZSBDb250ZW50IFNpZ25pbmcwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASYegpry1AYBRTVNL1CpTlbROnY3dey+UrsF9C3phYrATN3ZHf93Mo8RQN0KOUuOn19P4oWNFWe5n2/She9N7eTo1gwVjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lBA4wDAYKKwYBBAGD6F4CATAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFM5R4gSBTmRbI/jjxM+aPpzB11zCMAoGCCqGSM49BAMDA2cAMGQCMDFzHRSeAXrSy1WOzkbhPZ6Km2wGTmZ/2gK18k8BQGXyqz88Rdrz6CTX9flAnYNVxgIwcF9c3fVhqmJKpi+UhasNUMko69cyX6STPfta3Q8EjyzDjzoyrol46FP6VFHhvUcJoWNwYWRZDZ4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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" alt="" width="30" height="30"></span><span class="brand-name">Inquire</span></button>
     <nav class="crumbs" id="crumbs" aria-label="Breadcrumb"></nav>
     <div class="topstat"><span id="stat-t"></span><span class="meter" aria-hidden="true"><i id="stat-m"></i></span></div>
+    <button type="button" class="whoami" id="whoami" hidden></button>
   </header>
   <main class="view" id="view" tabindex="-1"></main>
   <div class="upd" id="upd" role="status" hidden></div>
@@ -1836,7 +1912,7 @@ DB.addGlossary("physics", [
 </script>
 <script>/* web/art/eng-agreement.js */
 /* ============ Story art: Subject–Verb Agreement (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: hound-moor (The Hound of the Baskervilles). */
+   Original scene drawn for Inquire, 480 × 180: hound-moor (The Hound of the Baskervilles). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};
@@ -1877,7 +1953,7 @@ S["hound-moor"] = svg("hm", `
 </script>
 <script>/* web/art/eng-clauses.js */
 /* ============ Story art: Clauses (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: raft-river (Twain, Adventures of Huckleberry Finn). */
+   Original scene drawn for Inquire, 480 × 180: raft-river (Twain, Adventures of Huckleberry Finn). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};
@@ -1928,7 +2004,7 @@ S["raft-river"] = svg("rr", `
 </script>
 <script>/* web/art/eng-fragments.js */
 /* ============ Story art: Fragments (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: bleak-fog (Dickens, Bleak House). */
+   Original scene drawn for Inquire, 480 × 180: bleak-fog (Dickens, Bleak House). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};
@@ -1971,7 +2047,7 @@ S["bleak-fog"] = svg("bf", `
 </script>
 <script>/* web/art/eng-joiners.js */
 /* ============ Story art: Prepositions & Conjunctions ============
-   Original inline-SVG scenes drawn for Codex (480 × 180). No covers, stills or other artists' designs. */
+   Original inline-SVG scenes drawn for Inquire (480 × 180). No covers, stills or other artists' designs. */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};
@@ -2035,7 +2111,7 @@ S["inaugural"] = svg(`
 </script>
 <script>/* web/art/eng-modifiers-place.js */
 /* ============ Story art: Misplaced & Dangling Modifiers (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: admiral-benbow (Stevenson, Treasure Island). */
+   Original scene drawn for Inquire, 480 × 180: admiral-benbow (Stevenson, Treasure Island). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};
@@ -2073,7 +2149,7 @@ S["admiral-benbow"] = svg("ab", `
 </script>
 <script>/* web/art/eng-modifiers.js */
 /* ============ Story art: Adjectives & Adverbs (eng-modifiers) ============
-   Original inline-SVG scenes drawn for Codex, 480 × 180. Gradient ids are prefixed with the scene key. */
+   Original inline-SVG scenes drawn for Inquire, 480 × 180. Gradient ids are prefixed with the scene key. */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};
@@ -2151,7 +2227,7 @@ S["studio-roses"] = svg(`
 </script>
 <script>/* web/art/eng-nouns.js */
 /* ============ Story art: Nouns & Pronouns (inline SVG, offline) ============
-   Drawn for Codex, 480 × 180. No book covers, film stills or other artists' illustrations. */
+   Drawn for Inquire, 480 × 180. No book covers, film stills or other artists' illustrations. */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};
@@ -2215,7 +2291,7 @@ S["moor-window"] = svg(`
 </script>
 <script>/* web/art/eng-patterns.js */
 /* ============ Story art: Complements & Sentence Patterns (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: frankenstein-lab (Frankenstein, ch. 5). */
+   Original scene drawn for Inquire, 480 × 180: frankenstein-lab (Frankenstein, ch. 5). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};
@@ -2256,7 +2332,7 @@ S["frankenstein-lab"] = svg("fk", `
 </script>
 <script>/* web/art/eng-phrases.js */
 /* ============ Story art: Phrases (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: sleepy-hollow (Irving, "The Legend of Sleepy Hollow"). */
+   Original scene drawn for Inquire, 480 × 180: sleepy-hollow (Irving, "The Legend of Sleepy Hollow"). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};
@@ -2298,7 +2374,7 @@ S["sleepy-hollow"] = svg("sh", `
 </script>
 <script>/* web/art/eng-pronouns.js */
 /* ============ Story art: Pronoun Case & Reference (inline SVG, offline) ============
-   Original scenes drawn for Codex, 480 × 180: baker-street (The Adventures of Sherlock Holmes),
+   Original scenes drawn for Inquire, 480 × 180: baker-street (The Adventures of Sherlock Holmes),
    wuthering-moor (Wuthering Heights). */
 (function(){
 window.DB = window.DB || {};
@@ -2371,7 +2447,7 @@ S["wuthering-moor"] = svg(`
 </script>
 <script>/* web/art/eng-punctuation.js */
 /* ============ Story art: Punctuation (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: dickinson-carriage (Emily Dickinson, "Because I could not stop for Death"). */
+   Original scene drawn for Inquire, 480 × 180: dickinson-carriage (Emily Dickinson, "Because I could not stop for Death"). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};
@@ -2412,7 +2488,7 @@ S["dickinson-carriage"] = svg("dc", `
 </script>
 <script>/* web/art/eng-subject.js */
 /* ============ Story art: Subject & Predicate (inline SVG, offline) ============
-   Original scenes drawn for Codex, 480 × 180: whitewash-fence (The Adventures of Tom Sawyer),
+   Original scenes drawn for Inquire, 480 × 180: whitewash-fence (The Adventures of Tom Sawyer),
    walden-pond (Walden). */
 (function(){
 window.DB = window.DB || {};
@@ -2480,7 +2556,7 @@ S["walden-pond"] = svg("wp", `
 </script>
 <script>/* web/art/eng-verbals.js */
 /* ============ Story art: Verbals (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: elsinore (Shakespeare, Hamlet). */
+   Original scene drawn for Inquire, 480 × 180: elsinore (Shakespeare, Hamlet). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};
@@ -2516,7 +2592,7 @@ S["elsinore"] = svg("el", `
 </script>
 <script>/* web/art/eng-verbs.js */
 /* ============ Story art: Verbs: Tense, Aspect & Mood (inline SVG, offline) ============
-   Original scenes drawn for Codex, 480 × 180: two-cities (A Tale of Two Cities), battlefield (Gettysburg Address). */
+   Original scenes drawn for Inquire, 480 × 180: two-cities (A Tale of Two Cities), battlefield (Gettysburg Address). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};
@@ -2578,7 +2654,7 @@ S["battlefield"] = svg("bf", `
 </script>
 <script>/* web/art/eng-voice.js */
 /* ============ Story art: Active & Passive Voice (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: declaration (the Declaration of Independence, 1776). */
+   Original scene drawn for Inquire, 480 × 180: declaration (the Declaration of Independence, 1776). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};
@@ -2618,7 +2694,7 @@ S["declaration"] = svg("dc", `
 <script>/* web/art/scenes-1.js */
 /* ============ Story art: original illustrated scenes (inline SVG, offline) ============
    DB.scenes[key] = svg string. Banner shape 480 × 180. Used by story panels on English topic pages.
-   Every scene is drawn for Codex: no book covers, film stills or other artists' illustrations. */
+   Every scene is drawn for Inquire: no book covers, film stills or other artists' illustrations. */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};
@@ -16143,7 +16219,7 @@ ARITH["eng-clauses"] = {
   formal: `<p>A <b>clause</b> is a construction containing a subject and a predicate whose verb is <b>finite</b>: marked for tense (past or present) and, where English shows it, for agreement with the subject (<i>she walks</i>, <i>they walk</i>). Modal auxiliaries (<i>can, must, should</i>) and imperatives also count as finite. An <b>independent (main) clause</b> is not grammatically subordinate to any other clause and can be punctuated as a sentence. A <b>dependent (subordinate) clause</b> functions as a constituent of another clause: as a noun (subject, object, complement, appositive), as an adjective modifying a noun, or as an adverb modifying a verb, adjective, adverb or the whole clause. It is usually introduced by a <b>subordinator</b>, which signals that dependence.</p>
 <div class="display"><span class="c1">clause</span> = <span class="c4">subject</span> + <span class="c5">finite verb</span> (+ rest of predicate)<br><span class="c2">dependent</span> = <span class="c3">marker</span> + subject + finite verb …<br><span class="c3">Subordinating conjunctions</span>: after, although,<br>as, because, before, if, once, since, so that,<br>than, though, unless, until, when, where,<br>whereas, while<br><span class="c3">Relative words</span>: who, whom, whose, which,<br>that; when, where, why<br><span class="c3">Noun-clause markers</span>: that, whether, if;<br>who, what, which, when, where, why, how<br><span class="c3">Zero marker</span>: I knew [<u>(that)</u> it leaked]</div>
 <p>Coordinating conjunctions (<i>and, but, or, nor, for, so, yet</i>) and conjunctive adverbs (<i>however, therefore, meanwhile</i>) join or link clauses without making either one dependent, which is why <i>But that ain’t no matter</i> is still independent. Dependent clauses can be <b>embedded</b> inside other dependent clauses to any depth: <i>I think [that the man [who sold us the raft] knew [that it leaked]]</i>. Handbooks treat the main clause as the whole sentence minus its removable modifier clauses; a noun clause that fills a required slot (<i>I think …</i>) stays inside the main clause, because <i>I think</i> alone is incomplete. Infinitives, gerunds and participles are <b>non-finite</b>, so traditional grammar classes <i>to live deliberately</i> or <i>hoping for rain</i> as verbal phrases.</p>
-<p>Modern grammars draw the lines differently. Huddleston and Pullum’s <i>Cambridge Grammar of the English Language</i> (2002) counts <i>to live deliberately</i> and <i>hoping for rain</i> as <b>non-finite clauses</b> (clauses whose subject is understood), so for them a clause is defined by its predicate, not by a finite verb. They also reserve the term subordinator for <i>that, whether, if</i> (and infinitival <i>for</i>), and analyse <i>before, after, since, until, because</i> as prepositions taking a clause as complement. In their terms the main clause always contains its subordinate clauses (<i>matrix clause</i> is another name). Codex follows the handbook definitions and notes the modern analysis where it matters.</p>`,
+<p>Modern grammars draw the lines differently. Huddleston and Pullum’s <i>Cambridge Grammar of the English Language</i> (2002) counts <i>to live deliberately</i> and <i>hoping for rain</i> as <b>non-finite clauses</b> (clauses whose subject is understood), so for them a clause is defined by its predicate, not by a finite verb. They also reserve the term subordinator for <i>that, whether, if</i> (and infinitival <i>for</i>), and analyse <i>before, after, since, until, because</i> as prepositions taking a clause as complement. In their terms the main clause always contains its subordinate clauses (<i>matrix clause</i> is another name). Inquire follows the handbook definitions and notes the modern analysis where it matters.</p>`,
   legend: [
     { c: "c1", sym: `[IC]`, name: "Independent clause", desc: "Subject + finite verb, no marker: it can stand alone as a sentence. <i>[the river rose]</i>." },
     { c: "c2", sym: `[DC]`, name: "Dependent clause", desc: "Subject + finite verb, but tied to another clause by a marker or by its job. <i>[when night fell]</i>." },
@@ -16488,7 +16564,7 @@ ARITH["eng-function-words"] = {
   formal: `<p>A <b>preposition</b> heads a <b>prepositional phrase</b> (PP) and takes a <b>complement</b>, traditionally called its <b>object</b>: a noun phrase, a pronoun in the objective case (<i>for him</i>, <i>between you and me</i>) or a gerund phrase (<i>of sitting by her sister</i>). A PP functions <b>adjectivally</b>, modifying a noun (<i>blessings <u>of existence</u></i>), or <b>adverbially</b>, modifying a verb, adjective or clause (<i>lived <u>in the world</u></i>). <b>Simple</b> prepositions are one word (<i>at, by, from, toward</i>); <b>complex</b> (compound, phrasal) prepositions are fixed sequences that behave as one (<i>because of, in spite of, on account of, in front of, instead of</i>). A preposition must be distinguished from an <b>adverb particle</b>, which belongs to a phrasal verb and takes no object of its own: <i>looked <u>up</u> the word</i> = <i>looked the word <u>up</u></i>, but never <i>Up the word she looked</i>.</p>
 <div class="display"><span class="c5">Coordinating conjunctions</span>: <i>for, and, nor, but, or, yet, so</i>. Join elements of equal grammatical rank.<br><span class="c5">Correlative conjunctions</span>: <i>both … and, either … or, neither … nor, not only … but also, whether … or</i>. Paired; each half precedes a parallel element.<br><span class="c5">Subordinating conjunctions</span>: introduce a dependent (adverb) clause. Time: <i>after, before, when, while, until, since, as soon as</i>. Cause: <i>because, since, as</i>. Condition: <i>if, unless, provided that</i>. Concession: <i>although, though, even though</i>. Contrast: <i>whereas, while</i>. Purpose: <i>so that, in order that</i>. Result: <i>so … that, such … that</i>.<br><span class="c4">Conjunctive adverbs</span>: <i>however, therefore, moreover, nevertheless, consequently, otherwise, furthermore, meanwhile, thus, then</i>. Adverbs that relate a clause to the one before it.</div>
 <p>The punctuation follows from the class. <span class="c1">IC</span>, <span class="c5">FANBOYS</span> <span class="c2">IC</span>. · <span class="c5">Sub</span> <span class="c1">DC</span>, <span class="c2">IC</span>. · <span class="c2">IC</span> <span class="c5">sub</span> <span class="c1">DC</span>. (no comma, except usually before a clause of concession or contrast) · <span class="c1">IC</span>; <span class="c4">however</span>, <span class="c2">IC</span>. Two tests separate a conjunctive adverb from a conjunction: <b>mobility</b> (an adverb can move inside its clause: <i>the ferry, however, sailed</i>; a conjunction cannot: <i>the ferry but sailed</i> fails) and <b>stacking</b> (an adverb can follow a conjunction: <i>and therefore</i>, <i>but nevertheless</i>). Ending a sentence with a preposition (<b>preposition stranding</b>: <i>the work we are in</i>) is standard English; the alternative (<b>pied-piping</b>: <i>the work in which we are</i>) is more formal, not more correct.</p>
-<p>Modern grammars draw these lines differently. Huddleston and Pullum's <i>Cambridge Grammar of the English Language</i> (2002) counts only <i>and, or, but</i> and <i>nor</i> as true coordinators, treating <i>so</i> and <i>yet</i> as adverbs (they can follow <i>and</i>: <i>and so, and yet</i>). It also classes most traditional subordinating conjunctions (<i>before, after, since, until, because, although, if, unless</i>) as prepositions that take a clause as their complement, so that <i>before</i> is one word class in all of <i>before dawn</i>, <i>before the sun rose</i> and <i>never before</i>, and keeps the name <b>subordinator</b> for <i>that</i>, <i>whether</i> and interrogative <i>if</i>. Handbooks, and Codex, use the traditional terms.</p>`,
+<p>Modern grammars draw these lines differently. Huddleston and Pullum's <i>Cambridge Grammar of the English Language</i> (2002) counts only <i>and, or, but</i> and <i>nor</i> as true coordinators, treating <i>so</i> and <i>yet</i> as adverbs (they can follow <i>and</i>: <i>and so, and yet</i>). It also classes most traditional subordinating conjunctions (<i>before, after, since, until, because, although, if, unless</i>) as prepositions that take a clause as their complement, so that <i>before</i> is one word class in all of <i>before dawn</i>, <i>before the sun rose</i> and <i>never before</i>, and keeps the name <b>subordinator</b> for <i>that</i>, <i>whether</i> and interrogative <i>if</i>. Handbooks, and Inquire, use the traditional terms.</p>`,
   legend: [
     { c: "c1", sym: `A`, name: "First clause", desc: "The clause that comes first in the joined sentence. It stays independent unless a subordinating conjunction attaches to it." },
     { c: "c2", sym: `B`, name: "Second clause", desc: "The clause that comes second. With a subordinating conjunction either clause can become the dependent one." },
@@ -16856,7 +16932,7 @@ ARITH["eng-nouns-pronouns"] = {
   formal: `<p>A <b>noun</b> is a word that can <b>head a noun phrase</b> (NP), the constituent that serves as subject, object or complement. Common nouns inflect for <b>number</b> (singular / plural) and take the <b>genitive</b> (possessive) <i>’s</i>. Count nouns combine with <i>a/an</i>, numerals and <i>many/few</i>; noncount nouns with <i>much/little</i> and no article, and they have no plural in that sense. Many nouns have both uses (<i>a cake / some cake; two coffees</i>). A <b>proper noun</b> names an individual and normally takes no determiner. <b>Collective</b> nouns are count nouns (<i>families</i>); in US usage they usually take singular agreement, in British usage often plural.</p>
 <div class="display"><span class="dim">person · number</span>&nbsp; <span class="c2">subjective</span> · <span class="c4">objective</span> · <span class="c4">poss. determiner</span> · <span class="c4">poss. pronoun</span> · <span class="c2">reflexive</span><br>1st sg&nbsp; <span class="c2">I</span> · <span class="c4">me</span> · <span class="c4">my</span> · <span class="c4">mine</span> · <span class="c2">myself</span><br>2nd sg&nbsp; <span class="c2">you</span> · <span class="c4">you</span> · <span class="c4">your</span> · <span class="c4">yours</span> · <span class="c2">yourself</span><br>3rd sg&nbsp; <span class="c2">he / she / it</span> · <span class="c4">him / her / it</span> · <span class="c4">his / her / its</span> · <span class="c4">his / hers / (its)</span> · <span class="c2">himself / herself / itself</span><br>1st pl&nbsp; <span class="c2">we</span> · <span class="c4">us</span> · <span class="c4">our</span> · <span class="c4">ours</span> · <span class="c2">ourselves</span><br>2nd pl&nbsp; <span class="c2">you</span> · <span class="c4">you</span> · <span class="c4">your</span> · <span class="c4">yours</span> · <span class="c2">yourselves</span><br>3rd pl&nbsp; <span class="c2">they</span> · <span class="c4">them</span> · <span class="c4">their</span> · <span class="c4">theirs</span> · <span class="c2">themselves</span></div>
 <p>A <b>pronoun</b> substitutes for a full NP, not for a noun. Its <b>antecedent</b> is the expression it is coreferential with; reference back is <b>anaphora</b>, reference forward (<i>When <u>she</u> arrived, Meg sat down</i>) is <b>cataphora</b>. First- and second-person pronouns are <b>deictic</b>: they refer to the speech roles and need no antecedent. A <b>reflexive</b> pronoun is an object coreferential with the subject of its clause (<i>Meg blamed herself</i>); the same form used for emphasis is <b>intensive</b> (<i>Meg herself came</i>). Nouns have only two case forms (plain and genitive); case contrasts such as <i>I/me</i> survive only in personal pronouns and <i>who/whom</i>.</p>
-<p>Huddleston and Pullum (<i>Cambridge Grammar of the English Language</i>, 2002) treat pronouns as a subclass of nouns, call <i>my, your, her</i> <b>dependent genitive</b> pronouns functioning as determiners and <i>mine, yours, hers</i> <b>independent genitives</b>, and treat possessive <i>’s</i> as marking the whole noun phrase rather than just its head noun (a phrasal genitive), which is why it can follow a phrase: <i>the King of Spain’s daughter</i>. Traditional handbooks call both <i>my</i> and <i>mine</i> possessive pronouns; Codex follows them and gives the modern terms where useful.</p>`,
+<p>Huddleston and Pullum (<i>Cambridge Grammar of the English Language</i>, 2002) treat pronouns as a subclass of nouns, call <i>my, your, her</i> <b>dependent genitive</b> pronouns functioning as determiners and <i>mine, yours, hers</i> <b>independent genitives</b>, and treat possessive <i>’s</i> as marking the whole noun phrase rather than just its head noun (a phrasal genitive), which is why it can follow a phrase: <i>the King of Spain’s daughter</i>. Traditional handbooks call both <i>my</i> and <i>mine</i> possessive pronouns; Inquire follows them and gives the modern terms where useful.</p>`,
   legend: [
     { c: "c1", sym: `N`, name: "Noun", desc: "Heads a noun phrase and names a person, place, thing or idea: <i>sister, rug, possibility, Jo</i>." },
     { c: "c2", sym: `Pro`, name: "Pronoun", desc: "Stands in for a whole noun phrase: personal <i>she, it</i>, reflexive <i>herself</i>, demonstrative <i>this</i>, relative <i>who</i>, indefinite <i>nothing</i>." },
@@ -17094,7 +17170,7 @@ ARITH["eng-parts-of-speech"] = {
   formal: `<p>A <b>part of speech</b> (a <b>word class</b> or <b>lexical category</b>) is a set of words that share <b>morphological</b> properties (the inflections they take), <b>syntactic</b> properties (the positions they fill and the words they combine with) and, loosely, a typical <b>meaning</b>. Classification rests on the first two; meaning is a guide, not a definition.</p>
 <div class="display"><span class="c1">Noun</span>: heads a noun phrase; inflects for number and possessive (<i>wife, wives, wife’s</i>).<br><span class="c1">Pronoun</span>: replaces a noun phrase; personal pronouns inflect for case (<i>I / me / my</i>).<br><span class="c2">Verb</span>: heads the predicate; inflects for tense and agreement (<i>give, gives, gave, given, giving</i>).<br><span class="c3">Adjective</span>: modifies a noun or follows a linking verb; most grade (<i>young, younger, youngest</i>).<br><span class="c4">Adverb</span>: modifies a verb, adjective, adverb or clause (<i>never, very, aloud</i>).<br><span class="c5">Preposition</span>: takes a noun phrase as its object and relates it to another element (<i>in Tuckahoe</i>).<br><span class="c5">Conjunction</span>: coordinating (<i>and, but, or, nor, for, so, yet</i>) or subordinating (<i>that, because, if</i>).<br><span class="c5">Interjection</span>: an exclamation outside the clause structure (<i>Bah! Alas!</i>).</div>
 <p>Nouns, verbs, adjectives and adverbs are <b>open classes</b>: they carry most of a sentence's content (<b>lexical</b> or content words) and admit new members (<i>to google</i>, <i>a selfie</i>). Pronouns, prepositions, conjunctions, articles and other determiners are <b>closed classes</b> of <b>function words</b>: small, fixed sets that mark grammatical relations. A word's class is a property of each <b>use</b>: English allows <b>conversion</b> (zero derivation), a change of class with no change of form, as in <i>a fast</i> (noun), <i>to fast</i> (verb), <i>a fast train</i> (adjective), <i>run fast</i> (adverb).</p>
-<p>The eight-class scheme is the traditional one used in most college handbooks. Modern reference grammars such as Huddleston and Pullum's <i>Cambridge Grammar of the English Language</i> (2002) revise it: articles and words like <i>my, this, some, every</i> form a separate class of <b>determinatives</b>; pronouns are treated as a subclass of nouns; and conjunctions split into <b>coordinators</b> and <b>subordinators</b>, with many traditional subordinating conjunctions (<i>before, since, after</i>) reclassified as prepositions. Codex uses the traditional eight and notes the modern analysis where it differs.</p>`,
+<p>The eight-class scheme is the traditional one used in most college handbooks. Modern reference grammars such as Huddleston and Pullum's <i>Cambridge Grammar of the English Language</i> (2002) revise it: articles and words like <i>my, this, some, every</i> form a separate class of <b>determinatives</b>; pronouns are treated as a subclass of nouns; and conjunctions split into <b>coordinators</b> and <b>subordinators</b>, with many traditional subordinating conjunctions (<i>before, since, after</i>) reclassified as prepositions. Inquire uses the traditional eight and notes the modern analysis where it differs.</p>`,
   legend: [
     { c: "c1", sym: `N`, name: "Nouns & pronouns", desc: "Naming words. Nouns head noun phrases (<i>truth, Ishmael</i>); pronouns stand in for them (<i>I, me, who, nothing</i>)." },
     { c: "c2", sym: `V`, name: "Verbs", desc: "The engine of the predicate, including auxiliaries: <i>is, gave, would sail, was born</i>. Verbs are the only words that take tense." },
@@ -17343,7 +17419,7 @@ ARITH["eng-phrases"] = {
   formal: `<p>A <b>phrase</b> is a <b>constituent</b> (a word or group of words that functions as a unit in the structure of a sentence) built around a <b>head</b>, the one word that determines its category and its distribution. Words that complete the head are its <b>complements</b>; words that add optional detail are <b>modifiers</b> (pre-modifiers before the head, post-modifiers after it). A phrase lacks the subject–finite verb pairing that defines a <b>clause</b>. Handbooks define a phrase as "a group of related words"; linguistics also counts a single word as a phrase when it fills a phrase's slot (<i>She</i> is a one-word NP, the subject of <i>She waved</i>).</p>
 <div class="display"><span class="c1">NP</span> = (determiner) (pre-modifiers) <b>noun</b> (post-modifiers): <i>[the [very old] <b>sailor</b> [at the gate]]</i>. A pronoun or proper noun is an NP alone.<br><span class="c2">VP</span> = (auxiliaries) <b>main verb</b> (objects, complements, adverbials): <i>[has <b>mended</b> [his nets] [on the beach]]</i>.<br><span class="c3">AjP</span> = (degree modifier) <b>adjective</b> (complement): <i>[much too <b>cold</b> [for swimming]]</i>, <i>[<b>fond</b> [of his lamp]]</i>.<br><span class="c4">AvP</span> = (degree modifier) <b>adverb</b> (complement): <i>[remarkably <b>quickly</b>]</i>, <i>[as <b>well</b> as she could]</i>.<br><span class="c5">PP</span> = <b>preposition</b> + object (an NP, pronoun or gerund phrase): <i>[<b>at</b> [the gate]]</i>, <i>[<b>for</b> [swimming]]</i>.</div>
 <p>A PP functions <b>adjectivally</b> when it modifies a noun (<i>the gate <u>of the churchyard</u></i>) and <b>adverbially</b> when it modifies a verb, adjective or clause (<i>waited <u>at the gate</u></i>). An <b>appositive</b> is an NP (less often another phrase) that renames an adjacent NP; nonrestrictive appositives take commas. An <b>absolute phrase</b> is an NP followed by a participle (or an adjective or PP) that modifies the whole clause: <i>[<u>its sails</u> <u>torn</u>], the ship limped home</i>. Four <b>constituency tests</b> find phrases: <b>substitution</b> by a pro-form (<i>he, it, there, then, so, do so</i>); <b>movement</b> (fronting, or a cleft: <i>It was the old sailor who …</i>); the <b>fragment answer</b> to a question (<i>Who waved? The old sailor.</i>); and <b>coordination</b> with a phrase of the same type (<i>at the gate and on the path</i>). A string that passes is a constituent; a string that fails (<i>old sailor at</i>) is not. The tests also decide attachment: in <i>saw a ship with torn sails</i>, <i>saw it</i> replaces <i>a ship with torn sails</i>, so the PP is inside the object NP.</p>
-<p>Two senses of "verb phrase" are in use. Handbooks (and the Verbs node) use it for the main verb with its auxiliaries, <i>has been mending</i>. Grammars of phrase structure use VP for the verb together with its objects, complements and adverbials, which is the complete predicate: <i>[has been mending his nets on the beach]</i>, the unit that <i>do so</i> replaces. Codex brackets the larger VP and calls the verb string its head. Modern grammars revise other traditional points too. Huddleston and Pullum's <i>Cambridge Grammar of the English Language</i> (2002) treats articles and words like <i>my, this, some</i> as <b>determiners</b>, a function inside the NP, not adjectives. It analyses most traditional subordinating conjunctions as prepositions, so <i>until the tide turned</i> is a PP whose complement is a clause (handbooks call it an adverb clause). And it treats absolute phrases as <b>non-finite</b> or <b>verbless clauses</b> with their own subject. Codex uses the traditional names and notes these where they matter.</p>`,
+<p>Two senses of "verb phrase" are in use. Handbooks (and the Verbs node) use it for the main verb with its auxiliaries, <i>has been mending</i>. Grammars of phrase structure use VP for the verb together with its objects, complements and adverbials, which is the complete predicate: <i>[has been mending his nets on the beach]</i>, the unit that <i>do so</i> replaces. Inquire brackets the larger VP and calls the verb string its head. Modern grammars revise other traditional points too. Huddleston and Pullum's <i>Cambridge Grammar of the English Language</i> (2002) treats articles and words like <i>my, this, some</i> as <b>determiners</b>, a function inside the NP, not adjectives. It analyses most traditional subordinating conjunctions as prepositions, so <i>until the tide turned</i> is a PP whose complement is a clause (handbooks call it an adverb clause). And it treats absolute phrases as <b>non-finite</b> or <b>verbless clauses</b> with their own subject. Inquire uses the traditional names and notes these where they matter.</p>`,
   legend: [
     { c: "c1", sym: `NP`, name: "Noun phrase", desc: "Head: a noun or pronoun. <i>[the old <b>sailor</b> at the gate]</i>, <i>[<b>she</b>]</i>. Subjects, objects and appositives are noun phrases." },
     { c: "c2", sym: `VP`, name: "Verb phrase", desc: "Head: the main verb, with its auxiliaries. The larger VP takes in the verb's objects and adverbials: the complete predicate." },
@@ -32631,7 +32707,7 @@ if (typeof document === "undefined") return;   // Node tests stop here
 /* ---------------- 2. MusicKit: drawing and sound ---------------- */
 const MT = W.MusicTheory;
 // Vector glyph paths in staff-space units (1 = distance between two staff lines), y pointing UP.
-// Drawn by Codex (no font needed): smooth Catmull-Rom curves through these points.
+// Drawn by Inquire (no font needed): smooth Catmull-Rom curves through these points.
 const G_CLEF = [[0.08,0.1],[0.5,0.05],[0.62,-0.42],[0.25,-0.86],[-0.38,-0.82],[-0.78,-0.3],[-0.72,0.45],[-0.25,1.15],[0.32,1.85],[0.6,2.6],[0.52,3.35],[0.22,3.75],[-0.08,3.45],[-0.2,2.7],[-0.08,1.6],[0.12,0.3],[0.28,-1.2],[0.3,-2.05],[0.05,-2.55],[-0.35,-2.55]];
 const F_CLEF = [[0,0],[0.18,0.5],[0.7,0.72],[1.18,0.42],[1.3,-0.25],[1.05,-1.0],[0.5,-1.65],[-0.15,-2.1]];
 function spline(g, pts, X, Y){ g.beginPath(); g.moveTo(X(pts[0][0]), Y(pts[0][1]));
@@ -63347,15 +63423,15 @@ function render(){
 function renderMenu(){
   const s = h("div", { class: "screen" });
   s.innerHTML = `<div class="screen-in">
-    <div class="hello"><p class="eyebrow">Codex · knowledge console</p><h1>Choose a section</h1>
-    <p>Codex maps each subject as a skill tree. Every node is a full dossier with an interactive model, the exact definitions, a worked example, and where the idea is used.</p></div>
+    <div class="hello"><p class="eyebrow">Inquire · knowledge console</p><h1>Choose a section</h1>
+    <p>Inquire maps each subject as a skill tree. Every node is a full dossier with an interactive model, the exact definitions, a worked example, and where the idea is used.</p></div>
     <div class="slots" id="slots"></div>
     <div class="verline" id="verline"></div></div>`;
   viewEl.appendChild(s);
   const slots = $("#slots", s);
   if (window.codexDesktop) {
     const vl = $("#verline", s);
-    vl.innerHTML = `<span>Codex <span class="num">v${esc(DESK_VERSION || "")}</span></span><button type="button" class="btn-s" id="chk">Check for updates</button>`;
+    vl.innerHTML = `<span>Inquire <span class="num">v${esc(DESK_VERSION || "")}</span></span><button type="button" class="btn-s" id="chk">Check for updates</button>`;
     $("#chk", s).onclick = () => window.codexDesktop.checkForUpdates();
   }
   const d = h("button", { type: "button", class: "slot big", onclick: () => go({ view: "dict", topic: null }) },
@@ -63961,7 +64037,7 @@ function glossaryPopover(root, subject){
   cleanup.push(() => { close(); document.removeEventListener("click", outside); document.removeEventListener("keydown", esc2); window.removeEventListener("resize", close); });
 }
 
-/* ---------- desktop shell (only inside the Codex app) ---------- */
+/* ---------- desktop shell (only inside the Inquire app) ---------- */
 let DESK_VERSION = "";
 if (window.codexDesktop) {
   const D = window.codexDesktop;
@@ -63973,11 +64049,11 @@ if (window.codexDesktop) {
     clearTimeout(hideT);
     const v = s.version ? esc(s.version) : "";
     let html = "", keep = true;
-    if (s.status === "downloading") html = `<span class="dot"></span>Downloading Codex ${v}… <span class="num">${s.percent || 0}%</span>`;
-    else if (s.status === "ready") html = `<span class="dot"></span>Codex ${v} is ready.<button type="button" class="btn good" id="upd-go">Install &amp; Relaunch</button><button type="button" class="btn-s" id="upd-x">Later</button>`;
-    else if (s.status === "installing") html = `<span class="dot"></span>Installing Codex ${v}…`;
-    else if (s.status === "installed") { html = `<span class="dot"></span>Updated to Codex ${v}.`; keep = false; }
-    else if (s.status === "blocked") html = `<span class="dot"></span>macOS blocked the update. Codex ${v} is in your Downloads folder: drag it into Applications and replace the old copy.<button type="button" class="btn-s" id="upd-rev">Show in Finder</button><button type="button" class="btn-s" id="upd-x">Dismiss</button>`;
+    if (s.status === "downloading") html = `<span class="dot"></span>Downloading Inquire ${v}… <span class="num">${s.percent || 0}%</span>`;
+    else if (s.status === "ready") html = `<span class="dot"></span>Inquire ${v} is ready.<button type="button" class="btn good" id="upd-go">Install &amp; Relaunch</button><button type="button" class="btn-s" id="upd-x">Later</button>`;
+    else if (s.status === "installing") html = `<span class="dot"></span>Installing Inquire ${v}…`;
+    else if (s.status === "installed") { html = `<span class="dot"></span>Updated to Inquire ${v}.`; keep = false; }
+    else if (s.status === "blocked") html = `<span class="dot"></span>macOS blocked the update. Inquire ${v} is in your Downloads folder: drag it into Applications and replace the old copy.<button type="button" class="btn-s" id="upd-rev">Show in Finder</button><button type="button" class="btn-s" id="upd-x">Dismiss</button>`;
     else if (s.status === "error" && s.message) html = `<span class="dot err"></span>Update problem: ${esc(s.message)}<button type="button" class="btn-s" id="upd-x">Dismiss</button>`;
     bar.hidden = !html; bar.innerHTML = html;
     const go = $("#upd-go"); if (go) go.onclick = () => { go.disabled = true; D.installUpdate(); };
@@ -63989,7 +64065,7 @@ if (window.codexDesktop) {
 
 /* ---------- boot ---------- */
 $("#brand").onclick = () => go({ view: "menu", topic: null });
-// Codex always opens on the main menu (a link with #topic still opens that page directly).
+// Inquire always opens on the main menu (a link with #topic still opens that page directly).
 const initial = fromHash() || { view: "menu" };
 if (initial.g) { Object.assign(G, initial.g); delete initial.g; }
 Object.assign(S, initial);
@@ -63999,6 +64075,274 @@ if (!SM[S.subject]) S.subject = "mathematics";
 if (S.topic && !NODE[S.topic]) S.topic = null;
 try { history.replaceState({ view: S.view, field: S.field, topic: S.topic }, ""); } catch(e){}
 render();
+})();
+
+</script>
+<script>/* web/src/intro.js */
+/* Intro / sign-in screen. Plays once per launch in the desktop app (or any page opened with ?intro).
+   Sequence: background fades in and drifts, neurons fire, logo fades in slowly, then the sign-in form appears.
+   Background: app/intro/inq-intro.webm or .mp4 (looping, muted) when present; otherwise the still plate plus the neuron sparks drawn
+   here on a canvas. The logo and form are always live elements on top, never part of the video.
+   Accounts are LOCAL to this computer (PBKDF2-hashed password in localStorage). There is no server, so no password reset. */
+(function () {
+"use strict";
+const desktop = !!window.codexDesktop;
+const wanted = desktop || /[?&]intro\b/.test(location.search);
+const appEl = document.getElementById("app");
+const who = document.getElementById("whoami");
+if (!wanted || !appEl) { if (who) who.hidden = true; return; }
+
+const reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const ACC_KEY = "codex.accounts", REM_KEY = "codex.rememberedUser";
+const ls = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+
+/* ---------- local accounts ---------- */
+const canCrypto = !!(window.crypto && crypto.subtle);
+const b64 = u8 => btoa(String.fromCharCode.apply(null, u8));
+const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function derive(pw, salt) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations: 210000 }, key, 256);
+  return b64(new Uint8Array(bits));
+}
+const same = (a, b) => { if (a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0; };
+const nameOk = u => /^[A-Za-z0-9_.-]{3,24}$/.test(u);
+const accounts = () => ls.get(ACC_KEY, {});
+async function createAccount(user, pw) {
+  const all = accounts(), id = user.toLowerCase();
+  if (all[id]) throw new Error("That username is taken on this computer.");
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  all[id] = { name: user, salt: b64(salt), hash: await derive(pw, salt), created: Date.now() };
+  ls.set(ACC_KEY, all);
+  return all[id].name;
+}
+let failures = 0;
+async function checkLogin(user, pw) {
+  if (failures >= 3) await new Promise(r => setTimeout(r, Math.min(failures - 2, 6) * 1000)); // slow down guessing
+  const a = accounts()[user.toLowerCase()];
+  const hash = await derive(pw, a ? unb64(a.salt) : new Uint8Array(16)); // same work either way
+  if (!a || !same(hash, a.hash)) { failures++; throw new Error("Username or password not recognised."); }
+  failures = 0;
+  return a.name;
+}
+
+/* ---------- markup ---------- */
+const root = document.createElement("div");
+root.className = "inqi";
+root.id = "inqi";
+root.setAttribute("role", "dialog");
+root.setAttribute("aria-modal", "true");
+root.setAttribute("aria-label", "Sign in to Inquire");
+root.innerHTML = `
+  <div class="inqi-world" aria-hidden="true">
+    <div class="inqi-plate"></div>
+    <video class="inqi-video" muted loop playsinline preload="auto" tabindex="-1"></video>
+    <canvas class="inqi-fx"></canvas>
+  </div>
+  <div class="inqi-shade" aria-hidden="true"></div>
+  <div class="inqi-stage">
+    <img class="inqi-logo" src="intro/inq-lockup.png" alt="Inquire">
+    <form class="inqi-form" novalidate>
+      <div class="inqi-tabs" role="tablist">
+        <button type="button" class="inqi-tab" role="tab" id="tab-in" aria-selected="true" data-mode="in">Sign in</button>
+        <button type="button" class="inqi-tab" role="tab" id="tab-up" aria-selected="false" data-mode="up">Create account</button>
+      </div>
+      <label class="inqi-field"><span>Username</span><input name="u" type="text" autocomplete="username" autocapitalize="off" spellcheck="false" maxlength="24" required></label>
+      <label class="inqi-field"><span>Password</span><input name="p" type="password" autocomplete="current-password" required></label>
+      <label class="inqi-field" data-up hidden><span>Confirm password</span><input name="p2" type="password" autocomplete="new-password"></label>
+      <label class="inqi-check"><input name="r" type="checkbox"> Remember my username</label>
+      <button type="submit" class="inqi-go">Sign in</button>
+      <p class="inqi-msg" role="alert" aria-live="polite"></p>
+      <p class="inqi-note">Accounts live on this computer only.</p>
+    </form>
+  </div>
+  <button type="button" class="inqi-skip">Skip intro</button>`;
+document.body.appendChild(root);
+appEl.inert = true;
+if (who) who.hidden = true;
+
+const $ = s => root.querySelector(s);
+const form = $(".inqi-form"), msg = $(".inqi-msg"), go = $(".inqi-go");
+const inU = form.elements.u, inP = form.elements.p, inP2 = form.elements.p2, inR = form.elements.r;
+let mode = "in", done = false, fxStop = null;
+
+/* ---------- sequence ---------- */
+const timers = [];
+const at = (ms, fn) => timers.push(setTimeout(fn, ms));
+function showForm() {
+  root.classList.add("is-bg", "is-logo", "is-form");
+  setTimeout(() => (inU.value ? inP : inU).focus({ preventScroll: true }), reduced ? 0 : 900);
+}
+function play() {
+  if (reduced) { root.classList.add("is-fast"); showForm(); startFx(); return; }
+  at(150, () => root.classList.add("is-bg"));
+  at(900, startFx);
+  at(2600, () => root.classList.add("is-logo"));
+  at(6400, showForm);
+}
+function skip() {
+  if (root.classList.contains("is-form")) return;
+  timers.forEach(clearTimeout);
+  root.classList.add("is-fast");
+  showForm(); startFx();
+  setTimeout(() => root.classList.remove("is-fast"), 60);
+}
+$(".inqi-skip").addEventListener("click", skip);
+document.addEventListener("keydown", e => { if (!done && !root.hidden && !root.classList.contains("is-form") && e.key !== "Tab") skip(); });
+root.addEventListener("pointerdown", e => { if (!e.target.closest(".inqi-form,.inqi-skip")) skip(); });
+
+/* ---------- form ---------- */
+function setMode(m) {
+  mode = m;
+  root.querySelectorAll(".inqi-tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.mode === m)));
+  form.querySelectorAll("[data-up]").forEach(el => { el.hidden = m !== "up"; });
+  inP2.required = m === "up";
+  inP.autocomplete = m === "up" ? "new-password" : "current-password";
+  go.textContent = m === "up" ? "Create account" : "Sign in";
+  setMsg("");
+  inU.focus({ preventScroll: true });
+}
+root.querySelectorAll(".inqi-tab").forEach(t => t.addEventListener("click", () => setMode(t.dataset.mode)));
+function setMsg(t, ok) { msg.textContent = t; msg.classList.toggle("ok", !!ok); [inU, inP, inP2].forEach(i => i.removeAttribute("aria-invalid")); }
+function bad(input, t) { setMsg(t); input.setAttribute("aria-invalid", "true"); input.focus(); return false; }
+function validate() {
+  const u = inU.value.trim();
+  if (!u) return bad(inU, "Enter your username.");
+  if (mode === "up" && !nameOk(u)) return bad(inU, "Use 3–24 letters, numbers, dots, dashes or underscores.");
+  if (!inP.value) return bad(inP, "Enter your password.");
+  if (mode === "up") {
+    if (inP.value.length < 8) return bad(inP, "Use at least 8 characters for the password.");
+    if (inP.value !== inP2.value) return bad(inP2, "The two passwords do not match.");
+  }
+  return true;
+}
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!canCrypto) return setMsg("This window cannot protect passwords, so accounts are unavailable.");
+  if (!validate()) return;
+  go.disabled = true;
+  try {
+    const u = inU.value.trim();
+    const name = mode === "up" ? await createAccount(u, inP.value) : await checkLogin(u, inP.value);
+    if (inR.checked) ls.set(REM_KEY, name); else ls.del(REM_KEY);
+    inP.value = inP2.value = "";
+    enter(name);
+  } catch (err) {
+    setMsg(err.message || "Something went wrong. Try again.");
+    inP.select();
+  } finally { go.disabled = false; }
+});
+
+function enter(name) {
+  done = true;
+  setMsg("Welcome, " + name + ".", true);
+  window.InquireUser = name;
+  if (who) { who.textContent = name + " · sign out"; who.hidden = false; who.setAttribute("aria-label", "Signed in as " + name + ". Sign out"); }
+  root.classList.add("is-leaving");
+  appEl.inert = false;
+  setTimeout(() => { root.hidden = true; if (fxStop) fxStop(); const v = $(".inqi-video"); try { v.pause(); } catch (e) {} const view = document.getElementById("view"); if (view) view.focus({ preventScroll: true }); }, 950);
+  window.dispatchEvent(new CustomEvent("inquire:signed-in", { detail: { user: name } }));
+}
+if (who) who.addEventListener("click", () => {
+  delete window.InquireUser; who.hidden = true; ls.del(REM_KEY);
+  appEl.inert = true; root.hidden = false; root.classList.remove("is-leaving");
+  setMode("in"); inU.value = ""; inR.checked = false; done = false;
+  const v = $(".inqi-video"); try { if (root.classList.contains("has-video")) v.play(); } catch (e) {}
+  startFx(); inU.focus();
+});
+
+/* ---------- background video (optional) ---------- */
+// Drop app/intro/inq-intro.webm and/or inq-intro.mp4 into the app and it is used automatically; with neither file the still plate + sparks play.
+(function tryVideo() {
+  if (reduced) return; // reduced motion: keep the still plate
+  const v = $(".inqi-video"); let missing = 0;
+  const kinds = [["inq-intro.webm", "video/webm"], ["inq-intro.mp4", "video/mp4"]];
+  kinds.forEach(([file, type]) => {
+    const s = document.createElement("source"); s.type = type; s.src = "intro/" + file;
+    s.addEventListener("error", () => { if (++missing === kinds.length) root.classList.remove("has-video"); });
+    v.appendChild(s);
+  });
+  v.addEventListener("canplay", () => { root.classList.add("has-video"); if (fxStop) fxStop(); v.play().catch(() => {}); }, { once: true });
+  v.load();
+})();
+
+/* ---------- neuron sparks (used while there is no video) ---------- */
+// Positions are in the 1672×941 source image; the plate is drawn "cover", so they are mapped the same way.
+const IW = 1672, IH = 941;
+const NODES = [[100, 322], [215, 415], [205, 385], [385, 235], [330, 215], [60, 290], [250, 150], [470, 175], [150, 520], [520, 640],
+  [620, 700], [870, 705], [1250, 650], [1330, 520], [1385, 598], [1497, 688], [1545, 645], [1600, 720], [1450, 470], [1620, 420]];
+let edges = null;
+function buildEdges(rng) {
+  const E = [];
+  NODES.forEach((a, i) => {
+    NODES.map((b, j) => ({ j, d: Math.hypot(a[0] - b[0], a[1] - b[1]) })).filter(o => o.j !== i && o.d < 420).sort((p, q) => p.d - q.d).slice(0, 2).forEach(o => {
+      if (E.some(e => (e.a === i && e.b === o.j) || (e.a === o.j && e.b === i))) return;
+      const b = NODES[o.j], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, nx = -(b[1] - a[1]), ny = b[0] - a[0], k = (rng() - .5) * .5;
+      E.push({ a: i, b: o.j, cx: mx + nx * k, cy: my + ny * k });
+    });
+  });
+  return E;
+}
+function startFx() {
+  if (fxStop || reduced || root.classList.contains("has-video")) return;
+  const cv = $(".inqi-fx"), cx = cv.getContext("2d");
+  let W = 0, H = 0, dpr = 1, raf = 0, last = 0, next = 0, alive = true;
+  const fires = [], sigs = [];
+  const rnd = () => Math.random();
+  if (!edges) edges = buildEdges(rnd);
+  const size = () => { dpr = Math.min(window.devicePixelRatio || 1, 2); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * dpr; cv.height = H * dpr; };
+  size(); addEventListener("resize", size);
+  const map = (x, y) => { const s = Math.max(W / IW, H / IH); return [x * s + (W - IW * s) / 2, y * s + (H - IH * s) / 2, s]; };
+  const bez = (e, t) => { const a = NODES[e.a], b = NODES[e.b], u = 1 - t; return [u * u * a[0] + 2 * u * t * e.cx + t * t * b[0], u * u * a[1] + 2 * u * t * e.cy + t * t * b[1]]; };
+  function fire(i, amp, now) { fires.push({ i, t0: now, dur: 1300 + rnd() * 700, amp }); }
+  function spawn(now) {
+    const i = Math.floor(rnd() * NODES.length);
+    fire(i, .5 + rnd() * .4, now);
+    const out = edges.filter(e => e.a === i || e.b === i).sort(() => rnd() - .5).slice(0, 1 + (rnd() < .4));
+    out.forEach(e => sigs.push({ e, fwd: e.a === i, t0: now + 120, dur: 900 + rnd() * 900, hit: false }));
+  }
+  function frame(now) {
+    if (!alive) return;
+    raf = requestAnimationFrame(frame);
+    if (document.hidden) { last = now; return; }
+    if (now >= next) { spawn(now); next = now + 380 + rnd() * 1100; }
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, W, H);
+    cx.globalCompositeOperation = "lighter"; cx.lineCap = "round";
+    for (let k = sigs.length - 1; k >= 0; k--) {
+      const s = sigs[k], p = (now - s.t0) / s.dur;
+      if (p < 0) continue;
+      if (p >= 1) { if (!s.hit) fire(s.fwd ? s.e.b : s.e.a, .45, now); sigs.splice(k, 1); continue; }
+      const t1 = s.fwd ? p : 1 - p, tail = s.fwd ? Math.max(0, p - .22) : Math.min(1, 1 - p + .22);
+      const env = Math.sin(Math.PI * p);
+      cx.beginPath();
+      for (let n = 0; n <= 10; n++) { const t = tail + (t1 - tail) * n / 10, q = bez(s.e, t), m = map(q[0], q[1]); n ? cx.lineTo(m[0], m[1]) : cx.moveTo(m[0], m[1]); }
+      const sc = map(0, 0)[2];
+      cx.strokeStyle = `rgba(160,235,255,${.55 * env})`; cx.lineWidth = Math.max(1, 1.5 * sc); cx.shadowColor = "rgba(92,200,224,.9)"; cx.shadowBlur = 8 * sc; cx.stroke();
+    }
+    cx.shadowBlur = 0;
+    for (let k = fires.length - 1; k >= 0; k--) {
+      const f = fires[k], p = (now - f.t0) / f.dur;
+      if (p >= 1) { fires.splice(k, 1); continue; }
+      const env = p < .18 ? p / .18 : Math.pow(1 - (p - .18) / .82, 1.6);
+      const m = map(NODES[f.i][0], NODES[f.i][1]), r = (26 + 30 * env) * m[2] * 1.4;
+      const g = cx.createRadialGradient(m[0], m[1], 0, m[0], m[1], r);
+      g.addColorStop(0, `rgba(230,250,255,${.7 * f.amp * env})`); g.addColorStop(.25, `rgba(110,215,245,${.4 * f.amp * env})`); g.addColorStop(1, "rgba(60,150,220,0)");
+      cx.fillStyle = g; cx.beginPath(); cx.arc(m[0], m[1], r, 0, 7); cx.fill();
+    }
+  }
+  raf = requestAnimationFrame(t => { last = t; next = t + 300; frame(t); });
+  fxStop = () => { alive = false; cancelAnimationFrame(raf); removeEventListener("resize", size); cx.clearRect(0, 0, W, H); fxStop = null; };
+}
+
+/* ---------- go ---------- */
+const remembered = ls.get(REM_KEY, "");
+if (remembered) { inU.value = remembered; inR.checked = true; }
+window.InquireIntro = { skip, isOpen: () => !done };
+play();
 })();
 
 </script>

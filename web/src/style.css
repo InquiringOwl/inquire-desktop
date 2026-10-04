@@ -53,6 +53,8 @@ table.proof td:first-child{width:55%}
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer;background:none;border:0;padding:0}
 .brand-mark{width:26px;height:26px;border:1px solid var(--cyan);display:grid;place-items:center;font:600 14px/1 var(--math);color:var(--cyan);
   clip-path:polygon(0 0,80% 0,100% 20%,100% 100%,20% 100%,0 80%);background:rgba(92,200,224,.08)}
+.brand-mark{width:30px;height:30px;border:0;clip-path:none;background:none;display:block}
+.brand-mark img{display:block;width:30px;height:30px}
 .brand-name{font:600 15px/1 var(--ui);letter-spacing:.28em;text-transform:uppercase}
 .crumbs{display:flex;align-items:center;gap:6px;font:500 13px/1 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);min-width:0;overflow:hidden;white-space:nowrap}
 .crumbs button{background:none;border:0;padding:4px 2px;color:var(--muted);cursor:pointer;letter-spacing:inherit;text-transform:inherit}

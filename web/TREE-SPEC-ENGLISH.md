@@ -6,7 +6,7 @@ Field map (`DB.subjectMaps.english`, fields in `DB.fields` with `subject: "engli
 - **Upper-Division Core**: Shakespeare ← Brit I; Literary Theory & Criticism ← Intro Lit + Comp II; Advanced Composition & Rhetoric ← Comp II; History of the English Language ← Linguistics + Brit I.
 - **Specialisations & Capstone**: Drama ← Shakespeare; Poetry & Poetics ← Brit II + Theory; The Novel ← Theory; Advanced Creative Writing Workshop ← Creative Writing + Rhetoric; Senior Seminar ← Theory + Novel + Rhetoric.
 
-Codex field names for `beyond`: Composition I; Composition II; Introduction to Creative Writing; Introduction to Literature; Introduction to English Linguistics; British Literature I/II; American Literature I/II; World Literature; Shakespeare; Literary Theory & Criticism; Advanced Composition & Rhetoric; History of the English Language; Drama; Poetry & Poetics; The Novel; Advanced Creative Writing Workshop; Senior Seminar.
+Inquire field names for `beyond`: Composition I; Composition II; Introduction to Creative Writing; Introduction to Literature; Introduction to English Linguistics; British Literature I/II; American Literature I/II; World Literature; Shakespeare; Literary Theory & Criticism; Advanced Composition & Rhetoric; History of the English Language; Drama; Poetry & Poetics; The Novel; Advanced Creative Writing Workshop; Senior Seminar.
 
 # Grammar & Usage tree (`DB.trees.grammar`, 21 nodes)
 

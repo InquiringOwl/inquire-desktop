@@ -1,5 +1,5 @@
 /* ============ Story art: Phrases (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: sleepy-hollow (Irving, "The Legend of Sleepy Hollow"). */
+   Original scene drawn for Inquire, 480 × 180: sleepy-hollow (Irving, "The Legend of Sleepy Hollow"). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};

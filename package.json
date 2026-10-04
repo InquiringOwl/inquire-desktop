@@ -1,8 +1,8 @@
 {
   "name": "codex-desktop",
-  "productName": "Codex",
-  "version": "1.12.0",
-  "description": "Codex: a knowledge console that maps subjects as skill trees, starting with the Mathematics dictionary.",
+  "productName": "Inquire",
+  "version": "1.13.0",
+  "description": "Inquire: a knowledge console that maps subjects as skill trees, starting with the Mathematics dictionary.",
   "author": "Wolfie's Coven <devon@ashleyhoffmann.com>",
   "license": "UNLICENSED",
   "private": true,
@@ -31,7 +31,7 @@
   },
   "build": {
     "appId": "com.wolfiescoven.codex",
-    "productName": "Codex",
+    "productName": "Inquire",
     "copyright": "Copyright © 2026 Wolfie's Coven",
     "directories": {
       "output": "dist",
@@ -73,10 +73,10 @@
           ]
         }
       ],
-      "artifactName": "Codex-${version}-${arch}-mac.${ext}"
+      "artifactName": "Inquire-${version}-${arch}-mac.${ext}"
     },
     "dmg": {
-      "artifactName": "Codex-${version}-${arch}.${ext}"
+      "artifactName": "Inquire-${version}-${arch}.${ext}"
     },
     "win": {
       "target": [
@@ -87,7 +87,7 @@
           ]
         }
       ],
-      "artifactName": "Codex-Setup-${version}.${ext}"
+      "artifactName": "Inquire-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,
@@ -98,7 +98,7 @@
         "AppImage"
       ],
       "category": "Education",
-      "artifactName": "Codex-${version}.${ext}"
+      "artifactName": "Inquire-${version}.${ext}"
     }
   }
 }

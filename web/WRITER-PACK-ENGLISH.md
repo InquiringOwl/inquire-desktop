@@ -23,7 +23,7 @@ HTML = raw HTML string; TEXT = plain text, no tags (shown escaped).
 - `example: { prompt: HTML, lines: [{ math: HTML, note: TEXT }, …], answer: HTML }`: 4–8 lines, ending with a check (substitution, transformation or reading aloud). `math` cells don't wrap on desktop: keep each under ~40 characters (split long lines into two).
 - `why` (HTML, 2 `<p>`), `careers` [{ role, use }] 5–7 (TEXT, real and specific), `life` [TEXT] ≥3, `fields` [{ name, use }] ≥2 (TEXT).
 - `prereqWhy: { "<pre-id>": HTML }` for every prerequisite and `unlocksWhy: { "<unlock-id>": HTML }` for every unlock in the spec (`{}` if none). One or two sentences on the exact link.
-- `beyond` [{ field, why }] 2–4 (TEXT), using Codex English field names (listed at the top of the spec).
+- `beyond` [{ field, why }] 2–4 (TEXT), using Inquire English field names (listed at the top of the spec).
 - `mistakes` [{ wrong: HTML, fix: HTML }] ≥3: real errors students make.
 - `practice` [{ q: HTML, a: HTML }] exactly 4, easy → hard, full answers with the reason.
 - `origin` (HTML, optional): only history you are sure of.

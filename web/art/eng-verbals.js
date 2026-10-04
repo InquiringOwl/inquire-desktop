@@ -1,5 +1,5 @@
 /* ============ Story art: Verbals (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: elsinore (Shakespeare, Hamlet). */
+   Original scene drawn for Inquire, 480 × 180: elsinore (Shakespeare, Hamlet). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};

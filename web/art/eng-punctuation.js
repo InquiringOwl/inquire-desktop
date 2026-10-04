@@ -1,5 +1,5 @@
 /* ============ Story art: Punctuation (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: dickinson-carriage (Emily Dickinson, "Because I could not stop for Death"). */
+   Original scene drawn for Inquire, 480 × 180: dickinson-carriage (Emily Dickinson, "Because I could not stop for Death"). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};

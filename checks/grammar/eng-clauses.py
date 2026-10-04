@@ -1,4 +1,4 @@
-# content: dead8d7323a8
+# content: b03bfb40c333
 # eng-clauses: Independent & Dependent Clauses
 import re
 plain = lambda h: re.sub(r"<[^>]+>", "", h)

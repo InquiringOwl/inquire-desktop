@@ -1,4 +1,4 @@
-// One-command release. Installed copies of Codex pick the new version up through auto-update.
+// One-command release. Installed copies of Inquire pick the new version up through auto-update.
 //   npm run release -- patch "Short note"     1.2.0 → 1.2.1
 //   npm run release -- minor "Geometry"       1.2.0 → 1.3.0
 //   npm run release -- 2.0.0 "Big change"     exact version
@@ -23,7 +23,7 @@ const cmp = (x, y) => { const p = x.split('.').map(Number), q = y.split('.').map
 if (cmp(next, pkg.version) <= 0) stop(`${next} is not newer than the current ${pkg.version}.`);
 
 if (out('git rev-parse --abbrev-ref HEAD') !== 'main') stop('Switch to the main branch first.');
-console.log(`\n▸ Codex ${pkg.version} → ${next}${note ? ': ' + note : ''}\n▸ Checking GitHub for newer commits…`);
+console.log(`\n▸ Inquire ${pkg.version} → ${next}${note ? ': ' + note : ''}\n▸ Checking GitHub for newer commits…`);
 sh('git fetch -q origin main');
 if (out('git rev-list --count HEAD..origin/main') !== '0') stop('GitHub has commits this Mac does not. Run "git pull" first.');
 if (out(`git tag -l v${next}`)) stop(`Tag v${next} already exists.`);
@@ -38,9 +38,9 @@ sh('node tools/build-web.js', { stdio: 'ignore' });
 const changes = out('git status --short');
 console.log('▸ Committing:\n' + changes.split('\n').map(l => '    ' + l).join('\n'));
 sh('git add -A');
-sh(`git commit -q -m ${JSON.stringify(`Codex ${next}${note ? ': ' + note : ''}`)}`);
+sh(`git commit -q -m ${JSON.stringify(`Inquire ${next}${note ? ': ' + note : ''}`)}`);
 console.log('▸ Pushing…');
 sh('git push -q origin main');
 sh(`git tag v${next}`);
 sh(`git push -q origin v${next}`);
-console.log(`\n✓ Codex ${next} is on its way. GitHub is building it now (about 5 minutes):\n  https://github.com/InquiringOwl/codex-desktop/actions\nInstalled copies update themselves after that.`);
+console.log(`\n✓ Inquire ${next} is on its way. GitHub is building it now (about 5 minutes):\n  https://github.com/InquiringOwl/codex-desktop/actions\nInstalled copies update themselves after that.`);

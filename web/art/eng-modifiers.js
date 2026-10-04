@@ -1,5 +1,5 @@
 /* ============ Story art: Adjectives & Adverbs (eng-modifiers) ============
-   Original inline-SVG scenes drawn for Codex, 480 × 180. Gradient ids are prefixed with the scene key. */
+   Original inline-SVG scenes drawn for Inquire, 480 × 180. Gradient ids are prefixed with the scene key. */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};

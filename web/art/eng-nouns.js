@@ -1,5 +1,5 @@
 /* ============ Story art: Nouns & Pronouns (inline SVG, offline) ============
-   Drawn for Codex, 480 × 180. No book covers, film stills or other artists' illustrations. */
+   Drawn for Inquire, 480 × 180. No book covers, film stills or other artists' illustrations. */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};

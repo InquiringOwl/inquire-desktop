@@ -113,7 +113,7 @@ if (typeof document === "undefined") return;   // Node tests stop here
 /* ---------------- 2. MusicKit: drawing and sound ---------------- */
 const MT = W.MusicTheory;
 // Vector glyph paths in staff-space units (1 = distance between two staff lines), y pointing UP.
-// Drawn by Codex (no font needed): smooth Catmull-Rom curves through these points.
+// Drawn by Inquire (no font needed): smooth Catmull-Rom curves through these points.
 const G_CLEF = [[0.08,0.1],[0.5,0.05],[0.62,-0.42],[0.25,-0.86],[-0.38,-0.82],[-0.78,-0.3],[-0.72,0.45],[-0.25,1.15],[0.32,1.85],[0.6,2.6],[0.52,3.35],[0.22,3.75],[-0.08,3.45],[-0.2,2.7],[-0.08,1.6],[0.12,0.3],[0.28,-1.2],[0.3,-2.05],[0.05,-2.55],[-0.35,-2.55]];
 const F_CLEF = [[0,0],[0.18,0.5],[0.7,0.72],[1.18,0.42],[1.3,-0.25],[1.05,-1.0],[0.5,-1.65],[-0.15,-2.1]];
 function spline(g, pts, X, Y){ g.beginPath(); g.moveTo(X(pts[0][0]), Y(pts[0][1]));

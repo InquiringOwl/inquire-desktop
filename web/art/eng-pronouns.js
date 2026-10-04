@@ -1,5 +1,5 @@
 /* ============ Story art: Pronoun Case & Reference (inline SVG, offline) ============
-   Original scenes drawn for Codex, 480 × 180: baker-street (The Adventures of Sherlock Holmes),
+   Original scenes drawn for Inquire, 480 × 180: baker-street (The Adventures of Sherlock Holmes),
    wuthering-moor (Wuthering Heights). */
 (function(){
 window.DB = window.DB || {};

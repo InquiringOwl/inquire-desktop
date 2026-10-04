@@ -1,11 +1,11 @@
 // Mac self-updater for builds without an Apple Developer ID.
 //
 // Squirrel (electron-updater's Mac installer) only works for Developer-ID-signed apps, so on
-// an ad-hoc-signed build Codex updates itself the same way Coven Wallet does:
+// an ad-hoc-signed build Inquire updates itself the same way Coven Wallet does:
 //   1. Ask GitHub for the latest release of the public releases repo.
 //   2. Read latest-mac.yml (written by electron-builder) for the zip name, size and sha512.
 //   3. Download the zip for this Mac's chip, check the sha512, unzip it with ditto.
-//   4. After Codex quits, a small script swaps the new Codex.app into place and reopens it.
+//   4. After Inquire quits, a small script swaps the new Inquire.app into place and reopens it.
 // If macOS refuses the swap (Privacy & Security > App Management), the old app is put back
 // and the new one is left in ~/Downloads with instructions.
 const fs = require('fs');
@@ -39,7 +39,7 @@ class MacUpdater {
     this.busy = false;
   }
   set(patch) { this.state = { ...this.state, ...patch }; this.notify(this.state); }
-  headers() { return { 'User-Agent': 'Codex-Updater', Accept: 'application/vnd.github+json' }; }
+  headers() { return { 'User-Agent': 'Inquire-Updater', Accept: 'application/vnd.github+json' }; }
 
   async latestRelease() {
     const res = await this.net.fetch(`https://api.github.com/repos/${this.owner}/${this.repo}/releases/latest`, { headers: this.headers() });
@@ -61,7 +61,7 @@ class MacUpdater {
       const assets = rel.assets || [];
       const ymlAsset = assets.find(a => a.name === 'latest-mac.yml');
       if (!ymlAsset) throw new Error('Release ' + latest + ' has no latest-mac.yml yet. The build may still be running.');
-      const yml = parseYml(await (await this.net.fetch(ymlAsset.browser_download_url, { headers: { 'User-Agent': 'Codex-Updater' } })).text());
+      const yml = parseYml(await (await this.net.fetch(ymlAsset.browser_download_url, { headers: { 'User-Agent': 'Inquire-Updater' } })).text());
       const wantArm = process.arch === 'arm64';
       const entry = yml.files.find(f => f.url.endsWith('.zip') && (wantArm ? /arm64/.test(f.url) : !/arm64/.test(f.url)));
       if (!entry) throw new Error('Release ' + latest + ' has no zip for this Mac (' + process.arch + ').');
@@ -80,7 +80,7 @@ class MacUpdater {
     const work = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-update-'));
     const zip = path.join(work, 'update.zip');
     this.set({ status: 'downloading', version, percent: 0 });
-    const res = await this.net.fetch(url, { headers: { 'User-Agent': 'Codex-Updater' } });
+    const res = await this.net.fetch(url, { headers: { 'User-Agent': 'Inquire-Updater' } });
     if (!res.ok || !res.body) throw new Error('Download failed (' + res.status + ').');
     const total = entry.size || +res.headers.get('content-length') || 0;
     const out = fs.createWriteStream(zip); const hash = crypto.createHash('sha512');
@@ -97,7 +97,7 @@ class MacUpdater {
     const dest = path.join(work, 'unpacked'); fs.mkdirSync(dest);
     await run('/usr/bin/ditto', ['-x', '-k', zip, dest]);
     const appName = fs.readdirSync(dest).find(f => f.endsWith('.app'));
-    if (!appName) throw new Error('The update does not contain Codex.app.');
+    if (!appName) throw new Error('The update does not contain Inquire.app.');
     fs.rmSync(zip, { force: true });
     this.ready = { version, appPath: path.join(dest, appName), work };
     this.set({ status: 'ready', version });
@@ -109,10 +109,10 @@ class MacUpdater {
     const r = this.ready; if (!r) return false;
     const target = this.bundlePath();
     if (!target) { this.set({ status: 'error', message: 'Updates install only into the packaged app.' }); return false; }
-    if (target.includes('AppTranslocation') || target.startsWith('/Volumes/')) { this.set({ status: 'error', message: 'Drag Codex into your Applications folder, open it from there, then install the update.' }); return false; }
+    if (target.includes('AppTranslocation') || target.startsWith('/Volumes/')) { this.set({ status: 'error', message: 'Drag Inquire into your Applications folder, open it from there, then install the update.' }); return false; }
     const backup = path.join(r.work, 'previous.app');
     const result = path.join(this.app.getPath('userData'), 'update-result.json');
-    const fallback = path.join(os.homedir(), 'Downloads', `Codex ${r.version}.app`);
+    const fallback = path.join(os.homedir(), 'Downloads', `Inquire ${r.version}.app`);
     const q = s => s.replace(/"/g, '\\"');
     const script = path.join(r.work, 'swap.sh');
     fs.writeFileSync(script, [

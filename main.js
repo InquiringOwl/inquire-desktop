@@ -1,7 +1,8 @@
-// Codex desktop shell: serves the app from a private codex:// scheme and keeps itself up to date.
+// Inquire desktop shell: serves the app from a private codex:// scheme and keeps itself up to date.
 // Source code, installers and update files all live in the public repo InquiringOwl/codex-desktop.
 const { app, BrowserWindow, protocol, net, ipcMain, shell, Menu, dialog } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const { pathToFileURL } = require('url');
 const log = require('electron-log');
 const { MacUpdater } = require('./updater-mac');
@@ -9,8 +10,11 @@ const { MacUpdater } = require('./updater-mac');
 const OWNER = 'InquiringOwl';
 const RELEASES_REPO = 'codex-desktop';
 const APP_DIR = path.join(__dirname, 'app');
-const CHECK_EVERY_MS = 4 * 60 * 60 * 1000; // every 4 hours while Codex is open
+const CHECK_EVERY_MS = 4 * 60 * 60 * 1000; // every 4 hours while Inquire is open
 const IS_MAC = process.platform === 'darwin';
+
+// The app used to be called Codex. Keep using its old data folder (saved progress lives there) when it exists.
+try { const old = path.join(app.getPath('appData'), 'Codex'); if (fs.existsSync(old)) app.setPath('userData', old); } catch (e) { /* first run: default folder */ }
 
 protocol.registerSchemesAsPrivileged([
   { scheme: 'codex', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }
@@ -32,7 +36,7 @@ function tell(message, detail, buttons) {
 function createWindow() {
   win = new BrowserWindow({
     width: 1480, height: 940, minWidth: 900, minHeight: 620,
-    backgroundColor: '#070A10', title: 'Codex',
+    backgroundColor: '#070A10', title: 'Inquire',
     titleBarStyle: IS_MAC ? 'hiddenInset' : 'default',
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true }
   });
@@ -50,10 +54,10 @@ function setupUpdates() {
     mac = new MacUpdater({ app, net, owner: OWNER, repo: RELEASES_REPO, log, notify: s => {
       send(s);
       if (!interactive) return;
-      if (s.status === 'current') { interactive = false; tell('Codex is up to date', `You have version ${app.getVersion()}.`); }
-      else if (s.status === 'downloading' && s.percent === 0) tell(`Codex ${s.version} is downloading`, 'A banner appears when it is ready to install. You can keep working.');
-      else if (s.status === 'ready') { interactive = false; tell(`Codex ${s.version} is ready`, 'Choose Install & Relaunch in the banner, or it waits until you do.'); }
-      else if (s.status === 'error') { interactive = false; tell('Could not update Codex', s.message || 'Check your internet connection and try again.'); }
+      if (s.status === 'current') { interactive = false; tell('Inquire is up to date', `You have version ${app.getVersion()}.`); }
+      else if (s.status === 'downloading' && s.percent === 0) tell(`Inquire ${s.version} is downloading`, 'A banner appears when it is ready to install. You can keep working.');
+      else if (s.status === 'ready') { interactive = false; tell(`Inquire ${s.version} is ready`, 'Choose Install & Relaunch in the banner, or it waits until you do.'); }
+      else if (s.status === 'error') { interactive = false; tell('Could not update Inquire', s.message || 'Check your internet connection and try again.'); }
     } });
     const r = mac.lastResult();
     if (r && r.ok) setTimeout(() => send({ status: 'installed', version: r.version }), 1500);
@@ -64,8 +68,8 @@ function setupUpdates() {
     autoUpdater.autoDownload = true;
     autoUpdater.autoInstallOnAppQuit = true;
     autoUpdater.on('checking-for-update', () => send({ status: 'checking' }));
-    autoUpdater.on('update-available', i => { send({ status: 'downloading', version: i.version, percent: 0 }); if (interactive) { interactive = false; tell(`Codex ${i.version} is downloading`, 'It installs when you restart. You can keep working.'); } });
-    autoUpdater.on('update-not-available', () => { send({ status: 'current' }); if (interactive) { interactive = false; tell('Codex is up to date', `You have version ${app.getVersion()}.`); } });
+    autoUpdater.on('update-available', i => { send({ status: 'downloading', version: i.version, percent: 0 }); if (interactive) { interactive = false; tell(`Inquire ${i.version} is downloading`, 'It installs when you restart. You can keep working.'); } });
+    autoUpdater.on('update-not-available', () => { send({ status: 'current' }); if (interactive) { interactive = false; tell('Inquire is up to date', `You have version ${app.getVersion()}.`); } });
     autoUpdater.on('download-progress', p => send({ status: 'downloading', percent: Math.round(p.percent) }));
     autoUpdater.on('update-downloaded', i => send({ status: 'ready', version: i.version }));
     autoUpdater.on('error', err => { log.warn('autoUpdater error', err); send({ status: 'error', message: String(err && err.message || err) }); if (interactive) { interactive = false; tell('Could not check for updates', 'Check your internet connection and try again.'); } });
@@ -86,7 +90,7 @@ app.whenReady().then(() => {
     const rel = decodeURIComponent(u.pathname).replace(/^\/+/, '') || 'index.html';
     const file = path.normalize(path.join(APP_DIR, rel));
     if (!file.startsWith(APP_DIR)) return new Response('Not found', { status: 404 });
-    return net.fetch(pathToFileURL(file).toString());
+    return net.fetch(pathToFileURL(file).toString(), { headers: req.headers }); // headers carry Range requests, which the intro video needs
   });
   const check = setupUpdates();
   ipcMain.handle('update:check', () => { check(true); return updateState; });
@@ -99,7 +103,7 @@ app.whenReady().then(() => {
   ipcMain.handle('app:version', () => app.getVersion());
 
   Menu.setApplicationMenu(Menu.buildFromTemplate([
-    ...(IS_MAC ? [{ label: 'Codex', submenu: [
+    ...(IS_MAC ? [{ label: 'Inquire', submenu: [
       { role: 'about' },
       { label: 'Check for Updates…', click: () => check(true) },
       { type: 'separator' }, { role: 'hide' }, { role: 'hideOthers' }, { role: 'unhide' }, { type: 'separator' }, { role: 'quit' }

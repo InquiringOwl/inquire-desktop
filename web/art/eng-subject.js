@@ -1,5 +1,5 @@
 /* ============ Story art: Subject & Predicate (inline SVG, offline) ============
-   Original scenes drawn for Codex, 480 × 180: whitewash-fence (The Adventures of Tom Sawyer),
+   Original scenes drawn for Inquire, 480 × 180: whitewash-fence (The Adventures of Tom Sawyer),
    walden-pond (Walden). */
 (function(){
 window.DB = window.DB || {};

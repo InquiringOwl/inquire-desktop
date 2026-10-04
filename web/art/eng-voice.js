@@ -1,5 +1,5 @@
 /* ============ Story art: Active & Passive Voice (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: declaration (the Declaration of Independence, 1776). */
+   Original scene drawn for Inquire, 480 × 180: declaration (the Declaration of Independence, 1776). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};

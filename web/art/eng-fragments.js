@@ -1,5 +1,5 @@
 /* ============ Story art: Fragments (inline SVG, offline) ============
-   Original scene drawn for Codex, 480 × 180: bleak-fog (Dickens, Bleak House). */
+   Original scene drawn for Inquire, 480 × 180: bleak-fog (Dickens, Bleak House). */
 (function(){
 window.DB = window.DB || {};
 const S = DB.scenes = DB.scenes || {};

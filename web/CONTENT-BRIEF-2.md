@@ -1,6 +1,6 @@
 # Content brief, round 2: Pre-Algebra and Algebra I
 
-You write topic dossiers for the Codex math dictionary. The schema, markup conventions and style rules are **exactly** those in `web/CONTENT-BRIEF.md` (read it fully first). The tree, prerequisites, unlocks and the lab + colour keys for each topic are in `web/TREE-SPEC.md`. For tone and depth, read two finished Arithmetic topics in `web/content/part3.js` (for example `proportions` and `real-numbers`) and match their quality.
+You write topic dossiers for the Inquire math dictionary. The schema, markup conventions and style rules are **exactly** those in `web/CONTENT-BRIEF.md` (read it fully first). The tree, prerequisites, unlocks and the lab + colour keys for each topic are in `web/TREE-SPEC.md`. For tone and depth, read two finished Arithmetic topics in `web/content/part3.js` (for example `proportions` and `real-numbers`) and match their quality.
 
 ## What changes from round 1
 - **Level.** These are the college developmental sequence: Pre-Algebra ≈ OpenStax *Prealgebra 2e* / community-college MATH 0xx; Algebra I ≈ OpenStax *Elementary Algebra 2e* / college Elementary Algebra. Use their standard terminology, definitions and conventions (e.g. "solution set", "interval notation", "extraneous solution", "zero-product property", "standard form Ax + By = C with A ≥ 0 and integer coefficients", "principal square root", "excluded values"). Everything must be correct at college level.
