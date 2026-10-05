@@ -652,7 +652,7 @@ button.gl-chip.sm{cursor:pointer}
 .gl-nav .ic{font:600 11px/1 var(--ui)!important;letter-spacing:.02em}
 /* sidebar Glossary list (Field map ⇄ Glossary) and the word pane beside it */
 .nav-gl-tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 12px 10px;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
-.nav-gl-full{margin-left:auto}
+.nav-gl-full{width:100%;text-align:center;margin-top:4px;padding:8px 9px}
 .nav-gl-none{width:100%;font:12px/1.4 var(--sans);color:var(--faint)}
 .nav-gl-flds{width:100%;display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:4px;padding-top:8px;border-top:1px dashed color-mix(in srgb,var(--line) 80%,transparent)}
 .nav-gl-fl{font:500 10px/1 var(--ui);letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-right:2px}

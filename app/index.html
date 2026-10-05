@@ -660,7 +660,7 @@ button.gl-chip.sm{cursor:pointer}
 .gl-nav .ic{font:600 11px/1 var(--ui)!important;letter-spacing:.02em}
 /* sidebar Glossary list (Field map ⇄ Glossary) and the word pane beside it */
 .nav-gl-tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 12px 10px;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
-.nav-gl-full{margin-left:auto}
+.nav-gl-full{width:100%;text-align:center;margin-top:4px;padding:8px 9px}
 .nav-gl-none{width:100%;font:12px/1.4 var(--sans);color:var(--faint)}
 .nav-gl-flds{width:100%;display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:4px;padding-top:8px;border-top:1px dashed color-mix(in srgb,var(--line) 80%,transparent)}
 .nav-gl-fl{font:500 10px/1 var(--ui);letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-right:2px}
@@ -830,7 +830,7 @@ a.inqi-soc:hover{color:#fff;border-color:var(--frame);box-shadow:0 0 14px var(--
 
 /* the app behind the window fogs and eases back */
 #app,.inqi-stage,.inqi-corner{transition:filter .35s ease,transform .35s ease}
-body.set-open #app,body.set-open .inqi-stage,body.set-open .inqi-corner,body.ask-open #app{filter:blur(3px) saturate(.75) brightness(.72);transform:scale(.985)}
+body.set-open #app,body.set-open .inqi-stage,body.set-open .inqi-corner,body.ask-open #app,body.mw-open #app{filter:blur(3px) saturate(.75) brightness(.72);transform:scale(.985)}
 .set-ov{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:16px;
   background:radial-gradient(ellipse at 50% 40%,rgba(200,220,255,.06),rgba(3,6,11,.55));opacity:0;transition:opacity .3s ease}
 body.set-open .set-ov{opacity:1}
@@ -1002,6 +1002,55 @@ body.ask-open .ask-win{transform:none}
 .ask-btns .btn{padding:9px 14px}
 .set-msg.warn{color:var(--amber)}
 
+/* rebindable shortcuts (Shortcuts tab) */
+.set-binds{display:grid;border-top:1px solid var(--line)}
+.set-bind{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.set-bind h3{margin:0}
+.set-bind p{margin:3px 0 0;font-size:12px;color:var(--faint)}
+.set-bk{min-width:120px;min-height:32px;display:flex;gap:4px;justify-content:center;align-items:center;padding:4px 8px;cursor:pointer;background:var(--panel-2);border:1px solid var(--line-2);border-radius:2px}
+.set-bk:hover,.set-bk:focus-visible{border-color:var(--frame);outline:none}
+.set-bk.off .set-kbd{color:var(--faint);border-style:dashed}
+.set-bk.rec{border-color:var(--frame);box-shadow:0 0 0 1px var(--frame),0 0 14px var(--glow)}
+.set-rec{font:600 11px/1 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--frame);animation:dk-gem 1.2s ease-in-out infinite}
+.set-bx{width:30px;height:30px;background:none;border:1px solid transparent;border-radius:2px;color:var(--muted);cursor:pointer;font-size:15px}
+.set-bx:hover:not(:disabled){color:var(--text);border-color:var(--line-2)}
+.set-bx:disabled{opacity:.25;cursor:default}
+.set-fixh{margin:26px 0 0!important}
+
+/* Your colours + presets (Appearance) */
+.set-cl{margin:0 0 12px;font-size:13px;color:var(--muted);max-width:66ch}
+.set-cl b{color:var(--text);font-weight:600}
+.set-cedit{display:grid;grid-template-columns:96px minmax(0,1fr);gap:16px;align-items:start;padding:14px;border:1px solid var(--line);background:rgba(0,0,0,.18);border-radius:3px}
+.set-cprev .set-sw{width:96px;height:96px}
+.set-cfields{display:grid;gap:8px}
+.set-cf{display:grid;grid-template-columns:150px 40px 96px;gap:10px;align-items:center}
+.set-cfl{font:600 12px/1.2 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--text);display:flex;flex-direction:column;gap:3px}
+.set-cfl small,.set-cglass small{font:400 12px/1.2 var(--sans);letter-spacing:0;text-transform:none;color:var(--faint)}
+.set-cpick{width:40px;height:30px;border-radius:3px;border:1px solid var(--line-2);background:var(--c);position:relative;cursor:pointer;overflow:hidden;box-shadow:inset 0 0 0 2px rgba(0,0,0,.25)}
+.set-cpick:hover,.set-cpick:focus-within{border-color:var(--frame)}
+.set-cpick input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;border:0;padding:0}
+.set-hex{width:96px;box-sizing:border-box;padding:6px 8px;font:500 12.5px/1 var(--mono);letter-spacing:.06em;color:var(--text);background:var(--ink);border:1px solid var(--line-2);border-radius:2px}
+.set-hex:focus{outline:none;border-color:var(--frame)}
+.set-hex.bad{border-color:var(--red)}
+.set-cglass{display:flex;align-items:center;gap:8px;font:600 12px/1.2 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--text);margin-top:4px;cursor:pointer}
+.set-cglass input{accent-color:var(--frame)}
+.set-csave{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0}
+.set-cname{flex:1 1 180px;max-width:240px;padding:7px 10px;font:400 13px/1.2 var(--sans);color:var(--text);background:var(--ink);border:1px solid var(--line-2);border-radius:2px}
+.set-cname:focus{outline:none;border-color:var(--frame)}
+.set-cto{font:600 11px/1 var(--ui);letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-left:4px}
+.set-csave .set-msg{flex-basis:100%;margin:2px 0 0;min-height:0}
+.set-presets{grid-template-columns:repeat(3,minmax(0,1fr))}
+.set-pwrap{position:relative;display:grid}
+.set-pwrap>.set-th{width:100%}
+.set-pwrap>button.set-th{padding-right:36px}
+.set-pempty{cursor:default;border-style:dashed;background:transparent}
+.set-pempty:hover{border-color:var(--line);background:transparent}
+.set-swempty{display:grid!important;place-items:center;background:transparent!important;border-style:dashed!important;font:600 20px/1 var(--ui);color:var(--faint)}
+.set-pdel{position:absolute;top:6px;right:6px;min-width:24px;height:24px;padding:0 6px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:2px;color:var(--muted);cursor:pointer;font:600 11px/1 var(--ui);letter-spacing:.08em}
+.set-pdel:hover,.set-pdel.armed{color:var(--red);border-color:var(--red)}
+@media (max-width:900px){ .set-presets{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:700px){ .set-cedit{grid-template-columns:minmax(0,1fr)} .set-cf{grid-template-columns:minmax(0,1fr) 40px 96px} }
+
 /* Main menu display box (.mx), bottom slots, menu notes strip (.mnotes), Notes screen (.nb), corner dock (.dk). */
 .slots.three{grid-template-columns:repeat(3,minmax(0,1fr))}
 .slots.three .slot.big{grid-template-columns:auto 1fr;min-height:132px}
@@ -1100,11 +1149,6 @@ body.ask-open .ask-win{transform:none}
 /* ---- corner dock ---- */
 .dk{position:fixed;right:0;bottom:84px;z-index:45;display:flex;flex-direction:column;align-items:flex-end;pointer-events:none}
 .dk>*{pointer-events:auto}
-.dk-tab{display:flex;align-items:center;gap:8px;cursor:pointer;padding:9px 14px 9px 12px;border:1px solid var(--frame);border-right:0;color:var(--text);
-  background:linear-gradient(180deg,var(--win-1),var(--win-2));font:600 11px/1 var(--ui);letter-spacing:.22em;text-transform:uppercase;
-  clip-path:polygon(10px 0,100% 0,100% 100%,0 100%,0 10px);box-shadow:0 0 16px var(--glow);transition:transform .2s}
-.dk-tab:hover{transform:translateX(-3px)}
-.dk.is-open .dk-tab{display:none}
 .dk-gem{width:8px;height:8px;background:var(--frame);transform:rotate(45deg);box-shadow:0 0 8px var(--frame)}
 .dk-win{position:fixed;right:16px;bottom:16px;width:min(380px,calc(100vw - 32px));height:min(540px,calc(100dvh - 90px));display:flex;flex-direction:column;
   box-shadow:0 18px 60px rgba(0,0,0,.6),0 0 24px var(--glow);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -1417,12 +1461,8 @@ a.nw-open{text-decoration:none}
 .nv-msg:empty{display:none}
 .nv-pop.win{height:auto}
 
-/* ---------- Assist: glass window that slides out of the right edge; the tab is its handle; holographic chat screen (1.16.1) ---------- */
+/* ---------- Assist: glass window that slides out of the right edge; the rail of icons is its handle; holographic chat screen (1.16.1) ---------- */
 .dk{--dkw:min(380px,calc(100vw - 32px))}
-.dk-tab{transition:transform .38s cubic-bezier(.2,.7,.2,1),box-shadow .2s}
-.dk-tab:hover{transform:translateX(-3px)}
-.dk.is-open .dk-tab{display:flex;transform:translateX(calc(-1 * (var(--dkw) + 16px)))}
-.dk.is-open .dk-tab:hover{transform:translateX(calc(-1 * (var(--dkw) + 19px)))}
 .dk.is-open .dk-gem{animation:dk-gem 2.4s ease-in-out infinite}
 @keyframes dk-gem{50%{box-shadow:0 0 14px var(--frame),0 0 2px #fff}}
 .dk-win.win{width:var(--dkw);transform:translateX(calc(100% + 28px));opacity:.4;
@@ -1449,7 +1489,6 @@ a.nw-open{text-decoration:none}
 .dk-scan{position:absolute;left:0;right:0;height:30%;top:-30%;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--frame) 10%,transparent),transparent);animation:mx-scan 7s linear infinite}
 @keyframes dk-flow{from{background-position:0 0,100% 0}to{background-position:0 0,0% 0}}
 .dk:not(.is-open) .dk-holo,.dk:not(.is-open) .dk-scan{animation-play-state:paused}
-@media (max-width:760px){ .dk.is-open .dk-tab{display:none} }
 
 /* ---------- right-click definitions (textmenu.js) ---------- */
 .tm-menu{max-width:min(380px,calc(100vw - 12px))}
@@ -1477,6 +1516,131 @@ a.nw-open{text-decoration:none}
 .nb-favtop[aria-pressed="true"]{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 50%,var(--line-2))}
 .nb-favtop:hover{color:var(--text);border-color:var(--frame)}
 .tm-dacts{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}
+
+/* ---------- dock layout (Oct 2026): icon rail (AI · Notes · Chat), "◆ Assist" header with tabs under it, separate Notes box ---------- */
+.dk-rail{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 5px 6px 7px;border:1px solid var(--frame);border-right:0;
+  background:linear-gradient(180deg,var(--win-1),var(--win-2));clip-path:polygon(10px 0,100% 0,100% 100%,0 100%,0 10px);box-shadow:0 0 16px var(--glow);
+  transition:transform .32s cubic-bezier(.2,.7,.2,1),opacity .25s}
+.dk-rail .dk-gem{margin:0 0 7px;animation:dk-gem 2.4s ease-in-out infinite}
+.dk-rail .dk-icons{flex-direction:column}
+.dk.rail-off .dk-rail{transform:translateX(115%);opacity:0;pointer-events:none}
+.dk-icons{display:flex;gap:2px}
+.dk-ic{width:30px;height:30px;display:grid;place-items:center;padding:0;background:none;border:1px solid transparent;border-radius:2px;color:var(--muted);cursor:pointer;transition:color .15s,background .15s}
+.dk-ic svg{width:17px;height:17px;display:block}
+.dk-ic:hover{color:var(--frame);border-color:var(--line-2)}
+.dk-ic[aria-pressed="true"]{color:var(--frame);background:color-mix(in srgb,var(--frame) 14%,transparent);border-color:color-mix(in srgb,var(--frame) 40%,transparent)}
+.dk-ic:focus-visible{outline:2px solid var(--frame);outline-offset:1px}
+.dk-h{align-items:flex-start;padding:9px 6px 0 12px}
+.dk-hl{display:flex;flex-direction:column;gap:3px;min-width:0}
+.dk-title{display:flex;align-items:center;gap:9px;font:600 12px/1 var(--ui);letter-spacing:.26em;text-transform:uppercase;color:var(--text);padding:3px 0}
+.dk-title .dk-gem{animation:dk-gem 2.4s ease-in-out infinite}
+.dk-tabs button{padding:8px 0 9px}
+.dk-hr{margin-left:auto;display:flex;align-items:center;gap:2px}
+.dk-hr .dk-x{margin-left:4px}
+.dk-who{display:block;font:600 10.5px/1.2 var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--frame);margin-bottom:3px}
+.dk-ask textarea:disabled,.dk-ask button:disabled{opacity:.5;cursor:not-allowed}
+/* Notes box: docked bottom right (left of Assist when both are open) or floating where it was dragged */
+.dkn.win{--dknw:min(380px,calc(100vw - 32px));position:fixed;width:var(--dknw);height:min(540px,calc(100dvh - 90px));display:flex;flex-direction:column;
+  opacity:0;transform:translateY(14px) scale(.98);transition:opacity .22s ease,transform .26s cubic-bezier(.2,.7,.2,1),right .38s cubic-bezier(.2,.7,.2,1);
+  background:linear-gradient(115deg,rgba(255,255,255,.07),transparent 32%,transparent 70%,color-mix(in srgb,var(--frame) 7%,transparent)),
+    linear-gradient(160deg,color-mix(in srgb,var(--win-1) 62%,transparent),color-mix(in srgb,var(--win-2) 74%,transparent));
+  border:1px solid color-mix(in srgb,var(--frame) 30%,var(--line-2));
+  box-shadow:0 18px 60px rgba(0,0,0,.55),0 0 28px var(--glow),inset 0 1px 0 rgba(255,255,255,.09),inset 0 0 40px color-mix(in srgb,var(--frame) 6%,transparent);
+  backdrop-filter:blur(20px) saturate(1.35);-webkit-backdrop-filter:blur(20px) saturate(1.35)}
+.dkn[hidden]{display:none}
+.dkn.is-open{opacity:1;transform:none}
+.dkn.docked{right:16px;bottom:16px}
+.dk.is-open .dkn.docked{right:calc(var(--dkw) + 28px)}
+.dkn.dragging{transition:none;user-select:none;box-shadow:0 26px 80px rgba(0,0,0,.6),0 0 34px var(--glow)}
+.dkn-h{display:flex;align-items:center;gap:10px;padding:6px 6px 6px 12px;border-bottom:1px solid var(--line);cursor:grab;touch-action:none;user-select:none;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--frame) 9%,rgba(255,255,255,.04)),transparent)}
+.dkn.dragging .dkn-h{cursor:grabbing}
+.dkn-grip{color:var(--faint);font-size:14px;line-height:1}
+.dkn.docked .dkn-home{display:none}
+@media (max-width:760px){ .dkn.win{left:16px!important;top:auto!important;right:16px;bottom:16px;width:auto} .dk.is-open .dkn.docked{right:16px} .dkn-h{cursor:default} .dkn-grip{display:none} }
+
+/* ---------- windows over the app: My notes, Achievements (modalWin in app.js; fog rule in settings.css) ---------- */
+.mw-ov{position:fixed;inset:0;z-index:1600;display:grid;place-items:center;padding:16px;
+  background:radial-gradient(ellipse at 50% 40%,rgba(200,220,255,.06),rgba(3,6,11,.55));opacity:0;transition:opacity .3s ease}
+body.mw-open .mw-ov{opacity:1}
+.mw-ov.out{opacity:0;pointer-events:none}
+.mw-win{width:min(1080px,100%);height:min(760px,calc(100dvh - 32px));display:flex;flex-direction:column;outline:none;
+  box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.03),0 0 40px var(--glow);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);transform:translateY(10px) scale(.98);transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+body.mw-open .mw-win{transform:none}
+.mw-ov.out .mw-win{transform:translateY(10px) scale(.98)}
+.mw-h{flex-wrap:wrap;row-gap:6px}
+.mw-sub{font:400 13px/1.3 var(--sans);color:var(--muted);margin-left:6px}
+.mw-sub b{color:var(--text);font-weight:600}
+.mw-hx{margin-left:auto;display:flex;align-items:center;gap:8px}
+.mw-h .set-x{margin-left:0}
+.mw-tip{width:22px;height:22px;display:grid;place-items:center;border:1px solid var(--line-2);border-radius:50%;color:var(--faint);font:600 11px/1 var(--ui);cursor:help}
+.mw-tip:hover,.mw-tip:focus-visible{color:var(--text);border-color:var(--frame);outline:none}
+.mw-body{flex:1;min-height:0;display:flex;flex-direction:column}
+.mw-notes{width:min(1340px,100%);height:calc(100dvh - 32px)}
+.mw-notes .mw-body>.nb{flex:1;min-height:0;height:auto}
+@media (max-width:860px){ .mw-ov{padding:8px} .mw-win,.mw-notes{height:calc(100dvh - 16px)} .mw-body{overflow:auto} .mw-notes .mw-body>.nb{flex:none} .mw-sub{flex-basis:100%;margin:0} }
+
+/* ---------- Achievements window (web/src/achievements.js) ---------- */
+.mw-ach{width:min(1120px,100%)}
+.ach-bal{display:inline-flex;align-items:baseline;gap:6px;padding:5px 11px 5px 9px;border:1px solid color-mix(in srgb,var(--amber) 55%,var(--line-2));border-radius:14px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--amber) 16%,transparent),color-mix(in srgb,var(--amber) 5%,transparent));box-shadow:0 0 14px color-mix(in srgb,var(--amber) 22%,transparent)}
+.ach-coin{color:var(--amber);font-size:12px;text-shadow:0 0 8px var(--amber)}
+.ach-bal b{font:600 15px/1 var(--ui);color:var(--text);letter-spacing:.04em}
+.ach-bal small{font:600 10px/1 var(--ui);letter-spacing:.18em;color:var(--amber)}
+.ach-mine[aria-pressed="true"]{color:var(--text);border-color:var(--frame)}
+.ach-tabs{display:flex;align-items:flex-end;gap:20px;padding:0 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ach-tabs [role=tab]{background:none;border:0;border-bottom:2px solid transparent;padding:12px 0 10px;cursor:pointer;font:600 11.5px/1 var(--ui);letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.ach-tabs [role=tab] .num{margin-left:4px;color:var(--faint)}
+.ach-tabs [aria-selected="true"]{color:var(--text);border-bottom-color:var(--frame)}
+.ach-sum{margin-left:auto;display:flex;align-items:center;gap:8px;padding:0 0 10px;font:500 11px/1 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.ach-sum .num{color:var(--text)}
+.ach-scroll{flex:1;min-height:0;overflow:auto;padding:14px 18px 22px}
+.ach-cats{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
+.ach-sec{margin:18px 0 0}
+.ach-sh{display:flex;align-items:baseline;gap:10px;margin:0 0 10px;padding-bottom:6px;border-bottom:1px dashed color-mix(in srgb,var(--line) 80%,transparent)}
+.ach-sh h3{margin:0;font:600 12.5px/1 var(--ui);letter-spacing:.2em;text-transform:uppercase;color:var(--text)}
+.ach-sic{color:var(--frame);font-family:var(--math)}
+.ach-sh .ln{font-size:12.5px;color:var(--faint)}
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.ach-card{--ac:var(--frame);display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:start;padding:12px;border:1px solid var(--line);border-left:3px solid color-mix(in srgb,var(--ac) 45%,var(--line));
+  background:color-mix(in srgb,var(--panel) 55%,transparent);position:relative}
+.ach-card.done{border-color:color-mix(in srgb,var(--green) 40%,var(--line));border-left-color:var(--green);background:linear-gradient(110deg,color-mix(in srgb,var(--green) 9%,transparent),transparent 60%),color-mix(in srgb,var(--panel) 55%,transparent)}
+.ach-card.soon{opacity:.55;border-style:dashed}
+.ach-medal{width:38px;height:38px;display:grid;place-items:center;font:400 17px/1 var(--math);color:color-mix(in srgb,var(--ac) 80%,var(--text));
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(160deg,color-mix(in srgb,var(--ac) 30%,var(--panel-2)),var(--panel-2))}
+.ach-card.done .ach-medal{color:#0b1410;background:linear-gradient(160deg,#a6efb4,var(--green));box-shadow:0 0 14px var(--green)}
+.ach-medal.sm{width:30px;height:30px;font-size:14px;--ac:var(--amber)}
+.ach-txt h3{margin:0;font:600 14px/1.25 var(--sans);color:var(--text)}
+.ach-txt p{margin:3px 0 7px;font-size:12.5px;line-height:1.4;color:var(--muted)}
+.ach-bar{display:inline-block;vertical-align:middle;width:min(160px,60%);height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-right:8px}
+.ach-bar.big{width:120px}
+.ach-bar i{display:block;height:100%;background:linear-gradient(90deg,color-mix(in srgb,var(--ac,var(--frame)) 70%,transparent),var(--ac,var(--frame)));border-radius:3px}
+.ach-prog,.ach-when{font:500 10.5px/1 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.ach-card.done .ach-when{color:var(--green)}
+.ach-pts{font:600 15px/1 var(--ui);color:var(--amber);white-space:nowrap}
+.ach-pts small{margin-left:3px;font-size:9.5px;letter-spacing:.16em}
+.ach-card:not(.done) .ach-pts{color:color-mix(in srgb,var(--amber) 55%,var(--faint))}
+.ach-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:0 0 16px}
+.ach-stats>div{padding:12px;border:1px solid var(--line);background:rgba(0,0,0,.14);display:flex;flex-direction:column;gap:6px}
+.ach-stats b{font:600 22px/1 var(--ui);color:var(--text)}
+.ach-stats>div:first-child b{color:var(--amber)}
+.ach-stats span{font:500 10px/1.2 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.ach-empty{color:var(--muted);font-size:14px;padding:20px 2px}
+.ach-toasts{position:fixed;left:18px;bottom:18px;z-index:2150;display:flex;flex-direction:column-reverse;gap:8px;align-items:flex-start;pointer-events:none}
+.ach-toast.win{pointer-events:auto;cursor:pointer;display:flex;align-items:center;gap:12px;padding:10px 14px 10px 10px;text-align:left;color:var(--text);
+  border:1px solid color-mix(in srgb,var(--amber) 55%,var(--line-2));box-shadow:0 14px 40px rgba(0,0,0,.5),0 0 22px color-mix(in srgb,var(--amber) 30%,transparent);animation:ach-in .45s cubic-bezier(.2,.7,.2,1);transition:opacity .4s,transform .4s}
+.ach-toast small{display:block;font:600 9.5px/1 var(--ui);letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin-bottom:4px}
+.ach-toast b{font:600 14px/1.2 var(--sans)}
+.ach-ap{font:600 13px/1 var(--ui);color:var(--amber);margin-left:6px}
+.ach-toast.out{opacity:0;transform:translateX(-30px)}
+@keyframes ach-in{from{opacity:0;transform:translateX(-40px)}}
+.slot .ach-tag{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 55%,var(--line-2))}
+.slots.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.slots.four .slot.big{grid-template-columns:auto 1fr;min-height:132px}
+@media (max-width:1280px){ .slots.four{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:760px){ .slots.four{grid-template-columns:minmax(0,1fr)} .ach-grid{grid-template-columns:minmax(0,1fr)} .ach-sum{margin-left:0;flex-basis:100%} .ach-toasts{left:12px;right:12px;align-items:stretch} }
+@media (prefers-reduced-motion:reduce){ .ach-toast.win{animation:none} }
 
 </style>
 </head><body>
@@ -36670,7 +36834,7 @@ E.quiz = cfg => {
     get item(){ return cfg.items[order[pos]]; },
     get index(){ return pos; },
     get total(){ return cfg.items.length; },
-    pick(v){ if (ctl.state.answered) return ctl.state; const ok = !!cfg.check(ctl.item, v); ctl.state = { answered: true, picked: v, correct: ok }; ctl.score.tries++; if (ok) ctl.score.right++; return ctl.state; },
+    pick(v){ if (ctl.state.answered) return ctl.state; const ok = !!cfg.check(ctl.item, v); ctl.state = { answered: true, picked: v, correct: ok }; ctl.score.tries++; if (ok) ctl.score.right++; if (typeof window !== "undefined" && window.dispatchEvent) window.dispatchEvent(new CustomEvent("inquire:quiz", { detail: { correct: ok } })); return ctl.state; }, // inquire:quiz → Achievements
     next(){ pos++; if (pos >= order.length) { order = E.shuffle(order, cfg.seed == null ? null : cfg.seed + 1); pos = 0; } ctl.state = { answered: false, picked: null, correct: null }; },
     reset(){ ctl.score = { right: 0, tries: 0 }; pos = 0; ctl.state = { answered: false, picked: null, correct: null }; },
     html(){ return cfg.render(ctl.item, ctl.state); }
@@ -65436,7 +65600,7 @@ function pick(o) {
       const hits = o.items.filter(x => !s || (x.label + " " + (x.sub || "")).toLowerCase().includes(s)).slice(0, 60);
       const mk = o.create ? o.create(q.value.trim()) : null;
       lst.innerHTML = (mk ? `<button type="button" class="nk-it nk-new" data-new="1"><span class="nk-ic">＋</span><span>${esc(mk)}</span></button>` : "")
-        + hits.map(x => `<button type="button" class="nk-it" data-id="${esc(x.id)}"><span class="nk-ic">${x.ic || "▤"}</span><span>${esc(x.label)}${x.sub ? `<small>${esc(x.sub)}</small>` : ""}</span></button>`).join("")
+        + hits.map(x => `<button type="button" class="nk-it" data-id="${esc(x.id)}"><span class="nk-ic"${x.col ? ` style="color:${esc(x.col)}"` : ""}>${x.ic || "▤"}</span><span>${esc(x.label)}${x.sub ? `<small>${esc(x.sub)}</small>` : ""}</span></button>`).join("")
         + (!hits.length && !mk ? `<p class="nk-none">Nothing matches.</p>` : "");
     };
     lst.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; finish(b.dataset.new ? { create: q.value.trim() } : b.dataset.id); });
@@ -65770,8 +65934,8 @@ function toolbar(api) {
   bar.className = "nr-tools"; bar.setAttribute("role", "toolbar"); bar.setAttribute("aria-label", "Formatting");
   const mod = /Mac/.test(navigator.platform) ? "⌘" : "Ctrl+";
   bar.innerHTML = `<button type="button" data-cmd="bold" title="Bold (${mod}B)" aria-label="Bold"><b>B</b></button><button type="button" data-cmd="italic" title="Italic (${mod}I)" aria-label="Italic"><i>I</i></button><button type="button" data-cmd="underline" title="Underline (${mod}U)" aria-label="Underline"><u>U</u></button>
-    <span class="nr-sep"></span><span class="nr-cols" role="group" aria-label="Text colour">${COLORS.map(([k, c, n]) => `<button type="button" class="nr-col" data-col="${c}" style="--c:${c}" title="${n} text" aria-label="${n} text"></button>`).join("")}<button type="button" class="nr-col nr-colx" data-col="${CLEAR}" title="Normal text colour" aria-label="Normal text colour">⊘</button></span>
     <span class="nr-sep"></span><span class="nr-sizes" role="group" aria-label="Text size">${[["2", "s", "Small text"], ["3", "n", "Normal text"], ["5", "l", "Large text"], ["6", "xl", "Huge text"]].map(([v, k, n]) => `<button type="button" data-size="${v}" class="nr-sz nr-sz-${k}" title="${n}" aria-label="${n}">A</button>`).join("")}</span>
+    <span class="nr-sep"></span><span class="nr-cols" role="group" aria-label="Text colour">${COLORS.map(([k, c, n]) => `<button type="button" class="nr-col" data-col="${c}" style="--c:${c}" title="${n} text" aria-label="${n} text"></button>`).join("")}<button type="button" class="nr-col nr-colx" data-col="${CLEAR}" title="Normal text colour" aria-label="Normal text colour">⊘</button></span>
     <span class="nr-sep"></span><button type="button" class="nr-sym" title="Emoji and symbols (Greek, maths, alchemical)" aria-haspopup="dialog">☺ Ω</button>
     <span class="nr-sep"></span><button type="button" data-w="code" title="Add a code box">&lt;/&gt; Code</button><button type="button" data-w="music" title="Add a music chart">♪ Music</button><button type="button" class="nr-vid" title="Add a video: a file from this computer, or a YouTube, Vimeo or video link" aria-haspopup="dialog">▶ Video</button>`;
   bar.addEventListener("mousedown", e => e.preventDefault()); // keep the selection in the note
@@ -66107,7 +66271,7 @@ const store = {
 const progKey = () => (window.InquireKeys ? InquireKeys.progress() : "codex.mastered");
 const loadMastered = () => { try { const v = JSON.parse(localStorage.getItem(progKey()) || "[]"); return new Set(Array.isArray(v) ? v : []); } catch(e){ return new Set(); } };
 let mastered = loadMastered();
-const saveMastered = () => { try { localStorage.setItem(progKey(), JSON.stringify([...mastered])); } catch(e){} };
+const saveMastered = () => { try { localStorage.setItem(progKey(), JSON.stringify([...mastered])); } catch(e){} window.dispatchEvent(new CustomEvent("inquire:mastered")); };
 // Settings → Data & progress (import / reset) rewrites the progress: reload it and redraw.
 window.addEventListener("inquire:progress-changed", () => { mastered = loadMastered(); render(); });
 function stateOf(id){
@@ -66123,6 +66287,11 @@ let cleanup = [];
 function clearView(){ cleanup.forEach(f => { try{ f(); }catch(e){} }); cleanup = []; viewEl.innerHTML = ""; }
 
 function go(next, push = true){
+  if (WIN_VIEWS[next.view]) { // a window, not a screen: open it over whatever is on screen (the Main Menu on a cold start)
+    WIN_VIEWS[next.view]();
+    if (viewEl.childElementCount) { try { history.replaceState(history.state, "", "#" + curTok()); } catch(e){} return; }
+    next = { view: "menu", topic: null }; push = false; winHash = true;
+  } else closeWins();
   const prev = { view: S.view, subject: S.subject };
   if (next.g) { Object.assign(G, next.g); next = { ...next }; delete next.g; }
   if (!("gword" in next)) next = { ...next, gword: null };
@@ -66134,10 +66303,61 @@ function go(next, push = true){
   render();
   // every move to another screen fades in like the Settings window; inside one subject only the main pane does
   viewIn(prev.view === "math" && S.view === "math" && prev.subject === S.subject ? $(".work > .main", viewEl) : viewEl);
-  const tok = (S.view === "glossary" ? gTok() : S.topic ? S.topic : (S.view === "math" ? (S.field === "map" ? "field-map" + (S.subject !== "mathematics" ? "-" + S.subject : "") : "field-" + S.field) : S.view)) + (S.view === "math" && S.gword ? "~" + encodeURIComponent(S.gword) : "");
+  const tok = curTok();
+  if (winHash) { winHash = false; try { history.replaceState(history.state, "", "#" + tok); } catch(e){} }
   if (push) { try { history.pushState({ ...next, view: S.view, subject: S.subject, field: S.field, topic: S.topic, gword: S.gword, ...(S.view === "glossary" ? { g: { sub: G.sub, word: G.word, field: G.field } } : {}) }, "", "#" + tok); } catch(e){} }
   store.set("last", { view: S.view, subject: S.subject, field: S.field, topic: S.topic });
   window.dispatchEvent(new CustomEvent("inquire:route"));
+}
+function curTok(){
+  return (S.view === "glossary" ? gTok() : S.topic ? S.topic : (S.view === "math" ? (S.field === "map" ? "field-map" + (S.subject !== "mathematics" ? "-" + S.subject : "") : "field-" + S.field) : S.view)) + (S.view === "math" && S.gword ? "~" + encodeURIComponent(S.gword) : "");
+}
+let winHash = false;
+
+/* ---------- windows over the app (My notes, Achievements) ----------
+   Like Settings and the New note dialog: the app behind fogs and eases back (body.mw-open, settings.css), ✕, Esc
+   (settings.js) or a click on the fog closes. Routes #notes / #achievements open them over the screen you are on.
+   modalWin(id, { title, sub, cls }) → { ov, win, body, head, cleanup: [], close() }; one window at a time. */
+const MW = {};
+function closeWins(except){ Object.keys(MW).forEach(k => { if (k !== except) MW[k].close(); }); }
+function modalWin(id, o = {}){
+  if (MW[id]) return MW[id];
+  closeWins(id);
+  const last = document.activeElement;
+  const ov = h("div", { class: "mw-ov", "data-mw": id });
+  ov.innerHTML = `<div class="mw-win win ${o.cls || ""}" role="dialog" aria-modal="true" aria-labelledby="mw-t-${id}">
+    <header class="set-h mw-h"><span class="dot"></span><h2 id="mw-t-${id}">${esc(o.title || "")}</h2>${o.sub ? `<span class="mw-sub">${o.sub}</span>` : ""}<span class="mw-hx"></span><button type="button" class="set-x" aria-label="Close ${esc(o.title || "window")}">✕</button></header>
+    <div class="mw-body"></div></div>`;
+  document.body.appendChild(ov);
+  const m = { id, ov, win: $(".mw-win", ov), body: $(".mw-body", ov), head: $(".mw-hx", ov), cleanup: [], closed: false,
+    close(){
+      if (m.closed) return; m.closed = true; delete MW[id];
+      m.cleanup.forEach(f => { try { f(); } catch(e){} }); m.cleanup = [];
+      if (!Object.keys(MW).length) document.body.classList.remove("mw-open");
+      ov.classList.add("out"); setTimeout(() => ov.remove(), 260);
+      if (last && document.contains(last)) try { last.focus({ preventScroll: true }); } catch(e){}
+      window.dispatchEvent(new CustomEvent("inquire:window", { detail: { id, open: false } }));
+    } };
+  MW[id] = m;
+  $(".set-x", ov).onclick = () => m.close();
+  ov.addEventListener("pointerdown", e => { if (e.target === ov) m.close(); });
+  requestAnimationFrame(() => { if (!m.closed) document.body.classList.add("mw-open"); });
+  setTimeout(() => { if (!m.closed && !m.win.contains(document.activeElement)) m.win.focus({ preventScroll: true }); }, 40);
+  m.win.tabIndex = -1;
+  window.dispatchEvent(new CustomEvent("inquire:window", { detail: { id, open: true } }));
+  return m;
+}
+const WIN_VIEWS = {
+  notes: () => openNotesWin(),
+  achievements: () => window.InquireAchievements && InquireAchievements.open()
+};
+function openNotesWin(){
+  const who = window.InquireUserName || window.InquireUser || "";
+  const fresh = !MW.notes, m = modalWin("notes", { title: "My notes", cls: "mw-notes",
+    sub: `All notes are saved on this computer${who ? ` for <b>${esc(who)}</b>` : ""}.` });
+  if (!fresh) { m.cleanup.forEach(f => { try { f(); } catch(e){} }); m.cleanup = []; }
+  renderNotes(m);
+  return m;
 }
 function viewIn(el){
   if (!el) return;
@@ -66156,7 +66376,7 @@ function fromHash(tok){
   if (NODE[t]) return { view: "math", field: fieldOf(t), topic: t };
   if (t === "field-map" || t.startsWith("field-map-")) { const sub = t.slice(10) || "mathematics"; if (SM[sub]) return { view: "math", subject: sub, field: "map", topic: null }; }
   if (t.startsWith("field-")) { const f = t.slice(6); if (DB.fields[f]) return { view: "math", subject: subjOf(f), field: f, topic: null }; }
-  if (t === "menu" || t === "dict" || t === "notes") return { view: t, topic: null };
+  if (t === "menu" || t === "dict" || t === "notes" || t === "achievements") return { view: t, topic: null };
   if (t === "glossary" || t.startsWith("glossary-") || t.startsWith("glossary~")) {
     const m = t.match(/^glossary(?:-([a-z0-9-]+))?(?:~(.*))?$/); if (!m) return null;
     let w = null; try { w = m[2] ? decodeURIComponent(m[2]).toLowerCase() : null; } catch(e){}
@@ -66262,7 +66482,6 @@ function render(){
   if (S.view === "menu") renderMenu();
   else if (S.view === "dict") renderDict();
   else if (S.view === "glossary") renderGlossary();
-  else if (S.view === "notes") renderNotes();
   else renderWork();
   viewEl.focus({ preventScroll: true });
 }
@@ -66289,7 +66508,7 @@ function renderMenu(){
       <div class="mx-stage"></div>
       <footer class="mx-foot"><button type="button" class="mx-arrow" data-d="-1" aria-label="Previous subject">◀</button><div class="mx-dots" role="tablist"></div><button type="button" class="mx-arrow" data-d="1" aria-label="Next subject">▶</button><span class="mx-bar"><i></i></span></footer>
     </section>
-    <div class="slots three" id="slots"></div>
+    <div class="slots four" id="slots"></div>
     <section class="mnotes" id="mnotes"></section>
     <div class="verline" id="verline"></div></div>`;
   viewEl.appendChild(s);
@@ -66304,6 +66523,9 @@ function renderMenu(){
     `<span class="glyph">◇</span><span><h3>Games</h3><p>Practice through play: timed drills, puzzles and challenges built from the topics you have mastered.</p></span><span class="tag">Uncharted</span>`));
   slots.appendChild(h("div", { class: "slot big locked", "aria-disabled": "true" },
     `<span class="glyph">⌖</span><span><h3>Plans</h3><p>Lay out a learning venture: pick goals, order the topics, set a pace and track the route to mastery.</p></span><span class="tag">Uncharted</span>`));
+  { const AC = window.InquireAchievements, ap = AC ? AC.points() : 0, L = AC ? AC.list() : [], got = L.filter(x => x.earned).length;
+    slots.appendChild(h("button", { type: "button", class: "slot big", id: "achslot", onclick: () => go({ view: "achievements", topic: null }) },
+      `<span class="glyph">◆</span><span><h3>Achievements</h3><p>Earn Achievement Points for lessons, fields, quizzes, notes and more. <span class="ach-n">${got} of ${L.filter(x => !x.soon).length} earned.</span></p></span><span class="tag ach-tag num">◆ ${ap.toLocaleString("en-US")} AP</span>`)); }
   slots.appendChild(h("button", { type: "button", class: "slot big", onclick: () => { G.sub = "all"; G.field = null; G.word = null; G.ret = null; openGlossary({}); } },
     `<span class="glyph">Aa</span><span><h3>Glossary</h3><p>Every subject’s words in one place, with each subject’s meaning marked. ${Object.keys(GWORDS).length} words so far.</p></span><span class="tag">Online</span>`));
   menuNotes($("#mnotes", s));
@@ -66436,12 +66658,13 @@ const NOTES = { sel: null, q: "", folder: "all", subj: "", sort: store.get("note
 const linkLabel = k => { const id = k.slice(2); return k[0] === "s" ? (SM[id] ? SM[id].name : id) : k[0] === "f" ? (DB.fields[id] ? DB.fields[id].name : id) : (T[id] ? T[id].title : id); };
 const linkIcon = k => k[0] === "s" ? (SM[k.slice(2)] ? SM[k.slice(2)].glyph : "◇") : k[0] === "f" ? "⌗" : "▤";
 const linkSubject = k => { const id = k.slice(2); return k[0] === "s" ? id : k[0] === "f" ? (DB.fields[id] ? subjOf(id) : "") : (NODE[id] ? subjOf(fieldOf(id)) : ""); };
+const linkColour = k => gColour(linkSubject(k) || "mathematics"); // icon colour = the subject group (STEM cyan, A&H magenta, Social lime), never the theme
 const linkOk = k => typeof k === "string" && (k[0] === "s" ? !!SM[k.slice(2)] : k[0] === "f" ? !!DB.fields[k.slice(2)] : k[0] === "t" ? !!NODE[k.slice(2)] : false);
 function linkTargets(){
   const out = [];
-  Object.keys(SM).forEach(sb => out.push({ id: "s:" + sb, label: SM[sb].name, sub: "Subject", ic: SM[sb].glyph }));
-  Object.keys(DB.fields).filter(f => SM[subjOf(f)]).forEach(f => out.push({ id: "f:" + f, label: DB.fields[f].name, sub: SM[subjOf(f)].name + " · field" + (charted(f) ? "" : " (planned)"), ic: "⌗" }));
-  NODES.forEach(n => { if (T[n.id]) out.push({ id: "t:" + n.id, label: T[n.id].title, sub: DB.fields[n.field].name + " · lesson", ic: "▤" }); });
+  Object.keys(SM).forEach(sb => out.push({ id: "s:" + sb, label: SM[sb].name, sub: "Subject", ic: SM[sb].glyph, col: linkColour("s:" + sb) }));
+  Object.keys(DB.fields).filter(f => SM[subjOf(f)]).forEach(f => out.push({ id: "f:" + f, label: DB.fields[f].name, sub: SM[subjOf(f)].name + " · field" + (charted(f) ? "" : " (planned)"), ic: "⌗", col: linkColour("f:" + f) }));
+  NODES.forEach(n => { if (T[n.id]) out.push({ id: "t:" + n.id, label: T[n.id].title, sub: DB.fields[n.field].name + " · lesson", ic: "▤", col: linkColour("t:" + n.id) }); });
   return out;
 }
 function openLink(k){
@@ -66450,21 +66673,17 @@ function openLink(k){
   else if (k[0] === "f") go({ view: "math", subject: subjOf(id), field: id, topic: null });
   else go({ view: "math", topic: id });
 }
-function renderNotes(){
+function renderNotes(m){
   const NS = window.InquireNotes;
-  const s = h("div", { class: "screen notes-screen" });
-  s.innerHTML = `<div class="screen-in">
-    <div class="hello"><div class="back-row"><button type="button" class="btn-s" id="nback">◀ Menu</button></div><p class="eyebrow">Notes</p><h1>My notes</h1>
-    <p>Notes are saved on this computer${window.InquireUser ? ` for <b>${esc(window.InquireUser)}</b>` : ""}. Drag notes into folders and folders into other folders, drag either up or down to put them in your own order, star the ones you use most, link them to subjects and lessons, and paste or drop photos and videos in. Use the ◀ tabs to hide the folders or the list, and drag the line beside the list to resize it. Select words and right-click to link them to another note.</p></div>
-    <div class="nb win"><nav class="nb-folders" aria-label="Folders"></nav>
+  const s = m.body;
+  s.innerHTML = `    <div class="nb"><nav class="nb-folders" aria-label="Folders"></nav>
     <aside class="nb-list"><div class="nb-tools"><label class="search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Search notes" aria-label="Search notes"></label><button type="button" class="btn-s" data-a="new">＋ New</button></div>
       <div class="nb-filter"><select class="nb-sort" aria-label="Order of notes"><option value="mine">My order</option><option value="recent">Recently edited</option></select><button type="button" class="nb-favtop" aria-pressed="false" title="Keep favourites at the top of the list">★ first</button><select class="nb-subj" aria-label="Show notes linked to a subject"></select></div><div class="nb-items" role="listbox" aria-label="Notes"></div></aside>
     <section class="nb-ed"></section>
     <button type="button" class="nb-fold" data-p="f"></button><button type="button" class="nb-fold" data-p="l"></button>
-    <div class="nb-rz" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize the notes list (drag, or ←/→; double-click resets)" title="Drag to resize the notes list · double-click resets"></div></div></div>`;
-  viewEl.appendChild(s);
+    <div class="nb-rz" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize the notes list (drag, or ←/→; double-click resets)" title="Drag to resize the notes list · double-click resets"></div></div>`;
   notesLayout($(".nb", s));
-  $("#nback", s).onclick = () => go({ view: "menu", topic: null });
+  m.head.innerHTML = `<span class="mw-tip" tabindex="0" title="Drag notes into folders and folders into other folders, drag either up or down to put them in your own order, star the ones you use most, link them to subjects and lessons, and paste or drop photos and videos in. The ◀ tabs hide the folders or the list; drag the line beside the list to resize it. Select words and right-click to link them to another note." aria-label="Tips">?</span>`;
   const fold = $(".nb-folders", s), items = $(".nb-items", s), ed = $(".nb-ed", s), q = $('input[type="search"]', s), subjSel = $(".nb-subj", s), sortSel = $(".nb-sort", s);
   q.value = NOTES.q;
   q.oninput = () => { NOTES.q = q.value; drawList(); };
@@ -66636,7 +66855,7 @@ function renderNotes(){
     ti.oninput = () => { clearTimeout(saveT); sv.textContent = "Editing…"; saveT = setTimeout(() => { saveT = null; NS.update(n.id, { title: ti.value.trim() || "Untitled note" }); sv.textContent = "Saved"; const it = items.querySelector(`[data-id="${n.id}"] .nb-t`); if (it) it.lastChild.textContent = ti.value.trim() || "Untitled note"; }, 400); };
     const chips = () => {
       const m = NS.get(n.id), ks = m.links.filter(linkOk);
-      $(".nb-chips", ed).innerHTML = ks.length ? ks.map(k => `<span class="nb-chip"><button type="button" data-open="${k}" title="Open ${esc(linkLabel(k))}"><span class="nb-cic">${linkIcon(k)}</span>${esc(linkLabel(k))}</button><button type="button" class="nb-cx" data-x="${k}" aria-label="Remove link to ${esc(linkLabel(k))}">×</button></span>`).join("") : `<span class="nb-nolink">Nothing yet</span>`;
+      $(".nb-chips", ed).innerHTML = ks.length ? ks.map(k => `<span class="nb-chip"><button type="button" data-open="${k}" title="Open ${esc(linkLabel(k))}"><span class="nb-cic" style="color:${linkColour(k)}">${linkIcon(k)}</span>${esc(linkLabel(k))}</button><button type="button" class="nb-cx" data-x="${k}" aria-label="Remove link to ${esc(linkLabel(k))}">×</button></span>`).join("") : `<span class="nb-nolink">Nothing yet</span>`;
       $(".nb-chips", ed).querySelectorAll("[data-open]").forEach(b => b.onclick = () => { flushEd(); openLink(b.dataset.open); });
       $(".nb-chips", ed).querySelectorAll("[data-x]").forEach(b => b.onclick = () => { NS.unlink(n.id, b.dataset.x); chips(); drawList(); });
     };
@@ -66661,7 +66880,7 @@ function renderNotes(){
   }
   function drawAll(focusTitle){ drawFolders(); drawList(); drawEd(focusTitle); }
   drawAll();
-  cleanup.push(() => { flushEd(); if (rich) { rich.destroy(); rich = null; } });
+  m.cleanup.push(() => { flushEd(); if (rich) { rich.destroy(); rich = null; } });
 }
 
 /* ---------- dictionary ---------- */
@@ -66674,7 +66893,8 @@ function renderDict(){
   viewEl.appendChild(s);
   $("#dback", s).onclick = () => go({ view: "menu", topic: null });
   (DB.subjectGroups || [{ id: "all", name: "Subjects", line: "" }]).forEach(g => {
-    const subs = DB.subjects.filter(x => (x.group || "all") === g.id);
+    const subs = DB.subjects.filter(x => (x.group || "all") === g.id).map((x, i) => [x, i]) // starred subjects first in their group, then the usual order
+      .sort((a, b) => (isFav("s:" + b[0].id) - isFav("s:" + a[0].id)) || a[1] - b[1]).map(x => x[0]);
     if (!subs.length) return;
     const sec = h("section", { class: "subj-group", "data-accent": g.accent || "", "aria-label": g.name });
     sec.innerHTML = `<div class="subj-gh"><h2>${esc(g.name)}</h2><span class="ln">${esc(g.line || "")}</span><span class="n">${subs.length}</span></div><div class="slots"></div>`;
@@ -66687,6 +66907,8 @@ function renderDict(){
     });
     $("#subj", s).appendChild(sec);
   });
+  // starring or un-starring a subject moves its card at once (the other cards slide over)
+  $("#subj", s).addEventListener("click", e => { if (!e.target.closest(".fav")) return; setTimeout(() => { if (S.view !== "dict") return; const y = viewEl.scrollTop; render(); viewEl.scrollTop = y; }, 0); }, true); // capture: the star stops the click
 }
 
 /* ---------- workspace ---------- */
@@ -66756,11 +66978,11 @@ function buildNav(nav, w){
     tools.innerHTML = (gn.length ? [[S.subject, SM[S.subject].name, gGlyph(S.subject), gColour(S.subject), gn.length], ["all", "All subjects", "◎", "var(--line-2)", all]]
       .map(([id, nm, gl, c, n]) => `<button type="button" class="gl-chip sm" data-scope="${id}" aria-pressed="${sc === id}" style="--gc:${c}"><span class="g">${gl}</span>${esc(nm)}<span class="n">${n}</span></button>`).join("")
       : `<span class="nav-gl-none">No ${esc(SM[S.subject].name)} words yet. Showing every subject.</span>`)
-      + `<button type="button" class="btn-s nav-gl-full" data-full>Full glossary ↗</button>`
       + (sc !== "all" && glFields.length > 1 ? `<div class="nav-gl-flds" role="group" aria-label="Filter by field"><span class="nav-gl-fl">Field</span>`
         + [["", "All fields", gn.length], ...glFields.map(([f, n]) => [f, DB.fields[f].name, n])]
           .map(([f, nm, n]) => `<button type="button" class="gl-chip sm nav-gl-fld" data-gfld="${f}" aria-pressed="${(fieldOn() || "") === f}" style="--gc:${gColour(S.subject)}">${esc(nm)}<span class="n">${n}</span></button>`).join("")
-        + `</div>` : "");
+        + `</div>` : "")
+      + `<button type="button" class="btn-s nav-gl-full" data-full>Full glossary ↗</button>`; // below every filter
     tools.addEventListener("click", e => {
       const b = e.target.closest("button"); if (!b) return;
       if (b.dataset.scope) { S.glScope = b.dataset.scope === "all" ? "all" : null; buildWords(); if (S.gword) render(); return; }
@@ -67392,7 +67614,7 @@ window.InquireApp = {
       if (sc > best.score) best = { score: sc, label: sc === 3 ? (T[id] ? T[id].title : id) : sc === 2 ? (DB.fields[id] ? DB.fields[id].name : id) : (SM[id] ? SM[id].name : id) }; });
     return best;
   },
-  context(){ const t = S.topic && T[S.topic]; return { userName: window.InquireUserName || window.InquireUser || "", view: S.view, subject: S.subject, subjectName: SM[S.subject] ? SM[S.subject].name : "", field: S.view === "math" ? S.field : null,
+  context(){ const t = S.topic && T[S.topic]; return { userName: window.InquireUserName || window.InquireUser || "", view: MW.notes ? "notes" : MW.achievements ? "achievements" : S.view, gword: S.view === "math" ? S.gword : S.view === "glossary" ? G.word : null, subject: S.subject, subjectName: SM[S.subject] ? SM[S.subject].name : "", field: S.view === "math" ? S.field : null,
     fieldName: S.view === "math" && DB.fields[S.field] ? DB.fields[S.field].name : "", topic: S.topic || null, topicTitle: t ? t.title : "" }; },
   openTopic: id => go({ view: "math", topic: id }), openNotes: id => { if (id) { NOTES.sel = id; const n = window.InquireNotes && InquireNotes.get(id); if (n) { NOTES.folder = "all"; NOTES.subj = ""; NOTES.q = ""; } } go({ view: "notes", topic: null }); },
   // right-click → Glossary: the entry shown inside the menu (headword, IPA, part of speech, each subject's first senses), or null
@@ -67410,14 +67632,34 @@ window.InquireApp = {
     if (!w) return false;
     const k = gLookup(w);
     if (k && S.view === "math") { go({ view: "math", gword: k }); return true; }
-    const from = S.view === "notes" ? { label: "My notes", state: { view: "notes", topic: null } }
+    const from = MW.notes ? { label: "My notes", state: { view: "notes", topic: null } }
       : S.view === "math" ? { label: S.topic && T[S.topic] ? T[S.topic].title : SM[S.subject].name, subject: S.subject, state: { view: "math", subject: S.subject, field: S.field, topic: S.topic } } : null;
     openGlossary({ from, sub: "all", q: k ? "" : w, word: k || null });
     return !!k;
   },
-  linkLabel, linkTargets, openLink
+  linkLabel, linkTargets, openLink,
+  modal: modalWin, closeWin: id => { if (id) { if (MW[id]) MW[id].close(); } else closeWins(); }, openWin: id => WIN_VIEWS[id] && WIN_VIEWS[id](), winOpen: id => (id ? !!MW[id] : Object.keys(MW).length > 0),
+  go: v => go(v),
+  // for Achievements: what has been mastered, per subject and per charted field (written lessons only)
+  progress(){
+    const by = {}, groups = {};
+    mastered.forEach(id => { if (!NODE[id]) return; const sb = subjOf(fieldOf(id)); by[sb] = (by[sb] || 0) + 1; const g = (GSUB[sb] && GSUB[sb].group) || "stem"; groups[g] = (groups[g] || 0) + 1; });
+    const fields = Object.keys(DB.fields).filter(f => charted(f) && SM[subjOf(f)]).map(f => { const pool = fieldNodes(f).filter(n => T[n.id]); return { id: f, name: DB.fields[f].name, subject: subjOf(f), colour: gColour(subjOf(f)), done: pool.filter(n => mastered.has(n.id)).length, total: pool.length }; }).filter(x => x.total);
+    return { mastered: [...mastered].filter(id => NODE[id]).length, bySubject: by, byGroup: groups, fields };
+  },
+  subjectName: id => (SM[id] ? SM[id].name : id), subjectColour: id => gColour(id),
+  // keyboard shortcuts (Settings → Shortcuts) that act on screens
+  shortcut(name){
+    if (name === "menu") return go({ view: "menu", topic: null });
+    if (name === "dict") return go({ view: "dict", topic: null });
+    if (name === "glossary") { G.sub = "all"; G.field = null; G.word = null; G.ret = null; return openGlossary({}); }
+    if (name === "notes") return MW.notes ? MW.notes.close() : openNotesWin();
+    if (name === "achievements") return MW.achievements ? MW.achievements.close() : WIN_VIEWS.achievements();
+    if (name === "sidebar") { const b = $(".nav-fold"); if (b && b.offsetParent) b.click(); return; }
+    if (name === "back") { if (Object.keys(MW).length) return closeWins(); const b = viewEl.querySelector(".back-row .btn-s:not(.navtoggle)"); if (b) b.click(); }
+  }
 };
-window.addEventListener("inquire:signed-in", () => { mastered = loadMastered(); render(); }); // that account's progress and notes
+window.addEventListener("inquire:signed-in", () => { mastered = loadMastered(); closeWins(); render(); }); // that account's progress and notes
 
 /* ---------- boot ---------- */
 $("#brand").onclick = () => go({ view: "menu", topic: null });
@@ -67436,12 +67678,21 @@ render();
 
 </script>
 <script>/* web/src/dock.js */
-/* Corner dock: the "Assist" tab at the bottom right of the app. It opens a small window with two tabs:
-   - AI: a chat. The model is NOT built in: set window.InquireAI before or after this file loads:
-       window.InquireAI = { name: "Tutor", async ask({ messages, context }) { … return "reply text"; } }
-     messages = [{ role: "user" | "assistant", content }], context = InquireApp.context() (view, subject, field, topic, topicTitle).
-     ask may also return an async iterable of text chunks (streaming). Without a provider the chat says it is not connected.
-   - Notes: write notes, make one from the current topic page (InquireNotes.fromTopic), or clip selected page text.
+/* Corner dock (layout of Oct 2026). Three icons (AI · Notes · Chat) sit in a small rail on the right edge of the app; the same
+   three icons are in the Assist window's header, so every box can be reached from any other.
+   - Assist window (#dk-win): "◆ Assist" at its top left with the tabs under it:
+       AI chat: the model is NOT built in: set window.InquireAI before or after this file loads:
+         window.InquireAI = { name: "Tutor", async ask({ messages, context }) { … return "reply text"; } }
+         messages = [{ role: "user" | "assistant", content }], context = InquireApp.context() (view, subject, field, topic, topicTitle).
+         ask may also return an async iterable of text chunks (streaming). Without a provider the chat says it is not connected.
+       Chat: talk with other Inquire users. Needs an online server, which is not built; plug one in with
+         window.InquireChat = { name, async send({ room, text, user }), subscribe(room, onMessage) → unsubscribe }
+         onMessage({ user, text, time }). Without it the tab says it is not connected and the box is disabled.
+   - Notes box (#dk-notes): its own window. Docked at the bottom right (left of Assist when both are open); drag its header to
+     detach it and move it anywhere. ✕ closes it and the Notes icon reopens it where it was (floating or docked);
+     ⇲ (or a double-click on the header) sends it home to the bottom right. Write notes, make one from the current topic page
+     (InquireNotes.fromTopic), or clip selected page text. Phones (≤760 px): no dragging, and only one of the two boxes is open at a time.
+   State in codex.dock = { open, tab, notes: { open, float, x, y } } (x/y in CSS px of #app, which may be zoomed).
    Lives inside #app, so the sign-in screen and the settings window cover/fog it like the rest of the app. */
 (function () {
 "use strict";
@@ -67449,47 +67700,86 @@ const app = document.getElementById("app"); if (!app) return;
 const NS = window.InquireNotes, A = () => window.InquireApp, esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const KEY = "codex.dock";
 const favTop = () => { try { return JSON.parse(localStorage.getItem("codex.notefavtop") ?? "true") !== false; } catch (e) { return true; } }; // My notes → "★ first"
-const st = (() => { try { return Object.assign({ open: false, tab: "ai" }, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) { return { open: false, tab: "ai" }; } })();
-const keep = () => { try { localStorage.setItem(KEY, JSON.stringify({ open: st.open, tab: st.tab })); } catch (e) {} };
+const st = (() => {
+  let o = {}; try { o = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) {}
+  const s = { open: !!o.open, tab: o.tab === "chat" ? "chat" : "ai", notes: Object.assign({ open: false, float: false, x: 0, y: 0 }, o.notes || {}) };
+  if (o.tab === "notes") { s.notes.open = !!o.open; s.open = false; } // before Oct 2026 Notes was a tab of Assist
+  return s;
+})();
+const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+
+const ICON = {
+  ai: `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 2.5l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path fill="currentColor" d="M18.5 14.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/></svg>`,
+  notes: `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 11h7M9 14.5h7M9 18h4"/></svg>`,
+  chat: `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 4.5h12v8.5H8.5L5 16v-3H3z"/><path d="M15 8.5h6V17h-2v3l-3.2-3H11v-4"/></svg>`
+};
+const icons = () => `<div class="dk-icons" role="group" aria-label="Assist tools">
+  <button type="button" class="dk-ic" data-go="ai" title="AI assistant" aria-label="AI assistant" aria-pressed="false">${ICON.ai}</button>
+  <button type="button" class="dk-ic" data-go="notes" title="Notes" aria-label="Notes" aria-pressed="false">${ICON.notes}</button>
+  <button type="button" class="dk-ic" data-go="chat" title="Chat with other Inquire users" aria-label="Chat with other Inquire users" aria-pressed="false">${ICON.chat}</button></div>`;
 
 const root = document.createElement("div");
 root.className = "dk";
 root.innerHTML = `
-  <button type="button" class="dk-tab" aria-expanded="false" aria-controls="dk-win"><span class="dk-gem" aria-hidden="true"></span>Assist</button>
+  <nav class="dk-rail" aria-label="Assist"><span class="dk-gem" aria-hidden="true"></span>${icons()}</nav>
   <section class="dk-win win" id="dk-win" role="dialog" aria-label="Assist" hidden>
-    <header class="dk-h"><div class="dk-tabs" role="tablist">
-      <button type="button" role="tab" data-t="ai">AI chat</button><button type="button" role="tab" data-t="notes">Notes</button></div>
-      <button type="button" class="dk-x" aria-label="Close Assist" title="Close">✕</button></header>
+    <header class="dk-h"><div class="dk-hl"><div class="dk-title"><span class="dk-gem" aria-hidden="true"></span>Assist</div>
+      <div class="dk-tabs" role="tablist"><button type="button" role="tab" data-t="ai">AI chat</button><button type="button" role="tab" data-t="chat">Chat</button></div></div>
+      <div class="dk-hr">${icons()}<button type="button" class="dk-x" aria-label="Close Assist" title="Close">✕</button></div></header>
     <div class="dk-pane" data-p="ai">
       <div class="dk-ctx"></div>
       <div class="dk-screen"><div class="dk-holo" aria-hidden="true"><span class="dk-scan"></span></div><div class="dk-log" aria-live="polite"></div></div>
       <form class="dk-ask"><textarea rows="2" placeholder="Ask about this topic…" aria-label="Message"></textarea><button type="submit" class="btn-s" aria-label="Send">Send</button></form>
     </div>
-    <div class="dk-pane" data-p="notes" hidden></div>
+    <div class="dk-pane" data-p="chat" hidden>
+      <div class="dk-ctx"><span>Room</span><b>General</b><span class="dk-prov dk-cprov">not connected</span></div>
+      <div class="dk-screen"><div class="dk-holo" aria-hidden="true"><span class="dk-scan"></span></div><div class="dk-log dk-clog" aria-live="polite"></div></div>
+      <form class="dk-ask dk-cask"><textarea rows="2" placeholder="Message other Inquire users…" aria-label="Message"></textarea><button type="submit" class="btn-s" aria-label="Send">Send</button></form>
+    </div>
+  </section>
+  <section class="dkn win" id="dk-notes" role="dialog" aria-label="Notes" hidden>
+    <header class="dkn-h" title="Drag to move · double-click to dock"><div class="dk-title"><span class="dk-gem" aria-hidden="true"></span>Notes</div><span class="dkn-grip" aria-hidden="true">⠿</span>
+      <div class="dk-hr"><button type="button" class="dk-x dkn-home" aria-label="Dock Notes at the bottom right" title="Dock at the bottom right">⇲</button><button type="button" class="dk-x dkn-x" aria-label="Close Notes" title="Close">✕</button></div></header>
+    <div class="dk-pane" data-p="notes"></div>
   </section>`;
 app.appendChild(root);
-const tabBtn = root.querySelector(".dk-tab"), win = root.querySelector(".dk-win");
+const win = root.querySelector("#dk-win"), nwin = root.querySelector("#dk-notes"), nh = nwin.querySelector(".dkn-h");
 const $ = s => root.querySelector(s);
 
-// the window slides out of the right edge and back into it; the Assist tab rides along its left side as the handle
+// the rail steps aside while a docked box covers its corner; icons show which boxes are open
+function sync() {
+  root.classList.toggle("rail-off", st.open || (st.notes.open && !st.notes.float));
+  root.querySelectorAll(".dk-ic").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.go === "notes" ? st.notes.open : st.open && st.tab === b.dataset.go)));
+}
+
+/* ---------- Assist window: slides out of the right edge and back ---------- */
 let slideT = null;
 function setOpen(o) {
   st.open = o; keep(); clearTimeout(slideT);
-  tabBtn.setAttribute("aria-expanded", String(o)); tabBtn.title = o ? "Slide Assist back into the side" : "Open Assist";
+  if (o && phone() && st.notes.open) setNotes(false); // phones: one box at a time
   if (o) { win.hidden = false; void win.offsetWidth; root.classList.add("is-open"); setTab(st.tab); }
   else { root.classList.remove("is-open"); slideT = setTimeout(() => { if (!st.open) win.hidden = true; }, 380); }
+  sync();
 }
 function setTab(t) {
   st.tab = t; keep();
-  root.querySelectorAll(".dk-tabs [data-t]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.t === t)));
-  root.querySelectorAll(".dk-pane").forEach(p => { p.hidden = p.dataset.p !== t; });
+  win.querySelectorAll(".dk-tabs [data-t]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.t === t)));
+  win.querySelectorAll(".dk-pane").forEach(p => { p.hidden = p.dataset.p !== t; });
   if (t === "ai") { drawCtx(); setTimeout(() => $(".dk-ask textarea").focus({ preventScroll: true }), 30); }
-  else drawNotes();
+  else drawChat();
+  sync();
 }
-tabBtn.onclick = () => setOpen(!st.open);
-$(".dk-x").onclick = () => { setOpen(false); tabBtn.focus(); };
-root.querySelectorAll(".dk-tabs [data-t]").forEach(b => b.onclick = () => setTab(b.dataset.t));
-win.addEventListener("keydown", e => { if (e.key === "Escape") { e.stopPropagation(); setOpen(false); tabBtn.focus(); } });
+const railFocus = () => { const b = root.querySelector('.dk-rail [data-go="ai"]'); if (b && !root.classList.contains("rail-off")) b.focus(); };
+root.addEventListener("click", e => {
+  const b = e.target.closest(".dk-ic"); if (!b) return;
+  const g = b.dataset.go;
+  if (g === "notes") return setNotes(!st.notes.open);
+  if (st.open && st.tab === g) setOpen(false);
+  else { st.tab = g; if (st.open) setTab(g); else setOpen(true); }
+});
+win.querySelector(".dk-x").onclick = () => { setOpen(false); railFocus(); };
+win.querySelectorAll(".dk-tabs [data-t]").forEach(b => b.onclick = () => setTab(b.dataset.t));
+win.addEventListener("keydown", e => { if (e.key === "Escape") { e.stopPropagation(); setOpen(false); railFocus(); } });
 
 /* ---------- AI chat ---------- */
 const chat = []; // this session only
@@ -67499,20 +67789,20 @@ function drawCtx() {
   $(".dk-ctx").innerHTML = (c.view === "math" && where ? `<span>Context</span><b>${esc(where)}</b>` : `<span>Context</span><b>${c.view === "notes" ? "My notes" : c.view === "glossary" ? "Glossary" : "Menu"}</b>`)
     + `<span class="dk-prov">${window.InquireAI ? esc(window.InquireAI.name || "Assistant") : "not connected"}</span>`;
 }
-function bubble(role, text) {
+function bubble(role, text, log) {
   const d = document.createElement("div");
   d.className = "dk-msg " + role;
   d.innerHTML = `<div class="dk-t"></div>` + (role === "assistant" ? `<button type="button" class="dk-save" title="Save this reply to a note">＋ Note</button>` : "");
   d.querySelector(".dk-t").textContent = text;
   const sv = d.querySelector(".dk-save");
   if (sv) sv.onclick = () => { const c = ctx(); const n = NS.create({ title: "AI: " + (c.topicTitle || "notes"), body: d.querySelector(".dk-t").textContent, src: c.topic ? { topic: c.topic, title: c.topicTitle } : null }); sv.textContent = "Saved ✓"; sv.disabled = true; window.dispatchEvent(new CustomEvent("inquire:notes-changed", { detail: { id: n.id } })); };
-  $(".dk-log").appendChild(d); $(".dk-log").scrollTop = 1e9;
+  log = log || $(".dk-log"); log.appendChild(d); log.scrollTop = 1e9;
   return d;
 }
 function hello() {
   if ($(".dk-log").childElementCount) return;
   const p = document.createElement("p"); p.className = "dk-hello";
-  p.textContent = window.InquireAI ? "Ask a question about the page you are on, or anything you are studying." : "The AI assistant is not connected yet. Its logic will be added in a later update; until then you can still write notes in the Notes tab.";
+  p.textContent = window.InquireAI ? "Ask a question about the page you are on, or anything you are studying." : "The AI assistant is not connected yet. Its logic will be added in a later update; until then you can still write notes in the Notes box.";
   $(".dk-log").appendChild(p);
 }
 $(".dk-ask").onsubmit = async e => {
@@ -67533,10 +67823,78 @@ $(".dk-ask").onsubmit = async e => {
 };
 $(".dk-ask textarea").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $(".dk-ask").requestSubmit(); } });
 
-/* ---------- notes ---------- */
+/* ---------- Chat with other users (needs window.InquireChat) ---------- */
+const clog = $(".dk-clog"), cask = $(".dk-cask"), cta = cask.querySelector("textarea");
+let chatOff = null;
+function cmsg(m, mine) {
+  const d = document.createElement("div"); d.className = "dk-msg " + (mine ? "user" : "assistant");
+  d.innerHTML = `${mine ? "" : `<b class="dk-who"></b>`}<div class="dk-t"></div>`;
+  if (!mine) d.querySelector(".dk-who").textContent = m.user || "Someone";
+  d.querySelector(".dk-t").textContent = m.text || "";
+  clog.appendChild(d); clog.scrollTop = 1e9;
+}
+function drawChat() {
+  const C = window.InquireChat, on = !!(C && typeof C.send === "function");
+  $(".dk-cprov").textContent = on ? (C.name || "Online") : "not connected";
+  cta.disabled = !on; cask.querySelector("button").disabled = !on;
+  cta.placeholder = on ? "Message other Inquire users…" : "Chat is not connected yet";
+  if (!on && !clog.childElementCount) clog.innerHTML = `<p class="dk-hello">Chat with other Inquire users is not connected yet. It needs Inquire’s online account server, which will come in a later update.</p>`;
+  if (on && !chatOff && typeof C.subscribe === "function") { clog.innerHTML = ""; chatOff = C.subscribe("general", m => cmsg(m, false)) || (() => {}); }
+  if (on) setTimeout(() => cta.focus({ preventScroll: true }), 30);
+}
+cask.onsubmit = async e => {
+  e.preventDefault();
+  const C = window.InquireChat, text = cta.value.trim(); if (!text || !C) return;
+  cta.value = ""; cmsg({ text }, true);
+  try { await C.send({ room: "general", text, user: window.InquireUserName || "" }); }
+  catch (err) { const p = document.createElement("p"); p.className = "dk-hello"; p.textContent = "Not sent: " + (err.message || "the chat server did not answer."); clog.appendChild(p); }
+};
+cta.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); cask.requestSubmit(); } });
+
+/* ---------- Notes box: docked or floating, dragged by its header ---------- */
+const zoom = () => app.currentCSSZoom || parseFloat(getComputedStyle(app).zoom) || 1;
+const phone = () => matchMedia("(max-width:760px)").matches;
+function place() {
+  const fl = st.notes.float && !phone();
+  nwin.classList.toggle("docked", !fl); nwin.classList.toggle("floating", fl);
+  if (!fl) { nwin.style.left = nwin.style.top = ""; return; }
+  const z = zoom(), W = innerWidth / z, H = innerHeight / z, w = nwin.offsetWidth || 380;
+  st.notes.x = Math.round(Math.max(120 - w, Math.min(W - 120, st.notes.x))); // keep enough of the header on screen to grab
+  st.notes.y = Math.round(Math.max(0, Math.min(H - 44, st.notes.y)));
+  nwin.style.left = st.notes.x + "px"; nwin.style.top = st.notes.y + "px";
+}
+let closeT = null;
+function setNotes(o) {
+  st.notes.open = o; keep(); clearTimeout(closeT);
+  if (o && phone() && st.open) setOpen(false);
+  if (o) { nwin.hidden = false; place(); void nwin.offsetWidth; nwin.classList.add("is-open"); drawNotes(); }
+  else { flush(); nwin.classList.remove("is-open"); closeT = setTimeout(() => { if (!st.notes.open) nwin.hidden = true; }, 240); }
+  sync();
+}
+function dockHome() { st.notes.float = false; keep(); place(); sync(); }
+nwin.querySelector(".dkn-x").onclick = () => { setNotes(false); railFocus(); };
+nwin.querySelector(".dkn-home").onclick = dockHome;
+nh.addEventListener("dblclick", e => { if (!e.target.closest("button")) dockHome(); });
+nwin.addEventListener("keydown", e => { if (e.key === "Escape" && !e.target.closest(".nr-pop, .nv-pop")) { e.stopPropagation(); setNotes(false); railFocus(); } });
+nh.addEventListener("pointerdown", e => {
+  if (e.button !== 0 || e.target.closest("button") || phone()) return;
+  e.preventDefault();
+  const z = zoom(), r = nwin.getBoundingClientRect(), ox = (e.clientX - r.left) / z, oy = (e.clientY - r.top) / z;
+  let moved = false;
+  const move = ev => {
+    if (!moved && Math.abs(ev.clientX - e.clientX) + Math.abs(ev.clientY - e.clientY) < 4) return; // a click is not a drag
+    if (!moved) { moved = true; nwin.classList.add("dragging"); st.notes.float = true; sync(); }
+    st.notes.x = ev.clientX / z - ox; st.notes.y = ev.clientY / z - oy; place();
+  };
+  const up = () => { nh.removeEventListener("pointermove", move); nh.removeEventListener("pointerup", up); nh.removeEventListener("pointercancel", up); nwin.classList.remove("dragging"); if (moved) keep(); };
+  try { nh.setPointerCapture(e.pointerId); } catch (err) {}
+  nh.addEventListener("pointermove", move); nh.addEventListener("pointerup", up); nh.addEventListener("pointercancel", up);
+});
+window.addEventListener("resize", () => { if (st.notes.open && st.notes.float) place(); });
+
 let edId = null, saveT = null, rich = null;
 function drawNotes() {
-  const pane = $('[data-p="notes"]');
+  const pane = nwin.querySelector('[data-p="notes"]');
   if (!NS) { pane.innerHTML = "<p class=dk-hello>Notes are unavailable.</p>"; return; }
   if (rich) { rich.destroy(); rich = null; }
   const n = edId && NS.get(edId);
@@ -67555,11 +67913,11 @@ function drawNotes() {
     pane.querySelector('[data-a="photo"]').onclick = () => file.click();
     file.onchange = async () => { const k = await rich.addFiles(file.files); sv.textContent = k ? "Photo added" : "That file is not a photo"; file.value = ""; };
     pane.querySelector('[data-a="back"]').onclick = () => { flush(); edId = null; drawNotes(); };
-    pane.querySelector('[data-a="full"]').onclick = () => { flush(); const id = edId; edId = null; setOpen(false); A() && A().openNotes(id); };
+    pane.querySelector('[data-a="full"]').onclick = () => { flush(); const id = edId; edId = null; setNotes(false); A() && A().openNotes(id); };
     const src = pane.querySelector('[data-a="src"]'); if (src) src.onclick = () => A() && A().openTopic(n.src.topic);
     pane.querySelector('[data-a="del"]').onclick = () => { // at once, with Undo (like My notes)
       flush(); if (rich) { rich.destroy(); rich = null; } edId = null;
-      NS.deleteWithUndo(n.id, id => { edId = id; if (st.open && st.tab === "notes") drawNotes(); }); drawNotes();
+      NS.deleteWithUndo(n.id, id => { edId = id; if (st.notes.open) drawNotes(); }); drawNotes();
     };
     pane.querySelector('[data-a="clip"]').onmousedown = e => e.preventDefault(); // keep the page selection
     pane.querySelector('[data-a="clip"]').onclick = () => {
@@ -67584,29 +67942,262 @@ function drawNotes() {
     const g = NS.fromTopic(c.topic); if (!g) return; const x = NS.create(g); edId = x.id; drawNotes();
     const ed = pane.querySelector(".nb-rich"); ed.focus(); const r = document.createRange(); r.selectNodeContents(ed); r.collapse(false); const s = getSelection(); s.removeAllRanges(); s.addRange(r); ed.scrollTop = 1e9;
   };
-  pane.querySelector('[data-a="full"]').onclick = () => { setOpen(false); A() && A().openNotes(); };
+  pane.querySelector('[data-a="full"]').onclick = () => { setNotes(false); A() && A().openNotes(); };
   pane.querySelectorAll(".dk-nit").forEach(b => b.onclick = () => { edId = b.dataset.id; drawNotes(); });
 }
 function flush() {
   if (rich) rich.flush();
-  if (!saveT) return; clearTimeout(saveT); saveT = null; const ti = $(".dk-ntitle"); if (ti && edId) NS.update(edId, { title: ti.value.trim() || "Untitled note" });
+  if (!saveT) return; clearTimeout(saveT); saveT = null; const ti = nwin.querySelector(".dk-ntitle"); if (ti && edId) NS.update(edId, { title: ti.value.trim() || "Untitled note" });
 }
 
 // keep the context line and the notes list current
-window.addEventListener("hashchange", () => { if (!win.hidden) { if (st.tab === "ai") drawCtx(); else if (!edId) drawNotes(); } });
-window.addEventListener("inquire:route", () => { if (!win.hidden) { if (st.tab === "ai") drawCtx(); else if (!edId) drawNotes(); } });
-window.addEventListener("inquire:notes-changed", () => { if (!win.hidden && st.tab === "notes" && !edId) drawNotes(); });
-window.addEventListener("inquire:signed-in", () => { edId = null; chat.length = 0; $(".dk-log").innerHTML = ""; hello(); if (!win.hidden) setTab(st.tab); });
+const refresh = () => { if (!win.hidden && st.tab === "ai") drawCtx(); if (!nwin.hidden && !edId) drawNotes(); };
+window.addEventListener("hashchange", refresh);
+window.addEventListener("inquire:route", refresh);
+window.addEventListener("inquire:notes-changed", () => { if (!nwin.hidden && !edId) drawNotes(); });
+window.addEventListener("inquire:signed-in", () => {
+  edId = null; chat.length = 0; $(".dk-log").innerHTML = ""; hello();
+  if (chatOff) { try { chatOff(); } catch (e) {} chatOff = null; } clog.innerHTML = "";
+  if (!win.hidden) setTab(st.tab); if (!nwin.hidden) drawNotes();
+});
+window.InquireDock = { open: t => { st.tab = t === "chat" ? "chat" : "ai"; setOpen(true); }, close: () => setOpen(false), notes: setNotes, dockNotes: dockHome, state: () => JSON.parse(JSON.stringify(st)) };
 hello();
 if (st.open) setOpen(true);
+if (st.notes.open) setNotes(true);
+sync();
+})();
+
+</script>
+<script>/* web/src/achievements.js */
+/* Achievements (Main Menu → Achievements, Alt+A, route #achievements): a window over the app like Settings and My notes
+   (InquireApp.modal). Two tabs: All achievements (the catalogue by category, with progress) and My Achievements (what you
+   earned, newest first). Each achievement is worth Achievement Points (AP), shown as a balance in the window's header and
+   on the Main Menu's Achievements slot. A toast says "Achievement unlocked" when one is earned.
+   Earned + counters are per account in codex.achievements.<user> (_local with no sign-in):
+     { earned: { id: time }, stats: { quizRight, quizTries, streak, bestStreak, words[], maps[], themes[], days[], games, gameBest }, seeded }
+   The first check for an account awards what is already done without toasts (seeded), so nobody gets a flood after updating.
+   Sources: progress (InquireApp.progress), notes and folders (InquireNotes), favourites (codex.favs.<user>), the theme
+   (codex.settings), routes (field maps and glossary words seen, days studied), and events:
+     inquire:quiz  { correct }   (EngLab.quiz fires it on every answer; other kits can too)
+     inquire:game  { score }     (for the Games section once it exists)
+   InquireAchievements = { open(tab), close(), points(), list(), record(kind, detail), check() }. Loaded after app.js. */
+(function () {
+"use strict";
+const A = () => window.InquireApp, NS = () => window.InquireNotes;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const user = () => (window.InquireUser ? String(window.InquireUser).toLowerCase() : "");
+const key = () => "codex.achievements." + (user() || "_local");
+const blank = () => ({ earned: {}, stats: { quizRight: 0, quizTries: 0, streak: 0, bestStreak: 0, words: [], maps: [], themes: [], days: [], games: 0, gameBest: 0 }, seeded: false });
+function load() {
+  try { const v = JSON.parse(localStorage.getItem(key()) || "null"); if (v && v.earned) { const b = blank(); return Object.assign(b, v, { stats: Object.assign(b.stats, v.stats || {}) }); } } catch (e) {}
+  return blank();
+}
+let D = load();
+const save = () => { try { localStorage.setItem(key(), JSON.stringify(D)); } catch (e) {} };
+// desktop: wait for sign-in so a session before it never writes into another account's file
+let ready = !window.inquireDesktop;
+
+/* ---------- the catalogue ---------- */
+const CATS = [
+  ["lessons", "Lessons", "▤", "Master lessons in any subject."],
+  ["fields", "Fields", "⌗", "Master every lesson in a field."],
+  ["subjects", "Subjects", "◈", "Study across subjects and groups."],
+  ["quizzes", "Quizzes", "✓", "Answer quiz questions in the labs’ Quiz modes."],
+  ["games", "Games", "◇", "Games are coming in a later update."],
+  ["study", "Notes & study", "✎", "Write, link and organise notes."],
+  ["explore", "Explorer", "⌖", "Find your way around Inquire."]
+];
+function readJ(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
+function facts() {
+  const P = A() && A().progress ? A().progress() : { mastered: 0, bySubject: {}, byGroup: {}, fields: [] };
+  const notes = NS() ? NS().list() : [], folders = NS() && NS().folders ? NS().folders() : [];
+  const favs = readJ("codex.favs." + (window.InquireUser || "_local"), { items: [] });
+  const st = D.stats;
+  return { P, notes: notes.length, linked: notes.filter(n => n.links && n.links.length).length, folders: folders.length, favs: (favs.items || []).length,
+    subjects: Object.keys(P.bySubject).length, groups: Object.keys(P.byGroup).length, fieldsDone: P.fields.filter(f => f.done >= f.total).length,
+    quizRight: st.quizRight, best: st.bestStreak, words: st.words.length, maps: st.maps.length, themes: st.themes.filter(t => t !== "capsuleer").length,
+    days: st.days.length, games: st.games, gameBest: st.gameBest };
+}
+// [id, category, name, description, points, goal, value(facts)]; soon = not reachable yet
+function catalogue() {
+  const L = [
+    ["first-lesson", "lessons", "First Steps", "Master your first lesson.", 10, 1, f => f.P.mastered],
+    ["lessons-10", "lessons", "Apprentice", "Master 10 lessons.", 25, 10, f => f.P.mastered],
+    ["lessons-25", "lessons", "Journeyman", "Master 25 lessons.", 50, 25, f => f.P.mastered],
+    ["lessons-50", "lessons", "Scholar", "Master 50 lessons.", 100, 50, f => f.P.mastered],
+    ["lessons-100", "lessons", "Savant", "Master 100 lessons.", 200, 100, f => f.P.mastered],
+    ["lessons-250", "lessons", "Polymath", "Master 250 lessons.", 500, 250, f => f.P.mastered],
+    ["field-1", "fields", "Field Charted", "Master every lesson in one field.", 100, 1, f => f.fieldsDone],
+    ["field-3", "fields", "Cartographer of Fields", "Master every lesson in three fields.", 300, 3, f => f.fieldsDone]
+  ];
+  (A() && A().progress ? A().progress().fields : []).forEach(x => L.push(["field:" + x.id, "fields", x.name + " Complete", `Master all ${x.total} ${esc(A().subjectName(x.subject))} lessons in ${x.name}.`,
+    Math.max(50, Math.round(x.total * 8 / 10) * 10), x.total, f => (f.P.fields.find(y => y.id === x.id) || { done: 0 }).done, { colour: x.colour }]));
+  L.push(
+    ["subjects-2", "subjects", "Two Disciplines", "Master lessons in two different subjects.", 50, 2, f => f.subjects],
+    ["subjects-3", "subjects", "Renaissance Mind", "Master lessons in three different subjects.", 150, 3, f => f.subjects],
+    ["subjects-5", "subjects", "Universal Scholar", "Master lessons in five different subjects.", 300, 5, f => f.subjects],
+    ["groups-2", "subjects", "Bridge Builder", "Master lessons in two subject groups (STEM, Arts & Humanities, Social Sciences).", 75, 2, f => f.groups],
+    ["quiz-1", "quizzes", "Right Answer", "Answer a quiz question correctly.", 10, 1, f => f.quizRight],
+    ["quiz-25", "quizzes", "Sharp", "Answer 25 quiz questions correctly.", 50, 25, f => f.quizRight],
+    ["quiz-100", "quizzes", "Quiz Master", "Answer 100 quiz questions correctly.", 150, 100, f => f.quizRight],
+    ["streak-5", "quizzes", "On a Roll", "Answer 5 quiz questions in a row correctly.", 40, 5, f => f.best],
+    ["streak-10", "quizzes", "Unstoppable", "Answer 10 quiz questions in a row correctly.", 100, 10, f => f.best],
+    ["streak-20", "quizzes", "Flawless", "Answer 20 quiz questions in a row correctly.", 250, 20, f => f.best],
+    ["game-1", "games", "Player One", "Finish your first game.", 25, 1, f => f.games, { soon: true }],
+    ["game-10", "games", "Regular Player", "Finish 10 games.", 75, 10, f => f.games, { soon: true }],
+    ["game-high", "games", "High Scorer", "Score 1,000 points in one game.", 150, 1000, f => f.gameBest, { soon: true }],
+    ["note-1", "study", "First Note", "Write your first note.", 10, 1, f => f.notes],
+    ["notes-10", "study", "Note Taker", "Keep 10 notes.", 40, 10, f => f.notes],
+    ["notes-50", "study", "Archivist", "Keep 50 notes.", 150, 50, f => f.notes],
+    ["note-link", "study", "Connected", "Link a note to a subject, field or lesson.", 20, 1, f => f.linked],
+    ["folders-3", "study", "Organiser", "Make three note folders.", 30, 3, f => f.folders],
+    ["maps-3", "explore", "Cartographer", "Open the field maps of three subjects.", 30, 3, f => f.maps],
+    ["words-10", "explore", "Wordsmith", "Look up 10 glossary words.", 30, 10, f => f.words],
+    ["words-50", "explore", "Lexicon", "Look up 50 glossary words.", 100, 50, f => f.words],
+    ["fav-1", "explore", "Favourite", "Star a subject or a field.", 10, 1, f => f.favs],
+    ["theme-1", "explore", "Make It Yours", "Pick a new look in Settings → Appearance.", 10, 1, f => f.themes],
+    ["days-7", "explore", "Regular", "Study on 7 different days.", 70, 7, f => f.days],
+    ["days-30", "explore", "Devoted", "Study on 30 different days.", 300, 30, f => f.days]
+  );
+  return L.map(([id, cat, name, desc, pts, goal, val, o]) => Object.assign({ id, cat, name, desc, pts, goal, val }, o || {}));
+}
+const points = () => catalogue().reduce((t, a) => t + (D.earned[a.id] ? a.pts : 0), 0);
+
+/* ---------- checking ---------- */
+let checkT = null;
+const soon = () => { clearTimeout(checkT); checkT = setTimeout(check, 250); };
+function check() {
+  if (!ready) return [];
+  const f = facts(), fresh = [];
+  catalogue().forEach(a => { if (!a.soon && !D.earned[a.id] && a.val(f) >= a.goal) { D.earned[a.id] = Date.now(); fresh.push(a); } });
+  const quiet = !D.seeded; D.seeded = true;
+  if (fresh.length || quiet) save();
+  if (fresh.length && !quiet) { toast(fresh); window.dispatchEvent(new CustomEvent("inquire:achievements", { detail: { ids: fresh.map(a => a.id) } })); }
+  if (win) draw();
+  paintSlot();
+  return fresh;
+}
+function today() { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function seen() {
+  if (!ready) return;
+  const st = D.stats, c = A() ? A().context() : {}, add = (arr, v) => { if (v && !arr.includes(v)) { arr.push(v); return true; } return false; };
+  let ch = add(st.days, today());
+  if (c.view === "math" && c.subject) ch = add(st.maps, c.subject) || ch;
+  if (c.gword) ch = add(st.words, c.gword) || ch;
+  const th = readJ("codex.settings", {}).theme; if (th) ch = add(st.themes, th) || ch;
+  if (ch) save();
+  soon();
+}
+function record(kind, d) {
+  if (!ready) return;
+  const st = D.stats;
+  if (kind === "quiz") { st.quizTries++; if (d && d.correct) { st.quizRight++; st.streak++; st.bestStreak = Math.max(st.bestStreak, st.streak); } else st.streak = 0; }
+  else if (kind === "game") { st.games++; st.gameBest = Math.max(st.gameBest, +(d && d.score) || 0); }
+  save(); soon();
+}
+
+// the Main Menu's Achievements slot (drawn by app.js, which loads first)
+function paintSlot() {
+  const el = document.getElementById("achslot"); if (!el) return;
+  const L = catalogue(), got = L.filter(a => D.earned[a.id]).length, tag = el.querySelector(".ach-tag"), n = el.querySelector(".ach-n");
+  if (tag) tag.textContent = "◆ " + points().toLocaleString("en-US") + " AP";
+  if (n) n.textContent = got + " of " + L.filter(a => !a.soon).length + " earned.";
+}
+/* ---------- toast ---------- */
+let tbox = null;
+function toast(list) {
+  if (!tbox) { tbox = document.createElement("div"); tbox.className = "ach-toasts"; tbox.setAttribute("aria-live", "polite"); document.body.appendChild(tbox); }
+  const many = list.length > 3, items = many ? [{ name: list.length + " achievements", pts: list.reduce((t, a) => t + a.pts, 0), cat: "lessons" }] : list;
+  items.forEach((a, i) => {
+    const t = document.createElement("button"); t.type = "button"; t.className = "ach-toast win";
+    t.innerHTML = `<span class="ach-medal sm">${(CATS.find(c => c[0] === a.cat) || CATS[0])[2]}</span><span><small>Achievement unlocked</small><b>${esc(a.name)}</b></span><span class="ach-ap">+${a.pts} AP</span>`;
+    t.onclick = () => { t.remove(); open("mine"); };
+    setTimeout(() => tbox.appendChild(t), i * 350);
+    setTimeout(() => { t.classList.add("out"); setTimeout(() => t.remove(), 400); }, 6000 + i * 350);
+  });
+}
+
+/* ---------- window ---------- */
+let win = null, tab = "all", cat = "all";
+const fmt = n => n.toLocaleString("en-US");
+const when = t => new Date(t).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+function open(t) {
+  if (t) tab = t === "mine" ? "mine" : "all";
+  if (!A() || !A().modal) return;
+  if (win && !win.closed) { draw(); return win; }
+  check();
+  win = A().modal("achievements", { title: "Achievements", cls: "mw-ach" });
+  win.cleanup.push(() => { win = null; });
+  win.head.innerHTML = `<span class="ach-bal" title="Achievement Points: earned by completing achievements"><span class="ach-coin" aria-hidden="true">◆</span><b class="num"></b><small>AP</small></span>
+    <button type="button" class="btn-s ach-mine" aria-pressed="false">★ My Achievements</button>`;
+  win.head.querySelector(".ach-mine").onclick = () => { tab = tab === "mine" ? "all" : "mine"; draw(); };
+  win.body.addEventListener("click", e => {
+    const b = e.target.closest("[data-tab],[data-cat]"); if (!b) return;
+    if (b.dataset.tab) tab = b.dataset.tab; else cat = b.dataset.cat;
+    draw();
+  });
+  draw();
+  return win;
+}
+function draw() {
+  if (!win || win.closed) return;
+  const L = catalogue(), f = facts(), pts = points(), got = L.filter(a => D.earned[a.id]), total = L.filter(a => !a.soon).length;
+  win.head.querySelector(".ach-bal b").textContent = fmt(pts);
+  const mb = win.head.querySelector(".ach-mine"); mb.setAttribute("aria-pressed", String(tab === "mine")); mb.textContent = tab === "mine" ? "◀ All achievements" : "★ My Achievements";
+  const card = a => {
+    const v = Math.min(a.goal, a.val(f)), done = !!D.earned[a.id], c = CATS.find(x => x[0] === a.cat);
+    return `<article class="ach-card${done ? " done" : ""}${a.soon ? " soon" : ""}"${a.colour ? ` style="--ac:${a.colour}"` : ""}>
+      <span class="ach-medal">${done ? "✓" : c[2]}</span>
+      <div class="ach-txt"><h3>${esc(a.name)}</h3><p>${a.desc}</p>
+        ${done ? `<span class="ach-when">Earned ${when(D.earned[a.id])}</span>` : a.soon ? `<span class="ach-when">Coming with Games</span>`
+          : `<span class="ach-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${a.goal}" aria-valuenow="${v}"><i style="width:${(v / a.goal * 100).toFixed(1)}%"></i></span><span class="ach-prog num">${fmt(v)} / ${fmt(a.goal)}</span>`}</div>
+      <span class="ach-pts num">${a.pts}<small>AP</small></span></article>`;
+  };
+  const tabs = `<div class="ach-tabs" role="tablist"><button type="button" role="tab" data-tab="all" aria-selected="${tab === "all"}">All achievements</button><button type="button" role="tab" data-tab="mine" aria-selected="${tab === "mine"}">My Achievements <span class="num">${got.length}</span></button>
+    <span class="ach-sum"><span class="ach-bar big"><i style="width:${(got.length / Math.max(1, total) * 100).toFixed(1)}%"></i></span><span class="num">${got.length} / ${total}</span> earned</span></div>`;
+  let body;
+  if (tab === "mine") {
+    const st = D.stats, rows = got.sort((a, b) => D.earned[b.id] - D.earned[a.id]);
+    body = `<div class="ach-stats">${[[fmt(pts), "Achievement Points"], [fmt(got.length), "Achievements earned"], [fmt(f.P.mastered), "Lessons mastered"], [fmt(f.fieldsDone), "Fields complete"], [fmt(st.quizRight), "Quiz answers right"], [fmt(st.bestStreak), "Best quiz streak"], [fmt(f.days), "Days studied"]]
+        .map(([n, l]) => `<div><b class="num">${n}</b><span>${l}</span></div>`).join("")}</div>`
+      + (rows.length ? `<div class="ach-grid">${rows.map(card).join("")}</div>`
+        : `<p class="ach-empty">Nothing earned yet. Master a lesson, answer a quiz question or write a note to earn your first Achievement Points.</p>`);
+  } else {
+    const chips = `<div class="ach-cats" role="group" aria-label="Category">${[["all", "All", "◎"]].concat(CATS).map(([id, nm, ic]) => { const n = id === "all" ? L : L.filter(a => a.cat === id);
+      return `<button type="button" class="gl-chip sm" data-cat="${id}" aria-pressed="${cat === id}"><span class="g">${ic}</span>${esc(nm)}<span class="n">${n.filter(a => D.earned[a.id]).length}/${n.length}</span></button>`; }).join("")}</div>`;
+    body = chips + CATS.filter(c => cat === "all" || c[0] === cat).map(([id, nm, ic, line]) => {
+      const list = L.filter(a => a.cat === id).sort((a, b) => (!!D.earned[b.id] - !!D.earned[a.id]) || 0);
+      return `<section class="ach-sec"><div class="ach-sh"><span class="ach-sic">${ic}</span><h3>${esc(nm)}</h3><span class="ln">${esc(line)}</span></div><div class="ach-grid">${list.map(card).join("")}</div></section>`;
+    }).join("");
+  }
+  const sc = win.body.querySelector(".ach-scroll"), y = sc ? sc.scrollTop : 0;
+  win.body.innerHTML = tabs + `<div class="ach-scroll">${body}</div>`;
+  if (sc) win.body.querySelector(".ach-scroll").scrollTop = y;
+}
+
+/* ---------- wiring ---------- */
+window.addEventListener("inquire:route", seen);
+window.addEventListener("inquire:mastered", soon);
+window.addEventListener("inquire:progress-changed", () => { D = load(); soon(); }); // a restored backup may carry achievements
+window.addEventListener("inquire:notes-changed", soon);
+window.addEventListener("inquire:quiz", e => record("quiz", e.detail));
+window.addEventListener("inquire:game", e => record("game", e.detail));
+window.addEventListener("storage", e => { if (e.key && /^codex\.(favs|settings|notefolders)/.test(e.key)) soon(); });
+window.addEventListener("click", e => { if (e.target.closest && e.target.closest(".fav, .set-theme, .set-th, [data-theme]")) setTimeout(seen, 50); }, true);
+window.addEventListener("inquire:signed-in", () => { ready = true; D = load(); if (win) win.close(); seen(); });
+window.InquireAchievements = { open, close: () => win && win.close(), points, list: () => catalogue().map(a => ({ id: a.id, cat: a.cat, name: a.name, pts: a.pts, goal: a.goal, earned: D.earned[a.id] || 0, soon: !!a.soon })), record, check };
+window.addEventListener("inquire:route", paintSlot);
+paintSlot();
+if (ready) setTimeout(seen, 0);
 })();
 
 </script>
 <script>/* web/src/textmenu.js */
 /* Right-click menu for selected text on lesson (topic) pages and in notes (.nb-rich editors: My notes and the Assist dock).
    1. Copy  2. Glossary: the glossary entry shown in the menu (Open in glossary ↗; no entry → search)
-   3. Dictionary: a simple online definition shown in the menu (Oxford Dictionaries API with keys from Settings → Usage, else the free
-      Wiktionary-based dictionaryapi.dev; the desktop app fetches through main.js "dict:lookup")  4. Link to a note:
+   3. Dictionary: a simple online definition shown in the menu, no keys or setup: Wiktionary (REST page/definition; inflected forms
+      follow "plural of …" to the headword), else a Wikipedia summary (names, phrases), else dictionaryapi.dev; the desktop app
+      fetches through main.js "dict:lookup" (host allowlist)  4. Link to a note:
    - in a note: the selected words become a link to another note (or a new one); links use --note-link (Settings → Appearance)
    - on a lesson: the selection is quoted into a note, with a link back to the lesson, and the note is linked to the lesson.
    No selection → the normal menu. Loaded after app.js, notes.js and dock.js. */
@@ -67652,7 +68243,7 @@ function open(x, y, c) {
   menu.innerHTML = `
     <button type="button" role="menuitem" data-a="copy"><span class="tm-ic">⧉</span><span>Copy</span><kbd>${/Mac/.test(navigator.platform) ? "⌘" : "Ctrl+"}C</kbd></button>
     <button type="button" role="menuitem" data-a="define"${words > 6 ? " disabled" : ""}><span class="tm-ic">Aa</span><span>Define “${esc(short)}” · Glossary<small>${words > 6 ? "Select a word or short phrase" : "Inquire’s own glossary"}</small></span></button>
-    <button type="button" role="menuitem" data-a="dict"${words > 3 ? " disabled" : ""}><span class="tm-ic">Ox</span><span>Define “${esc(short)}” · Dictionary<small>${words > 3 ? "Select a word or short phrase" : dictKeys().appId ? "Oxford, online" : "Online · Oxford with a key in Settings → Usage"}</small></span></button>
+    <button type="button" role="menuitem" data-a="dict"${words > 5 ? " disabled" : ""}><span class="tm-ic">W</span><span>Define “${esc(short)}” · Dictionary<small>${words > 5 ? "Select a word or short phrase" : "Wiktionary and Wikipedia, online"}</small></span></button>
     <button type="button" role="menuitem" data-a="link"><span class="tm-ic">↗</span><span>Link to a note…<small>${c.rich ? "These words open the note you pick" : "Quote this in a note, linked back here"}</small></span></button>`;
   document.body.appendChild(menu);
   const W = menu.offsetWidth, H = menu.offsetHeight;
@@ -67705,57 +68296,89 @@ function showGlossary(text, place) {
   menu._def = { word: g.word, topic: own ? own.node : null,
     html: `<blockquote><b>${esc(g.word)}</b>${g.ipa ? ` <i>${esc(g.ipa)}</i>` : ""}${b0.pos ? " · " + esc(b0.pos) : ""}<br>${b0.senses.join("<br>")}<br>— Glossary · ${esc(b0.subject)}${b0.field ? " · " + esc(b0.field) : ""}${own ? ` · <a class="nlink" data-topic="${esc(own.node)}">${esc(own.nodeTitle)}</a>` : ""}</blockquote>` };
 }
-const dictKeys = () => { try { return JSON.parse(localStorage.getItem("codex.dictkeys") || "{}") || {}; } catch (e) { return {}; } };
 const dictCache = {};
-async function lookup(word) {
-  const k = dictKeys(), key = (k.appId ? "ox:" : "free:") + word.toLowerCase();
-  if (dictCache[key]) return dictCache[key];
-  let r;
+const WIKT = "https://en.wiktionary.org/api/rest_v1/page/definition/", WIKI = "https://en.wikipedia.org/api/rest_v1/page/summary/";
+// one GET → { status, body } (status 0 = could not reach it). Desktop: main.js; browser build: these APIs allow cross-origin requests.
+async function getJSON(url) {
   const D = window.inquireDesktop;
-  if (D && D.lookupWord) r = await D.lookupWord({ word, appId: k.appId || "", appKey: k.appKey || "" });
-  else { // browser build: the free dictionary allows cross-origin requests
-    try { const res = await fetch("https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(word.toLowerCase())); r = res.status === 200 ? { ok: true, source: "free", data: await res.json() } : { ok: false, source: "free", error: res.status === 404 ? "No dictionary entry for that word." : "The dictionary answered " + res.status + "." }; }
-    catch (e) { r = { ok: false, error: "Could not reach the dictionary." }; }
-  }
-  if (r && r.ok) r.entry = parseDict(r);
-  if (r && r.ok && !r.entry.senses.length) r = { ok: false, source: r.source, error: "No definition found." };
-  if (r && (r.ok || /no (dictionary )?entry|no definition/i.test(r.error || ""))) dictCache[key] = r;
-  return r;
+  if (D && D.lookupWord) { try { return (await D.lookupWord({ url })) || { status: 0 }; } catch (e) { return { status: 0 }; } }
+  try { const r = await fetch(url, { headers: { Accept: "application/json" } }); return { status: r.status, body: r.status === 200 ? await r.json() : null }; }
+  catch (e) { return { status: 0 }; }
 }
-// both sources → { word, phon, senses: [{ pos, def }], link }
-function parseDict(r) {
-  const out = { word: "", phon: "", senses: [], link: "" };
-  if (r.source === "oxford") {
-    const res = (r.data && r.data.results) || [];
-    res.forEach(x => (x.lexicalEntries || []).forEach(le => (le.entries || []).forEach(en => {
-      out.word = out.word || x.word || "";
-      (en.pronunciations || []).concat(le.pronunciations || []).forEach(p => { if (!out.phon && p.phoneticSpelling) out.phon = "/" + p.phoneticSpelling + "/"; });
-      (en.senses || []).forEach(s => { const d = (s.shortDefinitions || s.definitions || [])[0]; if (d) out.senses.push({ pos: le.lexicalCategory ? le.lexicalCategory.text : "", def: d }); });
-    })));
-    out.link = "https://www.oxfordlearnersdictionaries.com/definition/english/" + encodeURIComponent((out.word || "").replace(/ /g, "-"));
-  } else {
-    (Array.isArray(r.data) ? r.data : []).forEach(x => {
-      out.word = out.word || x.word || ""; out.phon = out.phon || x.phonetic || ((x.phonetics || []).find(p => p.text) || {}).text || "";
-      (x.meanings || []).forEach(m => (m.definitions || []).slice(0, 2).forEach(d => out.senses.push({ pos: m.partOfSpeech || "", def: d.definition })));
-      if (!out.link && x.sourceUrls && x.sourceUrls[0]) out.link = x.sourceUrls[0];
-    });
-  }
-  out.senses = out.senses.filter(s => s.def).slice(0, 4);
+const plain = html => { const d = document.createElement("div"); d.innerHTML = String(html || "").replace(/<(script|style)[\s\S]*?<\/\1>/gi, ""); return d.textContent.replace(/\s+/g, " ").trim(); };
+// Wiktionary: English senses, and the headword an inflected form points to ("plural of cat")
+function wiktSenses(body) {
+  const out = { senses: [], lemma: "" };
+  ((body && body.en) || []).forEach(sec => (sec.definitions || []).forEach(d => {
+    const html = String(d.definition || ""), def = plain(html);
+    if (!def) return;
+    out.senses.push({ pos: (sec.partOfSpeech || "").toLowerCase(), def });
+    const m = !out.lemma && /form-of-definition-link[\s\S]*?title="([^"#]+)"/.exec(html);
+    if (m) out.lemma = plain(m[1]);
+  }));
   return out;
 }
+async function wiktionary(word) {
+  const tries = [...new Set([word, word.toLowerCase()])];
+  let reached = false;
+  for (const w of tries) {
+    const r = await getJSON(WIKT + encodeURIComponent(w.replace(/ /g, "_")));
+    if (r.status) reached = true;
+    if (r.status !== 200) continue;
+    const s = wiktSenses(r.body);
+    if (!s.senses.length) continue;
+    let senses = s.senses.slice(0, 2), head = w;
+    if (s.lemma && s.lemma.toLowerCase() !== w.toLowerCase() && s.senses.every(x => / of /.test(x.def))) { // inflected form: add the headword's meanings
+      const l = await getJSON(WIKT + encodeURIComponent(s.lemma.replace(/ /g, "_")));
+      const ls = l.status === 200 ? wiktSenses(l.body).senses : [];
+      if (ls.length) { senses = [s.senses[0]].concat(ls.slice(0, 3)); head = w; }
+    } else senses = s.senses;
+    return { ok: true, source: "Wiktionary", entry: { word: head, phon: "", senses: senses.slice(0, 4), link: "https://en.wiktionary.org/wiki/" + encodeURIComponent(w.replace(/ /g, "_")) + "#English" } };
+  }
+  return { ok: false, reached };
+}
+async function wikipedia(word) {
+  const r = await getJSON(WIKI + encodeURIComponent(word.replace(/ /g, "_")) + "?redirect=true");
+  if (r.status !== 200 || !r.body || r.body.type === "disambiguation" || !r.body.extract) return { ok: false, reached: !!r.status };
+  const ext = r.body.extract.replace(/\s+/g, " ").trim(), cut = ext.match(/^(.{40,320}?[.!?])(\s|$)/);
+  return { ok: true, source: "Wikipedia", entry: { word: r.body.title || word, phon: "", senses: [{ pos: r.body.description || "", def: cut ? cut[1] : ext.slice(0, 320) }],
+    link: (r.body.content_urls && r.body.content_urls.desktop && r.body.content_urls.desktop.page) || "https://en.wikipedia.org/wiki/" + encodeURIComponent(word.replace(/ /g, "_")) } };
+}
+async function freeDict(word) { // last resort (this service is often down: Cloudflare 522)
+  const r = await getJSON("https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(word.toLowerCase()));
+  if (r.status !== 200 || !Array.isArray(r.body)) return { ok: false, reached: !!r.status };
+  const e = { word: "", phon: "", senses: [], link: "" };
+  r.body.forEach(x => { e.word = e.word || x.word || ""; e.phon = e.phon || x.phonetic || "";
+    (x.meanings || []).forEach(m => (m.definitions || []).slice(0, 2).forEach(d => d.definition && e.senses.push({ pos: m.partOfSpeech || "", def: d.definition })));
+    if (!e.link && x.sourceUrls && x.sourceUrls[0]) e.link = x.sourceUrls[0]; });
+  e.senses = e.senses.slice(0, 4);
+  return e.senses.length ? { ok: true, source: "Wiktionary", entry: e } : { ok: false, reached: true };
+}
+async function lookup(word) {
+  const key = word.toLowerCase();
+  if (dictCache[key]) return dictCache[key];
+  const words = word.split(/\s+/).length;
+  let reached = false, r;
+  for (const f of words > 3 ? [wikipedia, wiktionary] : [wiktionary, wikipedia, freeDict]) {
+    r = await f(word); if (r.ok) break; reached = reached || r.reached;
+  }
+  if (!r.ok) r = reached ? { ok: false, error: `No definition found for “${word}”.` } : { ok: false, error: "Could not reach the online dictionary. Check your internet connection." };
+  if (r.ok || reached) dictCache[key] = r;
+  return r;
+}
 async function showDict(text, place) {
-  const word = text.trim().replace(/^[^\p{L}]+|[^\p{L}]+$/gu, "");
-  const ox = !!dictKeys().appId; menu._def = null;
-  defBox(`<p class="tm-dn tm-busy">Looking up “${esc(word)}” in ${ox ? "the Oxford dictionary" : "the dictionary"}…</p>`, place);
+  const word = text.trim().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "").replace(/\s+/g, " ").slice(0, 80);
+  menu._def = null;
+  defBox(`<p class="tm-dn tm-busy">Looking up “${esc(word)}”…</p>`, place);
   const r = await lookup(word);
   if (!menu) return;
   if (!r || !r.ok) { defBox(`<p class="tm-dn">${esc((r && r.error) || "No definition found.")}</p>`, place); return; }
-  const e = r.entry, src = r.source === "oxford" ? "Oxford" : "Wiktionary";
-  menu._def = { word: e.word || word, topic: null, html: `<blockquote><b>${esc(e.word || word)}</b>${e.phon ? ` <i>${esc(e.phon)}</i>` : ""}<br>${e.senses.map((s, i) => `${i + 1}. ${s.pos ? "(" + esc(s.pos) + ") " : ""}${esc(s.def)}`).join("<br>")}<br>— ${src} dictionary</blockquote>` };
+  const e = r.entry, src = r.source;
+  menu._def = { word: e.word || word, topic: null, html: `<blockquote><b>${esc(e.word || word)}</b>${e.phon ? ` <i>${esc(e.phon)}</i>` : ""}<br>${e.senses.map((s, i) => `${e.senses.length > 1 ? i + 1 + ". " : ""}${s.pos ? "(" + esc(s.pos) + ") " : ""}${esc(s.def)}`).join("<br>")}<br>— ${src}</blockquote>` };
   defBox(`<div class="tm-dh"><b>${esc(e.word || word)}</b>${e.phon ? `<span class="tm-ipa">${esc(e.phon)}</span>` : ""}<span class="tm-src">${src}</span></div>`
     + `<ol class="tm-dl">${e.senses.map(s => `<li>${s.pos ? `<i>${esc(s.pos)}</i> ` : ""}${esc(s.def)}</li>`).join("")}</ol>`
-    + `<div class="tm-dacts">${SAVE_BTN}${e.link ? `<a class="tm-dgo" href="${esc(e.link)}" target="_blank" rel="noopener">More at ${r.source === "oxford" ? "Oxford" : "Wiktionary"} ↗</a>` : ""}</div>`
-    + (r.source !== "oxford" ? `<p class="tm-dfoot">Free dictionary from Wiktionary. Add Oxford keys in Settings → Usage for Oxford definitions.</p>` : ""), place);
+    + `<div class="tm-dacts">${SAVE_BTN}${e.link ? `<a class="tm-dgo" href="${esc(e.link)}" target="_blank" rel="noopener">More at ${src} ↗</a>` : ""}</div>`
+    + `<p class="tm-dfoot">Free, from ${src} (CC BY-SA).</p>`, place);
 }
 
 async function linkFlow(x, y, c) {
@@ -68111,7 +68734,7 @@ async function removeAccount(pw) {
   const name = window.InquireUser; if (!name) throw new Error("Nobody is signed in.");
   await checkLogin(name, pw).catch(() => { throw new Error("The password is not right."); });
   const all = accounts(); delete all[name.toLowerCase()]; ls.set(ACC_KEY, all);
-  if (window.InquireKeys) { const k = InquireKeys.forUser(name); ls.del(k.progress); ls.del(k.notes); } // the account's own progress and notes go with it
+  if (window.InquireKeys) { const k = InquireKeys.forUser(name); ls.del(k.progress); ls.del(k.notes); ls.del("codex.achievements." + String(name).toLowerCase()); } // the account's own progress and notes go with it
   if ((ls.get(REM_KEY, "") || "").toLowerCase() === name.toLowerCase()) ls.del(REM_KEY);
   signOut();
 }
@@ -68260,7 +68883,8 @@ window.InquireDocs = Object.assign(window.InquireDocs || {}, {
 /* Settings window (gear in the top bar, and the Settings button on the sign-in screen).
    A sub-window that opens in front of the app; the app behind it fogs and eases back (body.set-open).
    Sections: Appearance (12 themes), Display & comfort, Shortcuts, Account, Data & progress, About.
-   Esc opens Settings (and closes it); off with Shortcuts → "Esc opens Settings" (escKey).
+   Shortcuts are rebindable (Shortcuts tab): KEYACTS below, combos like "Alt+KeyN" (modifiers + KeyboardEvent.code) in
+   S.keys (overrides of the defaults; "" = off). Esc always closes windows; by default it also opens Settings.
    Two sizes: uiScale = zoom on #app (whole interface); textSize = --ts on :root, which scaleText() multiplies into every
    px font size / line height in the stylesheets (CSSOM rewrite, only once a size other than 100% is chosen).
    Stored per computer in localStorage "codex.settings" (codex.* prefix kept for old installs). Themes only change
@@ -68274,7 +68898,9 @@ const load = () => {
   let o = {}; try { o = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) {}
   if (o.uiScale == null && typeof o.textScale === "number") o.uiScale = o.textScale; // the old single "Text & interface size" was a zoom
   delete o.textScale;
-  return Object.assign({}, DEF, o);
+  if (o.escKey === false && !(o.keys && "settings" in o.keys)) o.keys = Object.assign({}, o.keys, { settings: "" }); // the old "Esc opens Settings" switch
+  const pr = Array.isArray(o.presets) ? o.presets.slice(0, 3) : []; while (pr.length < 3) pr.push(null);
+  return Object.assign({}, DEF, o, { keys: Object.assign({}, o.keys), presets: pr });
 };
 let S = load();
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
@@ -68284,7 +68910,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;"
    bg = primary (window background), surface = secondary (panels), accent = detail (frames, glows).
    tint = second background glow. glass = translucent, blurred panels over a stronger glow. */
 const THEMES = [
-  { id: "capsuleer", fam: "Dark", name: "Capsuleer", bg: "#070A10", surface: "#111827", accent: "#5CC8E0", tint: "#B49BFF", note: "The original console" },
+  { id: "capsuleer", fam: "Dark", name: "Deep Space", bg: "#070A10", surface: "#111827", accent: "#5CC8E0", tint: "#B49BFF", note: "The original console, out among the stars" },
   { id: "obsidian", fam: "Dark", name: "Obsidian", bg: "#050506", surface: "#151517", accent: "#F2B84B", tint: "#8A6A22", text: "#E8E4DC", note: "Neutral black, brass trim" },
   { id: "old-growth", fam: "Nature", name: "Old Growth", bg: "#060D09", surface: "#11211A", accent: "#7BD88F", tint: "#3F7A4F", text: "#DCEBDF", note: "Deep forest canopy" },
   { id: "moss", fam: "Nature", name: "Moss & Lichen", bg: "#0B0F08", surface: "#1C2515", accent: "#B5D65A", tint: "#C9B458", text: "#E5EAD8", note: "Olive, moss and sunlit lichen" },
@@ -68327,8 +68953,24 @@ function themeVars(t) {
     "--era-1": rgba(mix(mix(t.surface, text, .05), t.accent, .1), g ? .8 : .95), "--era-2": rgba(mix(t.bg, t.surface, .6), g ? .8 : .95)
   };
 }
+/* Your colours (Appearance → Your colours): S.custom = { bg, surface, accent, glass } is the live "custom" theme while you
+   pick; S.presets = 3 × (null | { name, bg, surface, accent, glass }) are saved as themes "preset-1" … "preset-3".
+   Text, lines and the second glow are derived; a light secondary colour gets dark text. */
+const lum = c => { const [r, g, b] = hex(c).map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }); return .2126 * r + .7152 * g + .0722 * b; };
+function userTheme(c, id, name) {
+  if (!c || !hexOk(c.bg) || !hexOk(c.surface) || !hexOk(c.accent)) return null;
+  const light = lum(c.surface) > .4;
+  return { id, fam: "Custom", name, bg: c.bg, surface: c.surface, accent: c.accent, tint: mix(c.accent, light ? "#000000" : c.surface, .45), glass: !!c.glass,
+    text: light ? "#151A22" : lum(c.surface) > .18 ? "#F6F8FB" : undefined, note: id === "custom" ? "Not saved yet" : "Your preset" };
+}
+function findTheme(id) {
+  const m = /^preset-([123])$/.exec(id || "");
+  if (m) { const p = S.presets[m[1] - 1]; return userTheme(p, id, p ? p.name : "") || THEMES[0]; }
+  if (id === "custom") return userTheme(S.custom, "custom", "Custom") || THEMES[0];
+  return THEMES.find(x => x.id === id) || THEMES[0];
+}
 function applyTheme(id) {
-  const t = THEMES.find(x => x.id === id) || THEMES[0], st = document.documentElement.style;
+  const t = findTheme(id), st = document.documentElement.style;
   if (t.id === "capsuleer") VARS.forEach(v => st.removeProperty(v)); // default look = the stylesheet's own values
   else { const v = themeVars(t); VARS.forEach(k => st.setProperty(k, v[k])); }
   document.documentElement.dataset.theme = t.id;
@@ -68419,17 +69061,24 @@ function close() {
 ov.querySelector(".set-x").onclick = close;
 ov.addEventListener("pointerdown", e => { if (e.target === ov) close(); });
 document.addEventListener("keydown", e => {
+  if (recording) { recordKey(e); return; }
+  const combo = comboOf(e), act = e.repeat || e.defaultPrevented ? null : actionFor(combo);
   if (ov.hidden) {
-    // Esc opens Settings, unless something smaller is open that Esc should close first (Assist dock, a word card) or the intro is still playing
-    if (e.key !== "Escape" || !S.escKey || e.defaultPrevented || e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
-    if (document.querySelector(".gl-pop, .fav-pop, .tm-menu, .nk-pick, .nr-panel, .ask-ov, .nv-pop")) return;
-    const dk = document.getElementById("dk-win");
-    if (dk && !dk.hidden) { if (!dk.contains(e.target)) { e.preventDefault(); const x = dk.querySelector(".dk-x"); if (x) x.click(); } return; }
-    const intro = document.querySelector(".inqi");
-    if (intro && !intro.hidden && !intro.classList.contains("is-form")) return;
-    e.preventDefault(); e.stopPropagation(); open(); return;
+    const intro = document.querySelector(".inqi"), introOn = intro && !intro.hidden;
+    if (e.key === "Escape" && !e.defaultPrevented) {
+      // Esc closes the smallest thing first: a popup (it handles Esc itself), My notes / Achievements, the Assist or Notes box
+      if (document.querySelector(".gl-pop, .fav-pop, .tm-menu, .nk-pick, .nr-panel, .ask-ov, .nv-pop")) return;
+      if (document.querySelector(".mw-ov:not(.out)") && window.InquireApp) { e.preventDefault(); e.stopPropagation(); InquireApp.closeWin(); return; }
+      const dks = ["dk-win", "dk-notes"].map(id => document.getElementById(id)).filter(w => w && !w.hidden); // Assist / Notes box open: Esc closes them first
+      if (dks.length) { if (!dks.some(w => w.contains(e.target))) { e.preventDefault(); const x = dks[0].querySelector(".dk-hr .dk-x:last-child"); if (x) x.click(); } return; }
+    }
+    if (!act || document.querySelector(".ask-ov")) return;
+    if (act !== "settings" && introOn) return; // the sign-in screen: only Settings
+    if (act === "settings" && intro && introOn && !intro.classList.contains("is-form")) return;
+    if (typing(e) && !e.ctrlKey && !e.metaKey && combo !== "Escape") return; // plain and Alt keys belong to the text field
+    e.preventDefault(); e.stopPropagation(); runAction(act); return;
   }
-  if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(); return; }
+  if (e.key === "Escape" || act === "settings") { e.preventDefault(); e.stopPropagation(); close(); return; }
   if (e.key === "Tab") { // keep focus inside the window
     const f = [...win.querySelectorAll('button:not([disabled]),input:not([disabled]),select,a[href],[tabindex="0"]')].filter(el => el.offsetParent);
     if (!f.length) return;
@@ -68455,18 +69104,19 @@ function swatch(t) {
     <i class="set-swp"></i><i class="set-sws"></i><i class="set-swd"></i></span>`;
 }
 function paneLook() {
-  const wrap = h(`<div><p class="set-lede">Pick the colours of the console. Each square shows the theme's <b>primary</b> (background), <b>secondary</b> (panels) and <b>detail</b> (frames and glow) colours. Topic colours stay the same in every theme so diagrams keep their meaning.</p></div>`);
+  const wrap = h(`<div><p class="set-lede">Pick the colours of the console. Each square shows the theme's <b>primary</b> (background), <b>secondary</b> (panels) and <b>detail</b> (frames and glow) colours. Topic colours stay the same in every theme so diagrams keep their meaning. To make your own, scroll to <b>Your colours</b> below.</p></div>`);
   FAMS.forEach(([fam, label]) => {
     const g = h(`<div class="set-thfam"><h3>${label}</h3><div class="set-thgrid" role="radiogroup" aria-label="${label}"></div></div>`);
     THEMES.filter(t => t.fam === fam).forEach(t => {
       const b = h(`<button type="button" class="set-th" role="radio" aria-checked="${S.theme === t.id}" data-id="${t.id}">
         ${swatch(t)}<span class="set-thname">${esc(t.name)}</span><span class="set-thnote">${esc(t.note)}</span>
         <span class="set-thchips"><i style="background:${t.bg}" title="Primary ${t.bg}"></i><i style="background:${t.surface}" title="Secondary ${t.surface}"></i><i style="background:${t.accent}" title="Detail ${t.accent}"></i></span></button>`);
-      b.onclick = () => { S.theme = t.id; save(); applyTheme(t.id); wrap.querySelectorAll(".set-th").forEach(x => x.setAttribute("aria-checked", String(x.dataset.id === t.id))); };
+      b.onclick = () => { S.theme = t.id; save(); applyTheme(t.id); wrap.querySelectorAll(".set-th").forEach(x => x.setAttribute("aria-checked", String(x.dataset.id === t.id))); if (wrap._cust) wrap._cust(t); };
       g.querySelector(".set-thgrid").appendChild(b);
     });
     wrap.appendChild(g);
   });
+  wrap.appendChild(customLook(wrap));
   // colour of linked words in notes (links to other notes and back to lessons)
   const lc = h(`<div class="set-thfam"><h3>Note links</h3><div class="set-item set-lcitem"><div><p>Colour of linked words in your notes: links to other notes and quotes linked back to a lesson.
       <span class="set-lcdemo">Example: see <a class="nlink" tabindex="-1">my fractions note</a>.</span></p></div>
@@ -68479,6 +69129,66 @@ function paneLook() {
   pick.onchange = () => { S.noteLink = pick.value; save(); };
   wrap.appendChild(lc);
   pane.appendChild(wrap);
+}
+
+/* Your colours: three pickers (live), a preview square, and three preset slots drawn like the theme cards */
+const CFIELDS = [["bg", "Primary", "Background"], ["surface", "Secondary", "Panels"], ["accent", "Detail", "Frames & glow"]];
+function customLook(wrap) {
+  const cur = () => { const t = findTheme(S.theme); return { bg: t.bg, surface: t.surface, accent: t.accent, glass: !!t.glass }; };
+  let C = S.theme === "custom" && S.custom ? Object.assign({}, S.custom) : cur();
+  const card = (p, i) => {
+    const id = "preset-" + (i + 1), t = userTheme(p, id, p && p.name);
+    if (!t) return `<div class="set-pwrap"><div class="set-th set-pempty"><span class="set-sw set-swempty" aria-hidden="true">${i + 1}</span><span class="set-thname">Preset ${i + 1}</span><span class="set-thnote">Empty. Pick colours above, then save them here.</span></div></div>`;
+    return `<div class="set-pwrap"><button type="button" class="set-th" role="radio" aria-checked="${S.theme === id}" data-id="${id}">
+      ${swatch(t)}<span class="set-thname">${esc(t.name)}</span><span class="set-thnote">Your preset · slot ${i + 1}</span>
+      <span class="set-thchips"><i style="background:${t.bg}" title="Primary ${t.bg}"></i><i style="background:${t.surface}" title="Secondary ${t.surface}"></i><i style="background:${t.accent}" title="Detail ${t.accent}"></i></span></button>
+      <button type="button" class="set-pdel" data-del="${i}" title="Delete preset ${i + 1}" aria-label="Delete preset ${esc(t.name)}">✕</button></div>`;
+  };
+  const el = h(`<div class="set-thfam set-cust"><h3>Your colours</h3>
+    <p class="set-cl">Choose your own <b>primary</b>, <b>secondary</b> and <b>detail</b> colours; the console changes as you pick. Save a look into one of three presets to come back to it.</p>
+    <div class="set-cedit"><span class="set-cprev"></span>
+      <div class="set-cfields">${CFIELDS.map(([k, n, d]) => `<div class="set-cf"><span class="set-cfl">${n}<small>${d}</small></span>
+        <label class="set-cpick" style="--c:${C[k]}"><input type="color" data-c="${k}" value="${C[k]}" aria-label="${n} colour"></label>
+        <input class="set-hex" data-h="${k}" value="${C[k].toUpperCase()}" maxlength="7" spellcheck="false" autocomplete="off" aria-label="${n} colour, hex"></div>`).join("")}
+        <label class="set-cglass"><input type="checkbox" data-glass${C.glass ? " checked" : ""}> Glass panels <small>translucent, blurred</small></label></div></div>
+    <div class="set-csave"><input class="set-cname" maxlength="24" placeholder="Name this look" aria-label="Preset name">
+      <span class="set-cto">Save to</span>${[0, 1, 2].map(i => `<button type="button" class="btn-s" data-save="${i}">Preset ${i + 1}</button>`).join("")}<span class="set-msg" role="status"></span></div>
+    <div class="set-thgrid set-presets" role="radiogroup" aria-label="Your presets">${S.presets.map(card).join("")}</div></div>`);
+  const msg = el.querySelector(".set-msg");
+  const prev = () => { el.querySelector(".set-cprev").innerHTML = swatch({ bg: C.bg, surface: C.surface, accent: C.accent, tint: mix(C.accent, C.surface, .45), glass: C.glass }); };
+  const fill = () => { CFIELDS.forEach(([k]) => { el.querySelector(`[data-c="${k}"]`).value = C[k]; el.querySelector(`[data-h="${k}"]`).value = C[k].toUpperCase(); el.querySelector(`[data-c="${k}"]`).parentNode.style.setProperty("--c", C[k]); }); el.querySelector("[data-glass]").checked = !!C.glass; prev(); };
+  const mark = () => wrap.querySelectorAll(".set-th[data-id]").forEach(x => x.setAttribute("aria-checked", String(x.dataset.id === S.theme)));
+  const live = keep => { S.custom = Object.assign({}, C); S.theme = "custom"; applyTheme("custom"); mark(); prev(); if (keep) save(); };
+  CFIELDS.forEach(([k]) => {
+    const col = el.querySelector(`[data-c="${k}"]`), hx = el.querySelector(`[data-h="${k}"]`);
+    col.oninput = () => { C[k] = col.value; hx.value = col.value.toUpperCase(); col.parentNode.style.setProperty("--c", col.value); live(false); };
+    col.onchange = () => live(true);
+    hx.oninput = () => { let v = hx.value.trim(); if (!v.startsWith("#")) v = "#" + v; if (/^#[0-9a-f]{3}$/i.test(v)) v = "#" + v.slice(1).split("").map(x => x + x).join("");
+      if (hexOk(v)) { C[k] = v.toLowerCase(); col.value = C[k]; col.parentNode.style.setProperty("--c", C[k]); hx.classList.remove("bad"); live(true); } else hx.classList.add("bad"); };
+    hx.onblur = () => { hx.value = C[k].toUpperCase(); hx.classList.remove("bad"); };
+  });
+  el.querySelector("[data-glass]").onchange = e => { C.glass = e.target.checked; live(true); };
+  let armed = null;
+  el.querySelectorAll("[data-save]").forEach(b => b.onclick = () => {
+    const i = +b.dataset.save, had = S.presets[i];
+    if (had && armed !== b) { if (armed) armed.textContent = "Preset " + (+armed.dataset.save + 1); armed = b; b.textContent = "Replace?"; say(msg, `Preset ${i + 1} holds “${had.name}”. Click Replace? to save over it.`); return; }
+    armed = null;
+    const name = el.querySelector(".set-cname").value.trim() || "Preset " + (i + 1);
+    S.presets[i] = { name, bg: C.bg, surface: C.surface, accent: C.accent, glass: !!C.glass }; S.theme = "preset-" + (i + 1); save(); applyTheme(S.theme);
+    redraw(`Saved “${name}” as preset ${i + 1}.`);
+  });
+  el.querySelector(".set-presets").addEventListener("click", e => {
+    const d = e.target.closest("[data-del]");
+    if (d) { const i = +d.dataset.del; if (d.dataset.armed !== "1") { d.dataset.armed = "1"; d.textContent = "Delete?"; d.classList.add("armed"); return; }
+      const nm = S.presets[i].name; S.presets[i] = null; if (S.theme === "preset-" + (i + 1)) { S.custom = Object.assign({}, C); S.theme = "custom"; } save(); applyTheme(S.theme); redraw(`Deleted “${nm}”.`); return; }
+    const b = e.target.closest(".set-th[data-id]"); if (!b) return;
+    S.theme = b.dataset.id; save(); applyTheme(S.theme); mark();
+    const p = S.presets[+b.dataset.id.slice(7) - 1]; C = { bg: p.bg, surface: p.surface, accent: p.accent, glass: !!p.glass }; fill(); el.querySelector(".set-cname").value = p.name;
+  });
+  function redraw(note) { const y = pane.scrollTop; show("look"); pane.scrollTop = y; const m2 = pane.querySelector(".set-cust .set-msg"); if (m2 && note) say(m2, note, true); }
+  wrap._cust = t => { C = { bg: t.bg, surface: t.surface, accent: t.accent, glass: !!t.glass }; fill(); }; // a built-in theme picked: start from its colours
+  prev();
+  return el;
 }
 
 /* Display & comfort */
@@ -68532,19 +69242,7 @@ function paneUsage() {
     <div class="set-scrolltry" tabindex="0" aria-label="Scroll test area">${Array.from({ length: 12 }, (_, i) => `<p>Line ${i + 1}: try scrolling here.</p>`).join("")}</div>
   </div>`);
   w.querySelector('[data-k="invertScroll"]').onchange = e => { S.invertScroll = e.target.checked; save(); };
-  // Oxford Dictionaries API keys for right-click → Dictionary. Kept in their own key (not in settings backups).
-  let dk = {}; try { dk = JSON.parse(localStorage.getItem("codex.dictkeys") || "{}") || {}; } catch (e) {}
-  const ox = h(`<div class="set-form set-ox">
-    <h3>Oxford dictionary</h3>
-    <p class="set-small">Right-click a selected word → <b>Dictionary</b> shows its definition here in the app. With an Oxford Dictionaries API app ID and key it uses Oxford; without one it uses a free dictionary built from Wiktionary. Get keys at developer.oxforddictionaries.com (a free sandbox trial or a paid plan). They are kept only on this computer.</p>
-    <label><span>App ID</span><input data-x="appId" autocomplete="off" spellcheck="false" value="${esc(dk.appId || "")}"></label>
-    <label><span>App key</span><input data-x="appKey" type="password" autocomplete="off" spellcheck="false" value="${esc(dk.appKey || "")}"></label>
-    <div class="set-row"><button type="button" class="btn-s" data-a="oxsave">Save</button><button type="button" class="btn-s" data-a="oxclear">Remove keys</button><span class="set-msg" role="status"></span></div></div>`);
-  const oxm = ox.querySelector(".set-msg");
-  ox.querySelector('[data-a="oxsave"]').onclick = () => { const v = { appId: ox.querySelector('[data-x="appId"]').value.trim(), appKey: ox.querySelector('[data-x="appKey"]').value.trim() };
-    try { localStorage.setItem("codex.dictkeys", JSON.stringify(v)); } catch (e) {} say(oxm, v.appId && v.appKey ? "Saved. Dictionary uses Oxford." : "Saved. Both are needed for Oxford.", true); };
-  ox.querySelector('[data-a="oxclear"]').onclick = () => { try { localStorage.removeItem("codex.dictkeys"); } catch (e) {} ox.querySelectorAll("input").forEach(i => i.value = ""); say(oxm, "Removed. Dictionary uses the free dictionary.", true); };
-  w.appendChild(ox);
+  try { localStorage.removeItem("codex.dictkeys"); } catch (e) {} // old Oxford keys: the dictionary needs no keys now
   pane.appendChild(w);
 }
 
@@ -68575,22 +69273,99 @@ window.addEventListener("wheel", e => {
   scrollBox(e.target, dx, dy);
 }, { capture: true, passive: false });
 
-/* Shortcuts */
+/* Shortcuts: every action can be rebound (or turned off). Combos are modifiers + KeyboardEvent.code ("Alt+KeyN"), so they
+   work whatever letter Alt types on a Mac keyboard. Plain and Alt combos never fire while typing in a text field. */
+const KEYACTS = [
+  ["settings", "Open or close Settings", "Escape", "Esc always closes an open window first."],
+  ["menu", "Main Menu", "Alt+KeyM"],
+  ["dict", "Dictionary (all subjects)", "Alt+KeyD"],
+  ["glossary", "Glossary", "Alt+KeyG"],
+  ["notes", "My notes", "Alt+KeyN"],
+  ["achievements", "Achievements", "Alt+KeyA"],
+  ["assist", "Assist: AI chat", "Alt+KeyI"],
+  ["notesbox", "Assist: Notes box", "Alt+KeyB"],
+  ["chat", "Assist: Chat", "Alt+KeyC"],
+  ["sidebar", "Fold or unfold the sidebar", "Alt+KeyS"],
+  ["back", "Back (the ◀ button)", "Alt+Backspace", "Closes My notes or Achievements when one is open."]
+];
+const KDEF = Object.fromEntries(KEYACTS.map(a => [a[0], a[2]]));
+const binding = id => (S.keys && id in S.keys ? S.keys[id] : KDEF[id]) || "";
+const actionFor = c => c ? (KEYACTS.find(a => binding(a[0]) === c) || [null])[0] : null;
+const MODS = ["Control", "Alt", "Shift", "Meta", "CapsLock", "Fn", "OS", "Hyper", "Super"];
+function comboOf(e) {
+  if (!e.code || MODS.includes(e.key)) return "";
+  return (e.ctrlKey ? "Ctrl+" : "") + (e.altKey ? "Alt+" : "") + (e.shiftKey ? "Shift+" : "") + (e.metaKey ? "Meta+" : "") + e.code;
+}
+const MAC = /Mac/.test(navigator.platform);
+const KEYNAMES = { Escape: "Esc", ArrowLeft: "←", ArrowRight: "→", ArrowUp: "↑", ArrowDown: "↓", Backspace: "⌫", Delete: "Del", Space: "Space", Enter: "Enter", Minus: "-", Equal: "=", BracketLeft: "[", BracketRight: "]",
+  Semicolon: ";", Quote: "'", Comma: ",", Period: ".", Slash: "/", Backslash: "\\", Backquote: "`" };
+function keyLabel(c) {
+  if (!c) return ["Off"];
+  return c.split("+").map(p => p === "Ctrl" ? (MAC ? "⌃" : "Ctrl") : p === "Alt" ? (MAC ? "⌥" : "Alt") : p === "Shift" ? (MAC ? "⇧" : "Shift") : p === "Meta" ? (MAC ? "⌘" : "Win")
+    : KEYNAMES[p] || p.replace(/^Key|^Digit|^Numpad/, ""));
+}
+const typing = e => { const t = e.target; return !!(t && t.closest && t.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]')); };
+function runAction(a) {
+  const App = window.InquireApp, D = window.InquireDock, st = D && D.state();
+  if (a === "settings") return open();
+  if (a === "assist" || a === "chat") { const t = a === "assist" ? "ai" : "chat"; if (!D) return; return st.open && st.tab === t ? D.close() : D.open(t); }
+  if (a === "notesbox") return D && D.notes(!st.notes.open);
+  if (App && App.shortcut) App.shortcut(a);
+}
+// keys the app or the system needs; they cannot be taken
+function refused(c) {
+  if (["Tab", "Shift+Tab", "Enter", "Space", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(c)) return "is used to move around and press buttons";
+  if (/^(Ctrl|Meta)\+(Key[ACVXZYQWRP]|Shift\+KeyZ)$/.test(c)) return "is a system shortcut (copy, paste, undo, quit…)";
+  if (/^(Shift\+)?Key[A-Z]$|^(Shift\+)?Digit\d$/.test(c)) return "types a letter; add Alt, Ctrl or " + (MAC ? "⌘" : "Win");
+  return "";
+}
+let recording = null;
+function recordKey(e) {
+  if (MODS.includes(e.key)) return;
+  e.preventDefault(); e.stopPropagation();
+  const r = recording, c = comboOf(e);
+  if (e.code === "Backspace" && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey || e.code === "Delete") return r.done("", "");
+  const bad = refused(c);
+  if (bad) return r.done(null, keyLabel(c).join(" + ") + " " + bad + ".");
+  r.done(c, "");
+}
 function paneKeys() {
-  const k = s => `<kbd class="set-kbd">${s}</kbd>`;
-  const rows = [
-    [k("Esc"), "Open Settings from anywhere in the console. Press it again to close Settings. If the Assist window or a word card is open, Esc closes that first."],
-    [k("←") + k("→"), "On the Main Menu, move the display box to the previous or next subject."],
-    [k("Enter"), "Open the focused node in a skill tree, or the first word in a glossary search."],
-    [k("Tab"), "Move between buttons and fields; inside Settings, focus stays in the window."]
-  ];
+  const kb = c => keyLabel(c).map(k => `<kbd class="set-kbd">${esc(k)}</kbd>`).join("");
   const w = h(`<div>
-    <p class="set-lede">Keys that work throughout Inquire.</p>
-    <div class="set-item"><div><h3>Esc opens Settings</h3><p>Off: Esc only closes windows, and Settings opens from the Settings button.</p></div>
-      <label class="set-tog"><input type="checkbox" data-k="escKey"${S.escKey ? " checked" : ""}><span></span></label></div>
-    <dl class="set-keys">${rows.map(([key, d]) => `<div><dt>${key}</dt><dd>${d}</dd></div>`).join("")}</dl>
+    <p class="set-lede">Click a shortcut, then press the keys you want. <b>Backspace</b> turns a shortcut off. Shortcuts with only Alt or no modifier pause while you type in a text box.</p>
+    <div class="set-binds" role="list"></div>
+    <div class="set-row"><button type="button" class="btn-s" data-a="kreset">Reset all to defaults</button><span class="set-msg" role="status"></span></div>
+    <h3 class="set-fixh">Fixed keys</h3>
+    <dl class="set-keys">${[[["←", "→"], "On the Main Menu, move the display box to the previous or next subject."], [["Enter"], "Open the focused node in a skill tree, or the first word in a glossary search."],
+      [["Tab"], "Move between buttons and fields; inside Settings, focus stays in the window."], [["Esc"], "Close the window or popup that is open: menus, My notes, Achievements, Assist, Settings."]]
+      .map(([ks, d]) => `<div><dt>${ks.map(k => `<kbd class="set-kbd">${k}</kbd>`).join("")}</dt><dd>${d}</dd></div>`).join("")}</dl>
   </div>`);
-  w.querySelector('[data-k="escKey"]').onchange = e => { S.escKey = e.target.checked; save(); };
+  const list = w.querySelector(".set-binds"), msg = w.querySelector(".set-msg");
+  const draw = () => {
+    list.innerHTML = KEYACTS.map(([id, label, def, note]) => { const c = binding(id);
+      return `<div class="set-bind" role="listitem"><div><h3>${esc(label)}</h3>${note ? `<p>${esc(note)}</p>` : ""}</div>
+        <button type="button" class="set-bk${c ? "" : " off"}" data-k="${id}" aria-label="${esc(label)}: ${esc(keyLabel(c).join(" "))}. Click to change">${kb(c)}</button>
+        <button type="button" class="set-bx" data-r="${id}" title="Back to ${esc(keyLabel(def).join(" + "))}" aria-label="Reset ${esc(label)}"${c === def ? " disabled" : ""}>↺</button></div>`; }).join("");
+  };
+  const set = (id, c) => {
+    S.keys = Object.assign({}, S.keys);
+    let note = "";
+    if (c) KEYACTS.forEach(([o, label]) => { if (o !== id && binding(o) === c) { S.keys[o] = ""; note = `${keyLabel(c).join(" + ")} was on “${label}”, which is now off.`; } });
+    if (c === KDEF[id]) delete S.keys[id]; else S.keys[id] = c;
+    save(); draw(); say(msg, note || "Saved.", !note);
+  };
+  list.addEventListener("click", e => {
+    const r = e.target.closest("[data-r]"); if (r) { set(r.dataset.r, KDEF[r.dataset.r]); return; }
+    const b = e.target.closest("[data-k]"); if (!b) return;
+    if (recording) { const same = recording.id === b.dataset.k; recording.cancel(); if (same) return; }
+    b.classList.add("rec"); b.innerHTML = `<span class="set-rec">Press keys…</span>`;
+    const cancel = () => { recording = null; document.removeEventListener("pointerdown", out, true); draw(); };
+    const out = ev => { if (!ev.target.closest || ev.target.closest("[data-k]") !== b) { cancel(); } };
+    recording = { id: b.dataset.k, cancel, done: (c, err) => { cancel(); if (err) say(msg, err); else if (c !== null) set(b.dataset.k, c); } };
+    setTimeout(() => document.addEventListener("pointerdown", out, true), 0);
+  });
+  w.querySelector('[data-a="kreset"]').onclick = () => { S.keys = {}; save(); draw(); say(msg, "All shortcuts are back to their defaults.", true); };
+  draw();
   pane.appendChild(w);
 }
 
@@ -68637,7 +69412,7 @@ function paneAccount() {
 }
 
 /* Data & progress */
-/* Backups (format 3): { app: "Inquire", kind: "progress-backup", version: 3, data: { progress, notes, folders, images, favs, settings, groups } }.
+/* Backups (format 3): { app: "Inquire", kind: "progress-backup", version: 3, data: { progress, notes, folders, images, favs, achievements, settings, groups } }.
    progress, notes, note folders, photos (data URLs, only those the notes use) and favourites are the signed-in account's.
    Restoring replaces progress and settings, merges notes and folders by id (a note with the same id is replaced; others are
    kept, so nothing written since is lost) and restores the photos under their own ids. Format 1 and 2 files still load. */
@@ -68653,11 +69428,12 @@ function paneData() {
   </div>`);
   const m = msgEl(); w.appendChild(m);
   const favKey = () => "codex.favs." + (window.InquireUser || "_local");
+  const achKey = () => "codex.achievements." + (window.InquireUser ? String(window.InquireUser).toLowerCase() : "_local");
   w.querySelector('[data-a="exp"]').onclick = async e => {
     const btn = e.currentTarget; btn.disabled = true; btn.textContent = "Saving…";
     const NS = window.InquireNotes, notes = readJ(K().notes(), []);
     let images = {}, skipped = []; try { if (NS) ({ map: images, skipped } = await NS.exportMedia(NS.list())); } catch (err) {}
-    const data = { progress: readJ(K().progress(), []), notes, folders: NS ? NS.readFolders() : [], images, favs: readJ(favKey(), null), settings: readJ("codex.settings", {}), groups: readJ("codex.groups", null) };
+    const data = { progress: readJ(K().progress(), []), notes, folders: NS ? NS.readFolders() : [], images, favs: readJ(favKey(), null), achievements: readJ(achKey(), null), settings: readJ("codex.settings", {}), groups: readJ("codex.groups", null) };
     btn.disabled = false; btn.textContent = "Export…";
     const blob = new Blob([JSON.stringify({ app: "Inquire", kind: "progress-backup", version: 3, saved: new Date().toISOString(), account: window.InquireUser || null, data })], { type: "application/json" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "inquire-backup-" + new Date().toISOString().slice(0, 10) + ".json";
@@ -68685,6 +69461,7 @@ function paneData() {
       if (NS && Array.isArray(d.folders)) { const have = NS.readFolders(), ids = new Set(have.map(f => f.id)); NS.writeFolders(have.concat(d.folders.filter(f => f && f.id && f.name && !ids.has(f.id)))); }
       if (NS && d.images && typeof d.images === "object") np = await NS.importImages(d.images);
       if (d.favs && Array.isArray(d.favs.items)) localStorage.setItem(favKey(), JSON.stringify(d.favs));
+      if (d.achievements && d.achievements.earned && typeof d.achievements.earned === "object") localStorage.setItem(achKey(), JSON.stringify(d.achievements)); // read again at the next sign-in
       S = load(); applyAll(); progressChanged(); window.dispatchEvent(new CustomEvent("inquire:notes-changed"));
       show("data"); say(pane.querySelector(".set-msg") || m, `Backup restored: ${prog.length} topics, ${notes.length} notes${np ? `, ${np} photo${np === 1 ? "" : "s"}` : ""}.`, true);
     } catch (err) { say(m, "That file is not an Inquire backup."); }

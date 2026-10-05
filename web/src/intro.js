@@ -320,7 +320,7 @@ async function removeAccount(pw) {
   const name = window.InquireUser; if (!name) throw new Error("Nobody is signed in.");
   await checkLogin(name, pw).catch(() => { throw new Error("The password is not right."); });
   const all = accounts(); delete all[name.toLowerCase()]; ls.set(ACC_KEY, all);
-  if (window.InquireKeys) { const k = InquireKeys.forUser(name); ls.del(k.progress); ls.del(k.notes); } // the account's own progress and notes go with it
+  if (window.InquireKeys) { const k = InquireKeys.forUser(name); ls.del(k.progress); ls.del(k.notes); ls.del("codex.achievements." + String(name).toLowerCase()); } // the account's own progress and notes go with it
   if ((ls.get(REM_KEY, "") || "").toLowerCase() === name.toLowerCase()) ls.del(REM_KEY);
   signOut();
 }

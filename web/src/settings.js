@@ -1,7 +1,8 @@
 /* Settings window (gear in the top bar, and the Settings button on the sign-in screen).
    A sub-window that opens in front of the app; the app behind it fogs and eases back (body.set-open).
    Sections: Appearance (12 themes), Display & comfort, Shortcuts, Account, Data & progress, About.
-   Esc opens Settings (and closes it); off with Shortcuts → "Esc opens Settings" (escKey).
+   Shortcuts are rebindable (Shortcuts tab): KEYACTS below, combos like "Alt+KeyN" (modifiers + KeyboardEvent.code) in
+   S.keys (overrides of the defaults; "" = off). Esc always closes windows; by default it also opens Settings.
    Two sizes: uiScale = zoom on #app (whole interface); textSize = --ts on :root, which scaleText() multiplies into every
    px font size / line height in the stylesheets (CSSOM rewrite, only once a size other than 100% is chosen).
    Stored per computer in localStorage "codex.settings" (codex.* prefix kept for old installs). Themes only change
@@ -15,7 +16,9 @@ const load = () => {
   let o = {}; try { o = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) {}
   if (o.uiScale == null && typeof o.textScale === "number") o.uiScale = o.textScale; // the old single "Text & interface size" was a zoom
   delete o.textScale;
-  return Object.assign({}, DEF, o);
+  if (o.escKey === false && !(o.keys && "settings" in o.keys)) o.keys = Object.assign({}, o.keys, { settings: "" }); // the old "Esc opens Settings" switch
+  const pr = Array.isArray(o.presets) ? o.presets.slice(0, 3) : []; while (pr.length < 3) pr.push(null);
+  return Object.assign({}, DEF, o, { keys: Object.assign({}, o.keys), presets: pr });
 };
 let S = load();
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
@@ -25,7 +28,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;"
    bg = primary (window background), surface = secondary (panels), accent = detail (frames, glows).
    tint = second background glow. glass = translucent, blurred panels over a stronger glow. */
 const THEMES = [
-  { id: "capsuleer", fam: "Dark", name: "Capsuleer", bg: "#070A10", surface: "#111827", accent: "#5CC8E0", tint: "#B49BFF", note: "The original console" },
+  { id: "capsuleer", fam: "Dark", name: "Deep Space", bg: "#070A10", surface: "#111827", accent: "#5CC8E0", tint: "#B49BFF", note: "The original console, out among the stars" },
   { id: "obsidian", fam: "Dark", name: "Obsidian", bg: "#050506", surface: "#151517", accent: "#F2B84B", tint: "#8A6A22", text: "#E8E4DC", note: "Neutral black, brass trim" },
   { id: "old-growth", fam: "Nature", name: "Old Growth", bg: "#060D09", surface: "#11211A", accent: "#7BD88F", tint: "#3F7A4F", text: "#DCEBDF", note: "Deep forest canopy" },
   { id: "moss", fam: "Nature", name: "Moss & Lichen", bg: "#0B0F08", surface: "#1C2515", accent: "#B5D65A", tint: "#C9B458", text: "#E5EAD8", note: "Olive, moss and sunlit lichen" },
@@ -68,8 +71,24 @@ function themeVars(t) {
     "--era-1": rgba(mix(mix(t.surface, text, .05), t.accent, .1), g ? .8 : .95), "--era-2": rgba(mix(t.bg, t.surface, .6), g ? .8 : .95)
   };
 }
+/* Your colours (Appearance → Your colours): S.custom = { bg, surface, accent, glass } is the live "custom" theme while you
+   pick; S.presets = 3 × (null | { name, bg, surface, accent, glass }) are saved as themes "preset-1" … "preset-3".
+   Text, lines and the second glow are derived; a light secondary colour gets dark text. */
+const lum = c => { const [r, g, b] = hex(c).map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }); return .2126 * r + .7152 * g + .0722 * b; };
+function userTheme(c, id, name) {
+  if (!c || !hexOk(c.bg) || !hexOk(c.surface) || !hexOk(c.accent)) return null;
+  const light = lum(c.surface) > .4;
+  return { id, fam: "Custom", name, bg: c.bg, surface: c.surface, accent: c.accent, tint: mix(c.accent, light ? "#000000" : c.surface, .45), glass: !!c.glass,
+    text: light ? "#151A22" : lum(c.surface) > .18 ? "#F6F8FB" : undefined, note: id === "custom" ? "Not saved yet" : "Your preset" };
+}
+function findTheme(id) {
+  const m = /^preset-([123])$/.exec(id || "");
+  if (m) { const p = S.presets[m[1] - 1]; return userTheme(p, id, p ? p.name : "") || THEMES[0]; }
+  if (id === "custom") return userTheme(S.custom, "custom", "Custom") || THEMES[0];
+  return THEMES.find(x => x.id === id) || THEMES[0];
+}
 function applyTheme(id) {
-  const t = THEMES.find(x => x.id === id) || THEMES[0], st = document.documentElement.style;
+  const t = findTheme(id), st = document.documentElement.style;
   if (t.id === "capsuleer") VARS.forEach(v => st.removeProperty(v)); // default look = the stylesheet's own values
   else { const v = themeVars(t); VARS.forEach(k => st.setProperty(k, v[k])); }
   document.documentElement.dataset.theme = t.id;
@@ -160,17 +179,24 @@ function close() {
 ov.querySelector(".set-x").onclick = close;
 ov.addEventListener("pointerdown", e => { if (e.target === ov) close(); });
 document.addEventListener("keydown", e => {
+  if (recording) { recordKey(e); return; }
+  const combo = comboOf(e), act = e.repeat || e.defaultPrevented ? null : actionFor(combo);
   if (ov.hidden) {
-    // Esc opens Settings, unless something smaller is open that Esc should close first (Assist dock, a word card) or the intro is still playing
-    if (e.key !== "Escape" || !S.escKey || e.defaultPrevented || e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
-    if (document.querySelector(".gl-pop, .fav-pop, .tm-menu, .nk-pick, .nr-panel, .ask-ov, .nv-pop")) return;
-    const dk = document.getElementById("dk-win");
-    if (dk && !dk.hidden) { if (!dk.contains(e.target)) { e.preventDefault(); const x = dk.querySelector(".dk-x"); if (x) x.click(); } return; }
-    const intro = document.querySelector(".inqi");
-    if (intro && !intro.hidden && !intro.classList.contains("is-form")) return;
-    e.preventDefault(); e.stopPropagation(); open(); return;
+    const intro = document.querySelector(".inqi"), introOn = intro && !intro.hidden;
+    if (e.key === "Escape" && !e.defaultPrevented) {
+      // Esc closes the smallest thing first: a popup (it handles Esc itself), My notes / Achievements, the Assist or Notes box
+      if (document.querySelector(".gl-pop, .fav-pop, .tm-menu, .nk-pick, .nr-panel, .ask-ov, .nv-pop")) return;
+      if (document.querySelector(".mw-ov:not(.out)") && window.InquireApp) { e.preventDefault(); e.stopPropagation(); InquireApp.closeWin(); return; }
+      const dks = ["dk-win", "dk-notes"].map(id => document.getElementById(id)).filter(w => w && !w.hidden); // Assist / Notes box open: Esc closes them first
+      if (dks.length) { if (!dks.some(w => w.contains(e.target))) { e.preventDefault(); const x = dks[0].querySelector(".dk-hr .dk-x:last-child"); if (x) x.click(); } return; }
+    }
+    if (!act || document.querySelector(".ask-ov")) return;
+    if (act !== "settings" && introOn) return; // the sign-in screen: only Settings
+    if (act === "settings" && intro && introOn && !intro.classList.contains("is-form")) return;
+    if (typing(e) && !e.ctrlKey && !e.metaKey && combo !== "Escape") return; // plain and Alt keys belong to the text field
+    e.preventDefault(); e.stopPropagation(); runAction(act); return;
   }
-  if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(); return; }
+  if (e.key === "Escape" || act === "settings") { e.preventDefault(); e.stopPropagation(); close(); return; }
   if (e.key === "Tab") { // keep focus inside the window
     const f = [...win.querySelectorAll('button:not([disabled]),input:not([disabled]),select,a[href],[tabindex="0"]')].filter(el => el.offsetParent);
     if (!f.length) return;
@@ -196,18 +222,19 @@ function swatch(t) {
     <i class="set-swp"></i><i class="set-sws"></i><i class="set-swd"></i></span>`;
 }
 function paneLook() {
-  const wrap = h(`<div><p class="set-lede">Pick the colours of the console. Each square shows the theme's <b>primary</b> (background), <b>secondary</b> (panels) and <b>detail</b> (frames and glow) colours. Topic colours stay the same in every theme so diagrams keep their meaning.</p></div>`);
+  const wrap = h(`<div><p class="set-lede">Pick the colours of the console. Each square shows the theme's <b>primary</b> (background), <b>secondary</b> (panels) and <b>detail</b> (frames and glow) colours. Topic colours stay the same in every theme so diagrams keep their meaning. To make your own, scroll to <b>Your colours</b> below.</p></div>`);
   FAMS.forEach(([fam, label]) => {
     const g = h(`<div class="set-thfam"><h3>${label}</h3><div class="set-thgrid" role="radiogroup" aria-label="${label}"></div></div>`);
     THEMES.filter(t => t.fam === fam).forEach(t => {
       const b = h(`<button type="button" class="set-th" role="radio" aria-checked="${S.theme === t.id}" data-id="${t.id}">
         ${swatch(t)}<span class="set-thname">${esc(t.name)}</span><span class="set-thnote">${esc(t.note)}</span>
         <span class="set-thchips"><i style="background:${t.bg}" title="Primary ${t.bg}"></i><i style="background:${t.surface}" title="Secondary ${t.surface}"></i><i style="background:${t.accent}" title="Detail ${t.accent}"></i></span></button>`);
-      b.onclick = () => { S.theme = t.id; save(); applyTheme(t.id); wrap.querySelectorAll(".set-th").forEach(x => x.setAttribute("aria-checked", String(x.dataset.id === t.id))); };
+      b.onclick = () => { S.theme = t.id; save(); applyTheme(t.id); wrap.querySelectorAll(".set-th").forEach(x => x.setAttribute("aria-checked", String(x.dataset.id === t.id))); if (wrap._cust) wrap._cust(t); };
       g.querySelector(".set-thgrid").appendChild(b);
     });
     wrap.appendChild(g);
   });
+  wrap.appendChild(customLook(wrap));
   // colour of linked words in notes (links to other notes and back to lessons)
   const lc = h(`<div class="set-thfam"><h3>Note links</h3><div class="set-item set-lcitem"><div><p>Colour of linked words in your notes: links to other notes and quotes linked back to a lesson.
       <span class="set-lcdemo">Example: see <a class="nlink" tabindex="-1">my fractions note</a>.</span></p></div>
@@ -220,6 +247,66 @@ function paneLook() {
   pick.onchange = () => { S.noteLink = pick.value; save(); };
   wrap.appendChild(lc);
   pane.appendChild(wrap);
+}
+
+/* Your colours: three pickers (live), a preview square, and three preset slots drawn like the theme cards */
+const CFIELDS = [["bg", "Primary", "Background"], ["surface", "Secondary", "Panels"], ["accent", "Detail", "Frames & glow"]];
+function customLook(wrap) {
+  const cur = () => { const t = findTheme(S.theme); return { bg: t.bg, surface: t.surface, accent: t.accent, glass: !!t.glass }; };
+  let C = S.theme === "custom" && S.custom ? Object.assign({}, S.custom) : cur();
+  const card = (p, i) => {
+    const id = "preset-" + (i + 1), t = userTheme(p, id, p && p.name);
+    if (!t) return `<div class="set-pwrap"><div class="set-th set-pempty"><span class="set-sw set-swempty" aria-hidden="true">${i + 1}</span><span class="set-thname">Preset ${i + 1}</span><span class="set-thnote">Empty. Pick colours above, then save them here.</span></div></div>`;
+    return `<div class="set-pwrap"><button type="button" class="set-th" role="radio" aria-checked="${S.theme === id}" data-id="${id}">
+      ${swatch(t)}<span class="set-thname">${esc(t.name)}</span><span class="set-thnote">Your preset · slot ${i + 1}</span>
+      <span class="set-thchips"><i style="background:${t.bg}" title="Primary ${t.bg}"></i><i style="background:${t.surface}" title="Secondary ${t.surface}"></i><i style="background:${t.accent}" title="Detail ${t.accent}"></i></span></button>
+      <button type="button" class="set-pdel" data-del="${i}" title="Delete preset ${i + 1}" aria-label="Delete preset ${esc(t.name)}">✕</button></div>`;
+  };
+  const el = h(`<div class="set-thfam set-cust"><h3>Your colours</h3>
+    <p class="set-cl">Choose your own <b>primary</b>, <b>secondary</b> and <b>detail</b> colours; the console changes as you pick. Save a look into one of three presets to come back to it.</p>
+    <div class="set-cedit"><span class="set-cprev"></span>
+      <div class="set-cfields">${CFIELDS.map(([k, n, d]) => `<div class="set-cf"><span class="set-cfl">${n}<small>${d}</small></span>
+        <label class="set-cpick" style="--c:${C[k]}"><input type="color" data-c="${k}" value="${C[k]}" aria-label="${n} colour"></label>
+        <input class="set-hex" data-h="${k}" value="${C[k].toUpperCase()}" maxlength="7" spellcheck="false" autocomplete="off" aria-label="${n} colour, hex"></div>`).join("")}
+        <label class="set-cglass"><input type="checkbox" data-glass${C.glass ? " checked" : ""}> Glass panels <small>translucent, blurred</small></label></div></div>
+    <div class="set-csave"><input class="set-cname" maxlength="24" placeholder="Name this look" aria-label="Preset name">
+      <span class="set-cto">Save to</span>${[0, 1, 2].map(i => `<button type="button" class="btn-s" data-save="${i}">Preset ${i + 1}</button>`).join("")}<span class="set-msg" role="status"></span></div>
+    <div class="set-thgrid set-presets" role="radiogroup" aria-label="Your presets">${S.presets.map(card).join("")}</div></div>`);
+  const msg = el.querySelector(".set-msg");
+  const prev = () => { el.querySelector(".set-cprev").innerHTML = swatch({ bg: C.bg, surface: C.surface, accent: C.accent, tint: mix(C.accent, C.surface, .45), glass: C.glass }); };
+  const fill = () => { CFIELDS.forEach(([k]) => { el.querySelector(`[data-c="${k}"]`).value = C[k]; el.querySelector(`[data-h="${k}"]`).value = C[k].toUpperCase(); el.querySelector(`[data-c="${k}"]`).parentNode.style.setProperty("--c", C[k]); }); el.querySelector("[data-glass]").checked = !!C.glass; prev(); };
+  const mark = () => wrap.querySelectorAll(".set-th[data-id]").forEach(x => x.setAttribute("aria-checked", String(x.dataset.id === S.theme)));
+  const live = keep => { S.custom = Object.assign({}, C); S.theme = "custom"; applyTheme("custom"); mark(); prev(); if (keep) save(); };
+  CFIELDS.forEach(([k]) => {
+    const col = el.querySelector(`[data-c="${k}"]`), hx = el.querySelector(`[data-h="${k}"]`);
+    col.oninput = () => { C[k] = col.value; hx.value = col.value.toUpperCase(); col.parentNode.style.setProperty("--c", col.value); live(false); };
+    col.onchange = () => live(true);
+    hx.oninput = () => { let v = hx.value.trim(); if (!v.startsWith("#")) v = "#" + v; if (/^#[0-9a-f]{3}$/i.test(v)) v = "#" + v.slice(1).split("").map(x => x + x).join("");
+      if (hexOk(v)) { C[k] = v.toLowerCase(); col.value = C[k]; col.parentNode.style.setProperty("--c", C[k]); hx.classList.remove("bad"); live(true); } else hx.classList.add("bad"); };
+    hx.onblur = () => { hx.value = C[k].toUpperCase(); hx.classList.remove("bad"); };
+  });
+  el.querySelector("[data-glass]").onchange = e => { C.glass = e.target.checked; live(true); };
+  let armed = null;
+  el.querySelectorAll("[data-save]").forEach(b => b.onclick = () => {
+    const i = +b.dataset.save, had = S.presets[i];
+    if (had && armed !== b) { if (armed) armed.textContent = "Preset " + (+armed.dataset.save + 1); armed = b; b.textContent = "Replace?"; say(msg, `Preset ${i + 1} holds “${had.name}”. Click Replace? to save over it.`); return; }
+    armed = null;
+    const name = el.querySelector(".set-cname").value.trim() || "Preset " + (i + 1);
+    S.presets[i] = { name, bg: C.bg, surface: C.surface, accent: C.accent, glass: !!C.glass }; S.theme = "preset-" + (i + 1); save(); applyTheme(S.theme);
+    redraw(`Saved “${name}” as preset ${i + 1}.`);
+  });
+  el.querySelector(".set-presets").addEventListener("click", e => {
+    const d = e.target.closest("[data-del]");
+    if (d) { const i = +d.dataset.del; if (d.dataset.armed !== "1") { d.dataset.armed = "1"; d.textContent = "Delete?"; d.classList.add("armed"); return; }
+      const nm = S.presets[i].name; S.presets[i] = null; if (S.theme === "preset-" + (i + 1)) { S.custom = Object.assign({}, C); S.theme = "custom"; } save(); applyTheme(S.theme); redraw(`Deleted “${nm}”.`); return; }
+    const b = e.target.closest(".set-th[data-id]"); if (!b) return;
+    S.theme = b.dataset.id; save(); applyTheme(S.theme); mark();
+    const p = S.presets[+b.dataset.id.slice(7) - 1]; C = { bg: p.bg, surface: p.surface, accent: p.accent, glass: !!p.glass }; fill(); el.querySelector(".set-cname").value = p.name;
+  });
+  function redraw(note) { const y = pane.scrollTop; show("look"); pane.scrollTop = y; const m2 = pane.querySelector(".set-cust .set-msg"); if (m2 && note) say(m2, note, true); }
+  wrap._cust = t => { C = { bg: t.bg, surface: t.surface, accent: t.accent, glass: !!t.glass }; fill(); }; // a built-in theme picked: start from its colours
+  prev();
+  return el;
 }
 
 /* Display & comfort */
@@ -273,19 +360,7 @@ function paneUsage() {
     <div class="set-scrolltry" tabindex="0" aria-label="Scroll test area">${Array.from({ length: 12 }, (_, i) => `<p>Line ${i + 1}: try scrolling here.</p>`).join("")}</div>
   </div>`);
   w.querySelector('[data-k="invertScroll"]').onchange = e => { S.invertScroll = e.target.checked; save(); };
-  // Oxford Dictionaries API keys for right-click → Dictionary. Kept in their own key (not in settings backups).
-  let dk = {}; try { dk = JSON.parse(localStorage.getItem("codex.dictkeys") || "{}") || {}; } catch (e) {}
-  const ox = h(`<div class="set-form set-ox">
-    <h3>Oxford dictionary</h3>
-    <p class="set-small">Right-click a selected word → <b>Dictionary</b> shows its definition here in the app. With an Oxford Dictionaries API app ID and key it uses Oxford; without one it uses a free dictionary built from Wiktionary. Get keys at developer.oxforddictionaries.com (a free sandbox trial or a paid plan). They are kept only on this computer.</p>
-    <label><span>App ID</span><input data-x="appId" autocomplete="off" spellcheck="false" value="${esc(dk.appId || "")}"></label>
-    <label><span>App key</span><input data-x="appKey" type="password" autocomplete="off" spellcheck="false" value="${esc(dk.appKey || "")}"></label>
-    <div class="set-row"><button type="button" class="btn-s" data-a="oxsave">Save</button><button type="button" class="btn-s" data-a="oxclear">Remove keys</button><span class="set-msg" role="status"></span></div></div>`);
-  const oxm = ox.querySelector(".set-msg");
-  ox.querySelector('[data-a="oxsave"]').onclick = () => { const v = { appId: ox.querySelector('[data-x="appId"]').value.trim(), appKey: ox.querySelector('[data-x="appKey"]').value.trim() };
-    try { localStorage.setItem("codex.dictkeys", JSON.stringify(v)); } catch (e) {} say(oxm, v.appId && v.appKey ? "Saved. Dictionary uses Oxford." : "Saved. Both are needed for Oxford.", true); };
-  ox.querySelector('[data-a="oxclear"]').onclick = () => { try { localStorage.removeItem("codex.dictkeys"); } catch (e) {} ox.querySelectorAll("input").forEach(i => i.value = ""); say(oxm, "Removed. Dictionary uses the free dictionary.", true); };
-  w.appendChild(ox);
+  try { localStorage.removeItem("codex.dictkeys"); } catch (e) {} // old Oxford keys: the dictionary needs no keys now
   pane.appendChild(w);
 }
 
@@ -316,22 +391,99 @@ window.addEventListener("wheel", e => {
   scrollBox(e.target, dx, dy);
 }, { capture: true, passive: false });
 
-/* Shortcuts */
+/* Shortcuts: every action can be rebound (or turned off). Combos are modifiers + KeyboardEvent.code ("Alt+KeyN"), so they
+   work whatever letter Alt types on a Mac keyboard. Plain and Alt combos never fire while typing in a text field. */
+const KEYACTS = [
+  ["settings", "Open or close Settings", "Escape", "Esc always closes an open window first."],
+  ["menu", "Main Menu", "Alt+KeyM"],
+  ["dict", "Dictionary (all subjects)", "Alt+KeyD"],
+  ["glossary", "Glossary", "Alt+KeyG"],
+  ["notes", "My notes", "Alt+KeyN"],
+  ["achievements", "Achievements", "Alt+KeyA"],
+  ["assist", "Assist: AI chat", "Alt+KeyI"],
+  ["notesbox", "Assist: Notes box", "Alt+KeyB"],
+  ["chat", "Assist: Chat", "Alt+KeyC"],
+  ["sidebar", "Fold or unfold the sidebar", "Alt+KeyS"],
+  ["back", "Back (the ◀ button)", "Alt+Backspace", "Closes My notes or Achievements when one is open."]
+];
+const KDEF = Object.fromEntries(KEYACTS.map(a => [a[0], a[2]]));
+const binding = id => (S.keys && id in S.keys ? S.keys[id] : KDEF[id]) || "";
+const actionFor = c => c ? (KEYACTS.find(a => binding(a[0]) === c) || [null])[0] : null;
+const MODS = ["Control", "Alt", "Shift", "Meta", "CapsLock", "Fn", "OS", "Hyper", "Super"];
+function comboOf(e) {
+  if (!e.code || MODS.includes(e.key)) return "";
+  return (e.ctrlKey ? "Ctrl+" : "") + (e.altKey ? "Alt+" : "") + (e.shiftKey ? "Shift+" : "") + (e.metaKey ? "Meta+" : "") + e.code;
+}
+const MAC = /Mac/.test(navigator.platform);
+const KEYNAMES = { Escape: "Esc", ArrowLeft: "←", ArrowRight: "→", ArrowUp: "↑", ArrowDown: "↓", Backspace: "⌫", Delete: "Del", Space: "Space", Enter: "Enter", Minus: "-", Equal: "=", BracketLeft: "[", BracketRight: "]",
+  Semicolon: ";", Quote: "'", Comma: ",", Period: ".", Slash: "/", Backslash: "\\", Backquote: "`" };
+function keyLabel(c) {
+  if (!c) return ["Off"];
+  return c.split("+").map(p => p === "Ctrl" ? (MAC ? "⌃" : "Ctrl") : p === "Alt" ? (MAC ? "⌥" : "Alt") : p === "Shift" ? (MAC ? "⇧" : "Shift") : p === "Meta" ? (MAC ? "⌘" : "Win")
+    : KEYNAMES[p] || p.replace(/^Key|^Digit|^Numpad/, ""));
+}
+const typing = e => { const t = e.target; return !!(t && t.closest && t.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]')); };
+function runAction(a) {
+  const App = window.InquireApp, D = window.InquireDock, st = D && D.state();
+  if (a === "settings") return open();
+  if (a === "assist" || a === "chat") { const t = a === "assist" ? "ai" : "chat"; if (!D) return; return st.open && st.tab === t ? D.close() : D.open(t); }
+  if (a === "notesbox") return D && D.notes(!st.notes.open);
+  if (App && App.shortcut) App.shortcut(a);
+}
+// keys the app or the system needs; they cannot be taken
+function refused(c) {
+  if (["Tab", "Shift+Tab", "Enter", "Space", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(c)) return "is used to move around and press buttons";
+  if (/^(Ctrl|Meta)\+(Key[ACVXZYQWRP]|Shift\+KeyZ)$/.test(c)) return "is a system shortcut (copy, paste, undo, quit…)";
+  if (/^(Shift\+)?Key[A-Z]$|^(Shift\+)?Digit\d$/.test(c)) return "types a letter; add Alt, Ctrl or " + (MAC ? "⌘" : "Win");
+  return "";
+}
+let recording = null;
+function recordKey(e) {
+  if (MODS.includes(e.key)) return;
+  e.preventDefault(); e.stopPropagation();
+  const r = recording, c = comboOf(e);
+  if (e.code === "Backspace" && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey || e.code === "Delete") return r.done("", "");
+  const bad = refused(c);
+  if (bad) return r.done(null, keyLabel(c).join(" + ") + " " + bad + ".");
+  r.done(c, "");
+}
 function paneKeys() {
-  const k = s => `<kbd class="set-kbd">${s}</kbd>`;
-  const rows = [
-    [k("Esc"), "Open Settings from anywhere in the console. Press it again to close Settings. If the Assist window or a word card is open, Esc closes that first."],
-    [k("←") + k("→"), "On the Main Menu, move the display box to the previous or next subject."],
-    [k("Enter"), "Open the focused node in a skill tree, or the first word in a glossary search."],
-    [k("Tab"), "Move between buttons and fields; inside Settings, focus stays in the window."]
-  ];
+  const kb = c => keyLabel(c).map(k => `<kbd class="set-kbd">${esc(k)}</kbd>`).join("");
   const w = h(`<div>
-    <p class="set-lede">Keys that work throughout Inquire.</p>
-    <div class="set-item"><div><h3>Esc opens Settings</h3><p>Off: Esc only closes windows, and Settings opens from the Settings button.</p></div>
-      <label class="set-tog"><input type="checkbox" data-k="escKey"${S.escKey ? " checked" : ""}><span></span></label></div>
-    <dl class="set-keys">${rows.map(([key, d]) => `<div><dt>${key}</dt><dd>${d}</dd></div>`).join("")}</dl>
+    <p class="set-lede">Click a shortcut, then press the keys you want. <b>Backspace</b> turns a shortcut off. Shortcuts with only Alt or no modifier pause while you type in a text box.</p>
+    <div class="set-binds" role="list"></div>
+    <div class="set-row"><button type="button" class="btn-s" data-a="kreset">Reset all to defaults</button><span class="set-msg" role="status"></span></div>
+    <h3 class="set-fixh">Fixed keys</h3>
+    <dl class="set-keys">${[[["←", "→"], "On the Main Menu, move the display box to the previous or next subject."], [["Enter"], "Open the focused node in a skill tree, or the first word in a glossary search."],
+      [["Tab"], "Move between buttons and fields; inside Settings, focus stays in the window."], [["Esc"], "Close the window or popup that is open: menus, My notes, Achievements, Assist, Settings."]]
+      .map(([ks, d]) => `<div><dt>${ks.map(k => `<kbd class="set-kbd">${k}</kbd>`).join("")}</dt><dd>${d}</dd></div>`).join("")}</dl>
   </div>`);
-  w.querySelector('[data-k="escKey"]').onchange = e => { S.escKey = e.target.checked; save(); };
+  const list = w.querySelector(".set-binds"), msg = w.querySelector(".set-msg");
+  const draw = () => {
+    list.innerHTML = KEYACTS.map(([id, label, def, note]) => { const c = binding(id);
+      return `<div class="set-bind" role="listitem"><div><h3>${esc(label)}</h3>${note ? `<p>${esc(note)}</p>` : ""}</div>
+        <button type="button" class="set-bk${c ? "" : " off"}" data-k="${id}" aria-label="${esc(label)}: ${esc(keyLabel(c).join(" "))}. Click to change">${kb(c)}</button>
+        <button type="button" class="set-bx" data-r="${id}" title="Back to ${esc(keyLabel(def).join(" + "))}" aria-label="Reset ${esc(label)}"${c === def ? " disabled" : ""}>↺</button></div>`; }).join("");
+  };
+  const set = (id, c) => {
+    S.keys = Object.assign({}, S.keys);
+    let note = "";
+    if (c) KEYACTS.forEach(([o, label]) => { if (o !== id && binding(o) === c) { S.keys[o] = ""; note = `${keyLabel(c).join(" + ")} was on “${label}”, which is now off.`; } });
+    if (c === KDEF[id]) delete S.keys[id]; else S.keys[id] = c;
+    save(); draw(); say(msg, note || "Saved.", !note);
+  };
+  list.addEventListener("click", e => {
+    const r = e.target.closest("[data-r]"); if (r) { set(r.dataset.r, KDEF[r.dataset.r]); return; }
+    const b = e.target.closest("[data-k]"); if (!b) return;
+    if (recording) { const same = recording.id === b.dataset.k; recording.cancel(); if (same) return; }
+    b.classList.add("rec"); b.innerHTML = `<span class="set-rec">Press keys…</span>`;
+    const cancel = () => { recording = null; document.removeEventListener("pointerdown", out, true); draw(); };
+    const out = ev => { if (!ev.target.closest || ev.target.closest("[data-k]") !== b) { cancel(); } };
+    recording = { id: b.dataset.k, cancel, done: (c, err) => { cancel(); if (err) say(msg, err); else if (c !== null) set(b.dataset.k, c); } };
+    setTimeout(() => document.addEventListener("pointerdown", out, true), 0);
+  });
+  w.querySelector('[data-a="kreset"]').onclick = () => { S.keys = {}; save(); draw(); say(msg, "All shortcuts are back to their defaults.", true); };
+  draw();
   pane.appendChild(w);
 }
 
@@ -378,7 +530,7 @@ function paneAccount() {
 }
 
 /* Data & progress */
-/* Backups (format 3): { app: "Inquire", kind: "progress-backup", version: 3, data: { progress, notes, folders, images, favs, settings, groups } }.
+/* Backups (format 3): { app: "Inquire", kind: "progress-backup", version: 3, data: { progress, notes, folders, images, favs, achievements, settings, groups } }.
    progress, notes, note folders, photos (data URLs, only those the notes use) and favourites are the signed-in account's.
    Restoring replaces progress and settings, merges notes and folders by id (a note with the same id is replaced; others are
    kept, so nothing written since is lost) and restores the photos under their own ids. Format 1 and 2 files still load. */
@@ -394,11 +546,12 @@ function paneData() {
   </div>`);
   const m = msgEl(); w.appendChild(m);
   const favKey = () => "codex.favs." + (window.InquireUser || "_local");
+  const achKey = () => "codex.achievements." + (window.InquireUser ? String(window.InquireUser).toLowerCase() : "_local");
   w.querySelector('[data-a="exp"]').onclick = async e => {
     const btn = e.currentTarget; btn.disabled = true; btn.textContent = "Saving…";
     const NS = window.InquireNotes, notes = readJ(K().notes(), []);
     let images = {}, skipped = []; try { if (NS) ({ map: images, skipped } = await NS.exportMedia(NS.list())); } catch (err) {}
-    const data = { progress: readJ(K().progress(), []), notes, folders: NS ? NS.readFolders() : [], images, favs: readJ(favKey(), null), settings: readJ("codex.settings", {}), groups: readJ("codex.groups", null) };
+    const data = { progress: readJ(K().progress(), []), notes, folders: NS ? NS.readFolders() : [], images, favs: readJ(favKey(), null), achievements: readJ(achKey(), null), settings: readJ("codex.settings", {}), groups: readJ("codex.groups", null) };
     btn.disabled = false; btn.textContent = "Export…";
     const blob = new Blob([JSON.stringify({ app: "Inquire", kind: "progress-backup", version: 3, saved: new Date().toISOString(), account: window.InquireUser || null, data })], { type: "application/json" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "inquire-backup-" + new Date().toISOString().slice(0, 10) + ".json";
@@ -426,6 +579,7 @@ function paneData() {
       if (NS && Array.isArray(d.folders)) { const have = NS.readFolders(), ids = new Set(have.map(f => f.id)); NS.writeFolders(have.concat(d.folders.filter(f => f && f.id && f.name && !ids.has(f.id)))); }
       if (NS && d.images && typeof d.images === "object") np = await NS.importImages(d.images);
       if (d.favs && Array.isArray(d.favs.items)) localStorage.setItem(favKey(), JSON.stringify(d.favs));
+      if (d.achievements && d.achievements.earned && typeof d.achievements.earned === "object") localStorage.setItem(achKey(), JSON.stringify(d.achievements)); // read again at the next sign-in
       S = load(); applyAll(); progressChanged(); window.dispatchEvent(new CustomEvent("inquire:notes-changed"));
       show("data"); say(pane.querySelector(".set-msg") || m, `Backup restored: ${prog.length} topics, ${notes.length} notes${np ? `, ${np} photo${np === 1 ? "" : "s"}` : ""}.`, true);
     } catch (err) { say(m, "That file is not an Inquire backup."); }

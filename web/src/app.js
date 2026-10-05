@@ -36,7 +36,7 @@ const store = {
 const progKey = () => (window.InquireKeys ? InquireKeys.progress() : "codex.mastered");
 const loadMastered = () => { try { const v = JSON.parse(localStorage.getItem(progKey()) || "[]"); return new Set(Array.isArray(v) ? v : []); } catch(e){ return new Set(); } };
 let mastered = loadMastered();
-const saveMastered = () => { try { localStorage.setItem(progKey(), JSON.stringify([...mastered])); } catch(e){} };
+const saveMastered = () => { try { localStorage.setItem(progKey(), JSON.stringify([...mastered])); } catch(e){} window.dispatchEvent(new CustomEvent("inquire:mastered")); };
 // Settings → Data & progress (import / reset) rewrites the progress: reload it and redraw.
 window.addEventListener("inquire:progress-changed", () => { mastered = loadMastered(); render(); });
 function stateOf(id){
@@ -52,6 +52,11 @@ let cleanup = [];
 function clearView(){ cleanup.forEach(f => { try{ f(); }catch(e){} }); cleanup = []; viewEl.innerHTML = ""; }
 
 function go(next, push = true){
+  if (WIN_VIEWS[next.view]) { // a window, not a screen: open it over whatever is on screen (the Main Menu on a cold start)
+    WIN_VIEWS[next.view]();
+    if (viewEl.childElementCount) { try { history.replaceState(history.state, "", "#" + curTok()); } catch(e){} return; }
+    next = { view: "menu", topic: null }; push = false; winHash = true;
+  } else closeWins();
   const prev = { view: S.view, subject: S.subject };
   if (next.g) { Object.assign(G, next.g); next = { ...next }; delete next.g; }
   if (!("gword" in next)) next = { ...next, gword: null };
@@ -63,10 +68,61 @@ function go(next, push = true){
   render();
   // every move to another screen fades in like the Settings window; inside one subject only the main pane does
   viewIn(prev.view === "math" && S.view === "math" && prev.subject === S.subject ? $(".work > .main", viewEl) : viewEl);
-  const tok = (S.view === "glossary" ? gTok() : S.topic ? S.topic : (S.view === "math" ? (S.field === "map" ? "field-map" + (S.subject !== "mathematics" ? "-" + S.subject : "") : "field-" + S.field) : S.view)) + (S.view === "math" && S.gword ? "~" + encodeURIComponent(S.gword) : "");
+  const tok = curTok();
+  if (winHash) { winHash = false; try { history.replaceState(history.state, "", "#" + tok); } catch(e){} }
   if (push) { try { history.pushState({ ...next, view: S.view, subject: S.subject, field: S.field, topic: S.topic, gword: S.gword, ...(S.view === "glossary" ? { g: { sub: G.sub, word: G.word, field: G.field } } : {}) }, "", "#" + tok); } catch(e){} }
   store.set("last", { view: S.view, subject: S.subject, field: S.field, topic: S.topic });
   window.dispatchEvent(new CustomEvent("inquire:route"));
+}
+function curTok(){
+  return (S.view === "glossary" ? gTok() : S.topic ? S.topic : (S.view === "math" ? (S.field === "map" ? "field-map" + (S.subject !== "mathematics" ? "-" + S.subject : "") : "field-" + S.field) : S.view)) + (S.view === "math" && S.gword ? "~" + encodeURIComponent(S.gword) : "");
+}
+let winHash = false;
+
+/* ---------- windows over the app (My notes, Achievements) ----------
+   Like Settings and the New note dialog: the app behind fogs and eases back (body.mw-open, settings.css), ✕, Esc
+   (settings.js) or a click on the fog closes. Routes #notes / #achievements open them over the screen you are on.
+   modalWin(id, { title, sub, cls }) → { ov, win, body, head, cleanup: [], close() }; one window at a time. */
+const MW = {};
+function closeWins(except){ Object.keys(MW).forEach(k => { if (k !== except) MW[k].close(); }); }
+function modalWin(id, o = {}){
+  if (MW[id]) return MW[id];
+  closeWins(id);
+  const last = document.activeElement;
+  const ov = h("div", { class: "mw-ov", "data-mw": id });
+  ov.innerHTML = `<div class="mw-win win ${o.cls || ""}" role="dialog" aria-modal="true" aria-labelledby="mw-t-${id}">
+    <header class="set-h mw-h"><span class="dot"></span><h2 id="mw-t-${id}">${esc(o.title || "")}</h2>${o.sub ? `<span class="mw-sub">${o.sub}</span>` : ""}<span class="mw-hx"></span><button type="button" class="set-x" aria-label="Close ${esc(o.title || "window")}">✕</button></header>
+    <div class="mw-body"></div></div>`;
+  document.body.appendChild(ov);
+  const m = { id, ov, win: $(".mw-win", ov), body: $(".mw-body", ov), head: $(".mw-hx", ov), cleanup: [], closed: false,
+    close(){
+      if (m.closed) return; m.closed = true; delete MW[id];
+      m.cleanup.forEach(f => { try { f(); } catch(e){} }); m.cleanup = [];
+      if (!Object.keys(MW).length) document.body.classList.remove("mw-open");
+      ov.classList.add("out"); setTimeout(() => ov.remove(), 260);
+      if (last && document.contains(last)) try { last.focus({ preventScroll: true }); } catch(e){}
+      window.dispatchEvent(new CustomEvent("inquire:window", { detail: { id, open: false } }));
+    } };
+  MW[id] = m;
+  $(".set-x", ov).onclick = () => m.close();
+  ov.addEventListener("pointerdown", e => { if (e.target === ov) m.close(); });
+  requestAnimationFrame(() => { if (!m.closed) document.body.classList.add("mw-open"); });
+  setTimeout(() => { if (!m.closed && !m.win.contains(document.activeElement)) m.win.focus({ preventScroll: true }); }, 40);
+  m.win.tabIndex = -1;
+  window.dispatchEvent(new CustomEvent("inquire:window", { detail: { id, open: true } }));
+  return m;
+}
+const WIN_VIEWS = {
+  notes: () => openNotesWin(),
+  achievements: () => window.InquireAchievements && InquireAchievements.open()
+};
+function openNotesWin(){
+  const who = window.InquireUserName || window.InquireUser || "";
+  const fresh = !MW.notes, m = modalWin("notes", { title: "My notes", cls: "mw-notes",
+    sub: `All notes are saved on this computer${who ? ` for <b>${esc(who)}</b>` : ""}.` });
+  if (!fresh) { m.cleanup.forEach(f => { try { f(); } catch(e){} }); m.cleanup = []; }
+  renderNotes(m);
+  return m;
 }
 function viewIn(el){
   if (!el) return;
@@ -85,7 +141,7 @@ function fromHash(tok){
   if (NODE[t]) return { view: "math", field: fieldOf(t), topic: t };
   if (t === "field-map" || t.startsWith("field-map-")) { const sub = t.slice(10) || "mathematics"; if (SM[sub]) return { view: "math", subject: sub, field: "map", topic: null }; }
   if (t.startsWith("field-")) { const f = t.slice(6); if (DB.fields[f]) return { view: "math", subject: subjOf(f), field: f, topic: null }; }
-  if (t === "menu" || t === "dict" || t === "notes") return { view: t, topic: null };
+  if (t === "menu" || t === "dict" || t === "notes" || t === "achievements") return { view: t, topic: null };
   if (t === "glossary" || t.startsWith("glossary-") || t.startsWith("glossary~")) {
     const m = t.match(/^glossary(?:-([a-z0-9-]+))?(?:~(.*))?$/); if (!m) return null;
     let w = null; try { w = m[2] ? decodeURIComponent(m[2]).toLowerCase() : null; } catch(e){}
@@ -191,7 +247,6 @@ function render(){
   if (S.view === "menu") renderMenu();
   else if (S.view === "dict") renderDict();
   else if (S.view === "glossary") renderGlossary();
-  else if (S.view === "notes") renderNotes();
   else renderWork();
   viewEl.focus({ preventScroll: true });
 }
@@ -218,7 +273,7 @@ function renderMenu(){
       <div class="mx-stage"></div>
       <footer class="mx-foot"><button type="button" class="mx-arrow" data-d="-1" aria-label="Previous subject">◀</button><div class="mx-dots" role="tablist"></div><button type="button" class="mx-arrow" data-d="1" aria-label="Next subject">▶</button><span class="mx-bar"><i></i></span></footer>
     </section>
-    <div class="slots three" id="slots"></div>
+    <div class="slots four" id="slots"></div>
     <section class="mnotes" id="mnotes"></section>
     <div class="verline" id="verline"></div></div>`;
   viewEl.appendChild(s);
@@ -233,6 +288,9 @@ function renderMenu(){
     `<span class="glyph">◇</span><span><h3>Games</h3><p>Practice through play: timed drills, puzzles and challenges built from the topics you have mastered.</p></span><span class="tag">Uncharted</span>`));
   slots.appendChild(h("div", { class: "slot big locked", "aria-disabled": "true" },
     `<span class="glyph">⌖</span><span><h3>Plans</h3><p>Lay out a learning venture: pick goals, order the topics, set a pace and track the route to mastery.</p></span><span class="tag">Uncharted</span>`));
+  { const AC = window.InquireAchievements, ap = AC ? AC.points() : 0, L = AC ? AC.list() : [], got = L.filter(x => x.earned).length;
+    slots.appendChild(h("button", { type: "button", class: "slot big", id: "achslot", onclick: () => go({ view: "achievements", topic: null }) },
+      `<span class="glyph">◆</span><span><h3>Achievements</h3><p>Earn Achievement Points for lessons, fields, quizzes, notes and more. <span class="ach-n">${got} of ${L.filter(x => !x.soon).length} earned.</span></p></span><span class="tag ach-tag num">◆ ${ap.toLocaleString("en-US")} AP</span>`)); }
   slots.appendChild(h("button", { type: "button", class: "slot big", onclick: () => { G.sub = "all"; G.field = null; G.word = null; G.ret = null; openGlossary({}); } },
     `<span class="glyph">Aa</span><span><h3>Glossary</h3><p>Every subject’s words in one place, with each subject’s meaning marked. ${Object.keys(GWORDS).length} words so far.</p></span><span class="tag">Online</span>`));
   menuNotes($("#mnotes", s));
@@ -365,12 +423,13 @@ const NOTES = { sel: null, q: "", folder: "all", subj: "", sort: store.get("note
 const linkLabel = k => { const id = k.slice(2); return k[0] === "s" ? (SM[id] ? SM[id].name : id) : k[0] === "f" ? (DB.fields[id] ? DB.fields[id].name : id) : (T[id] ? T[id].title : id); };
 const linkIcon = k => k[0] === "s" ? (SM[k.slice(2)] ? SM[k.slice(2)].glyph : "◇") : k[0] === "f" ? "⌗" : "▤";
 const linkSubject = k => { const id = k.slice(2); return k[0] === "s" ? id : k[0] === "f" ? (DB.fields[id] ? subjOf(id) : "") : (NODE[id] ? subjOf(fieldOf(id)) : ""); };
+const linkColour = k => gColour(linkSubject(k) || "mathematics"); // icon colour = the subject group (STEM cyan, A&H magenta, Social lime), never the theme
 const linkOk = k => typeof k === "string" && (k[0] === "s" ? !!SM[k.slice(2)] : k[0] === "f" ? !!DB.fields[k.slice(2)] : k[0] === "t" ? !!NODE[k.slice(2)] : false);
 function linkTargets(){
   const out = [];
-  Object.keys(SM).forEach(sb => out.push({ id: "s:" + sb, label: SM[sb].name, sub: "Subject", ic: SM[sb].glyph }));
-  Object.keys(DB.fields).filter(f => SM[subjOf(f)]).forEach(f => out.push({ id: "f:" + f, label: DB.fields[f].name, sub: SM[subjOf(f)].name + " · field" + (charted(f) ? "" : " (planned)"), ic: "⌗" }));
-  NODES.forEach(n => { if (T[n.id]) out.push({ id: "t:" + n.id, label: T[n.id].title, sub: DB.fields[n.field].name + " · lesson", ic: "▤" }); });
+  Object.keys(SM).forEach(sb => out.push({ id: "s:" + sb, label: SM[sb].name, sub: "Subject", ic: SM[sb].glyph, col: linkColour("s:" + sb) }));
+  Object.keys(DB.fields).filter(f => SM[subjOf(f)]).forEach(f => out.push({ id: "f:" + f, label: DB.fields[f].name, sub: SM[subjOf(f)].name + " · field" + (charted(f) ? "" : " (planned)"), ic: "⌗", col: linkColour("f:" + f) }));
+  NODES.forEach(n => { if (T[n.id]) out.push({ id: "t:" + n.id, label: T[n.id].title, sub: DB.fields[n.field].name + " · lesson", ic: "▤", col: linkColour("t:" + n.id) }); });
   return out;
 }
 function openLink(k){
@@ -379,21 +438,17 @@ function openLink(k){
   else if (k[0] === "f") go({ view: "math", subject: subjOf(id), field: id, topic: null });
   else go({ view: "math", topic: id });
 }
-function renderNotes(){
+function renderNotes(m){
   const NS = window.InquireNotes;
-  const s = h("div", { class: "screen notes-screen" });
-  s.innerHTML = `<div class="screen-in">
-    <div class="hello"><div class="back-row"><button type="button" class="btn-s" id="nback">◀ Menu</button></div><p class="eyebrow">Notes</p><h1>My notes</h1>
-    <p>Notes are saved on this computer${window.InquireUser ? ` for <b>${esc(window.InquireUser)}</b>` : ""}. Drag notes into folders and folders into other folders, drag either up or down to put them in your own order, star the ones you use most, link them to subjects and lessons, and paste or drop photos and videos in. Use the ◀ tabs to hide the folders or the list, and drag the line beside the list to resize it. Select words and right-click to link them to another note.</p></div>
-    <div class="nb win"><nav class="nb-folders" aria-label="Folders"></nav>
+  const s = m.body;
+  s.innerHTML = `    <div class="nb"><nav class="nb-folders" aria-label="Folders"></nav>
     <aside class="nb-list"><div class="nb-tools"><label class="search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Search notes" aria-label="Search notes"></label><button type="button" class="btn-s" data-a="new">＋ New</button></div>
       <div class="nb-filter"><select class="nb-sort" aria-label="Order of notes"><option value="mine">My order</option><option value="recent">Recently edited</option></select><button type="button" class="nb-favtop" aria-pressed="false" title="Keep favourites at the top of the list">★ first</button><select class="nb-subj" aria-label="Show notes linked to a subject"></select></div><div class="nb-items" role="listbox" aria-label="Notes"></div></aside>
     <section class="nb-ed"></section>
     <button type="button" class="nb-fold" data-p="f"></button><button type="button" class="nb-fold" data-p="l"></button>
-    <div class="nb-rz" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize the notes list (drag, or ←/→; double-click resets)" title="Drag to resize the notes list · double-click resets"></div></div></div>`;
-  viewEl.appendChild(s);
+    <div class="nb-rz" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize the notes list (drag, or ←/→; double-click resets)" title="Drag to resize the notes list · double-click resets"></div></div>`;
   notesLayout($(".nb", s));
-  $("#nback", s).onclick = () => go({ view: "menu", topic: null });
+  m.head.innerHTML = `<span class="mw-tip" tabindex="0" title="Drag notes into folders and folders into other folders, drag either up or down to put them in your own order, star the ones you use most, link them to subjects and lessons, and paste or drop photos and videos in. The ◀ tabs hide the folders or the list; drag the line beside the list to resize it. Select words and right-click to link them to another note." aria-label="Tips">?</span>`;
   const fold = $(".nb-folders", s), items = $(".nb-items", s), ed = $(".nb-ed", s), q = $('input[type="search"]', s), subjSel = $(".nb-subj", s), sortSel = $(".nb-sort", s);
   q.value = NOTES.q;
   q.oninput = () => { NOTES.q = q.value; drawList(); };
@@ -565,7 +620,7 @@ function renderNotes(){
     ti.oninput = () => { clearTimeout(saveT); sv.textContent = "Editing…"; saveT = setTimeout(() => { saveT = null; NS.update(n.id, { title: ti.value.trim() || "Untitled note" }); sv.textContent = "Saved"; const it = items.querySelector(`[data-id="${n.id}"] .nb-t`); if (it) it.lastChild.textContent = ti.value.trim() || "Untitled note"; }, 400); };
     const chips = () => {
       const m = NS.get(n.id), ks = m.links.filter(linkOk);
-      $(".nb-chips", ed).innerHTML = ks.length ? ks.map(k => `<span class="nb-chip"><button type="button" data-open="${k}" title="Open ${esc(linkLabel(k))}"><span class="nb-cic">${linkIcon(k)}</span>${esc(linkLabel(k))}</button><button type="button" class="nb-cx" data-x="${k}" aria-label="Remove link to ${esc(linkLabel(k))}">×</button></span>`).join("") : `<span class="nb-nolink">Nothing yet</span>`;
+      $(".nb-chips", ed).innerHTML = ks.length ? ks.map(k => `<span class="nb-chip"><button type="button" data-open="${k}" title="Open ${esc(linkLabel(k))}"><span class="nb-cic" style="color:${linkColour(k)}">${linkIcon(k)}</span>${esc(linkLabel(k))}</button><button type="button" class="nb-cx" data-x="${k}" aria-label="Remove link to ${esc(linkLabel(k))}">×</button></span>`).join("") : `<span class="nb-nolink">Nothing yet</span>`;
       $(".nb-chips", ed).querySelectorAll("[data-open]").forEach(b => b.onclick = () => { flushEd(); openLink(b.dataset.open); });
       $(".nb-chips", ed).querySelectorAll("[data-x]").forEach(b => b.onclick = () => { NS.unlink(n.id, b.dataset.x); chips(); drawList(); });
     };
@@ -590,7 +645,7 @@ function renderNotes(){
   }
   function drawAll(focusTitle){ drawFolders(); drawList(); drawEd(focusTitle); }
   drawAll();
-  cleanup.push(() => { flushEd(); if (rich) { rich.destroy(); rich = null; } });
+  m.cleanup.push(() => { flushEd(); if (rich) { rich.destroy(); rich = null; } });
 }
 
 /* ---------- dictionary ---------- */
@@ -603,7 +658,8 @@ function renderDict(){
   viewEl.appendChild(s);
   $("#dback", s).onclick = () => go({ view: "menu", topic: null });
   (DB.subjectGroups || [{ id: "all", name: "Subjects", line: "" }]).forEach(g => {
-    const subs = DB.subjects.filter(x => (x.group || "all") === g.id);
+    const subs = DB.subjects.filter(x => (x.group || "all") === g.id).map((x, i) => [x, i]) // starred subjects first in their group, then the usual order
+      .sort((a, b) => (isFav("s:" + b[0].id) - isFav("s:" + a[0].id)) || a[1] - b[1]).map(x => x[0]);
     if (!subs.length) return;
     const sec = h("section", { class: "subj-group", "data-accent": g.accent || "", "aria-label": g.name });
     sec.innerHTML = `<div class="subj-gh"><h2>${esc(g.name)}</h2><span class="ln">${esc(g.line || "")}</span><span class="n">${subs.length}</span></div><div class="slots"></div>`;
@@ -616,6 +672,8 @@ function renderDict(){
     });
     $("#subj", s).appendChild(sec);
   });
+  // starring or un-starring a subject moves its card at once (the other cards slide over)
+  $("#subj", s).addEventListener("click", e => { if (!e.target.closest(".fav")) return; setTimeout(() => { if (S.view !== "dict") return; const y = viewEl.scrollTop; render(); viewEl.scrollTop = y; }, 0); }, true); // capture: the star stops the click
 }
 
 /* ---------- workspace ---------- */
@@ -685,11 +743,11 @@ function buildNav(nav, w){
     tools.innerHTML = (gn.length ? [[S.subject, SM[S.subject].name, gGlyph(S.subject), gColour(S.subject), gn.length], ["all", "All subjects", "◎", "var(--line-2)", all]]
       .map(([id, nm, gl, c, n]) => `<button type="button" class="gl-chip sm" data-scope="${id}" aria-pressed="${sc === id}" style="--gc:${c}"><span class="g">${gl}</span>${esc(nm)}<span class="n">${n}</span></button>`).join("")
       : `<span class="nav-gl-none">No ${esc(SM[S.subject].name)} words yet. Showing every subject.</span>`)
-      + `<button type="button" class="btn-s nav-gl-full" data-full>Full glossary ↗</button>`
       + (sc !== "all" && glFields.length > 1 ? `<div class="nav-gl-flds" role="group" aria-label="Filter by field"><span class="nav-gl-fl">Field</span>`
         + [["", "All fields", gn.length], ...glFields.map(([f, n]) => [f, DB.fields[f].name, n])]
           .map(([f, nm, n]) => `<button type="button" class="gl-chip sm nav-gl-fld" data-gfld="${f}" aria-pressed="${(fieldOn() || "") === f}" style="--gc:${gColour(S.subject)}">${esc(nm)}<span class="n">${n}</span></button>`).join("")
-        + `</div>` : "");
+        + `</div>` : "")
+      + `<button type="button" class="btn-s nav-gl-full" data-full>Full glossary ↗</button>`; // below every filter
     tools.addEventListener("click", e => {
       const b = e.target.closest("button"); if (!b) return;
       if (b.dataset.scope) { S.glScope = b.dataset.scope === "all" ? "all" : null; buildWords(); if (S.gword) render(); return; }
@@ -1321,7 +1379,7 @@ window.InquireApp = {
       if (sc > best.score) best = { score: sc, label: sc === 3 ? (T[id] ? T[id].title : id) : sc === 2 ? (DB.fields[id] ? DB.fields[id].name : id) : (SM[id] ? SM[id].name : id) }; });
     return best;
   },
-  context(){ const t = S.topic && T[S.topic]; return { userName: window.InquireUserName || window.InquireUser || "", view: S.view, subject: S.subject, subjectName: SM[S.subject] ? SM[S.subject].name : "", field: S.view === "math" ? S.field : null,
+  context(){ const t = S.topic && T[S.topic]; return { userName: window.InquireUserName || window.InquireUser || "", view: MW.notes ? "notes" : MW.achievements ? "achievements" : S.view, gword: S.view === "math" ? S.gword : S.view === "glossary" ? G.word : null, subject: S.subject, subjectName: SM[S.subject] ? SM[S.subject].name : "", field: S.view === "math" ? S.field : null,
     fieldName: S.view === "math" && DB.fields[S.field] ? DB.fields[S.field].name : "", topic: S.topic || null, topicTitle: t ? t.title : "" }; },
   openTopic: id => go({ view: "math", topic: id }), openNotes: id => { if (id) { NOTES.sel = id; const n = window.InquireNotes && InquireNotes.get(id); if (n) { NOTES.folder = "all"; NOTES.subj = ""; NOTES.q = ""; } } go({ view: "notes", topic: null }); },
   // right-click → Glossary: the entry shown inside the menu (headword, IPA, part of speech, each subject's first senses), or null
@@ -1339,14 +1397,34 @@ window.InquireApp = {
     if (!w) return false;
     const k = gLookup(w);
     if (k && S.view === "math") { go({ view: "math", gword: k }); return true; }
-    const from = S.view === "notes" ? { label: "My notes", state: { view: "notes", topic: null } }
+    const from = MW.notes ? { label: "My notes", state: { view: "notes", topic: null } }
       : S.view === "math" ? { label: S.topic && T[S.topic] ? T[S.topic].title : SM[S.subject].name, subject: S.subject, state: { view: "math", subject: S.subject, field: S.field, topic: S.topic } } : null;
     openGlossary({ from, sub: "all", q: k ? "" : w, word: k || null });
     return !!k;
   },
-  linkLabel, linkTargets, openLink
+  linkLabel, linkTargets, openLink,
+  modal: modalWin, closeWin: id => { if (id) { if (MW[id]) MW[id].close(); } else closeWins(); }, openWin: id => WIN_VIEWS[id] && WIN_VIEWS[id](), winOpen: id => (id ? !!MW[id] : Object.keys(MW).length > 0),
+  go: v => go(v),
+  // for Achievements: what has been mastered, per subject and per charted field (written lessons only)
+  progress(){
+    const by = {}, groups = {};
+    mastered.forEach(id => { if (!NODE[id]) return; const sb = subjOf(fieldOf(id)); by[sb] = (by[sb] || 0) + 1; const g = (GSUB[sb] && GSUB[sb].group) || "stem"; groups[g] = (groups[g] || 0) + 1; });
+    const fields = Object.keys(DB.fields).filter(f => charted(f) && SM[subjOf(f)]).map(f => { const pool = fieldNodes(f).filter(n => T[n.id]); return { id: f, name: DB.fields[f].name, subject: subjOf(f), colour: gColour(subjOf(f)), done: pool.filter(n => mastered.has(n.id)).length, total: pool.length }; }).filter(x => x.total);
+    return { mastered: [...mastered].filter(id => NODE[id]).length, bySubject: by, byGroup: groups, fields };
+  },
+  subjectName: id => (SM[id] ? SM[id].name : id), subjectColour: id => gColour(id),
+  // keyboard shortcuts (Settings → Shortcuts) that act on screens
+  shortcut(name){
+    if (name === "menu") return go({ view: "menu", topic: null });
+    if (name === "dict") return go({ view: "dict", topic: null });
+    if (name === "glossary") { G.sub = "all"; G.field = null; G.word = null; G.ret = null; return openGlossary({}); }
+    if (name === "notes") return MW.notes ? MW.notes.close() : openNotesWin();
+    if (name === "achievements") return MW.achievements ? MW.achievements.close() : WIN_VIEWS.achievements();
+    if (name === "sidebar") { const b = $(".nav-fold"); if (b && b.offsetParent) b.click(); return; }
+    if (name === "back") { if (Object.keys(MW).length) return closeWins(); const b = viewEl.querySelector(".back-row .btn-s:not(.navtoggle)"); if (b) b.click(); }
+  }
 };
-window.addEventListener("inquire:signed-in", () => { mastered = loadMastered(); render(); }); // that account's progress and notes
+window.addEventListener("inquire:signed-in", () => { mastered = loadMastered(); closeWins(); render(); }); // that account's progress and notes
 
 /* ---------- boot ---------- */
 $("#brand").onclick = () => go({ view: "menu", topic: null });

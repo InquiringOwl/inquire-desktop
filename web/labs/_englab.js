@@ -105,7 +105,7 @@ E.quiz = cfg => {
     get item(){ return cfg.items[order[pos]]; },
     get index(){ return pos; },
     get total(){ return cfg.items.length; },
-    pick(v){ if (ctl.state.answered) return ctl.state; const ok = !!cfg.check(ctl.item, v); ctl.state = { answered: true, picked: v, correct: ok }; ctl.score.tries++; if (ok) ctl.score.right++; return ctl.state; },
+    pick(v){ if (ctl.state.answered) return ctl.state; const ok = !!cfg.check(ctl.item, v); ctl.state = { answered: true, picked: v, correct: ok }; ctl.score.tries++; if (ok) ctl.score.right++; if (typeof window !== "undefined" && window.dispatchEvent) window.dispatchEvent(new CustomEvent("inquire:quiz", { detail: { correct: ok } })); return ctl.state; }, // inquire:quiz → Achievements
     next(){ pos++; if (pos >= order.length) { order = E.shuffle(order, cfg.seed == null ? null : cfg.seed + 1); pos = 0; } ctl.state = { answered: false, picked: null, correct: null }; },
     reset(){ ctl.score = { right: 0, tries: 0 }; pos = 0; ctl.state = { answered: false, picked: null, correct: null }; },
     html(){ return cfg.render(ctl.item, ctl.state); }

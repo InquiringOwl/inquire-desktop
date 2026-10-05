@@ -101,34 +101,16 @@ app.whenReady().then(() => {
     autoUpdater.quitAndInstall(); return true;
   });
   ipcMain.handle('update:state', () => updateState);
-  // Right-click → dictionary: fetched here (no CORS, no CSP on the main process). Oxford Dictionaries API when the user has saved an
-  // app ID + key in Settings → Usage (production first, then the free sandbox), otherwise the free Wiktionary-based dictionaryapi.dev.
+  // Right-click → dictionary: textmenu.js decides what to ask (Wiktionary, then Wikipedia, then dictionaryapi.dev); this only
+  // fetches, here in the main process (no CORS, no CSP), and only from those hosts. No keys or setup needed.
+  const DICT_HOSTS = ['en.wiktionary.org', 'en.wikipedia.org', 'api.dictionaryapi.dev'];
   ipcMain.handle('dict:lookup', async (_e, q) => {
-    const word = String(q && q.word || '').trim().toLowerCase().slice(0, 60);
-    if (!word || !/^[\p{L}][\p{L}'’ -]*$/u.test(word)) return { ok: false, error: 'Select a single word or short phrase.' };
-    const get = async (url, headers) => { const r = await net.fetch(url, { headers: Object.assign({ Accept: 'application/json' }, headers || {}) }); return { status: r.status, body: r.status === 200 ? await r.json() : null }; };
+    let u; try { u = new URL(String(q && q.url || '')); } catch (err) { return { status: 0 }; }
+    if (u.protocol !== 'https:' || !DICT_HOSTS.includes(u.hostname)) return { status: 0 };
     try {
-      if (q.appId && q.appKey) {
-        const H = { app_id: String(q.appId), app_key: String(q.appKey) };
-        for (const host of ['od-api.oxforddictionaries.com', 'od-api-sandbox.oxforddictionaries.com']) {
-          let r = await get(`https://${host}/api/v2/entries/en-gb/${encodeURIComponent(word)}?strictMatch=false`, H);
-          if (r.status === 404) { // an inflected form: find its headword first
-            const l = await get(`https://${host}/api/v2/lemmas/en-gb/${encodeURIComponent(word)}`, H);
-            const root = l.body && l.body.results && l.body.results[0] && l.body.results[0].lexicalEntries[0] && l.body.results[0].lexicalEntries[0].inflectionOf && l.body.results[0].lexicalEntries[0].inflectionOf[0];
-            if (root) r = await get(`https://${host}/api/v2/entries/en-gb/${encodeURIComponent(root.id)}?strictMatch=false`, H);
-            if (r.status === 404) return { ok: false, source: 'oxford', error: 'Oxford has no entry for that word.' };
-          }
-          if (r.status === 401 || r.status === 403) continue; // keys for the other host
-          if (r.status !== 200) return { ok: false, source: 'oxford', error: 'Oxford answered ' + r.status + '.' };
-          return { ok: true, source: 'oxford', data: r.body };
-        }
-        return { ok: false, source: 'oxford', error: 'Oxford did not accept the app ID and key (Settings → Usage).' };
-      }
-      const r = await get(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
-      if (r.status === 404) return { ok: false, source: 'free', error: 'No dictionary entry for that word.' };
-      if (r.status !== 200) return { ok: false, source: 'free', error: 'The dictionary answered ' + r.status + '.' };
-      return { ok: true, source: 'free', data: r.body };
-    } catch (err) { return { ok: false, error: 'Could not reach the dictionary. Check your internet connection.' }; }
+      const r = await net.fetch(u.href, { headers: { Accept: 'application/json', 'User-Agent': `Inquire/${app.getVersion()} (https://github.com/InquiringOwl/inquire-desktop)` } });
+      return { status: r.status, body: r.status === 200 ? await r.json() : null };
+    } catch (err) { return { status: 0 }; }
   });
   ipcMain.handle('update:reveal', () => { if (updateState.fallback) shell.showItemInFolder(updateState.fallback); });
   ipcMain.handle('app:version', () => app.getVersion());

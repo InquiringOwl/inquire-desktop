@@ -25,8 +25,8 @@ jobs:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'   # dev-only test tool; not needed to build the app
       HAS_MAC_CERT: ${{ secrets.MAC_CERT_P12_BASE64 != '' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with: { node-version: 22, cache: npm }
       - run: npm ci
       - run: node tools/build-web.js
@@ -44,5 +44,7 @@ jobs:
         if: runner.os == 'macOS' && env.HAS_MAC_CERT != 'true'
         shell: bash
         run: echo "CSC_IDENTITY_AUTO_DISCOVERY=false" >> "$GITHUB_ENV"
+      # One retry: a dropped upload to GitHub once left v1.16.1 without latest-mac.yml (Macs could not update until a re-run).
       - name: Build and publish
-        run: npx electron-builder --publish always
+        shell: bash
+        run: npx electron-builder --publish always || { echo "::warning::Build/upload failed, retrying once in 30 s"; sleep 30; npx electron-builder --publish always; }

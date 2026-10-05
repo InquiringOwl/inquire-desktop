@@ -61,7 +61,7 @@ const { desktop, dataFiles, R } = require('./build-web.js');
       for (const e of [...new Set(errs)]) failures.push(`${label} #${r}: ${e}`);
       process.stdout.write(errs.length ? 'x' : '.');
     }
-    // Windows that are not routes: the settings window (every tab), the Assist dock (both tabs, a note made from a
+    // Windows that are not routes: the settings window (every tab), the Assist dock (both tabs, the Notes box, a note made from a
     // topic page, which then shows on My notes) and the menu's display box arrows. Skipped when ONLY names screens.
     if (!process.env.ONLY) {
       errs = [];
@@ -70,12 +70,12 @@ const { desktop, dataFiles, R } = require('./build-web.js');
         for (const t of ['look', 'display', 'keys', 'usage', 'account', 'data', 'about']) { await p.evaluate(t => InquireSettings.open(t), t); await p.waitForTimeout(120); }
         await p.evaluate(() => InquireSettings.openDoc('eula')); await p.waitForTimeout(120);
         await p.evaluate(() => InquireSettings.close());
-        await p.click('.dk-tab'); await p.waitForTimeout(150);
+        await p.click('.dk-rail [data-go=ai]'); await p.waitForTimeout(150);
         await p.fill('.dk-ask textarea', 'test'); await p.click('.dk-ask button'); await p.waitForTimeout(200);
-        await p.click('.dk-tabs [data-t=notes]'); await p.click('.dk-pane [data-a=gen]'); await p.waitForTimeout(500);
+        await p.click('.dk-tabs [data-t=chat]'); await p.click('#dk-win .dk-ic[data-go=notes]'); await p.waitForTimeout(150); await p.click('#dk-notes [data-a=gen]'); await p.waitForTimeout(500);
         const body = await p.$eval('.dk-nbody .nb-rich', el => el.textContent.length);
         if (body < 100) errs.push('note from this page came out empty');
-        await p.click('.dk-x');
+        await p.evaluate(() => InquireDock.close()); await p.click('.dkn-x');
         await p.evaluate(() => { location.hash = 'notes'; }); await p.waitForTimeout(300);
         if (!(await p.$('.nb-it'))) errs.push('My notes does not list the new note');
         await p.evaluate(() => { location.hash = 'menu'; }); await p.waitForTimeout(300);

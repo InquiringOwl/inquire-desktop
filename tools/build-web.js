@@ -23,7 +23,7 @@ const dataSrc = ['web/src/data.js', ...dir('web/src').filter(f => /\/data-[a-z0-
 // Glossary entries (web/glossary/<subject>.js) come right after the data files: they only call DB.addGlossary.
 const files = [...dataSrc, ...dir('web/glossary'), ...dir('web/art'), ...tree('web/content'), 'web/src/labkit.js',
   ...dir('web/src').filter(f => /\/kit-[a-z0-9-]+\.js$/.test(f)),
-  ...dir('web/src').filter(f => /\/labs\d*\.js$/.test(f)), ...dir('web/traces'), ...dir('web/labs'), 'web/src/notes.js', 'web/src/notes-widgets.js', 'web/src/app.js', 'web/src/dock.js', 'web/src/textmenu.js', 'web/src/intro.js', 'web/src/eula.js', 'web/src/settings.js'];
+  ...dir('web/src').filter(f => /\/labs\d*\.js$/.test(f)), ...dir('web/traces'), ...dir('web/labs'), 'web/src/notes.js', 'web/src/notes-widgets.js', 'web/src/app.js', 'web/src/dock.js', 'web/src/achievements.js', 'web/src/textmenu.js', 'web/src/intro.js', 'web/src/eula.js', 'web/src/settings.js'];
 // Files that only define data (DB, ARITH, scenes): safe to run in Node for validate, dump-content and smoke.
 const dataFiles = files.filter(f => dataSrc.includes(f) || f.startsWith('web/glossary/') || f.startsWith('web/art/') || f.startsWith('web/content/'));
 const vm = require('vm');

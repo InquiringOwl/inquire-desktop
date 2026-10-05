@@ -1,7 +1,8 @@
 /* Right-click menu for selected text on lesson (topic) pages and in notes (.nb-rich editors: My notes and the Assist dock).
    1. Copy  2. Glossary: the glossary entry shown in the menu (Open in glossary ↗; no entry → search)
-   3. Dictionary: a simple online definition shown in the menu (Oxford Dictionaries API with keys from Settings → Usage, else the free
-      Wiktionary-based dictionaryapi.dev; the desktop app fetches through main.js "dict:lookup")  4. Link to a note:
+   3. Dictionary: a simple online definition shown in the menu, no keys or setup: Wiktionary (REST page/definition; inflected forms
+      follow "plural of …" to the headword), else a Wikipedia summary (names, phrases), else dictionaryapi.dev; the desktop app
+      fetches through main.js "dict:lookup" (host allowlist)  4. Link to a note:
    - in a note: the selected words become a link to another note (or a new one); links use --note-link (Settings → Appearance)
    - on a lesson: the selection is quoted into a note, with a link back to the lesson, and the note is linked to the lesson.
    No selection → the normal menu. Loaded after app.js, notes.js and dock.js. */
@@ -47,7 +48,7 @@ function open(x, y, c) {
   menu.innerHTML = `
     <button type="button" role="menuitem" data-a="copy"><span class="tm-ic">⧉</span><span>Copy</span><kbd>${/Mac/.test(navigator.platform) ? "⌘" : "Ctrl+"}C</kbd></button>
     <button type="button" role="menuitem" data-a="define"${words > 6 ? " disabled" : ""}><span class="tm-ic">Aa</span><span>Define “${esc(short)}” · Glossary<small>${words > 6 ? "Select a word or short phrase" : "Inquire’s own glossary"}</small></span></button>
-    <button type="button" role="menuitem" data-a="dict"${words > 3 ? " disabled" : ""}><span class="tm-ic">Ox</span><span>Define “${esc(short)}” · Dictionary<small>${words > 3 ? "Select a word or short phrase" : dictKeys().appId ? "Oxford, online" : "Online · Oxford with a key in Settings → Usage"}</small></span></button>
+    <button type="button" role="menuitem" data-a="dict"${words > 5 ? " disabled" : ""}><span class="tm-ic">W</span><span>Define “${esc(short)}” · Dictionary<small>${words > 5 ? "Select a word or short phrase" : "Wiktionary and Wikipedia, online"}</small></span></button>
     <button type="button" role="menuitem" data-a="link"><span class="tm-ic">↗</span><span>Link to a note…<small>${c.rich ? "These words open the note you pick" : "Quote this in a note, linked back here"}</small></span></button>`;
   document.body.appendChild(menu);
   const W = menu.offsetWidth, H = menu.offsetHeight;
@@ -100,57 +101,89 @@ function showGlossary(text, place) {
   menu._def = { word: g.word, topic: own ? own.node : null,
     html: `<blockquote><b>${esc(g.word)}</b>${g.ipa ? ` <i>${esc(g.ipa)}</i>` : ""}${b0.pos ? " · " + esc(b0.pos) : ""}<br>${b0.senses.join("<br>")}<br>— Glossary · ${esc(b0.subject)}${b0.field ? " · " + esc(b0.field) : ""}${own ? ` · <a class="nlink" data-topic="${esc(own.node)}">${esc(own.nodeTitle)}</a>` : ""}</blockquote>` };
 }
-const dictKeys = () => { try { return JSON.parse(localStorage.getItem("codex.dictkeys") || "{}") || {}; } catch (e) { return {}; } };
 const dictCache = {};
-async function lookup(word) {
-  const k = dictKeys(), key = (k.appId ? "ox:" : "free:") + word.toLowerCase();
-  if (dictCache[key]) return dictCache[key];
-  let r;
+const WIKT = "https://en.wiktionary.org/api/rest_v1/page/definition/", WIKI = "https://en.wikipedia.org/api/rest_v1/page/summary/";
+// one GET → { status, body } (status 0 = could not reach it). Desktop: main.js; browser build: these APIs allow cross-origin requests.
+async function getJSON(url) {
   const D = window.inquireDesktop;
-  if (D && D.lookupWord) r = await D.lookupWord({ word, appId: k.appId || "", appKey: k.appKey || "" });
-  else { // browser build: the free dictionary allows cross-origin requests
-    try { const res = await fetch("https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(word.toLowerCase())); r = res.status === 200 ? { ok: true, source: "free", data: await res.json() } : { ok: false, source: "free", error: res.status === 404 ? "No dictionary entry for that word." : "The dictionary answered " + res.status + "." }; }
-    catch (e) { r = { ok: false, error: "Could not reach the dictionary." }; }
-  }
-  if (r && r.ok) r.entry = parseDict(r);
-  if (r && r.ok && !r.entry.senses.length) r = { ok: false, source: r.source, error: "No definition found." };
-  if (r && (r.ok || /no (dictionary )?entry|no definition/i.test(r.error || ""))) dictCache[key] = r;
-  return r;
+  if (D && D.lookupWord) { try { return (await D.lookupWord({ url })) || { status: 0 }; } catch (e) { return { status: 0 }; } }
+  try { const r = await fetch(url, { headers: { Accept: "application/json" } }); return { status: r.status, body: r.status === 200 ? await r.json() : null }; }
+  catch (e) { return { status: 0 }; }
 }
-// both sources → { word, phon, senses: [{ pos, def }], link }
-function parseDict(r) {
-  const out = { word: "", phon: "", senses: [], link: "" };
-  if (r.source === "oxford") {
-    const res = (r.data && r.data.results) || [];
-    res.forEach(x => (x.lexicalEntries || []).forEach(le => (le.entries || []).forEach(en => {
-      out.word = out.word || x.word || "";
-      (en.pronunciations || []).concat(le.pronunciations || []).forEach(p => { if (!out.phon && p.phoneticSpelling) out.phon = "/" + p.phoneticSpelling + "/"; });
-      (en.senses || []).forEach(s => { const d = (s.shortDefinitions || s.definitions || [])[0]; if (d) out.senses.push({ pos: le.lexicalCategory ? le.lexicalCategory.text : "", def: d }); });
-    })));
-    out.link = "https://www.oxfordlearnersdictionaries.com/definition/english/" + encodeURIComponent((out.word || "").replace(/ /g, "-"));
-  } else {
-    (Array.isArray(r.data) ? r.data : []).forEach(x => {
-      out.word = out.word || x.word || ""; out.phon = out.phon || x.phonetic || ((x.phonetics || []).find(p => p.text) || {}).text || "";
-      (x.meanings || []).forEach(m => (m.definitions || []).slice(0, 2).forEach(d => out.senses.push({ pos: m.partOfSpeech || "", def: d.definition })));
-      if (!out.link && x.sourceUrls && x.sourceUrls[0]) out.link = x.sourceUrls[0];
-    });
-  }
-  out.senses = out.senses.filter(s => s.def).slice(0, 4);
+const plain = html => { const d = document.createElement("div"); d.innerHTML = String(html || "").replace(/<(script|style)[\s\S]*?<\/\1>/gi, ""); return d.textContent.replace(/\s+/g, " ").trim(); };
+// Wiktionary: English senses, and the headword an inflected form points to ("plural of cat")
+function wiktSenses(body) {
+  const out = { senses: [], lemma: "" };
+  ((body && body.en) || []).forEach(sec => (sec.definitions || []).forEach(d => {
+    const html = String(d.definition || ""), def = plain(html);
+    if (!def) return;
+    out.senses.push({ pos: (sec.partOfSpeech || "").toLowerCase(), def });
+    const m = !out.lemma && /form-of-definition-link[\s\S]*?title="([^"#]+)"/.exec(html);
+    if (m) out.lemma = plain(m[1]);
+  }));
   return out;
 }
+async function wiktionary(word) {
+  const tries = [...new Set([word, word.toLowerCase()])];
+  let reached = false;
+  for (const w of tries) {
+    const r = await getJSON(WIKT + encodeURIComponent(w.replace(/ /g, "_")));
+    if (r.status) reached = true;
+    if (r.status !== 200) continue;
+    const s = wiktSenses(r.body);
+    if (!s.senses.length) continue;
+    let senses = s.senses.slice(0, 2), head = w;
+    if (s.lemma && s.lemma.toLowerCase() !== w.toLowerCase() && s.senses.every(x => / of /.test(x.def))) { // inflected form: add the headword's meanings
+      const l = await getJSON(WIKT + encodeURIComponent(s.lemma.replace(/ /g, "_")));
+      const ls = l.status === 200 ? wiktSenses(l.body).senses : [];
+      if (ls.length) { senses = [s.senses[0]].concat(ls.slice(0, 3)); head = w; }
+    } else senses = s.senses;
+    return { ok: true, source: "Wiktionary", entry: { word: head, phon: "", senses: senses.slice(0, 4), link: "https://en.wiktionary.org/wiki/" + encodeURIComponent(w.replace(/ /g, "_")) + "#English" } };
+  }
+  return { ok: false, reached };
+}
+async function wikipedia(word) {
+  const r = await getJSON(WIKI + encodeURIComponent(word.replace(/ /g, "_")) + "?redirect=true");
+  if (r.status !== 200 || !r.body || r.body.type === "disambiguation" || !r.body.extract) return { ok: false, reached: !!r.status };
+  const ext = r.body.extract.replace(/\s+/g, " ").trim(), cut = ext.match(/^(.{40,320}?[.!?])(\s|$)/);
+  return { ok: true, source: "Wikipedia", entry: { word: r.body.title || word, phon: "", senses: [{ pos: r.body.description || "", def: cut ? cut[1] : ext.slice(0, 320) }],
+    link: (r.body.content_urls && r.body.content_urls.desktop && r.body.content_urls.desktop.page) || "https://en.wikipedia.org/wiki/" + encodeURIComponent(word.replace(/ /g, "_")) } };
+}
+async function freeDict(word) { // last resort (this service is often down: Cloudflare 522)
+  const r = await getJSON("https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(word.toLowerCase()));
+  if (r.status !== 200 || !Array.isArray(r.body)) return { ok: false, reached: !!r.status };
+  const e = { word: "", phon: "", senses: [], link: "" };
+  r.body.forEach(x => { e.word = e.word || x.word || ""; e.phon = e.phon || x.phonetic || "";
+    (x.meanings || []).forEach(m => (m.definitions || []).slice(0, 2).forEach(d => d.definition && e.senses.push({ pos: m.partOfSpeech || "", def: d.definition })));
+    if (!e.link && x.sourceUrls && x.sourceUrls[0]) e.link = x.sourceUrls[0]; });
+  e.senses = e.senses.slice(0, 4);
+  return e.senses.length ? { ok: true, source: "Wiktionary", entry: e } : { ok: false, reached: true };
+}
+async function lookup(word) {
+  const key = word.toLowerCase();
+  if (dictCache[key]) return dictCache[key];
+  const words = word.split(/\s+/).length;
+  let reached = false, r;
+  for (const f of words > 3 ? [wikipedia, wiktionary] : [wiktionary, wikipedia, freeDict]) {
+    r = await f(word); if (r.ok) break; reached = reached || r.reached;
+  }
+  if (!r.ok) r = reached ? { ok: false, error: `No definition found for “${word}”.` } : { ok: false, error: "Could not reach the online dictionary. Check your internet connection." };
+  if (r.ok || reached) dictCache[key] = r;
+  return r;
+}
 async function showDict(text, place) {
-  const word = text.trim().replace(/^[^\p{L}]+|[^\p{L}]+$/gu, "");
-  const ox = !!dictKeys().appId; menu._def = null;
-  defBox(`<p class="tm-dn tm-busy">Looking up “${esc(word)}” in ${ox ? "the Oxford dictionary" : "the dictionary"}…</p>`, place);
+  const word = text.trim().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "").replace(/\s+/g, " ").slice(0, 80);
+  menu._def = null;
+  defBox(`<p class="tm-dn tm-busy">Looking up “${esc(word)}”…</p>`, place);
   const r = await lookup(word);
   if (!menu) return;
   if (!r || !r.ok) { defBox(`<p class="tm-dn">${esc((r && r.error) || "No definition found.")}</p>`, place); return; }
-  const e = r.entry, src = r.source === "oxford" ? "Oxford" : "Wiktionary";
-  menu._def = { word: e.word || word, topic: null, html: `<blockquote><b>${esc(e.word || word)}</b>${e.phon ? ` <i>${esc(e.phon)}</i>` : ""}<br>${e.senses.map((s, i) => `${i + 1}. ${s.pos ? "(" + esc(s.pos) + ") " : ""}${esc(s.def)}`).join("<br>")}<br>— ${src} dictionary</blockquote>` };
+  const e = r.entry, src = r.source;
+  menu._def = { word: e.word || word, topic: null, html: `<blockquote><b>${esc(e.word || word)}</b>${e.phon ? ` <i>${esc(e.phon)}</i>` : ""}<br>${e.senses.map((s, i) => `${e.senses.length > 1 ? i + 1 + ". " : ""}${s.pos ? "(" + esc(s.pos) + ") " : ""}${esc(s.def)}`).join("<br>")}<br>— ${src}</blockquote>` };
   defBox(`<div class="tm-dh"><b>${esc(e.word || word)}</b>${e.phon ? `<span class="tm-ipa">${esc(e.phon)}</span>` : ""}<span class="tm-src">${src}</span></div>`
     + `<ol class="tm-dl">${e.senses.map(s => `<li>${s.pos ? `<i>${esc(s.pos)}</i> ` : ""}${esc(s.def)}</li>`).join("")}</ol>`
-    + `<div class="tm-dacts">${SAVE_BTN}${e.link ? `<a class="tm-dgo" href="${esc(e.link)}" target="_blank" rel="noopener">More at ${r.source === "oxford" ? "Oxford" : "Wiktionary"} ↗</a>` : ""}</div>`
-    + (r.source !== "oxford" ? `<p class="tm-dfoot">Free dictionary from Wiktionary. Add Oxford keys in Settings → Usage for Oxford definitions.</p>` : ""), place);
+    + `<div class="tm-dacts">${SAVE_BTN}${e.link ? `<a class="tm-dgo" href="${esc(e.link)}" target="_blank" rel="noopener">More at ${src} ↗</a>` : ""}</div>`
+    + `<p class="tm-dfoot">Free, from ${src} (CC BY-SA).</p>`, place);
 }
 
 async function linkFlow(x, y, c) {
