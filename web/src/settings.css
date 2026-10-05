@@ -6,7 +6,7 @@
 
 /* the app behind the window fogs and eases back */
 #app,.inqi-stage,.inqi-corner{transition:filter .35s ease,transform .35s ease}
-body.set-open #app,body.set-open .inqi-stage,body.set-open .inqi-corner{filter:blur(3px) saturate(.75) brightness(.72);transform:scale(.985)}
+body.set-open #app,body.set-open .inqi-stage,body.set-open .inqi-corner,body.ask-open #app{filter:blur(3px) saturate(.75) brightness(.72);transform:scale(.985)}
 .set-ov{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:16px;
   background:radial-gradient(ellipse at 50% 40%,rgba(200,220,255,.06),rgba(3,6,11,.55));opacity:0;transition:opacity .3s ease}
 body.set-open .set-ov{opacity:1}
@@ -71,7 +71,7 @@ body.set-open .set-win{transform:none}
 .set-tog span::after{content:"";position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s}
 .set-tog input:checked+span{background:color-mix(in srgb,var(--frame) 30%,var(--ink));border-color:var(--frame)}
 .set-tog input:checked+span::after{transform:translateX(20px);background:var(--frame)}
-.set-tog input:focus-visible+span{outline:2px solid var(--cyan);outline-offset:2px}
+.set-tog input:focus-visible+span{outline:2px solid var(--frame);outline-offset:2px}
 .set-form{display:grid;gap:10px;padding:14px 0;border-bottom:1px solid var(--line);max-width:420px}
 .set-form p{margin:0;font-size:13px;color:var(--muted)}
 .set-form label{display:grid;gap:5px;font:600 11px/1 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
@@ -127,7 +127,7 @@ a.btn-s{text-decoration:none;display:inline-block}
 .set-fader input[type=range]::-moz-range-progress{height:4px;background:var(--frame)}
 .set-fader input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:20px;margin-top:-9px;background:var(--panel-3);border:1px solid var(--frame);border-radius:1px;box-shadow:0 0 10px var(--glow),inset 0 0 0 2px var(--ink)}
 .set-fader input[type=range]::-moz-range-thumb{width:10px;height:18px;background:var(--panel-3);border:1px solid var(--frame);border-radius:1px;box-shadow:0 0 10px var(--glow)}
-.set-fader input[type=range]:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.set-fader input[type=range]:focus-visible{outline:2px solid var(--frame);outline-offset:2px}
 .set-frange{flex:1;min-width:0;display:flex;flex-direction:column}
 .set-fmarks{position:relative;height:12px;margin:6px 6px 0}
 .set-fmarks span{position:absolute;transform:translateX(-50%);font:500 10px/1 var(--ui);letter-spacing:.06em;color:var(--faint)}
@@ -144,7 +144,7 @@ a.btn-s{text-decoration:none;display:inline-block}
 /* Usage: scroll test box */
 .set-scrolltry{margin-top:14px;height:120px;overflow:auto;border:1px dashed var(--line-2);border-radius:2px;padding:4px 12px;background:rgba(0,0,0,.15);font-size:13px;color:var(--muted)}
 .set-scrolltry p{margin:6px 0}
-.set-scrolltry:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.set-scrolltry:focus-visible{outline:2px solid var(--frame);outline-offset:2px}
 
 /* Appearance → Note links */
 .set-lcitem{align-items:flex-start}
@@ -152,6 +152,28 @@ a.btn-s{text-decoration:none;display:inline-block}
 .set-lc{display:flex;flex-wrap:wrap;gap:6px;max-width:230px;justify-content:flex-end}
 .set-lcs{width:24px;height:24px;border-radius:50%;border:2px solid var(--panel);box-shadow:0 0 0 1px var(--line-2);background:var(--c);cursor:pointer;padding:0;position:relative;overflow:hidden}
 .set-lcs[aria-checked="true"]{box-shadow:0 0 0 2px var(--text),0 0 12px var(--c)}
-.set-lcs:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.set-lcs:focus-visible{outline:2px solid var(--frame);outline-offset:2px}
 .set-lcpick{background:conic-gradient(#F07CA0,#F2B84B,#7BD88F,#5CC8E0,#B49BFF,#F07CA0);display:inline-block}
 .set-lcpick input{position:absolute;inset:-4px;opacity:0;cursor:pointer;width:40px;height:40px}
+
+/* Updates in About: Install & Relaunch from Settings (sign-in screen or app) */
+.set-upd-btns:empty{display:none}
+.set-upd.is-ready h3{color:var(--green)}
+.set-upd .btn{padding:8px 12px;white-space:nowrap}
+.set-tab.has-upd::after{content:"";display:inline-block;width:7px;height:7px;margin-left:8px;vertical-align:middle;background:var(--green);box-shadow:0 0 8px var(--green)}
+
+/* small dialog in the same style (askText in app.js: New note title) */
+.ask-ov{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:16px;
+  background:radial-gradient(ellipse at 50% 40%,rgba(200,220,255,.06),rgba(3,6,11,.55));opacity:0;transition:opacity .25s ease}
+body.ask-open .ask-ov{opacity:1}
+.ask-ov.out{opacity:0}
+.ask-win{width:min(460px,100%);margin:0;box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.03),0 0 40px var(--glow);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);transform:translateY(10px) scale(.98);transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+body.ask-open .ask-win{transform:none}
+.ask-body{display:grid;gap:10px;padding:18px 20px 20px}
+.ask-l{font:600 12px/1 var(--ui);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.ask-in{background:var(--ink);color:var(--text);border:1px solid var(--line-2);border-radius:2px;padding:10px 12px;font:400 16px/1.3 var(--sans);outline:none}
+.ask-in:focus{border-color:var(--frame);box-shadow:0 0 0 1px var(--frame)}
+.ask-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+.ask-btns .btn{padding:9px 14px}
+.set-msg.warn{color:var(--amber)}

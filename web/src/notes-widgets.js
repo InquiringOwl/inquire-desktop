@@ -69,6 +69,65 @@ function symbolPanel(btn, api) {
   document.addEventListener("pointerdown", outP, true); document.addEventListener("keydown", keyP, true);
 }
 
+/* ---------- video: from a file or a link ---------- */
+// a link → { kind: "yt" | "vimeo" | "url", … } or null. YouTube plays from youtube-nocookie.com; files are https .mp4/.webm/.ogg/.mov
+function videoFrom(raw) {
+  let u; try { u = new URL(String(raw || "").trim()); } catch (e) { return null; }
+  if (u.protocol !== "https:" && u.protocol !== "http:") return null;
+  const host = u.hostname.replace(/^(www|m|music)\./, ""), seg = u.pathname.split("/").filter(Boolean);
+  const secs = t => { if (!t) return 0; if (/^\d+$/.test(t)) return +t; const m = String(t).match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$/); return m ? (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0) : 0; };
+  let yt = null;
+  if (host === "youtu.be") yt = seg[0];
+  else if (/^(youtube\.com|youtube-nocookie\.com)$/.test(host)) yt = u.searchParams.get("v") || (["embed", "shorts", "live", "v"].includes(seg[0]) ? seg[1] : null);
+  if (yt) return /^[\w-]{11}$/.test(yt) ? { kind: "yt", id: yt, start: secs(u.searchParams.get("t") || u.searchParams.get("start")) } : null;
+  if (host === "vimeo.com" || host === "player.vimeo.com") { const id = seg.find(x => /^\d{5,}$/.test(x)), i = seg.indexOf(id), hsh = seg[i + 1] && /^[0-9a-f]{6,}$/i.test(seg[i + 1]) ? seg[i + 1] : u.searchParams.get("h"); return id ? Object.assign({ kind: "vimeo", id }, hsh ? { h: hsh } : {}) : null; }
+  if (u.protocol === "https:" && /\.(mp4|m4v|webm|ogv|ogg|mov)$/i.test(u.pathname)) return { kind: "url", url: u.href };
+  return null;
+}
+const videoEmbed = d => d.kind === "yt" ? `https://www.youtube-nocookie.com/embed/${d.id}?rel=0&modestbranding=1${d.start ? "&start=" + d.start : ""}`
+  : d.kind === "vimeo" ? `https://player.vimeo.com/video/${d.id}${d.h ? "?h=" + d.h : ""}` : "";
+const videoLink = d => d.kind === "yt" ? `https://www.youtube.com/watch?v=${d.id}${d.start ? "&t=" + d.start + "s" : ""}` : d.kind === "vimeo" ? `https://vimeo.com/${d.id}${d.h ? "/" + d.h : ""}` : d.kind === "url" ? d.url : "";
+function mountVideo(el) {
+  const d = readSrc(el, { kind: "", title: "" });
+  const link = videoLink(d), src = videoEmbed(d);
+  el.innerHTML = `<div class="nw-h"><span class="nw-tag">▶</span><input class="nw-title" maxlength="80" placeholder="Video" aria-label="Video title" value="${esc(d.title)}">
+      ${link ? `<a class="nw-b nw-open" href="${esc(link)}" target="_blank" rel="noopener" title="Open on the web">↗</a>` : ""}<button type="button" class="nw-b nw-del" data-a="del" title="Remove this video" aria-label="Remove video">✕</button></div>
+    <div class="nw-vbox">${src ? `<iframe src="${esc(src)}" title="${esc(d.title || "Video")}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" loading="lazy"></iframe>`
+      : `<video controls preload="metadata" playsinline></video>`}</div>`;
+  const v = el.querySelector("video");
+  if (v) {
+    if (d.kind === "url") v.src = d.url;
+    else if (d.kind === "file" && d.vid && window.InquireNotes) InquireNotes.imageURL(d.vid).then(u => { if (u) v.src = u; else el.querySelector(".nw-vbox").innerHTML = `<p class="nw-vmiss">This video's file is missing (videos over 25 MB are not carried in backups).</p>`; });
+  }
+  const ti = el.querySelector(".nw-title");
+  ti.addEventListener("input", e => { e.stopPropagation(); writeSrc(el, Object.assign(readSrc(el, {}), { title: ti.value.trim() })); });
+  delButton(el);
+}
+let vpanel = null;
+function closeVPanel() { if (vpanel) { vpanel.remove(); vpanel = null; document.removeEventListener("pointerdown", outV, true); document.removeEventListener("keydown", keyV, true); } }
+const outV = e => { if (vpanel && !vpanel.contains(e.target) && !e.target.closest(".nr-vid")) closeVPanel(); };
+const keyV = e => { if (e.key === "Escape" && vpanel) { e.preventDefault(); e.stopPropagation(); closeVPanel(); } };
+function videoPanel(btn, api) {
+  if (vpanel) { closeVPanel(); return; }
+  vpanel = document.createElement("div");
+  vpanel.className = "nr-panel nv-pop win"; vpanel.setAttribute("role", "dialog"); vpanel.setAttribute("aria-label", "Add a video");
+  vpanel.innerHTML = `<div class="nr-ptabs"><b class="nv-h">▶ Add a video</b><span class="nr-phint"></span><button type="button" class="nr-px" aria-label="Close">✕</button></div>
+    <div class="nv-body"><button type="button" class="btn-s" data-a="file">Choose a video file…</button><small>MP4, WebM or MOV up to 500 MB, kept on this computer. You can also drop a video file into the note.</small>
+      <form class="nv-form"><input type="text" inputmode="url" spellcheck="false" placeholder="Paste a YouTube, Vimeo or video link" aria-label="Video link"><button type="submit" class="btn-s">Insert</button></form><p class="nv-msg" aria-live="polite"></p>
+      <input type="file" accept="video/*" hidden></div>`;
+  const file = vpanel.querySelector('input[type="file"]'), form = vpanel.querySelector(".nv-form"), inp = form.querySelector("input"), msg = vpanel.querySelector(".nv-msg");
+  vpanel.querySelector(".nr-px").onclick = closeVPanel;
+  vpanel.querySelector('[data-a="file"]').onclick = () => file.click();
+  file.onchange = async () => { const f = file.files[0]; if (!f) return; msg.textContent = "Adding…"; const k = await api.addFiles([f]); if (k) closeVPanel(); else msg.textContent = f.size > 500 * 1024 * 1024 ? "That video is over 500 MB." : "That file could not be added."; file.value = ""; };
+  form.onsubmit = e => { e.preventDefault(); if (api.addVideoLink(inp.value)) closeVPanel(); else msg.textContent = "Use a YouTube or Vimeo link, or an https link to an .mp4, .webm or .mov file."; };
+  document.body.appendChild(vpanel);
+  const r = btn.getBoundingClientRect(), W = Math.min(380, innerWidth - 16);
+  vpanel.style.width = W + "px"; vpanel.style.left = Math.max(8, Math.min(innerWidth - W - 8, r.left - W + r.width)) + "px";
+  vpanel.style.top = (r.bottom + 200 < innerHeight ? r.bottom + 6 : Math.max(8, r.top - 206)) + "px";
+  document.addEventListener("pointerdown", outV, true); document.addEventListener("keydown", keyV, true);
+  setTimeout(() => inp.focus({ preventScroll: true }), 0);
+}
+
 /* ---------- toolbar ---------- */
 function toolbar(api) {
   const bar = document.createElement("div");
@@ -76,14 +135,17 @@ function toolbar(api) {
   const mod = /Mac/.test(navigator.platform) ? "⌘" : "Ctrl+";
   bar.innerHTML = `<button type="button" data-cmd="bold" title="Bold (${mod}B)" aria-label="Bold"><b>B</b></button><button type="button" data-cmd="italic" title="Italic (${mod}I)" aria-label="Italic"><i>I</i></button><button type="button" data-cmd="underline" title="Underline (${mod}U)" aria-label="Underline"><u>U</u></button>
     <span class="nr-sep"></span><span class="nr-cols" role="group" aria-label="Text colour">${COLORS.map(([k, c, n]) => `<button type="button" class="nr-col" data-col="${c}" style="--c:${c}" title="${n} text" aria-label="${n} text"></button>`).join("")}<button type="button" class="nr-col nr-colx" data-col="${CLEAR}" title="Normal text colour" aria-label="Normal text colour">⊘</button></span>
+    <span class="nr-sep"></span><span class="nr-sizes" role="group" aria-label="Text size">${[["2", "s", "Small text"], ["3", "n", "Normal text"], ["5", "l", "Large text"], ["6", "xl", "Huge text"]].map(([v, k, n]) => `<button type="button" data-size="${v}" class="nr-sz nr-sz-${k}" title="${n}" aria-label="${n}">A</button>`).join("")}</span>
     <span class="nr-sep"></span><button type="button" class="nr-sym" title="Emoji and symbols (Greek, maths, alchemical)" aria-haspopup="dialog">☺ Ω</button>
-    <span class="nr-sep"></span><button type="button" data-w="code" title="Add a code box">&lt;/&gt; Code</button><button type="button" data-w="music" title="Add a music chart">♪ Music</button>`;
+    <span class="nr-sep"></span><button type="button" data-w="code" title="Add a code box">&lt;/&gt; Code</button><button type="button" data-w="music" title="Add a music chart">♪ Music</button><button type="button" class="nr-vid" title="Add a video: a file from this computer, or a YouTube, Vimeo or video link" aria-haspopup="dialog">▶ Video</button>`;
   bar.addEventListener("mousedown", e => e.preventDefault()); // keep the selection in the note
   bar.addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
     if (b.dataset.cmd) { api.focus(); document.execCommand(b.dataset.cmd); sync(); api.changed(); }
     else if (b.dataset.col) { api.focus(); document.execCommand("styleWithCSS", false, false); document.execCommand("foreColor", false, b.dataset.col); api.normalizeColors(); api.changed(); }
+    else if (b.dataset.size) { api.focus(); document.execCommand("styleWithCSS", false, false); document.execCommand("fontSize", false, b.dataset.size); api.normalizeColors(); api.changed(); }
     else if (b.classList.contains("nr-sym")) symbolPanel(b, api);
+    else if (b.classList.contains("nr-vid")) videoPanel(b, api);
     else if (b.dataset.w) api.addWidget(b.dataset.w);
   });
   const sync = () => { if (!api.el.contains(document.activeElement) && document.activeElement !== api.el) return;
@@ -351,19 +413,20 @@ function mountMusic(el) {
 function mount(el) {
   if (el._nw) return; el._nw = true;
   el.contentEditable = "false";
-  if (el.dataset.w === "code") mountCode(el); else if (el.dataset.w === "music") mountMusic(el);
+  if (el.dataset.w === "code") mountCode(el); else if (el.dataset.w === "music") mountMusic(el); else if (el.dataset.w === "video") mountVideo(el);
 }
-function create(type) {
+function create(type, data) {
   const el = document.createElement("div"); el.className = "nw"; el.dataset.w = type;
-  el.dataset.src = JSON.stringify(type === "code" ? { lang: "python", title: "", src: "" } : { title: "", clef: "treble", time: "4/4", tempo: 90, seq: "" });
+  el.dataset.src = JSON.stringify(type === "video" ? Object.assign({ title: "" }, data || {}) : type === "code" ? { lang: "python", title: "", src: "" } : { title: "", clef: "treble", time: "4/4", tempo: 90, seq: "" });
   return el;
 }
 // plain-text version for search, previews and .md export
 function text(el) {
   const d = readSrc(el, {});
   if (el.dataset.w === "code") return "\n```" + (d.lang && d.lang !== "text" ? d.lang : "") + (d.title ? " " + d.title : "") + "\n" + (d.src || "") + "\n```\n";
+  if (el.dataset.w === "video") { const l = videoLink(d); return "\n▶ " + (d.title || "Video") + (l ? " (" + l + ")" : "") + "\n"; }
   if (el.dataset.w === "music") return "\n♪ " + (d.title ? d.title + ": " : "") + (d.seq || "(empty)") + (d.time ? " [" + d.time + ", " + (d.clef || "treble") + " clef]" : "") + "\n";
   return "";
 }
-window.InquireWidgets = { toolbar, mount, create, text, colorKey, COLORS, parseSeq, chordNotes };
+window.InquireWidgets = { toolbar, mount, create, text, colorKey, COLORS, parseSeq, chordNotes, videoFrom };
 })();

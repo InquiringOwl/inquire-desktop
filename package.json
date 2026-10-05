@@ -1,7 +1,7 @@
 {
   "name": "codex-desktop",
   "productName": "Inquire",
-  "version": "1.16.0",
+  "version": "1.16.1",
   "description": "Inquire: a knowledge console that maps subjects as skill trees, starting with the Mathematics dictionary.",
   "author": "Wolfie's Coven <devon@ashleyhoffmann.com>",
   "license": "UNLICENSED",
@@ -12,7 +12,8 @@
     "validate": "node tools/validate.js",
     "smoke": "node tools/smoke.js",
     "mathcheck": "python3 tools/mathcheck.py",
-    "check": "node tools/build-web.js && node tools/validate.js && python3 tools/mathcheck.py && node tools/labtest.js && node tools/smoke.js",
+    "check": "node tools/build-web.js && node tools/validate.js && python3 tools/mathcheck.py && node tools/labtest.js && node tools/smoke.js && node tools/interact.js",
+    "interact": "node tools/interact.js",
     "labtest": "node tools/labtest.js",
     "layout": "node tools/layoutcheck.js",
     "start": "node tools/build-web.js && electron .",

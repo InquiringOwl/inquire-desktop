@@ -100,6 +100,36 @@ app.whenReady().then(() => {
     if (mac) return mac.install();
     autoUpdater.quitAndInstall(); return true;
   });
+  ipcMain.handle('update:state', () => updateState);
+  // Right-click → dictionary: fetched here (no CORS, no CSP on the main process). Oxford Dictionaries API when the user has saved an
+  // app ID + key in Settings → Usage (production first, then the free sandbox), otherwise the free Wiktionary-based dictionaryapi.dev.
+  ipcMain.handle('dict:lookup', async (_e, q) => {
+    const word = String(q && q.word || '').trim().toLowerCase().slice(0, 60);
+    if (!word || !/^[\p{L}][\p{L}'’ -]*$/u.test(word)) return { ok: false, error: 'Select a single word or short phrase.' };
+    const get = async (url, headers) => { const r = await net.fetch(url, { headers: Object.assign({ Accept: 'application/json' }, headers || {}) }); return { status: r.status, body: r.status === 200 ? await r.json() : null }; };
+    try {
+      if (q.appId && q.appKey) {
+        const H = { app_id: String(q.appId), app_key: String(q.appKey) };
+        for (const host of ['od-api.oxforddictionaries.com', 'od-api-sandbox.oxforddictionaries.com']) {
+          let r = await get(`https://${host}/api/v2/entries/en-gb/${encodeURIComponent(word)}?strictMatch=false`, H);
+          if (r.status === 404) { // an inflected form: find its headword first
+            const l = await get(`https://${host}/api/v2/lemmas/en-gb/${encodeURIComponent(word)}`, H);
+            const root = l.body && l.body.results && l.body.results[0] && l.body.results[0].lexicalEntries[0] && l.body.results[0].lexicalEntries[0].inflectionOf && l.body.results[0].lexicalEntries[0].inflectionOf[0];
+            if (root) r = await get(`https://${host}/api/v2/entries/en-gb/${encodeURIComponent(root.id)}?strictMatch=false`, H);
+            if (r.status === 404) return { ok: false, source: 'oxford', error: 'Oxford has no entry for that word.' };
+          }
+          if (r.status === 401 || r.status === 403) continue; // keys for the other host
+          if (r.status !== 200) return { ok: false, source: 'oxford', error: 'Oxford answered ' + r.status + '.' };
+          return { ok: true, source: 'oxford', data: r.body };
+        }
+        return { ok: false, source: 'oxford', error: 'Oxford did not accept the app ID and key (Settings → Usage).' };
+      }
+      const r = await get(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+      if (r.status === 404) return { ok: false, source: 'free', error: 'No dictionary entry for that word.' };
+      if (r.status !== 200) return { ok: false, source: 'free', error: 'The dictionary answered ' + r.status + '.' };
+      return { ok: true, source: 'free', data: r.body };
+    } catch (err) { return { ok: false, error: 'Could not reach the dictionary. Check your internet connection.' }; }
+  });
   ipcMain.handle('update:reveal', () => { if (updateState.fallback) shell.showItemInFolder(updateState.fallback); });
   ipcMain.handle('app:version', () => app.getVersion());
 
@@ -117,6 +147,11 @@ app.whenReady().then(() => {
       { label: 'Release notes', click: () => shell.openExternal(`https://github.com/${OWNER}/${RELEASES_REPO}/releases`) }
     ] }
   ]));
+  // Video embeds in notes: the page runs on codex://, which sends no Referer, and YouTube refuses embeds without one (error 153). Name the app instead.
+  session.defaultSession.webRequest.onBeforeSendHeaders({ urls: ['https://www.youtube-nocookie.com/*', 'https://www.youtube.com/*', 'https://player.vimeo.com/*'] }, (d, cb) => {
+    if (d.resourceType === 'subFrame' && !d.requestHeaders.Referer) d.requestHeaders.Referer = `https://github.com/${OWNER}/${RELEASES_REPO}`;
+    cb({ requestHeaders: d.requestHeaders });
+  });
   createWindow();
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });

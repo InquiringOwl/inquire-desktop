@@ -59,7 +59,7 @@ const desktop = `<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' codex:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' codex:; img-src 'self' data: blob: https: codex:">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' codex:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' codex:; img-src 'self' data: blob: https: codex:; media-src 'self' blob: https: codex:; frame-src https://www.youtube-nocookie.com https://player.vimeo.com">
 <title>Inquire</title>
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>

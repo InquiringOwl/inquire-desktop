@@ -10,6 +10,7 @@
 const app = document.getElementById("app"); if (!app) return;
 const NS = window.InquireNotes, A = () => window.InquireApp, esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const KEY = "codex.dock";
+const favTop = () => { try { return JSON.parse(localStorage.getItem("codex.notefavtop") ?? "true") !== false; } catch (e) { return true; } }; // My notes → "★ first"
 const st = (() => { try { return Object.assign({ open: false, tab: "ai" }, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) { return { open: false, tab: "ai" }; } })();
 const keep = () => { try { localStorage.setItem(KEY, JSON.stringify({ open: st.open, tab: st.tab })); } catch (e) {} };
 
@@ -23,7 +24,7 @@ root.innerHTML = `
       <button type="button" class="dk-x" aria-label="Close Assist" title="Close">✕</button></header>
     <div class="dk-pane" data-p="ai">
       <div class="dk-ctx"></div>
-      <div class="dk-log" aria-live="polite"></div>
+      <div class="dk-screen"><div class="dk-holo" aria-hidden="true"><span class="dk-scan"></span></div><div class="dk-log" aria-live="polite"></div></div>
       <form class="dk-ask"><textarea rows="2" placeholder="Ask about this topic…" aria-label="Message"></textarea><button type="submit" class="btn-s" aria-label="Send">Send</button></form>
     </div>
     <div class="dk-pane" data-p="notes" hidden></div>
@@ -32,10 +33,13 @@ app.appendChild(root);
 const tabBtn = root.querySelector(".dk-tab"), win = root.querySelector(".dk-win");
 const $ = s => root.querySelector(s);
 
+// the window slides out of the right edge and back into it; the Assist tab rides along its left side as the handle
+let slideT = null;
 function setOpen(o) {
-  st.open = o; keep();
-  win.hidden = !o; tabBtn.setAttribute("aria-expanded", String(o)); root.classList.toggle("is-open", o);
-  if (o) { setTab(st.tab); }
+  st.open = o; keep(); clearTimeout(slideT);
+  tabBtn.setAttribute("aria-expanded", String(o)); tabBtn.title = o ? "Slide Assist back into the side" : "Open Assist";
+  if (o) { win.hidden = false; void win.offsetWidth; root.classList.add("is-open"); setTab(st.tab); }
+  else { root.classList.remove("is-open"); slideT = setTimeout(() => { if (!st.open) win.hidden = true; }, 380); }
 }
 function setTab(t) {
   st.tab = t; keep();
@@ -99,7 +103,7 @@ function drawNotes() {
   if (rich) { rich.destroy(); rich = null; }
   const n = edId && NS.get(edId);
   if (n) {
-    pane.innerHTML = `<div class="dk-nbar"><button type="button" class="btn-s" data-a="back">◀ Notes</button><span class="dk-saved">Saved</span><button type="button" class="btn-s" data-a="photo" title="Add a photo from this computer">＋ Photo</button><button type="button" class="btn-s" data-a="clip" title="Add the text you have selected on the page">Clip selection</button></div>
+    pane.innerHTML = `<div class="dk-nbar"><button type="button" class="btn-s" data-a="back">◀ Notes</button><span class="dk-saved">Saved</span><button type="button" class="btn-s" data-a="photo" title="Add a photo from this computer">＋ Photo</button><button type="button" class="btn-s" data-a="clip" title="Add the text you have selected on the page">Clip selection</button><button type="button" class="btn-s warn" data-a="del" title="Delete this note">Delete</button></div>
       <input class="dk-ntitle" value="${esc(n.title)}" aria-label="Title" maxlength="140"><div class="dk-nbody"></div><input type="file" accept="image/*" multiple hidden>
       <div class="dk-nfoot">${n.src ? `<button type="button" class="dk-link" data-a="src">↗ ${esc(n.src.title)}</button>` : "<span></span>"}<button type="button" class="dk-link" data-a="full">Open in My notes ▸</button></div>`;
     const ti = pane.querySelector(".dk-ntitle"), sv = pane.querySelector(".dk-saved");
@@ -115,6 +119,10 @@ function drawNotes() {
     pane.querySelector('[data-a="back"]').onclick = () => { flush(); edId = null; drawNotes(); };
     pane.querySelector('[data-a="full"]').onclick = () => { flush(); const id = edId; edId = null; setOpen(false); A() && A().openNotes(id); };
     const src = pane.querySelector('[data-a="src"]'); if (src) src.onclick = () => A() && A().openTopic(n.src.topic);
+    pane.querySelector('[data-a="del"]').onclick = () => { // at once, with Undo (like My notes)
+      flush(); if (rich) { rich.destroy(); rich = null; } edId = null;
+      NS.deleteWithUndo(n.id, id => { edId = id; if (st.open && st.tab === "notes") drawNotes(); }); drawNotes();
+    };
     pane.querySelector('[data-a="clip"]').onmousedown = e => e.preventDefault(); // keep the page selection
     pane.querySelector('[data-a="clip"]').onclick = () => {
       const sel = String(window.getSelection ? window.getSelection() : "").trim(), c = ctx();
@@ -124,9 +132,14 @@ function drawNotes() {
     if (!n.body) rich.el.focus();
     return;
   }
-  const c = ctx(), all = NS.list();
+  const c = ctx(), here = n => (A() && A().noteHere ? A().noteHere(n) : { score: 0 });
+  // notes linked to the lesson, field or subject on screen come first (most specific first), then favourites, then the rest by last edit
+  const all = NS.list().map(n => Object.assign(n, { _h: here(n) })).sort((a, b) => (b._h.score - a._h.score) || (favTop() ? b.fav - a.fav : 0) || (b.updated - a.updated));
+  const nLinked = all.filter(n => n._h.score).length;
+  const item = x => `<button type="button" class="dk-nit${x._h.score ? " here" : ""}" data-id="${x.id}"><b>${x.fav ? "★ " : ""}${esc(x.title)}</b>${x._h.score ? `<small class="dk-nhere">Linked to ${esc(x._h.label)}</small>` : ""}<span>${esc(x.body.slice(0, 90))}</span></button>`;
+  const list = all.slice(0, Math.max(30, nLinked));
   pane.innerHTML = `<div class="dk-nbar"><button type="button" class="btn-s" data-a="new">＋ New</button><button type="button" class="btn-s" data-a="gen"${c.topic ? "" : " disabled"} title="${c.topic ? "Make a study note from " + esc(c.topicTitle) : "Open a topic page first"}">Note from this page</button></div>
-    <div class="dk-nlist">${all.length ? all.slice(0, 30).map(x => `<button type="button" class="dk-nit" data-id="${x.id}"><b>${x.fav ? "★ " : ""}${esc(x.title)}</b><span>${esc(x.body.slice(0, 90))}</span></button>`).join("") : `<p class="dk-hello">No notes yet. Start one, or open a topic and choose <b>Note from this page</b> for a ready-made study sheet you can add to.</p>`}</div>
+    <div class="dk-nlist">${all.length ? (nLinked ? `<p class="dk-nh">Linked to this page · ${nLinked}</p>` + list.slice(0, nLinked).map(item).join("") + (list.length > nLinked ? `<p class="dk-nh">Other notes</p>` : "") + list.slice(nLinked).map(item).join("") : list.map(item).join("")) : `<p class="dk-hello">No notes yet. Start one, or open a topic and choose <b>Note from this page</b> for a ready-made study sheet you can add to.</p>`}</div>
     <div class="dk-nfoot"><span>${all.length} note${all.length === 1 ? "" : "s"}</span><button type="button" class="dk-link" data-a="full">Open in My notes ▸</button></div>`;
   pane.querySelector('[data-a="new"]').onclick = () => { const x = NS.create({ src: c.topic ? { topic: c.topic, title: c.topicTitle } : null }); edId = x.id; drawNotes(); pane.querySelector(".dk-ntitle").select(); };
   pane.querySelector('[data-a="gen"]').onclick = () => {

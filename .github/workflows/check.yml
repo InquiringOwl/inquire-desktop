@@ -32,3 +32,6 @@ jobs:
       - run: node tools/smoke.js
         env:
           NODE_PATH: ${{ runner.temp }}/pw/node_modules
+      - run: node tools/interact.js
+        env:
+          NODE_PATH: ${{ runner.temp }}/pw/node_modules

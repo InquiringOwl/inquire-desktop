@@ -40,7 +40,8 @@ const THEMES = [
 ];
 const FAMS = [["Dark", "Darker tones"], ["Nature", "Nature tones"], ["Water", "Watery tones"], ["Earth", "Red & earthy tones"], ["Airy", "Lighter, airy tones"], ["Glass", "Glassy tones"]];
 const VARS = ["--void", "--ink", "--panel", "--panel-2", "--panel-3", "--line", "--line-2", "--text", "--muted", "--faint", "--tint-1", "--tint-2",
-  "--chrome-1", "--chrome-2", "--win-1", "--win-2", "--slot-1", "--slot-2", "--slot-h1", "--slot-h2", "--wash", "--sky", "--stage-sky", "--frame", "--blur", "--glow"];
+  "--chrome-1", "--chrome-2", "--win-1", "--win-2", "--slot-1", "--slot-2", "--slot-h1", "--slot-h2", "--wash", "--sky", "--stage-sky", "--frame", "--blur", "--glow",
+  "--node-1", "--node-2", "--node-line", "--node-line-2", "--node-text", "--orb-1", "--orb-2", "--era-1", "--era-2"];
 
 const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const toHex = c => "#" + c.map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, "0")).join("");
@@ -59,7 +60,12 @@ function themeVars(t) {
     "--slot-1": rgba(panel3, g ? .45 : .85), "--slot-2": rgba(mix(t.bg, t.surface, .5), g ? .5 : .9),
     "--slot-h1": rgba(mix(panel3, t.accent, .14), g ? .6 : .9), "--slot-h2": rgba(mix(t.bg, t.surface, .55), g ? .6 : .95),
     "--wash": rgba(mix(t.bg, t.surface, .3), g ? .45 : .75), "--sky": mix(mix(t.bg, t.surface, .3), t.accent, .05), "--stage-sky": mix(panel2, t.accent, .05),
-    "--frame": t.accent, "--blur": g ? "14px" : "0px", "--glow": rgba(t.accent, .35)
+    "--frame": t.accent, "--blur": g ? "14px" : "0px", "--glow": rgba(t.accent, .35),
+    // neutral tree nodes (locked / planned), node orbs and the era bar take the theme's surface, lightly tinted with its accent
+    "--node-1": mix(mix(t.surface, text, .06), t.accent, .05), "--node-2": mix(t.bg, t.surface, .7), "--node-line": mix(mix(t.surface, text, .22), t.accent, .1),
+    "--node-line-2": mix(mix(t.surface, text, .3), t.accent, .12), "--node-text": mix(text, t.surface, .3),
+    "--orb-1": mix(mix(t.surface, text, .17), t.accent, .14), "--orb-2": mix(t.bg, t.surface, .35),
+    "--era-1": rgba(mix(mix(t.surface, text, .05), t.accent, .1), g ? .8 : .95), "--era-2": rgba(mix(t.bg, t.surface, .6), g ? .8 : .95)
   };
 }
 function applyTheme(id) {
@@ -157,7 +163,7 @@ document.addEventListener("keydown", e => {
   if (ov.hidden) {
     // Esc opens Settings, unless something smaller is open that Esc should close first (Assist dock, a word card) or the intro is still playing
     if (e.key !== "Escape" || !S.escKey || e.defaultPrevented || e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
-    if (document.querySelector(".gl-pop, .fav-pop, .tm-menu, .nk-pick, .nr-panel")) return;
+    if (document.querySelector(".gl-pop, .fav-pop, .tm-menu, .nk-pick, .nr-panel, .ask-ov, .nv-pop")) return;
     const dk = document.getElementById("dk-win");
     if (dk && !dk.hidden) { if (!dk.contains(e.target)) { e.preventDefault(); const x = dk.querySelector(".dk-x"); if (x) x.click(); } return; }
     const intro = document.querySelector(".inqi");
@@ -267,6 +273,19 @@ function paneUsage() {
     <div class="set-scrolltry" tabindex="0" aria-label="Scroll test area">${Array.from({ length: 12 }, (_, i) => `<p>Line ${i + 1}: try scrolling here.</p>`).join("")}</div>
   </div>`);
   w.querySelector('[data-k="invertScroll"]').onchange = e => { S.invertScroll = e.target.checked; save(); };
+  // Oxford Dictionaries API keys for right-click → Dictionary. Kept in their own key (not in settings backups).
+  let dk = {}; try { dk = JSON.parse(localStorage.getItem("codex.dictkeys") || "{}") || {}; } catch (e) {}
+  const ox = h(`<div class="set-form set-ox">
+    <h3>Oxford dictionary</h3>
+    <p class="set-small">Right-click a selected word → <b>Dictionary</b> shows its definition here in the app. With an Oxford Dictionaries API app ID and key it uses Oxford; without one it uses a free dictionary built from Wiktionary. Get keys at developer.oxforddictionaries.com (a free sandbox trial or a paid plan). They are kept only on this computer.</p>
+    <label><span>App ID</span><input data-x="appId" autocomplete="off" spellcheck="false" value="${esc(dk.appId || "")}"></label>
+    <label><span>App key</span><input data-x="appKey" type="password" autocomplete="off" spellcheck="false" value="${esc(dk.appKey || "")}"></label>
+    <div class="set-row"><button type="button" class="btn-s" data-a="oxsave">Save</button><button type="button" class="btn-s" data-a="oxclear">Remove keys</button><span class="set-msg" role="status"></span></div></div>`);
+  const oxm = ox.querySelector(".set-msg");
+  ox.querySelector('[data-a="oxsave"]').onclick = () => { const v = { appId: ox.querySelector('[data-x="appId"]').value.trim(), appKey: ox.querySelector('[data-x="appKey"]').value.trim() };
+    try { localStorage.setItem("codex.dictkeys", JSON.stringify(v)); } catch (e) {} say(oxm, v.appId && v.appKey ? "Saved. Dictionary uses Oxford." : "Saved. Both are needed for Oxford.", true); };
+  ox.querySelector('[data-a="oxclear"]').onclick = () => { try { localStorage.removeItem("codex.dictkeys"); } catch (e) {} ox.querySelectorAll("input").forEach(i => i.value = ""); say(oxm, "Removed. Dictionary uses the free dictionary.", true); };
+  w.appendChild(ox);
   pane.appendChild(w);
 }
 
@@ -369,7 +388,7 @@ function paneData() {
   const n = readJ(K().progress(), []).length, nn = readJ(K().notes(), []).length;
   const w = h(`<div>
     <p class="set-lede">Saved on this computer${window.InquireUser ? ` for <b>${esc(window.InquireUser)}</b>` : ""}: <b>${n}</b> topic${n === 1 ? "" : "s"} mastered and <b>${nn}</b> note${nn === 1 ? "" : "s"}.</p>
-    <div class="set-item"><div><h3>Back up</h3><p>Saves your mastered topics, notes (with their folders, photos, code boxes and music charts), favourites and settings to one file. Never passwords.</p></div><button type="button" class="btn-s" data-a="exp">Export…</button></div>
+    <div class="set-item"><div><h3>Back up</h3><p>Saves your mastered topics, notes (with their folders, photos, code boxes, music charts and videos up to 25 MB), favourites and settings to one file. Never passwords. Bigger video files stay on this computer only: the backup tells you which.</p></div><button type="button" class="btn-s" data-a="exp">Export…</button></div>
     <div class="set-item"><div><h3>Restore a backup</h3><p>Loads a file made with Export, on this or another computer. Replaces progress and settings; adds the backup's notes, folders and photos to yours.</p></div><label class="btn-s set-file">Import…<input type="file" accept=".json,application/json" hidden></label></div>
     <div class="set-item"><div><h3>Reset progress</h3><p>Clears every mastered topic. This cannot be undone without a backup.</p></div><button type="button" class="btn-s set-warn" data-a="reset">Reset…</button></div>
   </div>`);
@@ -378,14 +397,16 @@ function paneData() {
   w.querySelector('[data-a="exp"]').onclick = async e => {
     const btn = e.currentTarget; btn.disabled = true; btn.textContent = "Saving…";
     const NS = window.InquireNotes, notes = readJ(K().notes(), []);
-    let images = {}; try { if (NS) images = await NS.exportImages(NS.list()); } catch (err) {}
+    let images = {}, skipped = []; try { if (NS) ({ map: images, skipped } = await NS.exportMedia(NS.list())); } catch (err) {}
     const data = { progress: readJ(K().progress(), []), notes, folders: NS ? NS.readFolders() : [], images, favs: readJ(favKey(), null), settings: readJ("codex.settings", {}), groups: readJ("codex.groups", null) };
     btn.disabled = false; btn.textContent = "Export…";
     const blob = new Blob([JSON.stringify({ app: "Inquire", kind: "progress-backup", version: 3, saved: new Date().toISOString(), account: window.InquireUser || null, data })], { type: "application/json" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "inquire-backup-" + new Date().toISOString().slice(0, 10) + ".json";
     document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
     const np = Object.keys(images).length;
-    say(m, `Backup saved: ${data.progress.length} topics, ${notes.length} notes${np ? `, ${np} photo${np === 1 ? "" : "s"}` : ""}.`, true);
+    say(m, `Backup saved: ${data.progress.length} topics, ${notes.length} notes${np ? `, ${np} photo${np === 1 ? "" : "s"} and video${np === 1 ? "" : "s"}` : ""}.`
+      + (skipped.length ? ` Not included (over 25 MB): ${skipped.length === 1 ? "a video" : skipped.length + " videos"} in ${[...new Set(skipped.map(x => "“" + x.note + "”"))].join(", ")} (${skipped.map(x => x.mb + " MB").join(", ")}). Keep those video files somewhere safe yourself.` : ""), !skipped.length);
+    m.classList.toggle("warn", skipped.length > 0);
   };
   w.querySelector('input[type="file"]').onchange = async e => {
     const f = e.target.files[0]; if (!f) return;
@@ -425,17 +446,48 @@ function paneAbout() {
   const D = window.inquireDesktop;
   const w = h(`<div>
     <p class="set-lede"><b>Inquire</b> <span class="set-ver">${D ? "" : "web preview"}</span>: a knowledge console that maps each subject as a skill tree.</p>
-    ${D ? `<div class="set-item"><div><h3>Updates</h3><p>Inquire checks at launch and every 4 hours.</p></div><button type="button" class="btn-s" data-a="upd">Check now</button></div>` : ""}
+    ${D ? `<div class="set-item set-upd"><div><h3>Updates</h3><p class="set-upd-msg">Inquire checks at launch and every 4 hours.</p></div><div class="set-upd-btns"></div></div>` : ""}
     <div class="set-item"><div><h3>End-user licence agreement</h3><p>The terms for using Inquire.</p></div><button type="button" class="btn-s" data-a="eula">Read</button></div>
     <div class="set-item"><div><h3>Source &amp; release notes</h3><p>github.com/InquiringOwl/inquire-desktop</p></div><a class="btn-s" href="https://github.com/InquiringOwl/inquire-desktop/releases" target="_blank" rel="noopener">Open ↗</a></div>
     <p class="set-small">Fonts: STIX Two Text, IBM Plex Sans &amp; Mono, Saira Semi Condensed (SIL Open Font License). Story passages are public domain.</p>
   </div>`);
   if (D) {
     D.version().then(v => { const el = w.querySelector(".set-ver"); if (el) el.textContent = "v" + v; }).catch(() => {});
-    w.querySelector('[data-a="upd"]').onclick = e => { e.target.textContent = "Checking…"; D.checkForUpdates(); setTimeout(() => { e.target.textContent = "Check now"; }, 2500); };
+    drawUpd(w.querySelector(".set-upd"));
   }
   w.querySelector('[data-a="eula"]').onclick = () => openDoc("eula");
   pane.appendChild(w);
+}
+
+/* Updates: live status in About, with Install & Relaunch once a download is ready (works from the sign-in screen too) */
+let UPD = { status: "idle" };
+const UPD_IDLE = "Inquire checks at launch and every 4 hours.";
+function drawUpd(box) {
+  const D = window.inquireDesktop; if (!box || !D) return;
+  const s = UPD, v = s.version ? esc(s.version) : "", msg = box.querySelector(".set-upd-msg"), btns = box.querySelector(".set-upd-btns");
+  const check = `<button type="button" class="btn-s" data-u="check">Check now</button>`;
+  let m = UPD_IDLE, b = check;
+  if (s.status === "checking") { m = "Checking for updates…"; b = `<button type="button" class="btn-s" disabled>Checking…</button>`; }
+  else if (s.status === "current") m = "Inquire is up to date.";
+  else if (s.status === "downloading") { m = `Downloading Inquire ${v}… ${s.percent || 0}%`; b = ""; }
+  else if (s.status === "ready") { m = `Inquire ${v} is downloaded and ready to install.`; b = `<button type="button" class="btn good" data-u="go">Install &amp; Relaunch</button>`; }
+  else if (s.status === "installing") { m = `Installing Inquire ${v}…`; b = ""; }
+  else if (s.status === "installed") m = `Updated to Inquire ${v}.`;
+  else if (s.status === "blocked") { m = `macOS blocked the update. Inquire ${v} is in your Downloads folder: drag it into Applications and replace the old copy.`; b = `<button type="button" class="btn-s" data-u="rev">Show in Finder</button>`; }
+  else if (s.status === "error" && s.message) m = "Update problem: " + esc(s.message);
+  msg.innerHTML = m; btns.innerHTML = b;
+  box.classList.toggle("is-ready", s.status === "ready");
+  const c = btns.querySelector('[data-u="check"]'); if (c) c.onclick = () => { UPD = { status: "checking" }; drawUpd(box); Promise.resolve(D.checkForUpdates()).catch(() => {}); setTimeout(() => { if (UPD.status === "checking" && D.updateState) D.updateState().then(st => { if (st && UPD.status === "checking") { UPD = Object.assign({}, st, st.status === "checking" ? { status: "idle" } : {}); drawUpd(pane.querySelector(".set-upd")); } }).catch(() => {}); }, 20000); };
+  const g = btns.querySelector('[data-u="go"]'); if (g) g.onclick = () => { g.disabled = true; g.textContent = "Relaunching…"; D.installUpdate(); };
+  const r = btns.querySelector('[data-u="rev"]'); if (r) r.onclick = () => D.revealUpdate();
+}
+function updTab() { // a dot on the About tab while an update waits to be installed
+  const t = tabsEl.querySelector('[data-tab="about"]'); if (t) t.classList.toggle("has-upd", UPD.status === "ready");
+}
+if (window.inquireDesktop) {
+  const D = window.inquireDesktop;
+  D.onUpdate(s => { UPD = Object.assign({}, s); updTab(); if (!ov.hidden) drawUpd(pane.querySelector(".set-upd")); });
+  if (D.updateState) D.updateState().then(s => { if (s && UPD.status === "idle") { UPD = Object.assign({}, s); updTab(); } }).catch(() => {});
 }
 
 /* top-bar gear */
