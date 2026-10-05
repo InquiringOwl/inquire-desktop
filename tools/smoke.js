@@ -67,13 +67,13 @@ const { desktop, dataFiles, R } = require('./build-web.js');
       errs = [];
       try {
         await p.evaluate(() => { location.hash = 'pa-variables'; }); await p.waitForTimeout(300);
-        for (const t of ['look', 'display', 'account', 'data', 'about']) { await p.evaluate(t => InquireSettings.open(t), t); await p.waitForTimeout(120); }
+        for (const t of ['look', 'display', 'keys', 'usage', 'account', 'data', 'about']) { await p.evaluate(t => InquireSettings.open(t), t); await p.waitForTimeout(120); }
         await p.evaluate(() => InquireSettings.openDoc('eula')); await p.waitForTimeout(120);
         await p.evaluate(() => InquireSettings.close());
         await p.click('.dk-tab'); await p.waitForTimeout(150);
         await p.fill('.dk-ask textarea', 'test'); await p.click('.dk-ask button'); await p.waitForTimeout(200);
         await p.click('.dk-tabs [data-t=notes]'); await p.click('.dk-pane [data-a=gen]'); await p.waitForTimeout(500);
-        const body = await p.$eval('.dk-nbody', el => el.value.length);
+        const body = await p.$eval('.dk-nbody .nb-rich', el => el.textContent.length);
         if (body < 100) errs.push('note from this page came out empty');
         await p.click('.dk-x');
         await p.evaluate(() => { location.hash = 'notes'; }); await p.waitForTimeout(300);

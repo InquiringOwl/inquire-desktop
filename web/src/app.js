@@ -45,13 +45,14 @@ function stateOf(id){
 }
 
 /* ---------- app state + routing ---------- */
-const S = { view: "menu", subject: "mathematics", field: "arithmetic", topic: null, gword: null, navMode: "fields", glScope: null, openGroups: store.get("groups", ["Foundations","Core Sequence"]), pan: {} };
+const S = { view: "menu", subject: "mathematics", field: "arithmetic", topic: null, gword: null, navMode: "fields", glScope: null, glField: null, openGroups: store.get("groups", ["Foundations","Core Sequence"]), pan: {} };
 const app = $("#app");
 const viewEl = $("#view");
 let cleanup = [];
 function clearView(){ cleanup.forEach(f => { try{ f(); }catch(e){} }); cleanup = []; viewEl.innerHTML = ""; }
 
 function go(next, push = true){
+  const prev = { view: S.view, subject: S.subject };
   if (next.g) { Object.assign(G, next.g); next = { ...next }; delete next.g; }
   if (!("gword" in next)) next = { ...next, gword: null };
   Object.assign(S, next);
@@ -60,10 +61,17 @@ function go(next, push = true){
   if (S.field !== "map" && DB.fields[S.field]) S.subject = subjOf(S.field);
   if (!SM[S.subject]) S.subject = "mathematics";
   render();
+  // every move to another screen fades in like the Settings window; inside one subject only the main pane does
+  viewIn(prev.view === "math" && S.view === "math" && prev.subject === S.subject ? $(".work > .main", viewEl) : viewEl);
   const tok = (S.view === "glossary" ? gTok() : S.topic ? S.topic : (S.view === "math" ? (S.field === "map" ? "field-map" + (S.subject !== "mathematics" ? "-" + S.subject : "") : "field-" + S.field) : S.view)) + (S.view === "math" && S.gword ? "~" + encodeURIComponent(S.gword) : "");
   if (push) { try { history.pushState({ ...next, view: S.view, subject: S.subject, field: S.field, topic: S.topic, gword: S.gword, ...(S.view === "glossary" ? { g: { sub: G.sub, word: G.word, field: G.field } } : {}) }, "", "#" + tok); } catch(e){} }
   store.set("last", { view: S.view, subject: S.subject, field: S.field, topic: S.topic });
   window.dispatchEvent(new CustomEvent("inquire:route"));
+}
+function viewIn(el){
+  if (!el) return;
+  el.classList.remove("vt-in"); void el.offsetWidth; el.classList.add("vt-in");
+  el.addEventListener("animationend", () => el.classList.remove("vt-in"), { once: true });
 }
 window.addEventListener("popstate", e => { if (e.state) go(e.state, false); });
 window.addEventListener("hashchange", () => { const s = fromHash(); if (s) go(s, false); });
@@ -86,6 +94,64 @@ function fromHash(tok){
   return null;
 }
 
+/* ---------- favourites + the top-bar progress meter ----------
+   Star (☆/★) a subject (Dictionary card, navigator title) or a charted field (its tree header). The meter follows the
+   tracked favourite on every screen (FAV.track; the first star becomes it), or "here" = the subject/field on screen.
+   Stored per account in codex.favs.<user> (codex.favs._local with no sign-in). Plans can join as another source later. */
+const favKey = () => "codex.favs." + (window.InquireUser || "_local");
+const loadFavs = () => { try { const v = JSON.parse(localStorage.getItem(favKey()) || "null"); if (v && Array.isArray(v.items)) return v; } catch(e){} return { items: [], track: null }; };
+let FAV = loadFavs();
+const saveFavs = () => { try { localStorage.setItem(favKey(), JSON.stringify(FAV)); } catch(e){} };
+const favOk = k => typeof k === "string" && (k.startsWith("s:") ? !!SM[k.slice(2)] : k.startsWith("f:") ? !!DB.fields[k.slice(2)] && charted(k.slice(2)) : false);
+const isFav = k => FAV.items.includes(k);
+const favName = k => k.startsWith("s:") ? SM[k.slice(2)].name : DB.fields[k.slice(2)].name;
+const favPool = k => k.startsWith("s:") ? NODES.filter(n => subjOf(n.field) === k.slice(2)) : fieldNodes(k.slice(2));
+const favTracked = () => FAV.track && FAV.track !== "here" && favOk(FAV.track) && isFav(FAV.track) ? FAV.track : null;
+function toggleFav(k){
+  if (isFav(k)) { FAV.items = FAV.items.filter(x => x !== k); if (FAV.track === k) FAV.track = FAV.items.find(favOk) || null; }
+  else { FAV.items.push(k); if (!FAV.track) FAV.track = k; }
+  saveFavs(); crumbs();
+}
+function starBtn(k){
+  const b = h("button", { type: "button", class: "fav" });
+  const paint = () => { const on = isFav(k); b.classList.toggle("on", on); b.textContent = on ? "★" : "☆"; b.setAttribute("aria-pressed", String(on));
+    b.title = (on ? "Remove " : "Add ") + favName(k) + (on ? " from favourites" : " to favourites (the progress bar can follow it)"); b.setAttribute("aria-label", b.title); };
+  b.onclick = e => { e.stopPropagation(); e.preventDefault(); toggleFav(k); paint(); };
+  paint(); return b;
+}
+function setMeter(text, frac, tracked){
+  $("#stat-t").innerHTML = (tracked ? '<span class="stat-star" aria-hidden="true">★</span>' : "") + esc(text);
+  $("#stat-m").style.width = Math.max(0, Math.min(1, frac)) * 100 + "%";
+  const ts = $("#topstat"); if (ts) ts.classList.toggle("tracked", !!tracked);
+}
+function meter(text, frac){
+  const k = favTracked();
+  if (!k) return setMeter(text, frac, false);
+  const pool = favPool(k), done = pool.filter(n => mastered.has(n.id)).length;
+  setMeter(`${favName(k)} ${done}/${pool.length} mastered`, pool.length ? done / pool.length : 0, true);
+}
+function favMenu(){
+  const old = document.querySelector(".fav-pop"); if (old) { old.remove(); return; }
+  const ts = $("#topstat"), r = ts.getBoundingClientRect();
+  const items = FAV.items.filter(favOk), cur = favTracked() || "here";
+  const pop = h("div", { class: "fav-pop win", role: "dialog", "aria-label": "Progress bar" });
+  pop.innerHTML = `<div class="win-h"><span class="dot"></span>Progress bar follows</div><div class="fav-list" role="radiogroup">
+    ${[["here", "Where I am", "The subject or field on screen"], ...items.map(k => [k, favName(k), k.startsWith("s:") ? "Subject · all its fields" : SM[subjOf(k.slice(2))].name + " field"])]
+      .map(([k, nm, sub]) => { const pool = k === "here" ? null : favPool(k), d = pool ? pool.filter(n => mastered.has(n.id)).length : 0;
+        return `<button type="button" role="radio" class="fav-opt" data-k="${k}" aria-checked="${cur === k}"><span class="fav-ic">${k === "here" ? "⌖" : "★"}</span><span class="fav-nm">${esc(nm)}<small>${esc(sub)}</small></span>${pool ? `<span class="fav-n num">${d}/${pool.length}</span>` : ""}</button>`; }).join("")}
+    </div><p class="fav-tip">${items.length ? "Plans will appear here too once they exist." : "Star a subject (☆ on its card or in its navigator) or a field (☆ beside its name) to follow it here."}</p>`;
+  document.body.appendChild(pop);
+  pop.style.top = r.bottom + 8 + "px"; pop.style.right = Math.max(8, window.innerWidth - r.right) + "px";
+  const close = () => { pop.remove(); document.removeEventListener("pointerdown", out, true); document.removeEventListener("keydown", key, true); };
+  const out = e => { if (!pop.contains(e.target) && !ts.contains(e.target)) close(); };
+  const key = e => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(); ts.focus(); } };
+  document.addEventListener("pointerdown", out, true); document.addEventListener("keydown", key, true);
+  pop.addEventListener("click", e => { const b = e.target.closest(".fav-opt"); if (!b) return; FAV.track = b.dataset.k; saveFavs(); crumbs(); close(); });
+  const sel = pop.querySelector(`[aria-checked="true"]`); if (sel) sel.focus({ preventScroll: true });
+}
+{ const ts = $("#topstat"); if (ts) ts.onclick = favMenu; }
+window.addEventListener("inquire:signed-in", () => { FAV = loadFavs(); });
+
 /* ---------- top bar ---------- */
 function crumbs(){
   const c = $("#crumbs"); c.innerHTML = "";
@@ -98,8 +164,7 @@ function crumbs(){
       if (fn && i < parts.length - 1) c.appendChild(h("button", { type: "button", onclick: fn }, esc(label)));
       else c.appendChild(h("span", { class: "here" }, esc(label)));
     });
-    $("#stat-t").textContent = `${Object.keys(GWORDS).length} words · ${gSubjects().length} subjects`;
-    $("#stat-m").style.width = "0%";
+    meter(`${Object.keys(GWORDS).length} words · ${gSubjects().length} subjects`, 0);
     return;
   }
   if (S.view === "notes") parts.push(["My notes", null]);
@@ -118,8 +183,7 @@ function crumbs(){
   const sf = S.topic ? fieldOf(S.topic) : (S.view === "math" && charted(S.field) ? S.field : null);
   const pool = sf ? fieldNodes(sf) : NODES.filter(n => subjOf(n.field) === S.subject);
   const done = pool.filter(n => mastered.has(n.id)).length, tot = pool.length;
-  $("#stat-t").textContent = `${sf ? DB.fields[sf].name : SM[S.subject].name} ${done}/${tot} mastered`;
-  $("#stat-m").style.width = (tot ? done / tot * 100 : 0) + "%";
+  meter(`${sf ? DB.fields[sf].name : SM[S.subject].name} ${done}/${tot} mastered`, tot ? done / tot : 0);
 }
 
 function render(){
@@ -147,10 +211,10 @@ let menuTimer = null;
 function renderMenu(){
   const s = h("div", { class: "screen" });
   s.innerHTML = `<div class="screen-in">
-    <div class="hello"><p class="eyebrow">Inquire · knowledge console</p><h1>Choose a section</h1></div>
+    <div class="hello"><p class="eyebrow">Inquire · Main Menu</p><h1>Dashboard</h1></div>
     <section class="mx win" aria-roledescription="carousel" aria-label="Subjects">
-      <header class="win-h mx-h"><span class="dot"></span><span>Featured subject</span><span class="mx-count num" aria-live="polite"></span>
-        <button type="button" class="btn-s mx-all">All subjects ▸</button></header>
+      <header class="win-h mx-h"><button type="button" class="btn-s mx-all" title="Open the Dictionary: every subject">◈ All subjects</button>
+        <span class="dot"></span><span>Featured subject</span><span class="mx-count num" aria-live="polite"></span></header>
       <div class="mx-stage"></div>
       <footer class="mx-foot"><button type="button" class="mx-arrow" data-d="-1" aria-label="Previous subject">◀</button><div class="mx-dots" role="tablist"></div><button type="button" class="mx-arrow" data-d="1" aria-label="Next subject">▶</button><span class="mx-bar"><i></i></span></footer>
     </section>
@@ -234,47 +298,148 @@ function menuNotes(el){
 }
 
 /* ---------- notes screen (#notes) ---------- */
-const NOTES = { sel: null, q: "" };
+const NOTES = { sel: null, q: "", folder: "all", subj: "" };
+// what a note can be linked to: a subject, a field or a lesson ("s:", "f:", "t:" keys)
+const linkLabel = k => { const id = k.slice(2); return k[0] === "s" ? (SM[id] ? SM[id].name : id) : k[0] === "f" ? (DB.fields[id] ? DB.fields[id].name : id) : (T[id] ? T[id].title : id); };
+const linkIcon = k => k[0] === "s" ? (SM[k.slice(2)] ? SM[k.slice(2)].glyph : "◇") : k[0] === "f" ? "⌗" : "▤";
+const linkSubject = k => { const id = k.slice(2); return k[0] === "s" ? id : k[0] === "f" ? (DB.fields[id] ? subjOf(id) : "") : (NODE[id] ? subjOf(fieldOf(id)) : ""); };
+const linkOk = k => typeof k === "string" && (k[0] === "s" ? !!SM[k.slice(2)] : k[0] === "f" ? !!DB.fields[k.slice(2)] : k[0] === "t" ? !!NODE[k.slice(2)] : false);
+function linkTargets(){
+  const out = [];
+  Object.keys(SM).forEach(sb => out.push({ id: "s:" + sb, label: SM[sb].name, sub: "Subject", ic: SM[sb].glyph }));
+  Object.keys(DB.fields).filter(f => SM[subjOf(f)]).forEach(f => out.push({ id: "f:" + f, label: DB.fields[f].name, sub: SM[subjOf(f)].name + " · field" + (charted(f) ? "" : " (planned)"), ic: "⌗" }));
+  NODES.forEach(n => { if (T[n.id]) out.push({ id: "t:" + n.id, label: T[n.id].title, sub: DB.fields[n.field].name + " · lesson", ic: "▤" }); });
+  return out;
+}
+function openLink(k){
+  const id = k.slice(2);
+  if (k[0] === "s") go({ view: "math", subject: id, field: "map", topic: null });
+  else if (k[0] === "f") go({ view: "math", subject: subjOf(id), field: id, topic: null });
+  else go({ view: "math", topic: id });
+}
 function renderNotes(){
   const NS = window.InquireNotes;
   const s = h("div", { class: "screen notes-screen" });
   s.innerHTML = `<div class="screen-in">
     <div class="hello"><div class="back-row"><button type="button" class="btn-s" id="nback">◀ Menu</button></div><p class="eyebrow">Notes</p><h1>My notes</h1>
-    <p>Notes are saved on this computer${window.InquireUser ? ` for <b>${esc(window.InquireUser)}</b>` : ""}. Write here, or make one from any topic with the Assist tab.</p></div>
-    <div class="nb win"><aside class="nb-list"><div class="nb-tools"><label class="search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Search notes" aria-label="Search notes"></label><button type="button" class="btn-s" data-a="new">＋ New</button></div><div class="nb-items" role="listbox" aria-label="Notes"></div></aside>
+    <p>Notes are saved on this computer${window.InquireUser ? ` for <b>${esc(window.InquireUser)}</b>` : ""}. Sort them into folders, star the ones you use most, link them to subjects and lessons, and paste or drop photos in. Select words and right-click to link them to another note.</p></div>
+    <div class="nb win"><nav class="nb-folders" aria-label="Folders"></nav>
+    <aside class="nb-list"><div class="nb-tools"><label class="search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Search notes" aria-label="Search notes"></label><button type="button" class="btn-s" data-a="new">＋ New</button></div>
+      <div class="nb-filter"><select class="nb-subj" aria-label="Show notes linked to a subject"></select></div><div class="nb-items" role="listbox" aria-label="Notes"></div></aside>
     <section class="nb-ed"></section></div></div>`;
   viewEl.appendChild(s);
   $("#nback", s).onclick = () => go({ view: "menu", topic: null });
-  const items = $(".nb-items", s), ed = $(".nb-ed", s), q = $('input[type="search"]', s);
+  const fold = $(".nb-folders", s), items = $(".nb-items", s), ed = $(".nb-ed", s), q = $('input[type="search"]', s), subjSel = $(".nb-subj", s);
   q.value = NOTES.q;
   q.oninput = () => { NOTES.q = q.value; drawList(); };
-  $('[data-a="new"]', s).onclick = () => { const n = NS.create({}); NOTES.sel = n.id; drawList(); drawEd(true); };
-  function drawList(){
-    const all = NS.list(NOTES.q);
-    if (!NOTES.sel || !NS.get(NOTES.sel)) NOTES.sel = all[0] ? all[0].id : null;
-    items.innerHTML = all.length ? all.map(n => `<button type="button" role="option" class="nb-it" aria-selected="${n.id === NOTES.sel}" data-id="${n.id}"><span class="nb-t">${esc(n.title)}</span><span class="nb-m">${n.src && n.src.title !== n.title ? esc(n.src.title) + " · " : ""}${when(n.updated)}</span></button>`).join("")
-      : `<p class="nb-empty">${NOTES.q ? "No notes match." : "No notes yet."}</p>`;
-    items.querySelectorAll(".nb-it").forEach(b => b.onclick = () => { NOTES.sel = b.dataset.id; drawList(); drawEd(); });
+  subjSel.onchange = () => { NOTES.subj = subjSel.value; drawList(); };
+  const realFolder = () => NS.folders().some(f => f.id === NOTES.folder) ? NOTES.folder : null;
+  $('[data-a="new"]', s).onclick = () => { flushEd(); const n = NS.create({ folder: realFolder(), fav: NOTES.folder === "fav", links: NOTES.subj ? ["s:" + NOTES.subj] : [] }); NOTES.sel = n.id; NOTES.q = q.value = ""; drawAll(true); };
+  const inView = n => (NOTES.folder === "all" || (NOTES.folder === "fav" ? n.fav : NOTES.folder === "none" ? !n.folder : n.folder === NOTES.folder))
+    && (!NOTES.subj || n.links.some(k => linkSubject(k) === NOTES.subj));
+  const moveTo = (id, folder) => { NS.update(id, { folder, quiet: true }); drawAll(); };
+
+  function drawFolders(){
+    const all = NS.list(), fs = NS.folders();
+    if (!["all", "fav", "none"].includes(NOTES.folder) && !fs.some(f => f.id === NOTES.folder)) NOTES.folder = "all";
+    const row = (id, ic, name, n, edit) => `<div class="nb-fd${NOTES.folder === id ? " sel" : ""}" data-f="${id}"><button type="button" class="nb-fdb" data-f="${id}" aria-pressed="${NOTES.folder === id}"><span class="nb-fic">${ic}</span><span class="nb-fnm">${esc(name)}</span><span class="nb-fn num">${n}</span></button>${edit ? `<button type="button" class="nb-fx" data-ren="${id}" title="Rename folder" aria-label="Rename ${esc(name)}">✎</button><button type="button" class="nb-fx" data-del="${id}" title="Delete folder (its notes are kept)" aria-label="Delete ${esc(name)}">✕</button>` : ""}</div>`;
+    fold.innerHTML = `<div class="nb-fh">Library</div>`
+      + row("all", "▤", "All notes", all.length) + row("fav", "★", "Favourites", all.filter(n => n.fav).length) + row("none", "◌", "Unfiled", all.filter(n => !n.folder).length)
+      + `<div class="nb-fh">Folders</div>` + fs.map(f => row(f.id, "▸", f.name, all.filter(n => n.folder === f.id).length, true)).join("")
+      + `<button type="button" class="nb-fadd" data-a="addf">＋ New folder</button>`;
+    // pick, rename, delete, drop notes on a folder
+    fold.querySelectorAll(".nb-fdb").forEach(b => b.onclick = () => { NOTES.folder = b.dataset.f; drawFolders(); drawList(); });
+    fold.querySelectorAll("[data-ren]").forEach(b => b.onclick = () => nameBox(b.closest(".nb-fd"), NS.folders().find(f => f.id === b.dataset.ren).name, v => { NS.renameFolder(b.dataset.ren, v); drawAll(); }));
+    fold.querySelectorAll("[data-del]").forEach(b => { let armed = 0; b.onclick = () => {
+      if (!armed) { b.textContent = "Delete?"; b.classList.add("armed"); armed = setTimeout(() => { armed = 0; b.textContent = "✕"; b.classList.remove("armed"); }, 3000); return; }
+      clearTimeout(armed); NS.removeFolder(b.dataset.del); if (NOTES.folder === b.dataset.del) NOTES.folder = "all"; drawAll(); }; });
+    fold.querySelectorAll(".nb-fd").forEach(d => {
+      const f = d.dataset.f; if (f === "all") return;
+      d.addEventListener("dragover", e => { if (e.dataTransfer.types.includes("text/x-note")) { e.preventDefault(); d.classList.add("drop"); } });
+      d.addEventListener("dragleave", () => d.classList.remove("drop"));
+      d.addEventListener("drop", e => { e.preventDefault(); d.classList.remove("drop"); const id = e.dataTransfer.getData("text/x-note"); if (!id) return;
+        if (f === "fav") NS.update(id, { fav: true, quiet: true }); else moveTo(id, f === "none" ? null : f); drawAll(); });
+    });
+    $('[data-a="addf"]', fold).onclick = e => nameBox(e.target, "", v => { const f = NS.addFolder(v); NOTES.folder = f.id; const n = NOTES.sel && NS.get(NOTES.sel); drawAll(); });
   }
-  let saveT = null;
+  // inline name field (new folder / rename); Enter saves, Esc cancels
+  function nameBox(at, val, done){
+    const box = h("form", { class: "nb-fname" }, `<input maxlength="60" aria-label="Folder name" placeholder="Folder name" value="${esc(val)}"><button type="submit" class="btn-s">OK</button>`);
+    at.replaceWith(box); const inp = $("input", box); inp.focus(); inp.select();
+    let fin = false;
+    const end = ok => { if (fin) return; fin = true; if (ok && inp.value.trim()) done(inp.value.trim()); else drawFolders(); };
+    box.onsubmit = e => { e.preventDefault(); end(true); };
+    inp.onkeydown = e => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); end(false); } };
+    inp.onblur = () => setTimeout(() => end(true), 120);
+  }
+  function drawList(){
+    const used = new Set(NS.list().flatMap(n => n.links.map(linkSubject)).filter(Boolean));
+    if (NOTES.subj && !used.has(NOTES.subj)) NOTES.subj = "";
+    subjSel.innerHTML = `<option value="">Linked to any subject</option>` + Object.keys(SM).filter(x => used.has(x)).map(x => `<option value="${x}"${NOTES.subj === x ? " selected" : ""}>Linked to ${esc(SM[x].name)}</option>`).join("");
+    subjSel.hidden = !used.size;
+    const all = NS.list(NOTES.q).filter(inView).sort((a, b) => (b.fav - a.fav) || (b.updated - a.updated));
+    if (!NOTES.sel || !all.some(n => n.id === NOTES.sel)) { if (!NOTES.sel || !NS.get(NOTES.sel) || !inView(NS.get(NOTES.sel))) NOTES.sel = all[0] ? all[0].id : null; }
+    const fname = Object.fromEntries(NS.folders().map(f => [f.id, f.name]));
+    items.innerHTML = all.length ? all.map(n => `<button type="button" role="option" class="nb-it" draggable="true" aria-selected="${n.id === NOTES.sel}" data-id="${n.id}"><span class="nb-t">${n.fav ? '<i class="nb-star" aria-label="Favourite">★</i>' : ""}${esc(n.title)}</span><span class="nb-m">${n.folder && fname[n.folder] && NOTES.folder !== n.folder ? "▸ " + esc(fname[n.folder]) + " · " : ""}${n.links.filter(linkOk).slice(0, 2).map(k => esc(linkLabel(k))).join(", ")}${n.links.filter(linkOk).length ? " · " : ""}${when(n.updated)}</span></button>`).join("")
+      : `<p class="nb-empty">${NOTES.q ? "No notes match." : NOTES.folder === "fav" ? "No favourites yet. Star a note with ☆." : "No notes here yet."}</p>`;
+    items.querySelectorAll(".nb-it").forEach(b => {
+      b.onclick = () => { if (NOTES.sel === b.dataset.id) return; flushEd(); NOTES.sel = b.dataset.id; drawList(); drawEd(); };
+      b.addEventListener("dragstart", e => { e.dataTransfer.setData("text/x-note", b.dataset.id); e.dataTransfer.effectAllowed = "move"; });
+    });
+  }
+  let saveT = null, rich = null;
+  const flushEd = () => { if (rich) rich.flush(); if (saveT) { clearTimeout(saveT); saveT = null; const ti = $(".nb-title", ed); if (ti && ed.dataset.id && NS.get(ed.dataset.id)) NS.update(ed.dataset.id, { title: ti.value.trim() || "Untitled note" }); } };
   function drawEd(focusTitle){
+    if (rich) { rich.destroy(); rich = null; }
     const n = NOTES.sel && NS.get(NOTES.sel);
+    ed.dataset.id = n ? n.id : "";
     if (!n) { ed.innerHTML = `<div class="nb-none"><p>Select a note, or start a new one.</p></div>`; return; }
-    ed.innerHTML = `<div class="nb-bar">${n.src ? `<button type="button" class="btn-s" data-a="src">↗ ${esc(n.src.title)}</button>` : ""}<span class="nb-saved" aria-live="polite">Saved ${when(n.updated)}</span>
-      <button type="button" class="btn-s" data-a="md">Save as .md</button><button type="button" class="btn-s set-warn" data-a="del">Delete</button></div>
+    const fs = NS.folders();
+    ed.innerHTML = `<div class="nb-bar"><button type="button" class="nb-favb${n.fav ? " on" : ""}" data-a="fav" aria-pressed="${n.fav}" title="${n.fav ? "Remove from favourites" : "Add to favourites"}">${n.fav ? "★" : "☆"}</button>
+        <label class="nb-fsel"><span>Folder</span><select data-a="folder" aria-label="Folder"><option value="">Unfiled</option>${fs.map(f => `<option value="${f.id}"${n.folder === f.id ? " selected" : ""}>${esc(f.name)}</option>`).join("")}</select></label>
+        <span class="nb-saved" aria-live="polite" title="Last saved ${esc(new Date(n.updated).toLocaleString())}">Saved</span>
+        <button type="button" class="btn-s" data-a="photo" title="Add photos from this computer (or paste / drop them into the note)">＋ Photo</button><button type="button" class="btn-s" data-a="purl" title="Show a photo from a web address">Photo link</button>
+        <button type="button" class="btn-s" data-a="md">Save as .md</button><button type="button" class="btn-s set-warn" data-a="del">Delete</button></div>
+      <form class="nb-urlrow" hidden><input type="url" placeholder="https://… address of a photo" aria-label="Photo address"><button type="submit" class="btn-s">Insert</button><button type="button" class="btn-s" data-a="purlx">Cancel</button><span class="nb-urlmsg"></span></form>
+      <div class="nb-links"><span class="nb-lb">Linked to</span><span class="nb-chips"></span><button type="button" class="btn-s nb-ladd" data-a="link">＋ Link subject, field or lesson</button></div>
       <input class="nb-title" value="${esc(n.title)}" aria-label="Title" maxlength="140">
-      <textarea class="nb-body" aria-label="Note" spellcheck="true" placeholder="Write…">${esc(n.body)}</textarea>`;
-    const ti = $(".nb-title", ed), bo = $(".nb-body", ed), sv = $(".nb-saved", ed);
-    const save = () => { clearTimeout(saveT); saveT = setTimeout(() => { NS.update(n.id, { title: ti.value.trim() || "Untitled note", body: bo.value }); sv.textContent = "Saved"; const it = items.querySelector(`[data-id="${n.id}"] .nb-t`); if (it) it.textContent = ti.value.trim() || "Untitled note"; }, 400); sv.textContent = "Editing…"; };
-    ti.oninput = save; bo.oninput = save;
-    const src = $('[data-a="src"]', ed); if (src) src.onclick = () => go({ view: "math", topic: n.src.topic });
-    $('[data-a="md"]', ed).onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["# " + ti.value + "\n\n" + bo.value], { type: "text/markdown" })); a.download = (ti.value.replace(/[^\w\- ]+/g, "").trim() || "note") + ".md"; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); };
+      <div class="nb-host"></div><input type="file" accept="image/*" multiple hidden>`;
+    const ti = $(".nb-title", ed), sv = $(".nb-saved", ed), file = $('input[type="file"]', ed);
+    rich = NS.mountEditor($(".nb-host", ed), n.id, {
+      onEditing: () => { sv.textContent = "Editing…"; },
+      onSaved: () => { sv.textContent = "Saved"; const it = items.querySelector(`[data-id="${n.id}"] .nb-m`); if (it) drawList(); },
+      openNote: id => { NOTES.sel = id; const m = NS.get(id); if (m && !inView(m)) { NOTES.folder = "all"; NOTES.subj = ""; } drawAll(); },
+      openTopic: id => go({ view: "math", topic: id })
+    });
+    ti.oninput = () => { clearTimeout(saveT); sv.textContent = "Editing…"; saveT = setTimeout(() => { saveT = null; NS.update(n.id, { title: ti.value.trim() || "Untitled note" }); sv.textContent = "Saved"; const it = items.querySelector(`[data-id="${n.id}"] .nb-t`); if (it) it.lastChild.textContent = ti.value.trim() || "Untitled note"; }, 400); };
+    const chips = () => {
+      const m = NS.get(n.id), ks = m.links.filter(linkOk);
+      $(".nb-chips", ed).innerHTML = ks.length ? ks.map(k => `<span class="nb-chip"><button type="button" data-open="${k}" title="Open ${esc(linkLabel(k))}"><span class="nb-cic">${linkIcon(k)}</span>${esc(linkLabel(k))}</button><button type="button" class="nb-cx" data-x="${k}" aria-label="Remove link to ${esc(linkLabel(k))}">×</button></span>`).join("") : `<span class="nb-nolink">Nothing yet</span>`;
+      $(".nb-chips", ed).querySelectorAll("[data-open]").forEach(b => b.onclick = () => { flushEd(); openLink(b.dataset.open); });
+      $(".nb-chips", ed).querySelectorAll("[data-x]").forEach(b => b.onclick = () => { NS.unlink(n.id, b.dataset.x); chips(); drawList(); });
+    };
+    chips();
+    $('[data-a="link"]', ed).onclick = async e => {
+      const r = e.currentTarget.getBoundingClientRect(), have = new Set(NS.get(n.id).links);
+      const k = await NS.pick({ x: r.left, y: r.bottom + 6, title: "Link this note to…", placeholder: "Search subjects, fields and lessons", items: linkTargets().filter(x => !have.has(x.id)) });
+      if (k && typeof k === "string") { NS.link(n.id, k); chips(); drawList(); }
+    };
+    $('[data-a="fav"]', ed).onclick = e => { const m = NS.update(n.id, { fav: !NS.get(n.id).fav, quiet: true }); const b = e.currentTarget; b.classList.toggle("on", m.fav); b.textContent = m.fav ? "★" : "☆"; b.setAttribute("aria-pressed", String(m.fav)); b.title = m.fav ? "Remove from favourites" : "Add to favourites"; drawFolders(); drawList(); };
+    $('[data-a="folder"]', ed).onchange = e => { NS.update(n.id, { folder: e.target.value || null, quiet: true }); drawFolders(); drawList(); };
+    $('[data-a="photo"]', ed).onclick = () => file.click();
+    file.onchange = async () => { const k = await rich.addFiles(file.files); sv.textContent = k ? (k === 1 ? "Photo added" : k + " photos added") : "Those files are not photos"; file.value = ""; };
+    const urlRow = $(".nb-urlrow", ed), urlIn = $("input", urlRow);
+    $('[data-a="purl"]', ed).onclick = () => { urlRow.hidden = !urlRow.hidden; if (!urlRow.hidden) urlIn.focus(); };
+    $('[data-a="purlx"]', ed).onclick = () => { urlRow.hidden = true; };
+    urlRow.onsubmit = e => { e.preventDefault(); if (rich.addURL(urlIn.value)) { urlIn.value = ""; urlRow.hidden = true; } else $(".nb-urlmsg", urlRow).textContent = "Use an https:// address of an image."; };
+    $('[data-a="md"]', ed).onclick = () => { flushEd(); const m = NS.get(n.id); const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["# " + m.title + "\n\n" + m.body], { type: "text/markdown" })); a.download = (m.title.replace(/[^\w\- ]+/g, "").trim() || "note") + ".md"; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); };
     const del = $('[data-a="del"]', ed); let armed = 0;
-    del.onclick = () => { if (!armed) { del.textContent = "Click again to delete"; armed = setTimeout(() => { armed = 0; del.textContent = "Delete"; }, 3500); return; } clearTimeout(armed); NS.remove(n.id); NOTES.sel = null; drawList(); drawEd(); };
+    del.onclick = () => { if (!armed) { del.textContent = "Click again to delete"; armed = setTimeout(() => { armed = 0; del.textContent = "Delete"; }, 3500); return; } clearTimeout(armed); if (rich) { rich.destroy(); rich = null; } NS.remove(n.id); NOTES.sel = null; drawAll(); };
     if (focusTitle) { ti.focus(); ti.select(); }
   }
-  drawList(); drawEd();
-  cleanup.push(() => { if (saveT) { clearTimeout(saveT); const ti = $(".nb-title", ed), bo = $(".nb-body", ed); if (ti && NOTES.sel) NS.update(NOTES.sel, { title: ti.value.trim() || "Untitled note", body: bo.value }); } });
+  function drawAll(focusTitle){ drawFolders(); drawList(); drawEd(focusTitle); }
+  drawAll();
+  cleanup.push(() => { flushEd(); if (rich) { rich.destroy(); rich = null; } });
 }
 
 /* ---------- dictionary ---------- */
@@ -295,7 +460,8 @@ function renderDict(){
       const open = sub.status === "open";
       const el = h(open ? "button" : "div", open ? { type: "button", class: "slot", onclick: () => go({ view: "math", subject: sub.id, field: "map", topic: null }) } : { class: "slot locked", "aria-disabled": "true" },
         `<span class="glyph">${sub.glyph}</span><span><h3>${esc(sub.name)}</h3><p>${esc(sub.note)}</p></span><span class="tag">${open ? "Open" : "Locked"}</span>`);
-      $(".slots", sec).appendChild(el);
+      if (open && SM[sub.id]) { const wrap = h("div", { class: "slot-wrap" }); wrap.append(el, starBtn("s:" + sub.id)); $(".slots", sec).appendChild(wrap); }
+      else $(".slots", sec).appendChild(el);
     });
     $("#subj", s).appendChild(sec);
   });
@@ -306,7 +472,21 @@ function renderWork(){
   const w = h("div", { class: "work", "data-accent": SM[S.subject].accent || "" });
   const nav = h("aside", { class: "nav", "aria-label": SM[S.subject].name + " navigator" });
   const main = h("section", { class: "main" });
-  w.append(nav, main); viewEl.appendChild(w);
+  // ◀/▶ tab on the sidebar's right edge: fold the sidebar away so the map, tree or lesson gets the full width (desktop)
+  const fold = h("button", { type: "button", class: "nav-fold", "aria-controls": "navside" });
+  nav.id = "navside";
+  const setFold = (on, save) => {
+    w.classList.toggle("navfold", on);
+    nav.inert = on && matchMedia("(min-width:761px)").matches;
+    fold.innerHTML = `<span aria-hidden="true">${on ? "▶" : "◀"}</span>`;
+    fold.setAttribute("aria-expanded", String(!on));
+    fold.title = fold.ariaLabel = on ? "Show the sidebar" : "Hide the sidebar (wider view)";
+    fold.setAttribute("aria-label", fold.title);
+    if (save) store.set("navfold", on);
+  };
+  fold.onclick = () => setFold(!w.classList.contains("navfold"), true);
+  setFold(!!store.get("navfold", false), false);
+  w.append(nav, main, fold); viewEl.appendChild(w);
   buildNav(nav, w);
   if (S.gword && GWORDS[S.gword]) renderWordPane(main);
   else if (S.topic) renderTopic(main);
@@ -320,12 +500,17 @@ function buildNav(nav, w){
   const glMode = S.navMode === "glossary";
   // glossary scope: this subject's words (default) or every subject's
   const scope = () => (S.glScope === "all" || !gn.length) ? "all" : S.subject;
+  // field sub-filter (Arithmetic, Pre-Algebra, …) inside this subject's words
+  if (S.glField && subjOf(S.glField) !== S.subject) S.glField = null;
+  const glFields = subjFields(S.subject).map(f => [f, GL.filter(e => e.subject === S.subject && e.field === f).length]).filter(x => x[1]);
+  const fieldOn = () => scope() !== "all" && S.glField && glFields.some(x => x[0] === S.glField) ? S.glField : null;
   nav.innerHTML = `<div class="nav-top">
       <div class="nav-title"><span class="glyph">${SM[S.subject].glyph}</span><div><h2>${esc(SM[S.subject].name)}</h2><small>${subjFields(S.subject).length} fields · ${subjTrees(S.subject).length} charted</small></div></div>
       <label class="search"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="none" stroke="#8B97AE" stroke-width="1.4"/><path d="M9.5 9.5 13 13" stroke="#8B97AE" stroke-width="1.4"/></svg>
       <input id="navq" type="text" placeholder="${glMode ? "Search words and definitions" : "Search fields and topics"}" aria-label="${glMode ? "Search the glossary" : "Search fields and topics"}"></label>
     </div><div class="nav-list" id="navlist"></div>
     <div class="nav-foot">${glMode ? "Pick a word to read it here. The full glossary has field, letter and mastered filters." : "Gold nodes are ready to study. Green nodes are mastered. Mark a topic mastered from its page."}</div>`;
+  $(".nav-title", nav).appendChild(starBtn("s:" + S.subject));
   const list = $("#navlist", nav);
   const q = $("#navq", nav);
   const fromHere = () => ({ label: SM[S.subject].name + (S.topic && T[S.topic] ? " · " + T[S.topic].title : S.field !== "map" && DB.fields[S.field] ? " · " + DB.fields[S.field].name : ""), subject: S.subject, state: { view: "math", subject: S.subject, field: S.field, topic: S.topic } });
@@ -349,16 +534,22 @@ function buildNav(nav, w){
     tools.innerHTML = (gn.length ? [[S.subject, SM[S.subject].name, gGlyph(S.subject), gColour(S.subject), gn.length], ["all", "All subjects", "◎", "var(--line-2)", all]]
       .map(([id, nm, gl, c, n]) => `<button type="button" class="gl-chip sm" data-scope="${id}" aria-pressed="${sc === id}" style="--gc:${c}"><span class="g">${gl}</span>${esc(nm)}<span class="n">${n}</span></button>`).join("")
       : `<span class="nav-gl-none">No ${esc(SM[S.subject].name)} words yet. Showing every subject.</span>`)
-      + `<button type="button" class="btn-s nav-gl-full" data-full>Full glossary ↗</button>`;
+      + `<button type="button" class="btn-s nav-gl-full" data-full>Full glossary ↗</button>`
+      + (sc !== "all" && glFields.length > 1 ? `<div class="nav-gl-flds" role="group" aria-label="Filter by field"><span class="nav-gl-fl">Field</span>`
+        + [["", "All fields", gn.length], ...glFields.map(([f, n]) => [f, DB.fields[f].name, n])]
+          .map(([f, nm, n]) => `<button type="button" class="gl-chip sm nav-gl-fld" data-gfld="${f}" aria-pressed="${(fieldOn() || "") === f}" style="--gc:${gColour(S.subject)}">${esc(nm)}<span class="n">${n}</span></button>`).join("")
+        + `</div>` : "");
     tools.addEventListener("click", e => {
       const b = e.target.closest("button"); if (!b) return;
       if (b.dataset.scope) { S.glScope = b.dataset.scope === "all" ? "all" : null; buildWords(); if (S.gword) render(); return; }
-      if (b.dataset.full != null) { w.classList.remove("navopen"); openGlossary({ from: fromHere(), sub: sc, word: S.gword && GWORDS[S.gword].some(e => sc === "all" || e.subject === sc) ? S.gword : null }); }
+      if (b.dataset.gfld != null) { S.glField = b.dataset.gfld || null; buildWords(); return; }
+      if (b.dataset.full != null) { w.classList.remove("navopen"); openGlossary({ from: fromHere(), sub: sc, field: fieldOn(), word: S.gword && GWORDS[S.gword].some(e => sc === "all" || e.subject === sc) ? S.gword : null }); }
     });
     list.appendChild(tools);
-    const vis = Object.keys(GWORDS).map(k => { const blocks = GWORDS[k].filter(e => sc === "all" || e.subject === sc); return { k, blocks, score: blocks.length ? gScore(k, blocks, term) : 0 }; })
+    const fo = fieldOn();
+    const vis = Object.keys(GWORDS).map(k => { const blocks = GWORDS[k].filter(e => (sc === "all" || e.subject === sc) && (!fo || e.field === fo)); return { k, blocks, score: blocks.length ? gScore(k, blocks, term) : 0 }; })
       .filter(x => x.score > 0).sort((a, b) => term ? b.score - a.score || a.k.localeCompare(b.k) : a.k.localeCompare(b.k));
-    if (!vis.length) { list.appendChild(h("div", { class: "gl-empty" }, term ? "No words match." : "No words yet.")); return; }
+    if (!vis.length) { list.appendChild(h("div", { class: "gl-empty" }, term ? "No words match." + (fo ? " Try All fields." : "") : "No words yet.")); return; }
     let letter = null, body = null;
     vis.forEach(({ k, blocks }) => {
       const l = term ? "" : k[0].toUpperCase();
@@ -543,6 +734,7 @@ function renderFieldTree(main, f){
   head.innerHTML = `<button type="button" class="btn-s navtoggle" id="navtoggle2">☰ Fields</button><button type="button" class="btn-s" id="tback">◀ ${esc(SM[subjOf(f)].name)} field map</button><div><h2>${esc(F.name)}</h2><div class="sub">${FN.length ? `${FN.length} topic${FN.length === 1 ? "" : "s"}${TR.planned && TR.planned.length ? ` written, ${TR.planned.length} planned` : ""} · about ${hrs} study hours · ${done} mastered` : `${(TR.planned || []).length} planned topics · the tree is mapped and the pages are being written`}</div></div>
    <div class="legend-chips"><span><i class="lg-m"></i>Mastered</span><span><i class="lg-a"></i>Ready</span><span><i class="lg-l"></i>Locked</span>${TR.planned && TR.planned.length ? '<span><i class="lg-p"></i>Planned</span>' : ""}<span><i class="lg-s"></i>Last opened</span></div>`;
   main.appendChild(head);
+  $("h2", head).appendChild(starBtn("f:" + f));
   $("#navtoggle2", head).onclick = () => main.parentElement.classList.toggle("navopen");
   $("#tback", head).onclick = () => go({ view: "math", subject: subjOf(f), field: "map", topic: null });
   const inTree = new Set(FN.map(n => n.id));
@@ -754,6 +946,8 @@ function gTok(){ return "glossary" + (G.sub !== "all" ? "-" + G.sub : "") + (G.w
 function openGlossary(o = {}){
   if (o.from) { G.ret = o.from; G.q = ""; G.field = null; G.letter = null; }
   if ("sub" in o) { G.sub = o.sub || "all"; if (G.field && (!DB.fields[G.field] || subjOf(G.field) !== G.sub)) G.field = null; }
+  if ("field" in o && o.field && DB.fields[o.field] && subjOf(o.field) === G.sub) G.field = o.field;
+  if ("q" in o) G.q = o.q || "";
   if ("word" in o) G.word = o.word;
   go({ view: "glossary", topic: null });
 }
@@ -969,7 +1163,19 @@ if (window.inquireDesktop) {
 window.InquireApp = {
   context(){ const t = S.topic && T[S.topic]; return { userName: window.InquireUserName || window.InquireUser || "", view: S.view, subject: S.subject, subjectName: SM[S.subject] ? SM[S.subject].name : "", field: S.view === "math" ? S.field : null,
     fieldName: S.view === "math" && DB.fields[S.field] ? DB.fields[S.field].name : "", topic: S.topic || null, topicTitle: t ? t.title : "" }; },
-  openTopic: id => go({ view: "math", topic: id }), openNotes: id => { if (id) NOTES.sel = id; go({ view: "notes", topic: null }); }
+  openTopic: id => go({ view: "math", topic: id }), openNotes: id => { if (id) { NOTES.sel = id; const n = window.InquireNotes && InquireNotes.get(id); if (n) { NOTES.folder = "all"; NOTES.subj = ""; NOTES.q = ""; } } go({ view: "notes", topic: null }); },
+  // right-click "Define": the glossary entry if the words are a headword (or one of its forms), else a glossary search for them
+  define(text){
+    const w = String(text || "").trim().replace(/\s+/g, " ").replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+    if (!w) return false;
+    const k = gLookup(w);
+    if (k && S.view === "math") { go({ view: "math", gword: k }); return true; }
+    const from = S.view === "notes" ? { label: "My notes", state: { view: "notes", topic: null } }
+      : S.view === "math" ? { label: S.topic && T[S.topic] ? T[S.topic].title : SM[S.subject].name, subject: S.subject, state: { view: "math", subject: S.subject, field: S.field, topic: S.topic } } : null;
+    openGlossary({ from, sub: "all", q: k ? "" : w, word: k || null });
+    return !!k;
+  },
+  linkLabel, linkTargets, openLink
 };
 window.addEventListener("inquire:signed-in", () => { mastered = loadMastered(); render(); }); // that account's progress and notes
 

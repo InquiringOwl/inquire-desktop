@@ -92,18 +92,26 @@ $(".dk-ask").onsubmit = async e => {
 $(".dk-ask textarea").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $(".dk-ask").requestSubmit(); } });
 
 /* ---------- notes ---------- */
-let edId = null, saveT = null;
+let edId = null, saveT = null, rich = null;
 function drawNotes() {
   const pane = $('[data-p="notes"]');
   if (!NS) { pane.innerHTML = "<p class=dk-hello>Notes are unavailable.</p>"; return; }
+  if (rich) { rich.destroy(); rich = null; }
   const n = edId && NS.get(edId);
   if (n) {
-    pane.innerHTML = `<div class="dk-nbar"><button type="button" class="btn-s" data-a="back">◀ Notes</button><span class="dk-saved">Saved</span><button type="button" class="btn-s" data-a="clip" title="Add the text you have selected on the page">Clip selection</button></div>
-      <input class="dk-ntitle" value="${esc(n.title)}" aria-label="Title" maxlength="140"><textarea class="dk-nbody" aria-label="Note" placeholder="Write…">${esc(n.body)}</textarea>
+    pane.innerHTML = `<div class="dk-nbar"><button type="button" class="btn-s" data-a="back">◀ Notes</button><span class="dk-saved">Saved</span><button type="button" class="btn-s" data-a="photo" title="Add a photo from this computer">＋ Photo</button><button type="button" class="btn-s" data-a="clip" title="Add the text you have selected on the page">Clip selection</button></div>
+      <input class="dk-ntitle" value="${esc(n.title)}" aria-label="Title" maxlength="140"><div class="dk-nbody"></div><input type="file" accept="image/*" multiple hidden>
       <div class="dk-nfoot">${n.src ? `<button type="button" class="dk-link" data-a="src">↗ ${esc(n.src.title)}</button>` : "<span></span>"}<button type="button" class="dk-link" data-a="full">Open in My notes ▸</button></div>`;
-    const ti = pane.querySelector(".dk-ntitle"), bo = pane.querySelector(".dk-nbody"), sv = pane.querySelector(".dk-saved");
-    const save = () => { clearTimeout(saveT); sv.textContent = "Editing…"; saveT = setTimeout(() => { NS.update(n.id, { title: ti.value.trim() || "Untitled note", body: bo.value }); sv.textContent = "Saved"; saveT = null; }, 400); };
-    ti.oninput = save; bo.oninput = save;
+    const ti = pane.querySelector(".dk-ntitle"), sv = pane.querySelector(".dk-saved");
+    rich = NS.mountEditor(pane.querySelector(".dk-nbody"), n.id, {
+      onEditing: () => { sv.textContent = "Editing…"; }, onSaved: () => { sv.textContent = "Saved"; },
+      openNote: id => { edId = id; drawNotes(); }, openTopic: id => A() && A().openTopic(id)
+    });
+    const saveTitle = () => { clearTimeout(saveT); sv.textContent = "Editing…"; saveT = setTimeout(() => { NS.update(n.id, { title: ti.value.trim() || "Untitled note" }); sv.textContent = "Saved"; saveT = null; }, 400); };
+    ti.oninput = saveTitle;
+    const file = pane.querySelector('input[type="file"]');
+    pane.querySelector('[data-a="photo"]').onclick = () => file.click();
+    file.onchange = async () => { const k = await rich.addFiles(file.files); sv.textContent = k ? "Photo added" : "That file is not a photo"; file.value = ""; };
     pane.querySelector('[data-a="back"]').onclick = () => { flush(); edId = null; drawNotes(); };
     pane.querySelector('[data-a="full"]').onclick = () => { flush(); const id = edId; edId = null; setOpen(false); A() && A().openNotes(id); };
     const src = pane.querySelector('[data-a="src"]'); if (src) src.onclick = () => A() && A().openTopic(n.src.topic);
@@ -111,22 +119,27 @@ function drawNotes() {
     pane.querySelector('[data-a="clip"]').onclick = () => {
       const sel = String(window.getSelection ? window.getSelection() : "").trim(), c = ctx();
       if (!sel) { sv.textContent = "Select text on the page first"; return; }
-      bo.value += (bo.value && !bo.value.endsWith("\n") ? "\n" : "") + "\n“" + sel + "”" + (c.topicTitle ? " (" + c.topicTitle + ")" : "") + "\n";
-      save();
+      flush(); NS.appendQuote(n.id, sel, c.topic, c.topicTitle); drawNotes(); sv.textContent = "Clipped";
     };
-    if (!n.body) bo.focus();
+    if (!n.body) rich.el.focus();
     return;
   }
   const c = ctx(), all = NS.list();
   pane.innerHTML = `<div class="dk-nbar"><button type="button" class="btn-s" data-a="new">＋ New</button><button type="button" class="btn-s" data-a="gen"${c.topic ? "" : " disabled"} title="${c.topic ? "Make a study note from " + esc(c.topicTitle) : "Open a topic page first"}">Note from this page</button></div>
-    <div class="dk-nlist">${all.length ? all.slice(0, 30).map(x => `<button type="button" class="dk-nit" data-id="${x.id}"><b>${esc(x.title)}</b><span>${esc(x.body.slice(0, 90))}</span></button>`).join("") : `<p class="dk-hello">No notes yet. Start one, or open a topic and choose <b>Note from this page</b> for a ready-made study sheet you can add to.</p>`}</div>
+    <div class="dk-nlist">${all.length ? all.slice(0, 30).map(x => `<button type="button" class="dk-nit" data-id="${x.id}"><b>${x.fav ? "★ " : ""}${esc(x.title)}</b><span>${esc(x.body.slice(0, 90))}</span></button>`).join("") : `<p class="dk-hello">No notes yet. Start one, or open a topic and choose <b>Note from this page</b> for a ready-made study sheet you can add to.</p>`}</div>
     <div class="dk-nfoot"><span>${all.length} note${all.length === 1 ? "" : "s"}</span><button type="button" class="dk-link" data-a="full">Open in My notes ▸</button></div>`;
   pane.querySelector('[data-a="new"]').onclick = () => { const x = NS.create({ src: c.topic ? { topic: c.topic, title: c.topicTitle } : null }); edId = x.id; drawNotes(); pane.querySelector(".dk-ntitle").select(); };
-  pane.querySelector('[data-a="gen"]').onclick = () => { const g = NS.fromTopic(c.topic); if (!g) return; const x = NS.create(g); edId = x.id; drawNotes(); const bo = pane.querySelector(".dk-nbody"); bo.focus(); bo.setSelectionRange(bo.value.length, bo.value.length); bo.scrollTop = 1e9; };
+  pane.querySelector('[data-a="gen"]').onclick = () => {
+    const g = NS.fromTopic(c.topic); if (!g) return; const x = NS.create(g); edId = x.id; drawNotes();
+    const ed = pane.querySelector(".nb-rich"); ed.focus(); const r = document.createRange(); r.selectNodeContents(ed); r.collapse(false); const s = getSelection(); s.removeAllRanges(); s.addRange(r); ed.scrollTop = 1e9;
+  };
   pane.querySelector('[data-a="full"]').onclick = () => { setOpen(false); A() && A().openNotes(); };
   pane.querySelectorAll(".dk-nit").forEach(b => b.onclick = () => { edId = b.dataset.id; drawNotes(); });
 }
-function flush() { if (!saveT) return; clearTimeout(saveT); saveT = null; const ti = $(".dk-ntitle"), bo = $(".dk-nbody"); if (ti && edId) NS.update(edId, { title: ti.value.trim() || "Untitled note", body: bo.value }); }
+function flush() {
+  if (rich) rich.flush();
+  if (!saveT) return; clearTimeout(saveT); saveT = null; const ti = $(".dk-ntitle"); if (ti && edId) NS.update(edId, { title: ti.value.trim() || "Untitled note" });
+}
 
 // keep the context line and the notes list current
 window.addEventListener("hashchange", () => { if (!win.hidden) { if (st.tab === "ai") drawCtx(); else if (!edId) drawNotes(); } });

@@ -11,8 +11,8 @@
   --tint-1:rgba(92,200,224,.10); --tint-2:rgba(180,155,255,.08); --chrome-1:#0F1624; --chrome-2:#0A0F18;
   --win-1:rgba(22,32,51,.92); --win-2:rgba(13,19,31,.94); --slot-1:rgba(27,39,64,.85); --slot-2:rgba(14,21,34,.9);
   --slot-h1:rgba(35,55,86,.9); --slot-h2:rgba(14,24,40,.95); --wash:rgba(11,16,25,.7); --sky:#101A2C; --stage-sky:#16203A; --frame:var(--cyan); --blur:0px;
-  --math:"STIX Two Text","Cambria Math",Cambria,Georgia,serif;
-  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --math:"STIX Two Text","Noto Sans Symbols","Cambria Math",Cambria,Georgia,serif;
+  --sans:"IBM Plex Sans","Noto Sans Symbols",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
   --ui:"Saira Semi Condensed","Arial Narrow","IBM Plex Sans",sans-serif;
 }
@@ -65,7 +65,34 @@ table.proof td:first-child{width:55%}
 .crumbs button:hover{color:var(--text)}
 .crumbs .sep{color:var(--faint)}
 .crumbs .here{color:var(--text)}
-.topstat{margin-left:auto;display:flex;align-items:center;gap:10px;font:500 12px/1 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.topstat{background:none;border:1px solid transparent;border-radius:2px;padding:5px 8px;cursor:pointer;margin-left:auto;display:flex;align-items:center;gap:10px;font:500 12px/1 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.topstat:hover{border-color:var(--line-2);color:var(--text)}
+.topstat:focus-visible{outline:2px solid var(--cyan);outline-offset:1px}
+.topstat.tracked{color:var(--text)}
+.stat-star{color:var(--amber);margin-right:6px;letter-spacing:0}
+/* favourite stars + the meter's "follows" popover */
+.fav{background:none;border:0;padding:2px 4px;margin-left:6px;cursor:pointer;font:400 18px/1 var(--sans);color:var(--faint);vertical-align:middle;transition:color .15s,transform .15s}
+.fav:hover{color:var(--amber);transform:scale(1.12)}
+.fav.on{color:var(--amber);text-shadow:0 0 10px rgba(242,184,75,.45)}
+.fav:focus-visible{outline:2px solid var(--cyan);outline-offset:1px}
+.nav-title .fav{margin-left:auto}
+.slot-wrap{position:relative;display:grid}
+.slot-wrap>.slot{width:100%;padding-right:36px}
+.slot-wrap>.fav{position:absolute;top:8px;right:8px}
+.fav-pop.win{position:fixed;z-index:1500;width:min(320px,calc(100vw - 16px));box-shadow:0 18px 60px rgba(0,0,0,.6),0 0 30px var(--glow);animation:vt-in .3s cubic-bezier(.2,.7,.2,1)}
+.fav-list{display:grid;padding:6px}
+.fav-opt{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 10px;border:1px solid transparent;border-radius:2px}
+.fav-opt:hover{background:rgba(255,255,255,.04)}
+.fav-opt:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px}
+.fav-opt[aria-checked="true"]{border-color:var(--frame);background:color-mix(in srgb,var(--frame) 12%,transparent)}
+.fav-ic{color:var(--amber);text-align:center}
+.fav-nm{font:600 12px/1.2 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--text)}
+.fav-nm small{display:block;font:400 12px/1.3 var(--sans);letter-spacing:0;text-transform:none;color:var(--muted);margin-top:2px}
+.fav-n{font:500 12px/1 var(--mono);color:var(--muted)}
+.fav-tip{margin:0;padding:8px 14px 12px;font-size:12px;color:var(--faint);border-top:1px solid var(--line)}
+/* screen transition (go() in app.js): the same fade-in as the Settings window */
+@keyframes vt-in{from{opacity:0;filter:blur(3px) brightness(.8)}to{opacity:1;filter:none}}
+.vt-in{animation:vt-in .45s cubic-bezier(.2,.7,.2,1)}
 .meter{width:120px;height:6px;background:var(--panel-3);border:1px solid var(--line);position:relative}
 .meter>i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--green),#B8F0C4);width:0}
 .view{min-height:0;position:relative}
@@ -102,7 +129,19 @@ table.proof td:first-child{width:55%}
 .slot.big{min-height:150px}
 
 /* ---------- workspace (sidebar + main) ---------- */
-.work{height:100%;display:grid;grid-template-columns:288px minmax(0,1fr);min-height:0}
+.work{height:100%;display:grid;grid-template-columns:288px minmax(0,1fr);min-height:0;position:relative;transition:grid-template-columns .32s cubic-bezier(.2,.7,.2,1)}
+.nav-fold{position:absolute;z-index:6;top:50%;left:288px;transform:translate(-50%,-50%);width:18px;height:64px;padding:0;display:grid;place-items:center;cursor:pointer;
+  background:linear-gradient(180deg,var(--panel-3),var(--panel-2));border:1px solid var(--line-2);border-radius:3px;color:var(--muted);font:400 10px/1 var(--ui);
+  box-shadow:0 4px 14px rgba(0,0,0,.4);transition:left .32s cubic-bezier(.2,.7,.2,1),color .15s,border-color .15s,box-shadow .15s}
+.nav-fold:hover{color:var(--text);border-color:var(--frame);box-shadow:0 0 12px var(--glow)}
+.nav-fold:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+@media (min-width:761px){
+  .work.navfold{grid-template-columns:0 minmax(0,1fr)}
+  .work>.nav{overflow:hidden}
+  .work>.nav>*{min-width:287px}
+  .work.navfold>.nav{visibility:hidden;border-right:0;transition:visibility 0s linear .32s}
+  .work.navfold>.nav-fold{left:9px}
+}
 .nav{min-height:0;display:flex;flex-direction:column;border-right:1px solid var(--line);background:linear-gradient(180deg,var(--chrome-1),var(--chrome-2));backdrop-filter:blur(var(--blur))}
 .nav-top{padding:12px;border-bottom:1px solid var(--line);display:grid;gap:10px}
 .nav-title{display:flex;align-items:center;gap:10px}
@@ -372,6 +411,16 @@ input[type=checkbox]{accent-color:var(--amber);width:16px;height:16px}
 .subj-gh .ln{color:var(--muted);font-size:13px}
 .subj-gh .n{margin-left:auto;font:500 11px/1 var(--ui);letter-spacing:.14em;color:var(--faint)}
 /* Arts & Humanities accent: magenta, between the pink and violet of the palette */
+/* STEM keeps its cyan in every theme (themes only recolour the default slot) */
+[data-accent="cyan"] .subj-gh{border-bottom-color:#26485a}
+[data-accent="cyan"] .subj-gh h2{text-shadow:0 0 12px rgba(92,200,224,.32)}
+[data-accent="cyan"] .slot{background:linear-gradient(180deg,rgba(22,44,58,.88),rgba(10,19,28,.92));border-color:#2f5a6c}
+[data-accent="cyan"] .slot:hover{border-color:var(--cyan);background:linear-gradient(180deg,rgba(28,58,76,.92),rgba(12,23,34,.95))}
+[data-accent="cyan"] .slot:focus-visible{outline-color:var(--cyan)}
+[data-accent="cyan"] .slot .glyph{color:var(--cyan);border-color:#3a6b7e;background:radial-gradient(circle at 35% 30%,rgba(92,200,224,.26),rgba(11,16,25,.8) 70%)}
+[data-accent="cyan"] .slot.locked:hover{border-color:#2f5a6c;background:linear-gradient(180deg,rgba(22,44,58,.88),rgba(10,19,28,.92))}
+[data-accent="cyan"] .slot.locked .glyph{color:#7aa4b4}
+[data-accent="cyan"] .slot.locked .tag{color:#5f8494}
 [data-accent="magenta"] .subj-gh{border-bottom-color:#4a3358}
 [data-accent="magenta"] .subj-gh h2{color:var(--magenta);text-shadow:0 0 12px rgba(217,122,230,.35)}
 [data-accent="magenta"] .slot{background:linear-gradient(180deg,rgba(46,29,60,.88),rgba(19,13,29,.92));border-color:#4f3a62}
@@ -482,6 +531,7 @@ input[type=checkbox]{accent-color:var(--amber);width:16px;height:16px}
   .stage{height:clamp(340px,56vh,520px)}
 }
 @media (max-width:760px){
+  .nav-fold{display:none}
   .work{grid-template-columns:minmax(0,1fr)}
   .nav{position:absolute;inset:0 auto 0 0;width:min(300px,86vw);z-index:20;transform:translateX(-102%);transition:transform .2s}
   .work.navopen .nav{transform:none;box-shadow:12px 0 40px rgba(0,0,0,.6)}
@@ -602,6 +652,9 @@ button.gl-chip.sm{cursor:pointer}
 .nav-gl-tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 12px 10px;border-bottom:1px solid rgba(36,49,73,.6)}
 .nav-gl-full{margin-left:auto}
 .nav-gl-none{width:100%;font:12px/1.4 var(--sans);color:var(--faint)}
+.nav-gl-flds{width:100%;display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:4px;padding-top:8px;border-top:1px dashed rgba(36,49,73,.8)}
+.nav-gl-fl{font:500 10px/1 var(--ui);letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-right:2px}
+.nav-gl-fld{font-size:11px;padding:4px 8px}
 .nav-gl-grp{border-bottom:0}
 .nav-gl-grp .grp-b{padding:0 0 2px}
 .nav-gw{padding-top:4px;padding-bottom:4px}

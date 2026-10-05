@@ -1,6 +1,6 @@
 // Inquire desktop shell: serves the app from a private codex:// scheme and keeps itself up to date.
 // Source code, installers and update files all live in the public repo InquiringOwl/inquire-desktop.
-const { app, BrowserWindow, protocol, net, ipcMain, shell, Menu, dialog } = require('electron');
+const { app, BrowserWindow, protocol, net, ipcMain, shell, Menu, dialog, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { pathToFileURL } = require('url');
@@ -44,6 +44,7 @@ function createWindow() {
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: 'deny' }; });
   win.webContents.on('will-navigate', (e, url) => { if (!url.startsWith('codex://')) { e.preventDefault(); if (/^https?:/.test(url)) shell.openExternal(url); } });
   win.webContents.on('did-finish-load', () => send({}));
+  win.on('close', flushStorage); // write localStorage (remembered username, progress, settings) to disk before the window goes
 }
 
 /* ---------------- automatic updates ---------------- */
@@ -119,4 +120,7 @@ app.whenReady().then(() => {
   createWindow();
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });
+/* Chromium writes localStorage to disk lazily; flush it so nothing set just before quitting is lost. */
+function flushStorage() { try { session.defaultSession.flushStorageData(); } catch (e) { /* not ready yet */ } }
+app.on('before-quit', flushStorage);
 app.on('window-all-closed', () => { if (!IS_MAC) app.quit(); });

@@ -23,7 +23,7 @@ const dataSrc = ['web/src/data.js', ...dir('web/src').filter(f => /\/data-[a-z0-
 // Glossary entries (web/glossary/<subject>.js) come right after the data files: they only call DB.addGlossary.
 const files = [...dataSrc, ...dir('web/glossary'), ...dir('web/art'), ...tree('web/content'), 'web/src/labkit.js',
   ...dir('web/src').filter(f => /\/kit-[a-z0-9-]+\.js$/.test(f)),
-  ...dir('web/src').filter(f => /\/labs\d*\.js$/.test(f)), ...dir('web/traces'), ...dir('web/labs'), 'web/src/notes.js', 'web/src/app.js', 'web/src/dock.js', 'web/src/intro.js', 'web/src/eula.js', 'web/src/settings.js'];
+  ...dir('web/src').filter(f => /\/labs\d*\.js$/.test(f)), ...dir('web/traces'), ...dir('web/labs'), 'web/src/notes.js', 'web/src/notes-widgets.js', 'web/src/app.js', 'web/src/dock.js', 'web/src/textmenu.js', 'web/src/intro.js', 'web/src/eula.js', 'web/src/settings.js'];
 // Files that only define data (DB, ARITH, scenes): safe to run in Node for validate, dump-content and smoke.
 const dataFiles = files.filter(f => dataSrc.includes(f) || f.startsWith('web/glossary/') || f.startsWith('web/art/') || f.startsWith('web/content/'));
 const vm = require('vm');
@@ -45,8 +45,8 @@ const body = `<div id="app">
   <header class="topbar">
     <button type="button" class="brand" id="brand" aria-label="Inquire main menu"><span class="brand-mark"><img src="${markUri}" alt="" width="30" height="30"></span><span class="brand-name">Inquire</span></button>
     <nav class="crumbs" id="crumbs" aria-label="Breadcrumb"></nav>
-    <div class="topstat"><span id="stat-t"></span><span class="meter" aria-hidden="true"><i id="stat-m"></i></span></div>
-    <button type="button" class="gear" id="gear" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></button>
+    <button type="button" class="topstat" id="topstat" aria-haspopup="dialog" title="Progress · choose what it follows"><span id="stat-t"></span><span class="meter" aria-hidden="true"><i id="stat-m"></i></span></button>
+    <button type="button" class="gear" id="gear" title="Settings (Esc)">Settings</button>
     <button type="button" class="whoami" id="whoami" hidden></button>
   </header>
   <main class="view" id="view" tabindex="-1"></main>
@@ -59,7 +59,7 @@ const desktop = `<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' codex:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' codex:; img-src 'self' data: codex:">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' codex:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' codex:; img-src 'self' data: blob: https: codex:">
 <title>Inquire</title>
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
@@ -73,7 +73,7 @@ ${body}
 const web = `<title>Inquire Math Dictionary</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;1,400;1,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Saira+Semi+Condensed:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;1,400;1,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Saira+Semi+Condensed:wght@400;500;600&family=Noto+Sans+Symbols&display=swap">
 <style>
 ${css}
 </style>

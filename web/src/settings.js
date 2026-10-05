@@ -1,14 +1,22 @@
 /* Settings window (gear in the top bar, and the Settings button on the sign-in screen).
    A sub-window that opens in front of the app; the app behind it fogs and eases back (body.set-open).
-   Sections: Appearance (12 themes), Display & comfort, Account, Data & progress, About.
+   Sections: Appearance (12 themes), Display & comfort, Shortcuts, Account, Data & progress, About.
+   Esc opens Settings (and closes it); off with Shortcuts → "Esc opens Settings" (escKey).
+   Two sizes: uiScale = zoom on #app (whole interface); textSize = --ts on :root, which scaleText() multiplies into every
+   px font size / line height in the stylesheets (CSSOM rewrite, only once a size other than 100% is chosen).
    Stored per computer in localStorage "codex.settings" (codex.* prefix kept for old installs). Themes only change
    surfaces (backgrounds, panels, lines, frame accent); the content colours c1–c5 keep their meaning in every theme.
    Also opens documents (the EULA, web/src/eula.js) in the same kind of window: InquireSettings.openDoc("eula"). */
 (function () {
 "use strict";
 const KEY = "codex.settings";
-const DEF = { theme: "capsuleer", textScale: 1, reduceMotion: false, playIntro: true, soundFx: true };
-const load = () => { try { return Object.assign({}, DEF, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) { return Object.assign({}, DEF); } };
+const DEF = { theme: "capsuleer", uiScale: 1, textSize: 1, reduceMotion: false, playIntro: true, soundFx: true, escKey: true, invertScroll: false, noteLink: "#B49BFF" };
+const load = () => {
+  let o = {}; try { o = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) {}
+  if (o.uiScale == null && typeof o.textScale === "number") o.uiScale = o.textScale; // the old single "Text & interface size" was a zoom
+  delete o.textScale;
+  return Object.assign({}, DEF, o);
+};
 let S = load();
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -61,16 +69,51 @@ function applyTheme(id) {
   document.documentElement.dataset.theme = t.id;
   document.documentElement.toggleAttribute("data-glass", !!t.glass);
 }
+/* Text size: every px font size and px line height in the stylesheets becomes calc(… * var(--ts, 1)).
+   Font shorthands that use var(--ui) keep their text form in the CSSOM, so the size token is rewritten in place. */
+const PX = /(\d*\.?\d+)px/, scaled = new WeakSet(), tsCalc = v => `calc(${v}px * var(--ts, 1))`;
+function scaleDecl(st) {
+  const f = st.getPropertyValue("font");
+  if (f && PX.test(f) && !f.includes("--ts"))
+    st.setProperty("font", f.replace(/(\d*\.?\d+)px(?:\s*\/\s*(\d*\.?\d+)px)?/, (m, a, b) => tsCalc(a) + (b ? " / " + tsCalc(b) : "")), st.getPropertyPriority("font"));
+  ["font-size", "line-height"].forEach(k => {
+    const v = st.getPropertyValue(k).trim(), m = /^(\d*\.?\d+)px$/.exec(v);
+    if (m) st.setProperty(k, tsCalc(m[1]), st.getPropertyPriority(k));
+  });
+}
+function scaleRules(rules) {
+  for (const r of rules) {
+    if (r.style) scaleDecl(r.style);
+    if (r.cssRules) scaleRules(r.cssRules);
+  }
+}
+function scaleText() {
+  for (const sh of document.styleSheets) {
+    if (scaled.has(sh)) continue;
+    try { scaleRules(sh.cssRules); scaled.add(sh); } catch (e) {} // cross-origin sheets (fonts) are skipped
+  }
+}
+let textOn = false;
+function applySizes() {
+  const app = document.getElementById("app");
+  if (app) app.style.zoom = S.uiScale === 1 ? "" : String(S.uiScale);
+  if (S.textSize !== 1) textOn = true;
+  if (textOn) scaleText();
+  document.documentElement.style.setProperty("--ts", String(S.textSize));
+}
+window.addEventListener("inquire:route", () => { if (textOn) scaleText(); }); // style sheets a screen or lab adds later
+const LINKCOL = [["#B49BFF", "Violet"], ["#5CC8E0", "Cyan"], ["#F2B84B", "Amber"], ["#F07CA0", "Pink"], ["#7BD88F", "Green"], ["#D97AE6", "Magenta"], ["#B5D65A", "Lime"], ["#FFFFFF", "White"]];
+const hexOk = c => /^#[0-9a-f]{6}$/i.test(c);
 function applyAll() {
   applyTheme(S.theme);
-  const app = document.getElementById("app");
-  if (app) app.style.zoom = S.textScale === 1 ? "" : String(S.textScale);
+  document.documentElement.style.setProperty("--note-link", hexOk(S.noteLink) ? S.noteLink : DEF.noteLink);
+  applySizes();
   document.documentElement.toggleAttribute("data-reduce-motion", !!S.reduceMotion);
 }
 applyAll();
 
 /* ---------- window ---------- */
-const TABS = [["look", "Appearance"], ["display", "Display & comfort"], ["account", "Account"], ["data", "Data & progress"], ["about", "About"]];
+const TABS = [["look", "Appearance"], ["display", "Display & comfort"], ["keys", "Shortcuts"], ["usage", "Usage"], ["account", "Account"], ["data", "Data & progress"], ["about", "About"]];
 const ov = document.createElement("div");
 ov.className = "set-ov"; ov.hidden = true;
 ov.innerHTML = `<div class="set-win win" role="dialog" aria-modal="true" aria-labelledby="set-title">
@@ -111,7 +154,16 @@ function close() {
 ov.querySelector(".set-x").onclick = close;
 ov.addEventListener("pointerdown", e => { if (e.target === ov) close(); });
 document.addEventListener("keydown", e => {
-  if (ov.hidden) return;
+  if (ov.hidden) {
+    // Esc opens Settings, unless something smaller is open that Esc should close first (Assist dock, a word card) or the intro is still playing
+    if (e.key !== "Escape" || !S.escKey || e.defaultPrevented || e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (document.querySelector(".gl-pop, .fav-pop, .tm-menu, .nk-pick, .nr-panel")) return;
+    const dk = document.getElementById("dk-win");
+    if (dk && !dk.hidden) { if (!dk.contains(e.target)) { e.preventDefault(); const x = dk.querySelector(".dk-x"); if (x) x.click(); } return; }
+    const intro = document.querySelector(".inqi");
+    if (intro && !intro.hidden && !intro.classList.contains("is-form")) return;
+    e.preventDefault(); e.stopPropagation(); open(); return;
+  }
   if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(); return; }
   if (e.key === "Tab") { // keep focus inside the window
     const f = [...win.querySelectorAll('button:not([disabled]),input:not([disabled]),select,a[href],[tabindex="0"]')].filter(el => el.offsetParent);
@@ -126,7 +178,7 @@ function show(id) {
   tab = id;
   tabsEl.querySelectorAll(".set-tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === id)));
   pane.innerHTML = ""; pane.scrollTop = 0;
-  ({ look: paneLook, display: paneDisplay, account: paneAccount, data: paneData, about: paneAbout })[id]();
+  ({ look: paneLook, display: paneDisplay, keys: paneKeys, usage: paneUsage, account: paneAccount, data: paneData, about: paneAbout })[id]();
 }
 const h = html => { const d = document.createElement("div"); d.innerHTML = html; return d.firstElementChild; };
 const msgEl = () => h(`<p class="set-msg" role="status" aria-live="polite"></p>`);
@@ -150,15 +202,37 @@ function paneLook() {
     });
     wrap.appendChild(g);
   });
+  // colour of linked words in notes (links to other notes and back to lessons)
+  const lc = h(`<div class="set-thfam"><h3>Note links</h3><div class="set-item set-lcitem"><div><p>Colour of linked words in your notes: links to other notes and quotes linked back to a lesson.
+      <span class="set-lcdemo">Example: see <a class="nlink" tabindex="-1">my fractions note</a>.</span></p></div>
+    <div class="set-lc" role="radiogroup" aria-label="Note link colour">${LINKCOL.map(([c, n]) => `<button type="button" role="radio" class="set-lcs" data-c="${c}" aria-checked="${S.noteLink.toLowerCase() === c.toLowerCase()}" title="${n}" aria-label="${n}" style="--c:${c}"></button>`).join("")}
+      <label class="set-lcs set-lcpick" title="Any colour" aria-label="Any colour"><input type="color" value="${hexOk(S.noteLink) ? S.noteLink : DEF.noteLink}"></label></div></div></div>`);
+  const mark = () => lc.querySelectorAll(".set-lcs[data-c]").forEach(b => b.setAttribute("aria-checked", String(b.dataset.c.toLowerCase() === S.noteLink.toLowerCase())));
+  lc.querySelectorAll(".set-lcs[data-c]").forEach(b => b.onclick = () => { S.noteLink = b.dataset.c; save(); applyAll(); mark(); lc.querySelector('input[type="color"]').value = S.noteLink; });
+  const pick = lc.querySelector('input[type="color"]');
+  pick.oninput = () => { S.noteLink = pick.value; applyAll(); mark(); };
+  pick.onchange = () => { S.noteLink = pick.value; save(); };
+  wrap.appendChild(lc);
   pane.appendChild(wrap);
 }
 
 /* Display & comfort */
+function fader(key, label, desc, min, max, step, marks) {
+  const v = S[key], pct = x => Math.round(x * 100) + "%";
+  return `<div class="set-item set-faditem" data-fader="${key}"><div><h3>${label}</h3><p>${desc}</p></div>
+    <div class="set-fader">
+      <div class="set-fadrow"><button type="button" class="set-fstep" data-d="-1" aria-label="Smaller ${label.toLowerCase()}">−</button>
+        <div class="set-frange"><input type="range" min="${min}" max="${max}" step="${step}" value="${v}" aria-label="${label}" aria-valuetext="${pct(v)}" style="--f:${(v - min) / (max - min) * 100}%;--n:${Math.round((max - min) / step)}">
+          <div class="set-fmarks" aria-hidden="true">${marks.map(m => `<span style="left:${(m - min) / (max - min) * 100}%">${pct(m)}</span>`).join("")}</div></div>
+        <button type="button" class="set-fstep" data-d="1" aria-label="Larger ${label.toLowerCase()}">+</button>
+        <output class="set-fval">${pct(v)}</output>
+        <button type="button" class="set-freset" title="Back to 100%"${v === 1 ? " disabled" : ""}>Reset</button></div>
+    </div></div>`;
+}
 function paneDisplay() {
-  const sizes = [[.9, "Small"], [1, "Standard"], [1.1, "Large"], [1.25, "Larger"]];
   const w = h(`<div>
-    <div class="set-item"><div><h3>Text & interface size</h3><p>Scales everything in the console, labs included.</p></div>
-      <div class="set-seg" role="radiogroup" aria-label="Text size">${sizes.map(([v, l]) => `<button type="button" role="radio" aria-checked="${S.textScale === v}" data-v="${v}">${l}</button>`).join("")}</div></div>
+    ${fader("textSize", "Text size", "Only the words: headings, pages, menus and labels. Layout and diagrams keep their size.", .8, 1.5, .05, [.8, 1, 1.25, 1.5])}
+    ${fader("uiScale", "Interface size", "Scales the whole console: panels, buttons, trees and labs, with their text.", .75, 1.4, .05, [.75, 1, 1.2, 1.4])}
     <div class="set-item"><div><h3>Reduce motion</h3><p>Turns off animations and slides, and shows the sign-in screen without its intro.</p></div>
       <label class="set-tog"><input type="checkbox" data-k="reduceMotion"${S.reduceMotion ? " checked" : ""}><span></span></label></div>
     <div class="set-item"><div><h3>Play the intro on launch</h3><p>The neuron storm and logo before the sign-in form. Off: the form appears at once.</p></div>
@@ -166,11 +240,79 @@ function paneDisplay() {
     <div class="set-item"><div><h3>Sound effects</h3><p>The unlock sound when you sign in.</p></div>
       <label class="set-tog"><input type="checkbox" data-k="soundFx"${S.soundFx ? " checked" : ""}><span></span></label></div>
   </div>`);
-  w.querySelectorAll(".set-seg button").forEach(b => b.onclick = () => {
-    S.textScale = +b.dataset.v; save(); applyAll();
-    w.querySelectorAll(".set-seg button").forEach(x => x.setAttribute("aria-checked", String(x === b)));
+  w.querySelectorAll("[data-fader]").forEach(row => {
+    const key = row.dataset.fader, r = row.querySelector("input"), out = row.querySelector("output"), rs = row.querySelector(".set-freset");
+    const min = +r.min, max = +r.max, step = +r.step;
+    const set = (v, commit) => {
+      v = Math.round(Math.min(max, Math.max(min, v)) / step) * step; v = Math.round(v * 100) / 100;
+      r.value = v; r.style.setProperty("--f", (v - min) / (max - min) * 100 + "%");
+      out.textContent = Math.round(v * 100) + "%"; r.setAttribute("aria-valuetext", out.textContent); rs.disabled = v === 1;
+      S[key] = v; applySizes(); if (commit) save();
+    };
+    r.oninput = () => set(+r.value, false);
+    r.onchange = () => set(+r.value, true);
+    row.querySelectorAll(".set-fstep").forEach(b => b.onclick = () => set(S[key] + step * +b.dataset.d, true));
+    rs.onclick = () => set(1, true);
   });
   w.querySelectorAll(".set-tog input").forEach(i => i.onchange = () => { S[i.dataset.k] = i.checked; save(); applyAll(); });
+  pane.appendChild(w);
+}
+
+/* Usage */
+function paneUsage() {
+  const w = h(`<div>
+    <p class="set-lede">How the mouse wheel and trackpad move things.</p>
+    <div class="set-item"><div><h3>Invert scroll direction</h3><p>Off: Inquire scrolls the way your computer is set. On: the wheel or trackpad scrolls the other way (down ⇄ up) in pages, lists, the glossary and when panning skill trees. Try it in the box below.</p></div>
+      <label class="set-tog"><input type="checkbox" data-k="invertScroll"${S.invertScroll ? " checked" : ""}><span></span></label></div>
+    <div class="set-scrolltry" tabindex="0" aria-label="Scroll test area">${Array.from({ length: 12 }, (_, i) => `<p>Line ${i + 1}: try scrolling here.</p>`).join("")}</div>
+  </div>`);
+  w.querySelector('[data-k="invertScroll"]').onchange = e => { S.invertScroll = e.target.checked; save(); };
+  pane.appendChild(w);
+}
+
+/* Invert scroll: every wheel event is swapped for a copy with deltaY reversed. Handlers that take the wheel themselves
+   (tree panning, labs) get the copy; if none of them cancels it, the nearest scrollable box is scrolled by hand. */
+const synthWheel = new WeakSet();
+function scrollBox(el, dx, dy) {
+  for (let n = el instanceof Element ? el : null; n && n !== document.documentElement; n = n.parentElement) {
+    const cs = getComputedStyle(n);
+    const canY = dy && /(auto|scroll|overlay)/.test(cs.overflowY) && n.scrollHeight > n.clientHeight + 1 && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1);
+    const canX = dx && /(auto|scroll|overlay)/.test(cs.overflowX) && n.scrollWidth > n.clientWidth + 1 && (dx < 0 ? n.scrollLeft > 0 : n.scrollLeft + n.clientWidth < n.scrollWidth - 1);
+    if (canY || canX) { n.scrollBy({ top: canY ? dy : 0, left: canX ? dx : 0 }); return; }
+  }
+  (document.scrollingElement || document.documentElement).scrollBy({ top: dy, left: dx });
+}
+window.addEventListener("wheel", e => {
+  if (!S.invertScroll || synthWheel.has(e) || e.ctrlKey || !e.deltaY) return; // ctrl+wheel = pinch zoom, left alone
+  e.preventDefault(); e.stopImmediatePropagation();
+  const c = new WheelEvent("wheel", { bubbles: true, cancelable: true, composed: true, view: window,
+    deltaX: e.deltaX, deltaY: -e.deltaY, deltaZ: e.deltaZ, deltaMode: e.deltaMode, clientX: e.clientX, clientY: e.clientY, screenX: e.screenX, screenY: e.screenY,
+    shiftKey: e.shiftKey, altKey: e.altKey, metaKey: e.metaKey, ctrlKey: e.ctrlKey, buttons: e.buttons });
+  synthWheel.add(c);
+  e.target.dispatchEvent(c);
+  if (c.defaultPrevented) return;
+  const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight * .9 : 1;
+  let dx = e.deltaX * unit, dy = -e.deltaY * unit;
+  if (e.shiftKey && !e.deltaX) { dx = dy; dy = 0; } // shift + wheel scrolls sideways
+  scrollBox(e.target, dx, dy);
+}, { capture: true, passive: false });
+
+/* Shortcuts */
+function paneKeys() {
+  const k = s => `<kbd class="set-kbd">${s}</kbd>`;
+  const rows = [
+    [k("Esc"), "Open Settings from anywhere in the console. Press it again to close Settings. If the Assist window or a word card is open, Esc closes that first."],
+    [k("←") + k("→"), "On the Main Menu, move the display box to the previous or next subject."],
+    [k("Enter"), "Open the focused node in a skill tree, or the first word in a glossary search."],
+    [k("Tab"), "Move between buttons and fields; inside Settings, focus stays in the window."]
+  ];
+  const w = h(`<div>
+    <p class="set-lede">Keys that work throughout Inquire.</p>
+    <div class="set-item"><div><h3>Esc opens Settings</h3><p>Off: Esc only closes windows, and Settings opens from the Settings button.</p></div>
+      <label class="set-tog"><input type="checkbox" data-k="escKey"${S.escKey ? " checked" : ""}><span></span></label></div>
+    <dl class="set-keys">${rows.map(([key, d]) => `<div><dt>${key}</dt><dd>${d}</dd></div>`).join("")}</dl>
+  </div>`);
+  w.querySelector('[data-k="escKey"]').onchange = e => { S.escKey = e.target.checked; save(); };
   pane.appendChild(w);
 }
 
@@ -217,26 +359,33 @@ function paneAccount() {
 }
 
 /* Data & progress */
-/* Backups (format 2): { app: "Inquire", kind: "progress-backup", version: 2, data: { progress, notes, settings, groups } }.
-   progress and notes are the signed-in account's. Restoring replaces progress and settings, and merges notes (a note with the
-   same id is replaced; others are kept), so nothing written since is lost. Format 1 files (data["codex.mastered"]) still load. */
+/* Backups (format 3): { app: "Inquire", kind: "progress-backup", version: 3, data: { progress, notes, folders, images, favs, settings, groups } }.
+   progress, notes, note folders, photos (data URLs, only those the notes use) and favourites are the signed-in account's.
+   Restoring replaces progress and settings, merges notes and folders by id (a note with the same id is replaced; others are
+   kept, so nothing written since is lost) and restores the photos under their own ids. Format 1 and 2 files still load. */
 const K = () => window.InquireKeys || { progress: () => "codex.mastered", notes: () => "codex.notes._local" };
 const readJ = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
 function paneData() {
   const n = readJ(K().progress(), []).length, nn = readJ(K().notes(), []).length;
   const w = h(`<div>
     <p class="set-lede">Saved on this computer${window.InquireUser ? ` for <b>${esc(window.InquireUser)}</b>` : ""}: <b>${n}</b> topic${n === 1 ? "" : "s"} mastered and <b>${nn}</b> note${nn === 1 ? "" : "s"}.</p>
-    <div class="set-item"><div><h3>Back up</h3><p>Saves your mastered topics, notes and settings to a file (never passwords).</p></div><button type="button" class="btn-s" data-a="exp">Export…</button></div>
-    <div class="set-item"><div><h3>Restore a backup</h3><p>Loads a file made with Export. Replaces progress and settings; adds the backup's notes to yours.</p></div><label class="btn-s set-file">Import…<input type="file" accept=".json,application/json" hidden></label></div>
+    <div class="set-item"><div><h3>Back up</h3><p>Saves your mastered topics, notes (with their folders, photos, code boxes and music charts), favourites and settings to one file. Never passwords.</p></div><button type="button" class="btn-s" data-a="exp">Export…</button></div>
+    <div class="set-item"><div><h3>Restore a backup</h3><p>Loads a file made with Export, on this or another computer. Replaces progress and settings; adds the backup's notes, folders and photos to yours.</p></div><label class="btn-s set-file">Import…<input type="file" accept=".json,application/json" hidden></label></div>
     <div class="set-item"><div><h3>Reset progress</h3><p>Clears every mastered topic. This cannot be undone without a backup.</p></div><button type="button" class="btn-s set-warn" data-a="reset">Reset…</button></div>
   </div>`);
   const m = msgEl(); w.appendChild(m);
-  w.querySelector('[data-a="exp"]').onclick = () => {
-    const data = { progress: readJ(K().progress(), []), notes: readJ(K().notes(), []), settings: readJ("codex.settings", {}), groups: readJ("codex.groups", null) };
-    const blob = new Blob([JSON.stringify({ app: "Inquire", kind: "progress-backup", version: 2, saved: new Date().toISOString(), account: window.InquireUser || null, data }, null, 2)], { type: "application/json" });
+  const favKey = () => "codex.favs." + (window.InquireUser || "_local");
+  w.querySelector('[data-a="exp"]').onclick = async e => {
+    const btn = e.currentTarget; btn.disabled = true; btn.textContent = "Saving…";
+    const NS = window.InquireNotes, notes = readJ(K().notes(), []);
+    let images = {}; try { if (NS) images = await NS.exportImages(NS.list()); } catch (err) {}
+    const data = { progress: readJ(K().progress(), []), notes, folders: NS ? NS.readFolders() : [], images, favs: readJ(favKey(), null), settings: readJ("codex.settings", {}), groups: readJ("codex.groups", null) };
+    btn.disabled = false; btn.textContent = "Export…";
+    const blob = new Blob([JSON.stringify({ app: "Inquire", kind: "progress-backup", version: 3, saved: new Date().toISOString(), account: window.InquireUser || null, data })], { type: "application/json" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "inquire-backup-" + new Date().toISOString().slice(0, 10) + ".json";
     document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-    say(m, "Backup saved.", true);
+    const np = Object.keys(images).length;
+    say(m, `Backup saved: ${data.progress.length} topics, ${notes.length} notes${np ? `, ${np} photo${np === 1 ? "" : "s"}` : ""}.`, true);
   };
   w.querySelector('input[type="file"]').onchange = async e => {
     const f = e.target.files[0]; if (!f) return;
@@ -247,12 +396,17 @@ function paneData() {
       if (!Array.isArray(prog) || !Array.isArray(notes)) throw new Error();
       localStorage.setItem(K().progress(), JSON.stringify(prog.filter(x => typeof x === "string")));
       const mine = readJ(K().notes(), []), ids = new Set(notes.map(x => x && x.id));
-      const merged = mine.filter(x => !ids.has(x.id)).concat(notes.filter(x => x && x.id && typeof x.body === "string"));
+      const safe = notes.filter(x => x && x.id && typeof x.body === "string").map(x => (typeof x.html === "string" && window.InquireNotes ? Object.assign({}, x, { html: InquireNotes.sanitize(x.html) }) : x)); // never trust markup from a file
+      const merged = mine.filter(x => !ids.has(x.id)).concat(safe);
       localStorage.setItem(K().notes(), JSON.stringify(merged));
       if (set && typeof set === "object") localStorage.setItem("codex.settings", JSON.stringify(set));
       if (grp) localStorage.setItem("codex.groups", JSON.stringify(grp));
+      const NS = window.InquireNotes; let np = 0;
+      if (NS && Array.isArray(d.folders)) { const have = NS.readFolders(), ids = new Set(have.map(f => f.id)); NS.writeFolders(have.concat(d.folders.filter(f => f && f.id && f.name && !ids.has(f.id)))); }
+      if (NS && d.images && typeof d.images === "object") np = await NS.importImages(d.images);
+      if (d.favs && Array.isArray(d.favs.items)) localStorage.setItem(favKey(), JSON.stringify(d.favs));
       S = load(); applyAll(); progressChanged(); window.dispatchEvent(new CustomEvent("inquire:notes-changed"));
-      show("data"); say(pane.querySelector(".set-msg") || m, `Backup restored: ${prog.length} topics, ${notes.length} notes.`, true);
+      show("data"); say(pane.querySelector(".set-msg") || m, `Backup restored: ${prog.length} topics, ${notes.length} notes${np ? `, ${np} photo${np === 1 ? "" : "s"}` : ""}.`, true);
     } catch (err) { say(m, "That file is not an Inquire backup."); }
     e.target.value = "";
   };

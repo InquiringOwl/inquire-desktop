@@ -181,7 +181,7 @@ form.addEventListener("submit", async e => {
   try {
     const u = inU.value.trim();
     const name = mode === "up" ? await createAccount(u, inP.value, inN.value) : await checkLogin(u, inP.value);
-    if (inR.checked) ls.set(REM_KEY, name); else ls.del(REM_KEY);
+    if (inR.checked) ls.set(REM_KEY, name); else ls.del(REM_KEY); // the account's real username (its own capitals)
     inP.value = inP2.value = ""; inN.value = "";
     await unlock(displayOf(name));
     enter(name);
@@ -299,12 +299,12 @@ function enter(name) {
   window.dispatchEvent(new CustomEvent("inquire:signed-in", { detail: { user: name } }));
 }
 function signOut() {
-  delete window.InquireUser; delete window.InquireUserName; if (who) who.hidden = true; ls.del(REM_KEY);
+  delete window.InquireUser; delete window.InquireUserName; if (who) who.hidden = true;
   form.classList.remove("is-unlocking", "is-open"); $(".inqi-unlock").setAttribute("aria-hidden", "true"); msg.classList.remove("sr"); setMsg("");
   appEl.inert = true; root.hidden = false; root.classList.remove("is-leaving");
-  setMode("in"); inU.value = ""; inR.checked = false; done = false;
+  setMode("in"); fillRemembered(); done = false;
   const v = $(".inqi-video"); try { if (root.classList.contains("has-video")) v.play(); } catch (e) {}
-  startFx(); inU.focus();
+  startFx(); (inU.value ? inP : inU).focus();
 }
 if (who) who.addEventListener("click", signOut);
 
@@ -417,8 +417,17 @@ function startFx() {
 }
 
 /* ---------- go ---------- */
-const remembered = ls.get(REM_KEY, "");
-if (remembered) { inU.value = remembered; inR.checked = true; }
+/* "Remember my username": kept in codex.rememberedUser until the box is unticked (signing out keeps it).
+   Unticking forgets it at once; ticking with a username typed remembers it at once (sign-in then stores the account's own spelling). */
+function fillRemembered() {
+  const r = ls.get(REM_KEY, "");
+  inU.value = r || ""; inR.checked = !!r;
+}
+inR.addEventListener("change", () => {
+  const u = inU.value.trim();
+  if (!inR.checked) ls.del(REM_KEY); else if (u) ls.set(REM_KEY, u);
+});
+fillRemembered();
 window.InquireIntro = { skip, isOpen: () => !done };
 play();
 })();

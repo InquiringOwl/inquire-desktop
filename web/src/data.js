@@ -260,7 +260,7 @@ DB.fieldEras = [
 /* Dictionary subjects, grouped the way universities group them.
    group: "stem" | "humanities" | "social" (see DB.subjectGroups). status "open" = has a field map. */
 DB.subjectGroups = [
-  { id: "stem", name: "STEM", line: "Science, technology, engineering and mathematics" },
+  { id: "stem", name: "STEM", line: "Science, technology, engineering and mathematics", accent: "cyan" },
   { id: "humanities", name: "Arts & Humanities", line: "Language, literature, the arts and ideas", accent: "magenta" },
   { id: "social", name: "Social Sciences", line: "How people, markets and societies behave", accent: "lime" }
 ];
