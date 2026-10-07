@@ -9,26 +9,12 @@ const RAD = Math.PI / 180;
 const MR = () => window.MathRules;
 // one hint per stage: replaces the previous one (labkit's k.hint appends)
 const hintOne = (k, txt) => { k.stage.querySelectorAll(".hintc").forEach(e => e.remove()); if (txt) k.hint(txt); };
-// Exact √q for a rational q ≥ 0: {s, t} with √q = s·√t (s rational, t square-free).  sqrtQ(25/4) = {s: 5/2, t: 1}
-function sqrtQ(q){ const R = MR(); q = R.Q(q); const [s, t] = R.sqrtParts(q.n * q.d); return { s: R.Q(s, q.d), t }; }
-const rootStr = (q, html) => { const r = sqrtQ(q); return MR().radStr(r.s, r.t, html); };
-// (v − h)² as text or HTML; "x²" when h = 0.  sqTerm("x", 2) = "(x − 2)²"
-function sqTerm(v, h, html){ const R = MR(); h = R.Q(h); const V = html ? `<i>${v}</i>` : v, sq = html ? "<sup>2</sup>" : "²";
-  if (h.n === 0) return V + sq; const m = R.qT(R.Q.abs(h)); return `(${V} ${h.n > 0 ? MI : "+"} ${m})${sq}`; }
-function linTerm(v, h, html){ const R = MR(); h = R.Q(h); const V = html ? `<i>${v}</i>` : v;
-  if (h.n === 0) return V; return `(${V} ${h.n > 0 ? MI : "+"} ${R.qT(R.Q.abs(h))})`; }
-// Standard form of a conic result {type, h, k, X2, Y2, r2, p, axis} (as from MathRules.conic) as text or HTML.
-function stdForm(r, html){
-  const R = MR(), Q = R.Q;
-  const over = (t, q) => (Q.eq(q, 1) ? t : html ? `<span class="fr"><span>${t}</span><span>${R.qT(q)}</span></span>` : `${t}/${R.qT(q)}`);
-  const X = sqTerm("x", r.h, html), Y = sqTerm("y", r.k, html);
-  if (r.type === "circle") return `${X} + ${Y} = ${R.qT(r.r2)}`;
-  if (r.type === "ellipse") return `${over(X, r.X2)} + ${over(Y, r.Y2)} = 1`;
-  if (r.type === "hyperbola") return Q.val(r.X2) > 0 ? `${over(X, r.X2)} ${MI} ${over(Y, Q.neg(r.Y2))} = 1` : `${over(Y, r.Y2)} ${MI} ${over(X, Q.neg(r.X2))} = 1`;
-  if (r.type === "parabola") { const p4 = Q.mul(4, r.p), co = Q.eq(p4, 1) ? "" : Q.eq(p4, -1) ? MI : R.qT(p4);
-    return r.axis === "vertical" ? `${X} = ${co}${linTerm("y", r.k, html)}` : `${Y} = ${co}${linTerm("x", r.h, html)}`; }
-  return "";
-}
+// Exact √q, (v − h)², (v − h) and conic standard form: MathRules (web/kits/subjects/math.js)
+const sqrtQ = q => MR().sqrtQ(q);
+const rootStr = (q, html) => MR().sqrtQStr(q, html);
+const sqTerm = (v, h, html) => MR().sqShiftStr(v, h, html);
+const linTerm = (v, h, html) => MR().shiftStr(v, h, html);
+const stdForm = (r, html) => MR().conicStdForm(r, html);
 // Register the plane's tick labels as boxes so P.labels keeps clear of them (call right after P.axes()).
 function tickBoxes(P, d, F, o = {}){
   const R = MR(), sx = o.xstep || R.niceStep(P.xmax - P.xmin), sy = o.ystep || R.niceStep(P.ymax - P.ymin), font = `11px ${F.mono}`;
@@ -38,13 +24,9 @@ function tickBoxes(P, d, F, o = {}){
   for (let y = Math.ceil(P.ymin / sy) * sy; y <= P.ymax + 1e-9; y += sy) { if (Math.abs(y) < 1e-9) continue; const w = d.width(f(y), font), xr = Math.max(P.left - 6, P.X(ay) - 7); P.boxes.push({ x: xr - w - 2, y: P.Y(y) - 8, w: w + 4, h: 16 }); }
 }
 const ptT = (x, y) => `(${MR().qT(x)}, ${MR().qT(y)})`;
-// "h ± c" with c = √q exactly (text/HTML); "±c" when h = 0
-const pmStr = (h, q, html) => { const R = MR(), c = rootStr(q, html); return R.Q(h).n === 0 ? `±${c}` : `${R.qT(h)} ± ${c}`; };
-// The two points (h ± c, k) (or (h, k ± c) when !horiz) with c = √q: exact pair when c is rational and the centre
-// coordinate is not 0, else the compact ± form.  pairStr(2, −1, 25, true) = "(−3, −1), (7, −1)"
-function pairStr(h, k, q, horiz, html){ const R = MR(), Q = R.Q, r = sqrtQ(q), m = horiz ? Q(h) : Q(k);
-  if (r.t === 1 && m.n !== 0) { const c = r.s, a = Q.sub(m, c), b = Q.add(m, c); return horiz ? `${ptT(a, k)}, ${ptT(b, k)}` : `${ptT(h, a)}, ${ptT(h, b)}`; }
-  return horiz ? `(${pmStr(h, q, html)}, ${R.qT(k)})` : `(${R.qT(h)}, ${pmStr(k, q, html)})`; }
+// "h ± √q" and the pair of points (h ± √q, k): MathRules (web/kits/subjects/math.js)
+const pmStr = (h, q, html) => MR().pmRootStr(h, q, html);
+const pairStr = (h, k, q, horiz, html) => MR().pmPairStr(h, k, q, horiz, html);
 // General form Ax² + Cy² + Dx + Ey + F = 0 as HTML, coefficients wrapped in `cls`
 function genEq(o, cls = "c4"){
   const T = [[o.A, "<i>x</i><sup>2</sup>"], [o.C, "<i>y</i><sup>2</sup>"], [o.D, "<i>x</i>"], [o.E, "<i>y</i>"], [o.F, ""]]; let s = "";

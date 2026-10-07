@@ -69,7 +69,8 @@ ARITH["a1-piecewise"] = {
     "a1-abs-eq": "The absolute value function's two pieces come from the definition of |x| used to solve absolute value equations."
   },
   unlocksWhy: {
-    "a2-transformations": "The V-shaped graph of <span class=\"m\">|<i>x</i>|</span> is one of the parent functions that Algebra II shifts, stretches and reflects."
+    "a2-transformations": "The V-shaped graph of <span class=\"m\">|<i>x</i>|</span> is one of the parent functions that Algebra II shifts, stretches and reflects.",
+    "pc-piecewise-abs": "Evaluating a function that changes rule at a boundary, and graphing each piece with its own open or closed endpoint, is the starting skill for step functions and for rewriting absolute-value graphs as pieces."
   },
   beyond: [
     { field: "Precalculus", why: "Transformations of |x|, step functions and piecewise definitions of functions are studied in detail." },

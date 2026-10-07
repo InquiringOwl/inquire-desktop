@@ -69,7 +69,9 @@ ARITH["a2-hyperbolas"] = {
   prereqWhy: {
     "a2-ellipses": "A hyperbola mirrors an ellipse: a difference of focal distances instead of a sum, a minus sign in the standard form, and c² = a² + b² instead of c² = a² − b²."
   },
-  unlocksWhy: {},
+  unlocksWhy: {
+    "pc-eccentricity": "The values <i>a</i>, <i>c</i> and the relation <i>c</i>² = <i>a</i>² + <i>b</i>² give <i>e</i> = <i>c</i>/<i>a</i> &gt; 1, the hyperbola case of the single focus-directrix definition of a conic."
+  },
   beyond: [
     { field: "Physics", why: "Hyperbolic orbits and Rutherford scattering both come from inverse-square forces." },
     { field: "Calculus I", why: "Asymptotes are limits of the slope as x → ∞, and the hyperbolic functions cosh and sinh trace x² − y² = 1." },

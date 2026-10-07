@@ -3,18 +3,18 @@
 const L = window.LABS;
 const MI = "−";
 
-/* ---------- DOM-free helpers (kit additions: candidates for MathRules, with tests) ---------- */
+/* ---------- DOM-free helpers (magT = MathRules.sideT; quadFix, tensions are MathRules, web/kits/subjects/trig.js) ---------- */
 // Number text with a real minus: nf(-2.5) → "−2.5", nf(3) → "3", nf(1.236, 2) → "1.24".
 const nf = (v, d = 1) => { let s = Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : v.toFixed(d); if (/^-0(\.0+)?$/.test(s)) s = s.slice(1); return s.replace("-", MI); };
 const vt = (v, d = 1) => `⟨${nf(v[0], d)}, ${nf(v[1], d)}⟩`;
 // Exact magnitude of an integer vector: magT([−6, −8]) → "10", magT([2, 3]) → "√13", magT([2, 6]) → "2√10".
-const magT = (v, MR) => { const [s, t] = MR.sqrtParts(v[0] * v[0] + v[1] * v[1]); return t === 1 ? String(s) : (s === 1 ? "" : s) + "√" + t; };
+const magT = (v, MR) => MR.sideT(v[0] * v[0] + v[1] * v[1]);
 const QUAD = ["on an axis", "Quadrant I", "Quadrant II", "Quadrant III", "Quadrant IV"];
 const quadOf = v => v[0] > 0 && v[1] > 0 ? 1 : v[0] < 0 && v[1] > 0 ? 2 : v[0] < 0 && v[1] < 0 ? 3 : v[0] > 0 && v[1] < 0 ? 4 : 0;
 // The correction tan⁻¹(b/a) needs to become the direction angle: 0, 180 or 360 (null when a = 0).
-const quadFix = v => v[0] === 0 ? null : v[0] < 0 ? 180 : v[1] < 0 ? 360 : 0;
+const quadFix = v => window.MathRules.dirFix(v);
 // Two cables at angles al, be (degrees, from the horizontal) holding weight W: equilibrium tensions [T1, T2].
-const tensions = (W, al, be) => { const r = Math.PI / 180, s = Math.sin((al + be) * r); return [W * Math.cos(be * r) / s, W * Math.cos(al * r) / s]; };
+const tensions = (W, al, be) => window.MathRules.tensions(W, al, be);
 
 /* ---------- trig-vectors ---------- */
 L["trig-vectors"] = k => {

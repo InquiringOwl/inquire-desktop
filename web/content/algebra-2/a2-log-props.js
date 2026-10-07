@@ -70,7 +70,8 @@ ARITH["a2-log-props"] = {
     "a2-logs": "The rules rest on the definition log_b x = y ⇔ bʸ = x and on exact values such as log_b b = 1 and log_b 1 = 0."
   },
   unlocksWhy: {
-    "a2-exp-log-eq": "Solving equations means condensing logs into one and using the power rule to bring an unknown down from an exponent."
+    "a2-exp-log-eq": "Solving equations means condensing logs into one and using the power rule to bring an unknown down from an exponent.",
+    "pc-fitting-models": "The product and power rules turn <i>y</i> = <i>a</i>·<i>x<sup>b</sup></i> into ln <i>y</i> = ln <i>a</i> + <i>b</i> ln <i>x</i>, the straight line that a power model is fitted to."
   },
   beyond: [
     { field: "Calculus I", why: "Logarithmic differentiation expands the log of a product or quotient before taking the derivative." },

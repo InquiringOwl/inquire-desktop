@@ -4,7 +4,7 @@
    Music theory pages have no story panels: like math and physics, each page is a definition, a worked
    analysis and practice. Nodes list the mathematics (`math`) and physics (`physics`) they draw on;
    both are informational and never lock a node. Fields live in DB.fields with subject: "music-theory".
-   Spec: web/TREE-SPEC-MUSIC.md · brief: web/WRITER-PACK-MUSIC.md · lab kit: web/src/kit-music.js */
+   Spec: web/TREE-SPEC-MUSIC.md · brief: web/WRITER-PACK-MUSIC.md · lab kit: web/kits/subjects/music.js */
 (function(){
 const sub = DB.subjects.find(s => s.id === "music-theory");
 if (sub) Object.assign(sub, { status: "open", note: "16 fields · Music Fundamentals begun" });

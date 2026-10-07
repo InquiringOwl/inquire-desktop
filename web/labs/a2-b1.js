@@ -3,45 +3,9 @@
 const L = window.LABS;
 const MI = "−";
 
-/* ---------- DOM-free helpers (kit additions: candidates for MathRules, with tests) ---------- */
-// sameGraph(f, g, lo, hi): f and g are defined at the same sample points of [lo, hi] and agree there.
-function sameGraph(f, g, lo, hi, n = 241){
-  let any = false;
-  for (let i = 0; i < n; i++) {
-    const x = lo + (hi - lo) * (i + 0.37) / n, u = f(x), v = g(x), fu = isFinite(u), fv = isFinite(v);
-    if (fu !== fv) return false;
-    if (fu) { any = true; if (Math.abs(u - v) > 1e-7 * (1 + Math.abs(u))) return false; }
-  }
-  return any;
-}
-// Exact real sets: sorted unions of intervals {lo, hi, lc, hc}; an endpoint is {v, t (text), h (html)}, null = ±∞.
-const RS = (() => {
-  const R = () => window.MathRules;
-  const qh = q => (q.d === 1 ? R().sg(q.n) : `${q.n < 0 ? MI : ""}<span class="fr"><span>${Math.abs(q.n)}</span><span>${q.d}</span></span>`);
-  const ep = q => { q = R().Q(q); return { v: q.n / q.d, t: R().qT(q), h: qh(q) }; };
-  // ±√s for an integer s > 0
-  const root = (s, sign) => { const [m, r] = R().sqrtParts(s); if (r === 1) return ep(sign * m); const pre = (sign < 0 ? MI : "") + (m > 1 ? m : "");
-    return { v: sign * Math.sqrt(s), t: `${pre}√${r}`, h: `${pre}√<span class="mk-ol">${r}</span>` }; };
-  const ALL = () => [{ lo: null, hi: null }];
-  const ge = (e, strict) => [{ lo: e, hi: null, lc: !strict }];
-  const ne = (...es) => { es.sort((a, b) => a.v - b.v); const out = []; let lo = null; es.forEach(e => { out.push({ lo, hi: e, lc: false, hc: false }); lo = e; }); out.push({ lo, hi: null, lc: false }); return out; };
-  const E = 1e-12;
-  function and(A, B){
-    const out = [];
-    for (const a of A) for (const b of B) {
-      let lo = a.lo, lc = a.lc, hi = a.hi, hc = a.hc;
-      if (b.lo && (!lo || b.lo.v > lo.v + E)) { lo = b.lo; lc = b.lc; } else if (b.lo && lo && Math.abs(b.lo.v - lo.v) <= E) lc = lc && b.lc;
-      if (b.hi && (!hi || b.hi.v < hi.v - E)) { hi = b.hi; hc = b.hc; } else if (b.hi && hi && Math.abs(b.hi.v - hi.v) <= E) hc = hc && b.hc;
-      if (lo && hi && (lo.v > hi.v + E || (Math.abs(lo.v - hi.v) <= E && !(lc && hc)))) continue;
-      out.push({ lo, hi, lc, hc });
-    }
-    return out;
-  }
-  const has = (A, x) => A.some(p => (!p.lo || x > p.lo.v + 1e-9 || (p.lc && Math.abs(x - p.lo.v) <= 1e-9)) && (!p.hi || x < p.hi.v - 1e-9 || (p.hc && Math.abs(x - p.hi.v) <= 1e-9)));
-  const str = (A, html) => { const e = p => (html ? p.h : p.t); if (!A.length) return "∅";
-    return A.map(p => (p.lo && p.hi && Math.abs(p.lo.v - p.hi.v) <= E ? `{${e(p.lo)}}` : (p.lo ? (p.lc ? "[" : "(") + e(p.lo) : "(" + MI + "∞") + ", " + (p.hi ? e(p.hi) + (p.hc ? "]" : ")") : "∞)"))).join(" ∪ "); };
-  return { ep, root, ALL, ge, ne, and, has, str, qh };
-})();
+/* ---------- DOM-free helpers: sameGraph and the exact real sets RS now live in MathRules (web/kits/subjects/math.js) ---------- */
+const sameGraph = (f, g, lo, hi, n) => window.MathRules.sameGraph(f, g, lo, hi, n);
+const RS = window.MathRules.RS;
 /* Function family for operations and composition: {kind, p} with kind lin1 = x + p, lin2 = 2x + p, quad = x² + p,
    sqrt = √(x + p), recip = 1/(x + p). Exact domains (RS sets) of f, f∘g and of g(x) ≥ c / g(x) ≠ c. */
 const FAM = (() => {

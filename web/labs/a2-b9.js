@@ -4,60 +4,10 @@ const W = window, L = W.LABS = W.LABS || {}, MR = W.MathRules;
 const { Q, Poly } = MR;
 const MI = "−";
 
-/* ---------- DOM-free helpers (kit additions: candidates for MathRules, exposed as window.B9Rules) ---------- */
-// Inequality symbols: s = sign wanted, eq = boundary zeros included
-const REL = { ">": { s: 1, eq: false }, "≥": { s: 1, eq: true }, "<": { s: -1, eq: false }, "≤": { s: -1, eq: true } };
-const FLIP = { ">": "<", "<": ">", "≥": "≤", "≤": "≥" };
-// Critical values of N/D, sorted: [{x, q, m, out}]; out = true where D = 0 (excluded, even if N = 0 there too)
-function critical(N, D){
-  const out = (Poly.deg(D) >= 1 ? Poly.realRoots(D) : []).map(p => ({ x: p.x, q: p.q, m: p.m, out: true }));
-  Poly.realRoots(N).forEach(z => { if (!out.some(o => Math.abs(o.x - z.x) < 1e-9)) out.push({ x: z.x, q: z.q, m: z.m, out: false }); });
-  return out.sort((a, b) => a.x - b.x);
-}
-// A friendly test value strictly inside (lo, hi) (null = unbounded): 0 if possible, else the integer nearest the middle, else the midpoint
-function testValue(lo, hi){
-  if (!lo && !hi) return Q(0);
-  if (!lo) return Q(Math.ceil(hi.x) - 1);
-  if (!hi) return Q(Math.floor(lo.x) + 1);
-  const a = Math.floor(lo.x) + 1, b = Math.ceil(hi.x) - 1, mid = (lo.x + hi.x) / 2;
-  if (a <= b) return Q(a <= 0 && b >= 0 ? 0 : Math.min(b, Math.max(a, Math.round(mid))));
-  return lo.q && hi.q ? Q.div(Q.add(lo.q, hi.q), Q(2)) : Q(Math.round(mid * 1000) / 1000);
-}
-// Solve N(x)/D(x) rel 0 by a sign chart. Returns {N, D, rel, crit, ivs: [{lo, hi, t, v, s, inSet}], pieces: [{pt} | {lo, loIn, hi, hiIn}]}
-function solveIneq(N, D, rel){
-  N = Poly(N); D = Poly(D || [1]);
-  const R = REL[rel], crit = critical(N, D), ivs = [];
-  for (let i = 0; i <= crit.length; i++) {
-    const lo = crit[i - 1] || null, hi = crit[i] || null, t = testValue(lo, hi), v = Q.div(Poly.eval(N, t), Poly.eval(D, t)), s = Math.sign(v.n);
-    ivs.push({ lo, hi, t, v, s, inSet: s === R.s });
-  }
-  crit.forEach(c => { c.inSet = !c.out && R.eq; });
-  const items = []; ivs.forEach((iv, i) => { items.push({ iv }); if (crit[i]) items.push({ c: crit[i] }); });
-  const runs = []; let run = null;
-  items.forEach(it => { if (it.iv ? it.iv.inSet : it.c.inSet) { run = run || { first: it }; run.last = it; } else if (run) { runs.push(run); run = null; } });
-  if (run) runs.push(run);
-  const pieces = runs.map(r => (r.first === r.last && r.first.c ? { pt: r.first.c }
-    : { lo: r.first.iv ? r.first.iv.lo : r.first.c, loIn: !!r.first.c, hi: r.last.iv ? r.last.iv.hi : r.last.c, hiIn: !!r.last.c }));
-  return { N, D, rel, crit, ivs, pieces };
-}
+/* ---------- DOM-free helpers (exposed as window.B9Rules): the sign-chart solver is MathRules.solveIneq (web/kits/subjects/math.js) ---------- */
+const REL = MR.INEQ, FLIP = MR.INEQ_FLIP, critical = MR.criticalValues, testValue = MR.testValue, solveIneq = MR.solveIneq;
 const cT = c => (c.q ? MR.qT(c.q) : MR.fmtN(c.x, 3));
-// Solution set in interval notation (text): "(−∞, −2] ∪ {1} ∪ [3, ∞)", "∅"
-const setT = S => (!S.pieces.length ? "∅" : S.pieces.map(p => (p.pt ? `{${cT(p.pt)}}`
-  : `${p.lo && p.loIn ? "[" : "("}${p.lo ? cT(p.lo) : MI + "∞"}, ${p.hi ? cT(p.hi) : "∞"}${p.hi && p.hiIn ? "]" : ")"}`)).join(" ∪ "));
-// Polynomial in factored form with integer linear factors: 2x² + 5x − 3 → "(2x − 1)(x + 3)", −x + 5 → "−(x − 5)"
-function factorT(p, html){
-  p = Poly(p); const { roots, rest } = Poly.ratRoots(p); let den = Q(1);
-  const sup = m => (m > 1 ? (html ? `<sup>${m}</sup>` : MR.supT(m)) : "");
-  const fs = roots.map(({ r, m }) => { den = Q.mul(den, Q.pow(Q(r.d), m)); const s = MR.factorStr(r, { integer: true, html }); return r.n === 0 ? s + sup(m) : `(${s})${sup(m)}`; });
-  fs.sort((a, b) => (b[0] !== "(") - (a[0] !== "("));
-  const restS = Poly.scale(rest, Q.inv(den));
-  if (Poly.deg(restS) >= 1) { const ld = Poly.lead(restS), mon = Poly.scale(restS, Q.inv(ld)), pre = Q.eq(ld, 1) ? "" : Q.eq(ld, -1) ? MI : MR.qT(ld);
-    return pre + (fs.length || pre ? `(${MR.polyStr(mon, { html })})` : MR.polyStr(mon, { html })) + fs.join(""); }
-  const c0 = restS[0], pre = Q.eq(c0, 1) ? "" : Q.eq(c0, -1) ? MI : MR.qT(c0);
-  if (!fs.length) return MR.qT(c0);
-  if (fs.length === 1 && !pre && fs[0][0] === "(" && roots[0].m === 1) return fs[0].slice(1, -1);
-  return pre + fs.join("");
-}
+const setT = MR.ineqSetStr, factorT = MR.factorIntStr;
 // The cross-multiplying shortcut for (u·x + p)/(x − q) rel c: u·x + p rel c(x − q), solved as if x − q > 0 → {r0, rel}
 function shortcut(u, p, q, c, rel){ const k = Q.sub(Q(u), Q(c)), r0 = Q.div(Q.sub(Q.neg(Q.mul(Q(c), Q(q))), Q(p)), k); return { r0, rel: k.n > 0 ? rel : FLIP[rel] }; }
 W.B9Rules = { REL, FLIP, critical, testValue, solveIneq, setT, factorT, shortcut };

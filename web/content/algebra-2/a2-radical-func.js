@@ -72,7 +72,9 @@ ARITH["a2-radical-func"] = {
     "a2-transformations": "a√(x − h) + k is the parent √x stretched and shifted, so its graph and endpoint follow the transformation rules.",
     "a1-rational-exp": "ⁿ√x is the same as x^(1/n), and the index decides which inputs give real outputs."
   },
-  unlocksWhy: {},
+  unlocksWhy: {
+    "pc-parent-functions": "The graphs, domains and ranges of √<i>x</i> and ∛<i>x</i> go into the library of parent functions, and the cube root also supplies an odd function."
+  },
   beyond: [
     { field: "Precalculus", why: "Radical functions join rational and power functions in the study of domains, inverses and composition." },
     { field: "Calculus I", why: "The derivative of √x is 1/(2√x), which explains why the graph flattens and why it has a vertical tangent at its endpoint." },

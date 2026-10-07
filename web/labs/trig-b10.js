@@ -6,20 +6,14 @@ const I = s => `<i>${s}</i>`;
 const SUP = "⁰¹²³⁴⁵⁶⁷⁸⁹", SUB = "₀₁₂₃₄₅₆₇₈₉", sup = n => String(n).split("").map(d => SUP[d]).join(""), sub = n => String(n).split("").map(d => SUB[d]).join("");
 
 /* ---------- DOM-free helpers (kit additions: candidates for MathRules, with tests) ---------- */
-// Exact terms of m·√s·fn(qπ) (m rational, s a positive integer), like terms merged; null if qπ is not a multiple of π/12.
-function exTerms(MR, fn, q, m, s = 1){ const e = MR.trigExact(fn, q); if (!e || e.undef) return null; const Q = MR.Q, out = [];
-  e.terms.forEach(([a, t]) => { const [o, i] = MR.sqrtParts(t * s), v = Q.mul(a, Q.mul(Q(m), o)), f = out.find(u => u[1] === i); if (f) f[0] = Q.add(f[0], v); else out.push([v, i]); });
-  return out.filter(([a]) => a.n !== 0); }
-// a + bi text from exact term lists: zText(MR, [[−1,3]], [[1,1]]) → "−√3 + i"
-function zText(MR, re, im){ const Q = MR.Q, val = ts => ts.reduce((s, [a, t]) => s + Q.val(a) * Math.sqrt(t), 0);
-  if (!im.length) return MR.exStr(re); const neg = val(im) < 0, at = MR.exStr(neg ? im.map(([a, t]) => [Q.neg(a), t]) : im);
-  const ip = at === "1" ? "i" : at.includes("/") ? `(${at})i` : at + "i"; return re.length ? `${MR.exStr(re)} ${neg ? MI : "+"} ${ip}` : (neg ? MI : "") + ip; }
-// r cis(qπ) in a + bi form (exact) or null; r = m√s
-const rect = (MR, q, m, s = 1) => { const a = exTerms(MR, "cos", q, m, s), b = exTerms(MR, "sin", q, m, s); return a && b ? zText(MR, a, b) : null; };
+// Exact terms of m·√s·fn(qπ), a + bi text from term lists, r cis(qπ) in exact a + bi form: MathRules (web/kits/subjects/trig.js)
+const exTerms = (MR, fn, q, m, s) => MR.exTerms(fn, q, m, s);
+const zText = (MR, re, im) => MR.exZStr(re, im);
+const rect = (MR, q, m, s) => MR.cisExact(q, m, s);
 // "r(cos θ + i sin θ)" with r text given (plain text, so it can be guarded)
 const cs = (MR, rT, q) => `${rT === "1" ? "" : rT}(cos ${MR.piT(q)} + i sin ${MR.piT(q)})`;
 // positive real nth root of an integer as text: "2", "√2", "³√2"
-const rootT = (R, n) => { const m = Math.round(Math.pow(R, 1 / n)); return Math.pow(m, n) === R ? String(m) : (n === 2 ? "" : sup(n)) + "√" + R; };
+const rootT = (R, n) => window.MathRules.nthRootT(R, n);
 // snap a math point to polar (r step rs within [r0, r1], θ to π/12): {r, q}
 const snapPolar = (MR, p, rs, r0, r1) => ({ r: Math.max(r0, Math.min(r1, Math.round(Math.hypot(p.x, p.y) / rs) * rs)), q: MR.normQ(MR.Q(Math.round(Math.atan2(p.y, p.x) / PI * 12), 12)) });
 const lbl = (F, text, x, y, color, prefer, sz = 14) => ({ text, x, y, color, prefer, font: `600 ${sz}px ${F.math}` });

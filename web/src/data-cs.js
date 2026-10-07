@@ -3,7 +3,7 @@
    courses, then upper-division electives. First field: Programming Fundamentals (CS1, Python; reference
    OpenStax *Introduction to Python Programming*). Pages are taught like math: definition, worked trace,
    practice. Fields list the mathematics they need (`math`, informational, never locks).
-   Spec: web/TREE-SPEC-CS.md · lab kit: web/src/kit-cs.js */
+   Spec: web/TREE-SPEC-CS.md · lab kit: web/kits/subjects/cs.js */
 (function(){
 const sub = DB.subjects.find(s => s.id === "computer-science");
 if (sub) Object.assign(sub, { status: "open", note: "18 fields · Programming Fundamentals charted" });

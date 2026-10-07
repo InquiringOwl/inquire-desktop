@@ -4,28 +4,14 @@ const L = window.LABS;
 const MI = "−";
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-/* ---- DOM-free helpers (kit additions: candidates for MathRules, with tests) ---- */
+/* ---- DOM-free helpers: vertex form, shifted terms, general form and conic systems are in MathRules (web/kits/subjects/math.js) ---- */
 const MR = () => window.MathRules;
-// Vertex form of ax² + bx + c (a ≠ 0), exactly: {a, h, k, q} with h = −b/(2a), k = c − b²/(4a), q = (b/(2a))² the completing term.
-function vertexForm(a, b, c){
-  const Q = MR().Q; a = Q(a); b = Q(b); c = Q(c);
-  const m = Q.div(b, Q.mul(2, a)), q = Q.mul(m, m);
-  return { a, b, c, m, q, h: Q.neg(m), k: Q.sub(c, Q.mul(a, q)) };
-}
-// Text pieces of a(v − h)² + k: coefficient, square, constant (text uses ², html uses <sup>).
-function vfParts(a, h, k, o = {}){
-  const R = MR(), Q = R.Q, html = !!o.html, X = html ? "<i>x</i>" : "x", sq = html ? "<sup>2</sup>" : "²";
-  const num = q => (html ? R.qH(q) : R.qT(q)), wrap = (s, cls) => (html && cls ? `<span class="${cls}">${s}</span>` : s);
-  const co = Q.eq(a, 1) ? "" : Q.eq(a, -1) ? MI : html || Q.isInt(a) ? num(a) : `${Q.val(a) < 0 ? MI : ""}(${R.qT(Q.abs(a))})`;
-  const sqr = Q.zero(h) ? X + sq : `(${X} ${Q.val(h) > 0 ? MI : "+"} ${wrap(num(Q.abs(h)), "c1")})${sq}`;
-  const kk = Q.zero(k) ? "" : ` ${Q.val(k) > 0 ? "+" : MI} ${wrap(num(Q.abs(k)), "c2")}`;
-  return wrap(co, "c3") + sqr + kk;
-}
-const vfT = (a, h, k) => vfParts(a, h, k);
-const vfH = (a, h, k) => vfParts(a, h, k, { html: true });
+const vertexForm = (a, b, c) => MR().vertexForm(a, b, c);
+const vfT = (a, h, k) => MR().vertexFormStr(a, h, k);
+const vfH = (a, h, k) => MR().vertexFormStr(a, h, k, { html: true });
 const ptT = (x, y) => `(${MR().qT(x)}, ${MR().qT(y)})`;
 // "(v − h)" or "v" for a linear factor
-function linT(v, h, html){ const R = MR(), Q = R.Q, V = html ? `<i>${v}</i>` : v; h = Q(h); return Q.zero(h) ? V : `(${V} ${Q.val(h) > 0 ? MI : "+"} ${R.qT(Q.abs(h))})`; }
+const linT = (v, h, html) => MR().shiftStr(v, h, html);
 // Parabola with axis along v: (u − h)² = 4p(v − k) as HTML; hz = horizontal axis (u = y, v = x)
 function parabolaH(h, k, p, hz){
   const R = MR(), Q = R.Q, U = hz ? "y" : "x", V = hz ? "x" : "y", p4 = Q.mul(4, p);
@@ -33,56 +19,9 @@ function parabolaH(h, k, p, hz){
   const sqr = Q.zero(h) ? `<i>${U}</i><sup>2</sup>` : `${linT(U, h, true)}<sup>2</sup>`;
   return `${sqr} = ${co}${linT(V, k, true)}`;
 }
-// General form Ax² + Cy² + Dx + Ey + F = 0 (rational coefficients) as HTML
-function genEqH(o){
-  const R = MR(), Q = R.Q; let s = "";
-  [[o.A, "<i>x</i><sup>2</sup>"], [o.C, "<i>y</i><sup>2</sup>"], [o.D, "<i>x</i>"], [o.E, "<i>y</i>"], [o.F, ""]].forEach(([c, v]) => {
-    c = Q(c || 0); if (Q.zero(c)) return; const m = Q.abs(c), num = Q.eq(m, 1) && v ? "" : R.qT(m);
-    s += s ? (Q.val(c) < 0 ? ` ${MI} ` : " + ") : Q.val(c) < 0 ? MI : ""; s += num + v; });
-  return (s || "0") + " = 0";
-}
-// Intersections of a conic A x² + C y² + E y + F = 0 (no x-term: symmetric about the y-axis, A ≠ 0)
-// with a line y = m x + b or a second such conic. All coefficients rational.
-// → {pts: [{x, y, xt, yt, exact}], kind: "points"|"none"|"infinite", red: {v, a, b, c} the one-variable equation,
-//    D (discriminant or null), complex (a negative discriminant), rejected: [{y, X}] (x² < 0), tangent}
-function sysSolve(c1, c2){
-  const R = MR(), Q = R.Q, z = Q.zero, out = { pts: [], kind: "points", complex: false, rejected: [], tangent: false, D: null };
-  const fmtX = X => { const r = R.sqrtQ(X); return r.t === 1 ? [r.s, R.qT(r.s), R.qT(Q.neg(r.s))] : [null, R.radStr(r.s, r.t, false), MI + R.radStr(r.s, r.t, false)]; };
-  const push = (x, y, xt, yt, exact) => out.pts.push({ x, y, xt, yt, exact });
-  const { A, C, E, F } = c1;
-  if (c2.kind === "line") {
-    const { m, b } = c2, al = Q.add(A, Q.mul(C, Q.mul(m, m))), be = Q.add(Q.mul(2, Q.mul(C, Q.mul(m, b))), Q.mul(E, m)), ga = Q.add(Q.add(Q.mul(C, Q.mul(b, b)), Q.mul(E, b)), F);
-    out.red = { v: "x", a: al, b: be, c: ga };
-    const yOf = x => Q.add(Q.mul(m, x), b);
-    if (z(al)) { if (z(be)) { out.kind = z(ga) ? "infinite" : "none"; return out; } const x = Q.div(Q.neg(ga), be), y = yOf(x); push(Q.val(x), Q.val(y), R.qT(x), R.qT(y), true); return out; }
-    const r = R.quadRoots(al, be, ga); out.D = r.D;
-    if (r.kind === "complex") { out.complex = true; out.kind = "none"; return out; }
-    if (r.exact) r.exact.forEach(x => { const y = yOf(x); push(Q.val(x), Q.val(y), R.qT(x), R.qT(y), true); });
-    else r.values.forEach(v => { const y = Q.val(m) * v.re + Q.val(b); push(v.re, y, R.fmtN(v.re, 2), R.fmtN(y, 2), false); });
-    out.tangent = r.kind === "double";
-    return out;
-  }
-  const A2 = c2.A, C2 = c2.C, E2 = c2.E, F2 = c2.F;
-  const al = Q.sub(Q.mul(A2, C), Q.mul(A, C2)), be = Q.sub(Q.mul(A2, E), Q.mul(A, E2)), ga = Q.sub(Q.mul(A2, F), Q.mul(A, F2));
-  out.red = { v: "y", a: al, b: be, c: ga };
-  if (z(al) && z(be)) { out.kind = z(ga) ? "infinite" : "none"; return out; }
-  let ys = [];
-  if (z(al)) ys = [{ q: Q.div(Q.neg(ga), be) }];
-  else { const r = R.quadRoots(al, be, ga); out.D = r.D; if (r.kind === "complex") { out.complex = true; out.kind = "none"; return out; }
-    out.tangent = r.kind === "double"; ys = r.exact ? r.exact.map(q => ({ q })) : r.values.map(v => ({ v: v.re })); }
-  ys.forEach(Y => {
-    if (Y.q) { const y = Y.q, X = Q.div(Q.neg(Q.add(Q.add(Q.mul(C, Q.mul(y, y)), Q.mul(E, y)), F)), A), yt = R.qT(y);
-      if (Q.val(X) < 0) { out.rejected.push({ y: yt, X: R.qT(X) }); return; }
-      if (z(X)) { out.tangent = true; push(0, Q.val(y), "0", yt, true); return; }
-      const [, p, n] = fmtX(X), xv = Math.sqrt(Q.val(X)); push(-xv, Q.val(y), n, yt, true); push(xv, Q.val(y), p, yt, true); }
-    else { const y = Y.v, X = -(Q.val(C) * y * y + Q.val(E) * y + Q.val(F)) / Q.val(A);
-      if (X < -1e-12) { out.rejected.push({ y: R.fmtN(y, 2), X: R.fmtN(X, 2) }); return; }
-      if (X < 1e-12) { out.tangent = true; push(0, y, "0", R.fmtN(y, 2), false); return; }
-      const xv = Math.sqrt(X); push(-xv, y, R.fmtN(-xv, 2), R.fmtN(y, 2), false); push(xv, y, R.fmtN(xv, 2), R.fmtN(y, 2), false); }
-  });
-  if (!out.pts.length) out.kind = "none";
-  return out;
-}
+// General form as HTML, and intersections of a conic with a line or a second conic (MathRules.conicSystem)
+const genEqH = o => MR().generalFormH(o);
+const sysSolve = (c1, c2) => MR().conicSystem(c1, c2);
 const setT = pts => (pts.length ? pts.map(p => `(${p.xt}, ${p.yt})`).join(", ") : "no real solution");
 
 /* ================= Quadratic functions in vertex form (A + C) ================= */

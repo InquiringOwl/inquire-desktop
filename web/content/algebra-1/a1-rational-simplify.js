@@ -66,7 +66,8 @@ ARITH["a1-rational-simplify"] = {
   },
   unlocksWhy: {
     "a2-rational-func": "Finding holes means factoring and cancelling common factors while keeping the excluded values, exactly the work of simplifying a rational expression.",
-    "a1-rational-add": "Adding and subtracting rational expressions requires factoring denominators, building a common denominator and simplifying the result, all learned here."
+    "a1-rational-add": "Adding and subtracting rational expressions requires factoring denominators, building a common denominator and simplifying the result, all learned here.",
+    "pc-limit-laws": "A limit that gives 0/0 at direct substitution is evaluated by factoring the numerator and denominator and cancelling the common factor, then substituting, which is the simplifying skill learned here."
   },
   beyond: [
     { field: "Precalculus", why: "Graphs of rational functions have holes where common factors cancel and vertical asymptotes at the remaining excluded values." },

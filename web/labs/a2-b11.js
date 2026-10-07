@@ -3,47 +3,13 @@
 const L = window.LABS;
 const MI = "−";
 
-/* ---------- DOM-free helpers (kit additions: candidates for MathRules, with tests) ---------- */
-// Positive-integer n with n/2·(2a₁ + (n − 1)d) = S (integers a₁, d, S). The equation is d·n² + (2a₁ − d)·n − 2S = 0.
-// Returns {A, B, C, D, roots: [numbers, ascending], n (the valid count or null), rejected: [roots that are not counts]}.
-// A root is a count only if it is a positive integer and (for d < 0) every term a₁ … aₙ stays positive when o.positive.
-function arithSolveN(a1, d, S, o = {}){
-  const A = d, B = 2 * a1 - d, Cc = -2 * S;
-  let roots;
-  if (A === 0) roots = B ? [-Cc / B] : [];
-  else { const D = B * B - 4 * A * Cc; if (D < 0) roots = []; else { const s = Math.sqrt(D); roots = [(-B - s) / (2 * A), (-B + s) / (2 * A)].sort((p, q) => p - q); } }
-  const ok = r => Math.abs(r - Math.round(r)) < 1e-9 && Math.round(r) >= 1 && (!o.positive || a1 + (Math.round(r) - 1) * d > 0);
-  const good = roots.filter(ok).map(Math.round);
-  return { A, B, C: Cc, D: B * B - 4 * A * Cc, roots, n: good.length ? good[0] : null, rejected: roots.filter(r => !ok(r)) };
-}
-// Repeating decimal int.pre(rep)(rep)… as a geometric series: head = int.pre exactly, a₁ = rep/10^(p+q), r = 1/10^q.
-// repDecimal(0, "", "36") → {head: 0, a1: 36/100, r: 1/100, tail: 4/11, value: 4/11}; repDecimal(0, "1", "6").value = 1/6.
-function repDecimal(int, pre, rep){
-  const Q = window.MathRules.Q, p = pre.length, q = rep.length;
-  const head = Q.add(Q(int), Q(pre ? +pre : 0, 10 ** p)), a1 = Q(+rep, 10 ** (p + q)), r = Q(1, 10 ** q);
-  const tail = Q.div(a1, Q.sub(1, r));
-  return { head, a1, r, tail, value: Q.add(head, tail), raw: Q(+rep, 10 ** q - 1), p, q };
-}
-// Exact partial sum of a geometric series when the numbers stay inside safe integers, else null (use the decimal value).
-function geomExact(a1, r, n){
-  const MR = window.MathRules, Q = MR.Q; r = Q(r); a1 = Q(a1);
-  if (Math.pow(Math.max(Math.abs(r.n), r.d), n) * Math.max(Math.abs(a1.n), a1.d) * 64 > 9e15) return null;
-  return MR.geom(a1, r).sum(n);
-}
-// The m-th of the C(n, k) lattice paths from the top of Pascal's triangle to entry (n, k), in lexicographic order:
-// an array of n letters, "a" (down-left, the entry index stays) or "b" (down-right, the index grows by 1), with k b's.
-function pascalPath(n, k, m){
-  const nCr = window.MathRules.nCr, out = []; let kk = k;
-  for (let i = n; i > 0; i--) { const withA = nCr(i - 1, kk); if (kk < i && m < withA) out.push("a"); else { if (kk < i) m -= withA; out.push("b"); kk--; } }
-  return out;
-}
-// Monomial c·u^e1·v^e2 as text with superscript digits; u, v wrapped in <i> when html. monoT(-160, [["a", 3], ["b", 3]]) → "−160a³b³"
-function monoT(c, parts, html = true){
-  const supT = window.MathRules.supT, vars = parts.filter(([u, e]) => u && e > 0);
-  const vs = vars.map(([u, e]) => (html ? `<i>${u}</i>` : u) + (e === 1 ? "" : supT(e))).join("");
-  if (!vs) return (c < 0 ? MI : "") + Math.abs(c);
-  return (c < 0 ? MI : "") + (Math.abs(c) === 1 ? "" : Math.abs(c)) + vs;
-}
+/* ---------- DOM-free helpers: series and binomial helpers are in MathRules (web/kits/subjects/math.js) ---------- */
+const MRx = () => window.MathRules;
+const arithSolveN = (a1, d, S, o) => MRx().arithSolveN(a1, d, S, o);
+const repDecimal = (int, pre, rep) => MRx().repDecimal(int, pre, rep);
+const geomExact = (a1, r, n) => MRx().geomExact(a1, r, n);
+const pascalPath = (n, k, m) => MRx().pascalPath(n, k, m);
+const monoT = (c, parts, html) => MRx().monoStr(c, parts, html);
 
 /* ---------- small helpers ---------- */
 const SUB = "₀₁₂₃₄₅₆₇₈₉", subT = n => String(n).split("").map(ch => SUB[+ch]).join("");

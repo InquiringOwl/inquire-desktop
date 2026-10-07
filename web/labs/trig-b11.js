@@ -4,33 +4,9 @@ const L = window.LABS;
 const MI = "−", PI = Math.PI, TAU = 2 * PI;
 const I = s => `<i>${s}</i>`;
 
-/* ---------- DOM-free helper (kit addition: candidate for MathRules, with tests) ---------- */
-// The polar families (OpenStax §10.4). polarFamily(id, a, b, n, fmt) → {eq, br: r(θ) branches, rb: branches for the
-// rectangular graph (NaN where undefined), t1: one full trace from θ = 0, kind, sym, zeros, top: {r, at} | null, petals, ratio, note}.
-// ids: o = circle, l = limaçon (+/−), r = rose, m = lemniscate, sp = spiral; second letter c/s = cos/sin.
-const FAM = [["oc", "r = a cos θ"], ["os", "r = a sin θ"], ["lc+", "r = a + b cos θ"], ["lc-", "r = a − b cos θ"], ["ls+", "r = a + b sin θ"], ["ls-", "r = a − b sin θ"],
-  ["rc", "r = a cos nθ"], ["rs", "r = a sin nθ"], ["mc", "r² = a² cos 2θ"], ["ms", "r² = a² sin 2θ"], ["sp", "r = aθ"]];
-function polarFamily(id, a, b = 1, n = 2, fmt = String){
-  const co = v => v === 1 ? "" : fmt(v) + " ", sg = id[2] === "-" ? -1 : 1, sn = id[1] === "s", fn = sn ? Math.sin : Math.cos, F = sn ? "sin" : "cos";
-  const A3 = ["polar axis", "θ = π/2", "pole"], ax = sn ? ["θ = π/2"] : ["polar axis"], norm = t => ((t % TAU) + TAU) % TAU;
-  const seq = (t0, st, t1) => { const o = []; for (let t = t0; t < t1 - 1e-9; t += st) o.push(t); return o; };
-  if (id[0] === "o") return { eq: `r = ${co(a)}${F} θ`, br: [t => a * fn(t)], t1: PI, kind: `circle, diameter ${fmt(a)}`, sym: ax, zeros: [sn ? 0 : PI / 2], top: { r: a, at: [sn ? PI / 2 : 0] },
-    note: `Centre ${sn ? `(0, ${fmt(a / 2)})` : `(${fmt(a / 2)}, 0)`} in x, y. One trace takes θ from 0 to π.` };
-  if (id[0] === "l") { const q = a / b, v = -sg * q, z = [];
-    if (q <= 1) { const u = sn ? Math.asin(v) : Math.acos(v); (sn ? [u, PI - u] : [u, TAU - u]).map(norm).forEach(t => { if (!z.some(w => Math.abs(w - t) < 1e-9)) z.push(t); }); z.sort((s, t) => s - t); }
-    return { eq: `r = ${fmt(a)} ${sg > 0 ? "+" : MI} ${co(b)}${F} θ`, br: [t => a + sg * b * fn(t)], t1: TAU, ratio: q, sym: ax, zeros: z, top: { r: a + b, at: [norm((sn ? PI / 2 : 0) + (sg > 0 ? 0 : PI))] },
-      kind: q < 1 ? "limaçon with an inner loop" : q === 1 ? "cardioid" : q < 2 ? "dimpled limaçon" : "convex limaçon",
-      note: q < 1 ? "a/b < 1: r is negative for part of the turn, and those points form the inner loop." : q === 1 ? "a = b: r falls to 0 once, so the curve comes to a point at the pole."
-        : q < 2 ? "1 < a/b < 2: r stays positive, but the curve bends inward where r is smallest." : "a/b ≥ 2: r stays far from 0 and the curve bulges outward everywhere." }; }
-  if (id[0] === "r") { const t1 = n % 2 ? PI : TAU, p = n % 2 ? n : 2 * n;
-    return { eq: `r = ${co(a)}${F} ${n}θ`, br: [t => a * fn(n * t)], t1, petals: p, kind: `rose, ${p} petals of length ${fmt(a)}`, sym: n % 2 ? ax : A3,
-      zeros: seq(sn ? 0 : PI / (2 * n), PI / n, t1), top: { r: a, at: seq(sn ? PI / (2 * n) : 0, PI / n, t1) },
-      note: n % 2 ? `n = ${n} is odd: ${n} petals, and θ from 0 to π traces the whole rose.` : `n = ${n} is even: 2n = ${p} petals, traced as θ runs from 0 to 2π.` }; }
-  if (id[0] === "m") { const s = t => Math.sqrt(Math.max(0, fn(2 * t))), w = t => Math.sqrt(fn(2 * t));
-    return { eq: `r² = ${fmt(a * a)} ${F} 2θ`, br: [t => a * s(t), t => -a * s(t)], rb: [t => a * w(t), t => -a * w(t)], t1: TAU, kind: "lemniscate", sym: sn ? ["pole"] : A3,
-      zeros: seq(sn ? 0 : PI / 4, PI / 2, TAU), top: { r: a, at: sn ? [PI / 4, 5 * PI / 4] : [0, PI] }, note: `Points exist only where ${F} 2θ ≥ 0; there r = ±${fmt(a)}√(${F} 2θ).` }; }
-  return { eq: `r = ${a === 1 ? "" : fmt(a)}θ`, br: [t => a * t], t1: 3 * PI, kind: "Archimedean spiral", sym: [], zeros: [0], top: null, note: `Each full turn adds 2π · ${fmt(a)} ≈ ${fmt(TAU * a, 2)} to r: the turns are evenly spaced.` };
-}
+/* ---------- The polar families: MathRules.polarFamily / POLAR_FAMILIES (web/kits/subjects/trig.js) ---------- */
+const FAM = window.MathRules.POLAR_FAMILIES;
+const polarFamily = (id, a, b, n, fmt) => window.MathRules.polarFamily(id, a, b, n, fmt);
 
 /* ---------- trig-polar-graphs ---------- */
 L["trig-polar-graphs"] = k => {

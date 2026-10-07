@@ -4,7 +4,7 @@ Reference: OpenStax *Introduction to Python Programming* (2024) and ACM/IEEE CS2
 
 **Colour keys, the same on every CS page and lab** (legend must use them): c1 amber = line about to run · c2 cyan = variable that just changed · c3 pink = output · c4 violet = references / objects · c5 green = return values. A topic may reuse a colour for its own key only if the lab does too (e.g. bars marks).
 
-**Lab archetypes** (all on `web/src/kit-cs.js`; programs are real Python in `web/cs-src/<id>.py`, traced by `tools/pytrace.py`):
+**Lab archetypes** (all on `web/kits/subjects/cs.js`; programs are real Python in `web/cs-src/<id>.py`, traced by `tools/pytrace.py`):
 - **T · Trace**: `k.trace({programs, narr})` code + variables + output, stepped.
 - **M · Memory**: `k.trace({view: "memory"})` names → objects with arrows (aliasing, mutation, objects).
 - **S · Stack**: `k.trace` on programs with calls; frames stack in the variables pane, return values in c5.

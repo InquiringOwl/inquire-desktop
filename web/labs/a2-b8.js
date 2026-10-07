@@ -3,54 +3,16 @@
 const L = window.LABS;
 const MI = "−";
 
-/* ---------- DOM-free helpers (kit additions: candidates for MathRules, with tests) ---------- */
-// (1 + 1/n)ⁿ computed stably (log1p keeps 9+ correct decimals up to n = 10⁶ and beyond).
-const compoundE = n => Math.exp(n * Math.log1p(1 / n));
-// Truncated decimal digits of v and how many leading characters agree with e = 2.718281828…
-// eDigits(2.71828047) → {text: "2.718280469", chars: 7, decimals: 5}
-function eDigits(v, dec = 9){
-  const s = String(Math.floor(v * 10 ** dec + 1e-7)), es = String(Math.floor(Math.E * 10 ** dec));
-  let m = 0; while (m < s.length && s[m] === es[m]) m++;
-  return { text: s[0] + "." + s.slice(1), chars: m ? m + 1 : 0, decimals: Math.max(0, m - 1) };
-}
-// Exact points of y = log_b x for a rational base b (Q) with x in [lo, hi]: x = b^m, and b^(m/2) when √b is rational.
-// Each {x: Q, y: Q}; MathRules.logExact confirms every one.
-function logPoints(b, lo, hi){
-  const MR = window.MathRules, Q = MR.Q, out = [], rt = MR.sqrtQ(b);
-  const add = (x, y) => { const v = Q.val(x); if (v >= lo && v <= hi) { const e = MR.logExact(b, x); if (e && Q.eq(e, y)) out.push({ x, y }); } };
-  for (let m = -12; m <= 12; m++) { add(Q.pow(b, m), Q(m)); if (rt.t === 1 && m % 2) add(Q.pow(rt.s, m), Q(m, 2)); }
-  return out;
-}
-// Exact-log drill cases: log_b x with b = c^p, x = c^q (c = 2, 3, 5, 10), answer q/p, each confirmed by MathRules.logExact.
-function logCases(){
-  const MR = window.MathRules, Q = MR.Q, out = [];
-  [2, 3, 5, 10].forEach(c => [1, 2, 3].forEach(p => { const b = c ** p; if (b > 1000) return;
-    for (let q = -3; q <= 4; q++) { if (q === 0 || q === p || c ** Math.abs(q) > 1000) continue;
-      const x = Q.pow(Q(c), q), y = MR.logExact(Q(b), x); if (y && Q.eq(y, Q(q, p))) out.push({ c, p, q, b, x, y }); } }));
-  return out;
-}
-// √(x + a) = x + b for integers a, b. Squaring: x² + (2b − 1)x + (b² − a) = 0, discriminant D = 4(a − b) + 1 (odd, never 0).
-// Returns {D, cands: [{v, t, ok, lhs, rhs}], sol}: a candidate is a solution only if √(v + a) equals v + b (so v + b ≥ 0).
-function radicalEq(a, b){
-  const MR = window.MathRules, Q = MR.Q, D = 4 * (a - b) + 1, N = 1 - 2 * b;
-  if (D < 0) return { D, cands: [], sol: [] };
-  const [m, r] = MR.sqrtParts(D);
-  const cands = [-1, 1].map(s => {
-    const v = (N + s * Math.sqrt(D)) / 2, lhs = Math.sqrt(Math.max(0, v + a)), rhs = v + b;
-    const t = r === 1 ? MR.qT(Q(N + s * m, 2)) : `(${MR.sg(N)} ${s < 0 ? MI : "+"} ${m === 1 ? "" : m}√${r})/2`;
-    return { v, t, ok: rhs >= -1e-12 && Math.abs(lhs - rhs) < 1e-9, lhs, rhs };
-  });
-  return { D, cands, sol: cands.filter(q => q.ok) };
-}
+/* ---------- DOM-free helpers: e, exact log points and drills, radical equations are in MathRules (web/kits/subjects/math.js) ---------- */
+const compoundE = n => window.MathRules.compoundE(n);
+const eDigits = (v, dec) => window.MathRules.eDigits(v, dec);
+const logPoints = (b, lo, hi) => window.MathRules.logPoints(b, lo, hi);
+const logCases = () => window.MathRules.logCases();
+const radicalEq = (a, b) => window.MathRules.radicalEq(a, b);
 
 /* ---------- small drawing helpers ---------- */
-// A point of y = f(x) inside the window, searched outward from the fraction `at` of [lo, hi].
-function onCurve(P, f, at = 0.85, lo = -Infinity, hi = Infinity){
-  lo = Math.max(lo, P.xmin); hi = Math.min(hi, P.xmax); const my = (P.ymax - P.ymin) * 0.08;
-  for (let i = 0; i <= 60; i++) { const s = (i % 2 ? -1 : 1) * Math.ceil(i / 2) / 60, x = lo + (hi - lo) * Math.min(1, Math.max(0, at + s)), y = f(x);
-    if (isFinite(y) && y > P.ymin + my && y < P.ymax - my) return { x, y }; }
-  return null;
-}
+// A point of y = f(x) inside the window: the plane kit's P.onCurve (same search).
+const onCurve = (P, f, at, lo, hi) => P.onCurve(f, at, lo, hi);
 const ix = "<i>x</i>", iy = "<i>y</i>";
 const fr = (a, b) => `<span class="fr"><span>${a}</span><span>${b}</span></span>`;
 const ol = s => `√<span class="mk-ol">${s}</span>`;

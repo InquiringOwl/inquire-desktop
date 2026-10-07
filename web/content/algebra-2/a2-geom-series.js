@@ -67,7 +67,9 @@ ARITH["a2-geom-series"] = {
     "a2-sequences": "A geometric series is a partial sum of a geometric sequence, written in sigma notation; its infinite version is the limit of those partial sums.",
     "a2-exp-func": "The term a₁rⁿ⁻¹ is an exponential function of n. When 0 < |r| < 1 it decays toward 0, which is exactly why an infinite geometric series can have a finite sum."
   },
-  unlocksWhy: {},
+  unlocksWhy: {
+    "pc-induction": "The sum formula <i>a</i>(1 − <i>r<sup>n</sup></i>)/(1 − <i>r</i>) is a statement about every positive integer <i>n</i>, and induction is the method that proves it."
+  },
   beyond: [
     { field: "Calculus II", why: "The geometric series is the model for power series and for the ratio and comparison tests of convergence." },
     { field: "Precalculus", why: "Limits of sequences and the notation n → ∞ are introduced with partial sums of geometric series." },

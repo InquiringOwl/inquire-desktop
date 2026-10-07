@@ -71,7 +71,8 @@ ARITH["trig-sinusoids"] = {
   },
   unlocksWhy: {
     "trig-modeling": "Fitting tides, daylight or a Ferris wheel means finding A, B, C and D from real data.",
-    "trig-polar-graphs": "Polar curves such as r = 2 + 4 cos θ and r = 3 sin 2θ use the same amplitudes, periods and midlines, now wrapped around the pole."
+    "trig-polar-graphs": "Polar curves such as r = 2 + 4 cos θ and r = 3 sin 2θ use the same amplitudes, periods and midlines, now wrapped around the pole.",
+    "pc-parametric": "Circles and ellipses are parametrised as (<i>a</i> cos <i>t</i>, <i>b</i> sin <i>t</i>), using sine and cosine with their amplitudes and periods as functions of a parameter."
   },
   beyond: [
     { field: "Physics (Waves)", why: "A travelling wave A sin(kx − ωt + φ) has an amplitude, a wavelength 2π/k and a phase, the same three ideas." },

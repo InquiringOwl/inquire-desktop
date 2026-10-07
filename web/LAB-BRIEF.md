@@ -3,7 +3,7 @@
 Every topic page in Inquire opens with an interactive model ("lab"): a stage (canvas or DOM) on the left, a readout panel on the right, and a controls bar below. The style follows an "Euler's formula" explainer: a live picture of the idea, readouts that update as you drag, and one highlighted "landmark" box that explains what the current state means.
 
 Read these before writing anything:
-- `web/src/labkit.js` — the toolkit (API below).
+- `web/kits/universal/core.js` — the toolkit (API below; graphs and steppers come from `web/kits/categorical/`). Newer fields: `docs/universal/WRITER-CORE.md`.
 - Examples of finished labs: `web/src/labs1.js` (`rounding`, `division` stepper, `order-ops` DOM stepper), `web/src/labs2.js` (`integers` hops, `gcf-lcm`), `web/src/labs3.js` (`percent-apps` chart, `averages` draggable points, `proportions`, `units` DOM chain). Copy their structure and visual language.
 - `web/TREE-SPEC.md` — for each topic: what the lab should show and the **colour keys** (c1 amber, c2 cyan, c3 pink, c4 violet, c5 green). The page's text legend uses the same colours, so follow them exactly.
 

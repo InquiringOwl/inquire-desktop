@@ -4,50 +4,12 @@ const W = window, L = W.LABS = W.LABS || {}, MR = W.MathRules;
 const { Q, Poly } = MR;
 const MI = "−";
 
-/* ---------- DOM-free helpers (candidates for MathRules; exposed as window.B3Rules) ---------- */
-// Candidate test order a person would use: integers by size (positive first), then fractions by size.
-const testOrder = cands => cands.slice().sort((a, b) => (a.d !== 1) - (b.d !== 1) || Math.abs(Q.val(a)) - Math.abs(Q.val(b)) || Q.val(b) - Q.val(a));
+/* ---------- DOM-free helpers: now in MathRules (web/kits/subjects/math.js); still exposed as window.B3Rules ---------- */
+const testOrder = MR.rootTestOrder;
 // Linear factor for the zero p/q (lowest terms): "x − 3", "2x − 1", "x + 2" (text).
-const linT = r => { r = Q(r); const lead = r.d === 1 ? "x" : r.d + "x"; return r.n === 0 ? "x" : `${lead} ${r.n > 0 ? MI : "+"} ${Math.abs(r.n)}`; };
+const linT = r => MR.factorStr(r, { integer: true });
 const supT = MR.supT;
-// Wrong remainders a student typically gets, each with the reason (for multiple-choice checks of synthetic division).
-function synthDistractors(p, r){
-  r = Q(r); const S = Poly.synth(p, r), right = S.rem, top = S.top, n = top.length - 1, out = [];
-  const add = (v, why) => { if (!Q.eq(v, right) && !out.some(o => Q.eq(o.v, v))) out.push({ v, why }); };
-  add(Poly.eval(p, Q.neg(r)), `That is P(${MR.qT(Q.neg(r))}): the sign of r was taken from the divisor as written. For x ${r.n < 0 ? "+" : MI} ${MR.qT(Q.abs(r))}, r = ${MR.qT(r)}.`);
-  const nz = top.filter(c => c.n !== 0);
-  if (nz.length < top.length) { const T = Poly.synth(Poly(nz.slice().reverse()), r); add(T.rem, "The zero placeholders were left out, so the columns slid together."); }
-  if (n >= 1) add(Q.add(top[n], S.bottom[n - 1]), "The last column was added without multiplying by r first.");
-  if (n >= 1) add(Q.mul(S.bottom[n - 1], r), "The last product was not added to the constant term.");
-  add(Q.add(right, r), "Check the last addition: the carried number plus the constant term.");
-  add(Q.neg(right), "Right size, wrong sign: recheck the signs in the last column.");
-  return out.slice(0, 3);
-}
-// Deflation plan for an integer polynomial: candidate tests in order, each zero found with its synthetic row,
-// then the last quadratic (or linear) factor. P = K · Π(qx − p) · rest.
-function factorPlan(P){
-  const cands = Poly.ratCandidates(P), order = testOrder(cands), stages = []; let cur = P, idx = 0, fails = [];
-  while (Poly.deg(cur) > 2 && idx < order.length) {
-    const c = order[idx], v = Poly.eval(cur, c);
-    if (v.n === 0) { const S = Poly.synth(cur, c); stages.push({ poly: cur, fails, root: c, synth: S, q: S.q }); cur = S.q; fails = []; }
-    else { fails.push({ c, v }); idx++; }
-  }
-  const roots = stages.map(s => s.root); let quad = null;
-  if (Poly.deg(cur) === 1) { roots.push(Q.div(Q.neg(cur[0]), cur[1])); }
-  else if (Poly.deg(cur) === 2) {
-    const R = MR.quadRoots(cur[2], cur[1], cur[0]);
-    const rr = Poly.ratRoots(cur).roots; const rat = rr.reduce((m, o) => m + o.m, 0) === 2;
-    quad = { poly: cur, R, rat, roots: rat ? rr.flatMap(o => Array(o.m).fill(o.r)) : [] };
-    if (rat) roots.push(...quad.roots);
-  }
-  const lin = roots.map(r => Q(r));
-  const restP = quad && !quad.rat ? Poly.primitive(cur).map(v => Q(v)) : null;
-  let K = Poly.lead(P); lin.forEach(r => { K = Q.div(K, r.d); }); if (restP) K = Q.div(K, Poly.lead(restP));
-  // factors grouped with multiplicity, in the order found
-  const groups = []; lin.forEach(r => { const g = groups.find(o => Q.eq(o.r, r)); if (g) g.m++; else groups.push({ r, m: 1 }); });
-  const factorsT = (K.n === 1 && K.d === 1 ? "" : K.n === -1 && K.d === 1 ? MI : MR.qT(K)) + groups.map(g => `(${linT(g.r)})${g.m > 1 ? supT(g.m) : ""}`).join("") + (restP ? `(${MR.polyT(restP)})` : "");
-  return { cands, order, stages, quad, rest: cur, restP, groups, K, factorsT };
-}
+const synthDistractors = MR.synthDistractors, factorPlan = MR.factorPlan;
 W.B3Rules = { testOrder, linT, synthDistractors, factorPlan };
 
 /* ---------- shared DOM helpers ---------- */

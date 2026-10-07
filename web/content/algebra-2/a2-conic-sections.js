@@ -76,7 +76,8 @@ ARITH["a2-conic-sections"] = {
   unlocksWhy: {
     "a2-parabolas": "The case AC = 0 becomes the parabola, studied through its focus, directrix and the value p.",
     "a2-ellipses": "The case AC > 0 with A ≠ C becomes the ellipse, with its foci, axes and eccentricity.",
-    "a2-nonlinear-sys": "Solving a nonlinear system means intersecting conics, so you need to recognise each equation's graph first."
+    "a2-nonlinear-sys": "Solving a nonlinear system means intersecting conics, so you need to recognise each equation's graph first.",
+    "pc-rotation": "The general second-degree equation, with the sign of <i>AC</i> sorting conics into types, is extended by adding an <i>xy</i> term, whose discriminant <i>B</i>² − 4<i>AC</i> does the same sorting for a rotated conic."
   },
   beyond: [
     { field: "Precalculus", why: "Rotating the axes removes an xy term, and the polar form r = ep/(1 − e cos θ) gives every conic from one eccentricity." },

@@ -5,8 +5,7 @@ const MI = "−", PI = Math.PI, TAU = 2 * PI;
 
 /* ---------- DOM-free helpers ---------- */
 // asymGen(MR, fn, B, C): general vertical asymptote of A·fn(B(x − C)) + D, e.g. "x = π/4 + nπ/2" (spacing π/|B|)
-const asymGen = (MR, fn, B, C) => { const sp = MR.Q.inv(MR.Q(Math.abs(B))), x0 = MR.asymptotes(fn, B, C, -1e-9, 40)[0], n = `${sp.n === 1 ? "" : sp.n}nπ${sp.d === 1 ? "" : "/" + sp.d}`;
-  return Math.abs(x0) < 1e-9 ? `x = ${n}` : `x = ${MR.piFmt(x0)} + ${n}`; };
+const asymGen = (MR, fn, B, C) => MR.asymGenT(fn, B, C);
 // hltLine(f, a, b): a height y that the graph of f on [a, b] meets at least twice (horizontal line test fails), or null.
 // Candidates: halfway between each interior turning value and the nearer-side endpoint value, then a grid of heights.
 const hltLine = (f, a, b) => { const N = 600, xs = [], ys = []; for (let i = 0; i <= N; i++) { const x = a + (b - a) * i / N; xs.push(x); ys.push(f(x)); }

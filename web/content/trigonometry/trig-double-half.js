@@ -82,7 +82,9 @@ ARITH["trig-double-half"] = {
     { name: `Engineering`, use: `Stress transformation on an inclined plane uses sin 2θ and cos 2θ.` }
   ],
   prereqWhy: { "trig-sum-difference": `Each double-angle formula is a sum formula with β = α, and the half-angle formulas are the cos 2θ formula solved for a square.` },
-  unlocksWhy: { "trig-equations-multi": `Equations such as sin 2x = cos x or cos 2x = sin x are solved by rewriting the double angle with these formulas and then factoring.` },
+  unlocksWhy: { "trig-equations-multi": `Equations such as sin 2x = cos x or cos 2x = sin x are solved by rewriting the double angle with these formulas and then factoring.`,
+    "pc-rotation": "Eliminating the <i>xy</i> term requires the angle <i>θ</i> with cot 2<i>θ</i> = (<i>A</i> − <i>C</i>)/<i>B</i>, and the half-angle formulas then give sin <i>θ</i> and cos <i>θ</i> exactly for the rotation."
+  },
   beyond: [
     { field: `Calculus II`, why: `Integrals of even powers of sine and cosine use the power-reducing formulas, and the substitution t = tan(x/2) turns any rational function of sine and cosine into a rational function of t.` },
     { field: `Physics (Mechanics)`, why: `The range and maximum height of a projectile, R = v² sin 2θ/g and H = v² sin² θ/(2g), come from these formulas.` },

@@ -66,7 +66,9 @@ ARITH["a2-binomial"] = {
     "a2-sequences": "The theorem is written as a sigma sum over k, and its coefficients n!/(k!(n − k)!) are built from factorials.",
     "a1-poly-mult": "Expanding (a + b)ⁿ is repeated polynomial multiplication; the theorem predicts the result of distributing n brackets."
   },
-  unlocksWhy: {},
+  unlocksWhy: {
+    "pc-counting": "The coefficients C(<i>n</i>, <i>k</i>) and the factorial notation behind them are the combinations formula, which Precalculus now derives from counting choices and links back to Pascal's triangle."
+  },
   beyond: [
     { field: "Statistics", why: "The binomial distribution and its mean np come straight from the terms of (p + q)ⁿ." },
     { field: "Discrete Mathematics", why: "Binomial coefficients, Pascal's rule and combinatorial proofs are central to counting." },

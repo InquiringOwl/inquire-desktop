@@ -70,7 +70,9 @@ ARITH["trig-polar-graphs"] = {
     "trig-polar-coords": "Every point of a polar graph is a polar pair (r, θ). Negative r goes on the opposite ray, and converting to x and y identifies circles and checks symmetry.",
     "trig-sinusoids": "r = a + b cos θ and r = a cos nθ are sinusoids in θ. Their midline, amplitude and period give the maximum |r|, the zeros and how often petals repeat."
   },
-  unlocksWhy: {},
+  unlocksWhy: {
+    "pc-polar-conics": "Plotting <i>r</i> as a function of <i>θ</i> and reading points from the pole is the skill used for <i>r</i> = <i>ep</i>/(1 ± <i>e</i> cos <i>θ</i>), whose graphs are ellipses, parabolas and hyperbolas."
+  },
   beyond: [
     { field: "Calculus II", why: "Area inside a polar curve, arc length and slopes of tangent lines all start from these graphs and their zeros." },
     { field: "Precalculus", why: "Conic sections in polar form, r = ed/(1 ± e cos θ), and parametric curves extend the same plotting." },

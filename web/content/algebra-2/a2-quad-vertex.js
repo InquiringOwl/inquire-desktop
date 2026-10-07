@@ -71,7 +71,8 @@ ARITH["a2-quad-vertex"] = {
     "a1-quad-sqrt": "Completing the square, first used to solve quadratic equations, is the step that turns ax² + bx + c into a(x − h)² + k."
   },
   unlocksWhy: {
-    "a2-parabolas": "The parabola as a conic, (x − h)² = 4p(y − k), is vertex form rearranged, with 4p = 1/a locating the focus and directrix."
+    "a2-parabolas": "The parabola as a conic, (x − h)² = 4p(y − k), is vertex form rearranged, with 4p = 1/a locating the focus and directrix.",
+    "pc-function-modeling": "Many situation problems give a quadratic, such as the area of a fenced region, and its vertex gives the exact best value without a graph."
   },
   beyond: [
     { field: "Calculus I", why: "The vertex is where the derivative 2a(x − h) is zero, the first example of finding a maximum or minimum." },

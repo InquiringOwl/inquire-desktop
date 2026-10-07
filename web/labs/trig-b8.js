@@ -3,12 +3,12 @@
 const L = window.LABS;
 const I = s => `<i>${s}</i>`, PI = Math.PI, TAU = 2 * PI, SUB = ["", "₁", "₂"];
 
-/* ---------- DOM-free helpers (kit additions: candidates for MathRules, with tests) ---------- */
+/* ---------- DOM-free helpers (angT, refOf, the sign quadrants and the SSA case text are MathRules, web/kits/subjects/trig.js) ---------- */
 // Angle in radians as text: exact multiple of π (denominator ≤ 48) or 4 decimals.
-const angT = (MR, x) => { const q = MR.piQ(x, 48); return q ? MR.piT(q) : x.toFixed(4); };
+const angT = (MR, x) => MR.angT(x);
 // Reference angle of fn x = k (radians) and the quadrants where fn has the sign of k.
-const refOf = (fn, k) => fn === "sin" ? Math.asin(Math.min(1, Math.abs(k))) : fn === "cos" ? Math.acos(Math.min(1, Math.abs(k))) : Math.atan(Math.abs(k));
-const QUADS = { sin: ["I and II", "III and IV"], cos: ["I and IV", "II and III"], tan: ["I and III", "II and IV"] };
+const refOf = (fn, k) => window.MathRules.refOf(fn, k);
+const QUADS = window.MathRules.SIGN_QUADS;
 // "x = 0 + 2πn" → "2πn"; general-solution text from MR.trigSolve, without the "x = ".
 const genT = g => g.replace(/^x = /, "").replace(/^0 \+ /, "").replace(/n$/, I("n"));
 // Plan of a step-by-step equation: given, rewrite lines, one line per simple factor (solved by MR.trigSolve),
@@ -35,12 +35,7 @@ function planOf(MR, p){
   return { lines, parts, kept, checkAt, ans };
 }
 // SSA: the case in words (the classification by h = b sin A), from MR.solveTriangle({A, a, b}).
-function caseText(g, S){
-  if (g.A >= 90) return g.a > g.b ? "A ≥ 90°, a > b ⇒ 1 triangle" : "A ≥ 90°, a ≤ b ⇒ no triangle";
-  if (S.count === 0) return "a < h ⇒ no triangle";
-  if (Math.abs(g.a - S.h) < 1e-9) return "a = h ⇒ 1 right triangle";
-  return S.count === 2 ? "h < a < b ⇒ 2 triangles" : "a ≥ b ⇒ 1 triangle";
-}
+const caseText = (g, S) => window.MathRules.ssaCase(g, S);
 const nr = (v, d) => Math.abs(v - Math.round(v)) < 1e-6 ? `= ${Math.round(v)}` : `≈ ${v.toFixed(d)}`;
 const DIRS = ["e", "ne", "n", "nw", "w", "sw", "s", "se"], dirOf = (dx, dy) => DIRS[((Math.round(Math.atan2(dy, dx) / (PI / 4)) % 8) + 8) % 8];
 const KS = [[-Math.sqrt(3), "−√3"], [-1.2, "−1.2"], [-1, "−1"], [-Math.sqrt(3) / 2, "−√3/2"], [-Math.SQRT1_2, "−√2/2"], [-0.5, "−1/2"], [-0.3, "−0.3"], [0, "0"], [0.3, "0.3"], [0.5, "1/2"], [Math.SQRT1_2, "√2/2"], [Math.sqrt(3) / 2, "√3/2"], [1, "1"], [1.2, "1.2"], [Math.sqrt(3), "√3"]];

@@ -1,10 +1,12 @@
-/* ============ Trigonometry kit (loads after kit-math.js; extends MathRules and MathKit) ============
+/* ============ Subject kit: Trigonometry (loads after subjects/math.js; extends MathRules and MathKit) ============
    1. MathRules (DOM-free, tested in tests/trig.test.js): angles as exact multiples of π (Q), degrees/DMS, quadrants,
       reference angles, exact values of all six functions at multiples of π/12, solving fn(B(x − C)) = k on an interval,
       triangle solving (SSS, SAS, ASA/AAS, SSA with 0/1/2 solutions), areas, vectors, polar ↔ rectangular, complex polar
-      form, De Moivre powers and nth roots.
+      form, De Moivre powers and nth roots; plus helpers moved from the trig labs (right-triangle ratios, SSA case text,
+      asymptote text, cable tensions, exact cis text, the polar-graph families).
    2. MathKit.attach(k) also adds: P.piAxes, P.angleArc, P.vec, P.tri, k.fit, k.unitCircle, k.polarPlane (+ P.polarCurve, P.pp, P.ray).
-   API summary: web/WRITER-PACK-MATH.md § Trigonometry. */
+   API summary: docs/subjects/MATH.md § Trigonometry. The unit circle and polar plane are math-only for now; they move
+   to the categorical plane kit once a second subject needs them. */
 (function(){
 const W = window, MR = W.MathRules, { Q } = MR, MI = "−", PI = Math.PI;
 const TAU = 2 * PI, D2R = PI / 180;
@@ -101,7 +103,7 @@ const keyPts = (fn, A = 1, B = 1, C = 0, D = 0) => { const P = TAU / Math.abs(B)
   const h = fn === "cos" || fn === "sec" ? [1, 0, -1, 0, 1] : [0, 1, 0, -1, 0]; return h.map((v, i) => ({ x: C + i * P / 4, y: D + A * v })); };
 const period = (fn, B = 1) => ((fn === "tan" || fn === "cot") ? PI : TAU) / Math.abs(B);
 // vertical asymptotes of A·fn(B(x − C)) + D in [lo, hi] (tan, sec: cos = 0; cot, csc: sin = 0)
-const asymptotes = (fn, B = 1, C = 0, lo = -10, hi = 10) => { if (fn === "sin" || fn === "cos") return []; const off = (fn === "tan" || fn === "sec") ? PI / 2 : 0, out = [];
+const asymptotes = (fn, B = 1, C = 0, lo = -10, hi = 10) => { if (fn === "sin" || fn === "cos" || !B || !isFinite(B)) return []; B = Math.abs(B); /* the set {off + nπ} is symmetric, so B < 0 gives the same lines as |B| */ const off = (fn === "tan" || fn === "sec") ? PI / 2 : 0, out = [];
   for (let n = Math.ceil((B * (lo - C) - off) / PI - 1e-9); ; n++) { const x = (off + n * PI) / B + C; if (x > hi + 1e-12) break; if (x >= lo - 1e-12) out.push(x); if (out.length > 400) break; } return out.sort((a, b) => a - b); };
 // "y = 2 sin(3(x − π/4)) + 1" (factored B(x − C) form); o.html colours A c3, B c2, C c1, D c4
 function sinEq(fn, A = 1, B = 1, C = 0, D = 0, o = {}){ const html = o.html, w = (s, cl) => (html ? `<span class="${cl}">${s}</span>` : s);
@@ -193,8 +195,89 @@ const C_ = {
 };
 const cisT = (r, q, o = {}) => `${o.r || MR.fmtN(r, 4)}(cos ${piT(q)} + i sin ${piT(q)})`;
 
+/* ---------- moved from the trig-b* labs (tested in tests/trig.test.js) ---------- */
+// reduceDeg(θ) → {r, k}: the coterminal angle r in [0°, 360°) and the integer k with r = θ + 360k
+const reduceDeg = th => { const r = +((((th % 360) + 360) % 360).toFixed(9)) % 360; return { r, k: Math.round((r - th) / 360) }; };
+// Exact ratio √(P/Q2) of two sides given their squares (integers > 0), rationalised: ratioExact(9, 41) → {t: "3√41/41", v: 0.4685…}
+function ratioExact(P, Q2){
+  const r = MR.sqrtQ(Q(P, Q2)), s = r.s, t = r.t, v = Math.sqrt(P / Q2);
+  if (t === 1) return { t: MR.qT(s), v };
+  const num = (s.n === 1 ? "" : s.n) + "√" + t;
+  return { t: s.d === 1 ? num : num + "/" + s.d, v };
+}
+// The six ratios of the acute angle whose opposite leg is o and adjacent leg a (integers), from the side squares:
+// sixRatios(3, 4).sin → {num: "opp", den: "hyp", rawN: "3", rawD: "5", exact: "3/5", v: 0.6}; also hyp2, hypT
+const RATIO = { sin: ["opp", "hyp"], cos: ["adj", "hyp"], tan: ["opp", "adj"], csc: ["hyp", "opp"], sec: ["hyp", "adj"], cot: ["adj", "opp"] };
+function sixRatios(o, a){
+  const sq = { opp: o * o, adj: a * a, hyp: o * o + a * a }, out = { hyp2: sq.hyp, hypT: sideT(sq.hyp) };
+  for (const [fn, [n, d]] of Object.entries(RATIO)) { const ex = ratioExact(sq[n], sq[d]); out[fn] = { num: n, den: d, rawN: sideT(sq[n]), rawD: sideT(sq[d]), exact: ex.t, v: ex.v }; }
+  return out;
+}
+// General vertical asymptote of A·fn(B(x − C)) + D as text (spacing π/|B|): asymGenT("tan", 2, 0) = "x = π/4 + nπ/2"
+const asymGenT = (fn, B, C) => { const sp = Q.inv(Q(Math.abs(B))), x0 = asymptotes(fn, B, C, -1e-9, 40)[0], n = `${sp.n === 1 ? "" : sp.n}nπ${sp.d === 1 ? "" : "/" + sp.d}`;
+  return Math.abs(x0) < 1e-9 ? `x = ${n}` : `x = ${piFmt(x0)} + ${n}`; };
+// The other of sin/cos (fn names the one wanted) from an exact value v (Q) and the quadrant (1–4), by sin² + cos² = 1:
+// a Q, or null unless 1 − v² is a rational square. otherSinCos(Q(3, 5), 2, "cos") = −4/5
+function otherSinCos(v, quad, fn){ const r = MR.sqrtQ(Q.sub(1, Q.mul(v, v))); if (r.t !== 1) return null;
+  const pos = fn === "cos" ? (quad === 1 || quad === 4) : (quad === 1 || quad === 2); return pos ? r.s : Q.neg(r.s); }
+// Angle in radians as text: exact multiple of π (denominator ≤ 48) or 4 decimals
+const angT = x => { const q = piQ(x, 48); return q ? piT(q) : x.toFixed(4); };
+// Reference angle (radians) of fn x = k, and the quadrants where sin/cos/tan has the sign of k (SIGN_QUADS[fn][k > 0 ? 0 : 1])
+const refOf = (fn, k) => fn === "sin" ? Math.asin(Math.min(1, Math.abs(k))) : fn === "cos" ? Math.acos(Math.min(1, Math.abs(k))) : Math.atan(Math.abs(k));
+const SIGN_QUADS = { sin: ["I and II", "III and IV"], cos: ["I and IV", "II and III"], tan: ["I and III", "II and IV"] };
+// SSA {A, a, b}: the case in words (by h = b sin A), with S = solveTriangle({A, a, b}): "h < a < b ⇒ 2 triangles" …
+function ssaCase(g, S){
+  if (g.A >= 90) return g.a > g.b ? "A ≥ 90°, a > b ⇒ 1 triangle" : "A ≥ 90°, a ≤ b ⇒ no triangle";
+  if (S.count === 0) return "a < h ⇒ no triangle";
+  if (Math.abs(g.a - S.h) < 1e-9) return "a = h ⇒ 1 right triangle";
+  return S.count === 2 ? "h < a < b ⇒ 2 triangles" : "a ≥ b ⇒ 1 triangle";
+}
+// The correction tan⁻¹(b/a) needs to become the direction angle of ⟨a, b⟩: 0, 180 or 360 (degrees); null when a = 0
+const dirFix = v => v[0] === 0 ? null : v[0] < 0 ? 180 : v[1] < 0 ? 360 : 0;
+// Two cables at angles al, be (degrees above the horizontal, on either side) holding weight W: equilibrium tensions [T1, T2]
+const tensions = (W, al, be) => { const r = PI / 180, s = Math.sin((al + be) * r); return [W * Math.cos(be * r) / s, W * Math.cos(al * r) / s]; };
+// Exact terms of m·√s·fn(qπ) (m rational, s a positive integer), like terms merged; null if fn(qπ) is not exact here
+function exTerms(fn, q, m, s = 1){ const e = trigExact(fn, q); if (!e || e.undef) return null; const out = [];
+  e.terms.forEach(([a, t]) => { const [o, i] = MR.sqrtParts(t * s), v = Q.mul(a, Q.mul(Q(m), o)), f = out.find(u => u[1] === i); if (f) f[0] = Q.add(f[0], v); else out.push([v, i]); });
+  return out.filter(([a]) => a.n !== 0); }
+// a + bi text from exact term lists: exZStr([[−1, 3]], [[1, 1]]) → "−√3 + i"
+function exZStr(re, im){ const val = ts => ts.reduce((s, [a, t]) => s + Q.val(a) * Math.sqrt(t), 0);
+  if (!im.length) return exStr(re); const neg = val(im) < 0, at = exStr(neg ? im.map(([a, t]) => [Q.neg(a), t]) : im);
+  const ip = at === "1" ? "i" : at.includes("/") ? `(${at})i` : at + "i"; return re.length ? `${exStr(re)} ${neg ? MI : "+"} ${ip}` : (neg ? MI : "") + ip; }
+// r cis(qπ) with r = m√s in exact a + bi form (text), or null when qπ is not a multiple of π/12
+const cisExact = (q, m, s = 1) => { const a = exTerms("cos", q, m, s), b = exTerms("sin", q, m, s); return a && b ? exZStr(a, b) : null; };
+// Positive real nth root of an integer R as text: "2", "√2", "³√2"
+const nthRootT = (R, n) => { const m = Math.round(Math.pow(R, 1 / n)); return Math.pow(m, n) === R ? String(m) : (n === 2 ? "" : MR.supT(n)) + "√" + R; };
+// The polar families (OpenStax §10.4). polarFamily(id, a, b, n, fmt) → {eq, br: r(θ) branches, rb: branches for the rectangular
+// graph (NaN where undefined), t1: one full trace from θ = 0, kind, sym, zeros, top: {r, at} | null, petals, ratio, note}.
+// ids (POLAR_FAMILIES): o = circle, l = limaçon (+/−), r = rose, m = lemniscate, sp = spiral; second letter c/s = cos/sin.
+const POLAR_FAMILIES = [["oc", "r = a cos θ"], ["os", "r = a sin θ"], ["lc+", "r = a + b cos θ"], ["lc-", "r = a − b cos θ"], ["ls+", "r = a + b sin θ"], ["ls-", "r = a − b sin θ"],
+  ["rc", "r = a cos nθ"], ["rs", "r = a sin nθ"], ["mc", "r² = a² cos 2θ"], ["ms", "r² = a² sin 2θ"], ["sp", "r = aθ"]];
+function polarFamily(id, a, b = 1, n = 2, fmt = String){
+  const co = v => v === 1 ? "" : fmt(v) + " ", sg = id[2] === "-" ? -1 : 1, sn = id[1] === "s", fn = sn ? Math.sin : Math.cos, F = sn ? "sin" : "cos";
+  const A3 = ["polar axis", "θ = π/2", "pole"], ax = sn ? ["θ = π/2"] : ["polar axis"], norm = t => ((t % TAU) + TAU) % TAU;
+  const seq = (t0, st, t1) => { const o = []; for (let t = t0; t < t1 - 1e-9; t += st) o.push(t); return o; };
+  if (id[0] === "o") return { eq: `r = ${co(a)}${F} θ`, br: [t => a * fn(t)], t1: PI, kind: `circle, diameter ${fmt(a)}`, sym: ax, zeros: [sn ? 0 : PI / 2], top: { r: a, at: [sn ? PI / 2 : 0] },
+    note: `Centre ${sn ? `(0, ${fmt(a / 2)})` : `(${fmt(a / 2)}, 0)`} in x, y. One trace takes θ from 0 to π.` };
+  if (id[0] === "l") { const q = a / b, v = -sg * q, z = [];
+    if (q <= 1) { const u = sn ? Math.asin(v) : Math.acos(v); (sn ? [u, PI - u] : [u, TAU - u]).map(norm).forEach(t => { if (!z.some(w => Math.abs(w - t) < 1e-9)) z.push(t); }); z.sort((s, t) => s - t); }
+    return { eq: `r = ${fmt(a)} ${sg > 0 ? "+" : MI} ${co(b)}${F} θ`, br: [t => a + sg * b * fn(t)], t1: TAU, ratio: q, sym: ax, zeros: z, top: { r: a + b, at: [norm((sn ? PI / 2 : 0) + (sg > 0 ? 0 : PI))] },
+      kind: q < 1 ? "limaçon with an inner loop" : q === 1 ? "cardioid" : q < 2 ? "dimpled limaçon" : "convex limaçon",
+      note: q < 1 ? "a/b < 1: r is negative for part of the turn, and those points form the inner loop." : q === 1 ? "a = b: r falls to 0 once, so the curve comes to a point at the pole."
+        : q < 2 ? "1 < a/b < 2: r stays positive, but the curve bends inward where r is smallest." : "a/b ≥ 2: r stays far from 0 and the curve bulges outward everywhere." }; }
+  if (id[0] === "r") { const t1 = n % 2 ? PI : TAU, p = n % 2 ? n : 2 * n;
+    return { eq: `r = ${co(a)}${F} ${n}θ`, br: [t => a * fn(n * t)], t1, petals: p, kind: `rose, ${p} petals of length ${fmt(a)}`, sym: n % 2 ? ax : A3,
+      zeros: seq(sn ? 0 : PI / (2 * n), PI / n, t1), top: { r: a, at: seq(sn ? PI / (2 * n) : 0, PI / n, t1) },
+      note: n % 2 ? `n = ${n} is odd: ${n} petals, and θ from 0 to π traces the whole rose.` : `n = ${n} is even: 2n = ${p} petals, traced as θ runs from 0 to 2π.` }; }
+  if (id[0] === "m") { const s = t => Math.sqrt(Math.max(0, fn(2 * t))), w = t => Math.sqrt(fn(2 * t));
+    return { eq: `r² = ${fmt(a * a)} ${F} 2θ`, br: [t => a * s(t), t => -a * s(t)], rb: [t => a * w(t), t => -a * w(t)], t1: TAU, kind: "lemniscate", sym: sn ? ["pole"] : A3,
+      zeros: seq(sn ? 0 : PI / 4, PI / 2, TAU), top: { r: a, at: sn ? [PI / 4, 5 * PI / 4] : [0, PI] }, note: `Points exist only where ${F} 2θ ≥ 0; there r = ±${fmt(a)}√(${F} 2θ).` }; }
+  return { eq: `r = ${a === 1 ? "" : fmt(a)}θ`, br: [t => a * t], t1: 3 * PI, kind: "Archimedean spiral", sym: [], zeros: [0], top: null, note: `Each full turn adds 2π · ${fmt(a)} ≈ ${fmt(TAU * a, 2)} to r: the turns are evenly spaced.` };
+}
+
 Object.assign(MR, { piQ, degQ, qDeg, qRad, normQ, normDeg, quadrant, axisOf, refAngle, coterminal, dms, fromDms, piT, piH, degT,
-  trigExact, exactOf, exStr, sideT, sqrtRatio, sixFrom, ucPoint, piFmt, sinusoid, sameCurve, keyPts, period, asymptotes, sinEq, trigSolve, solveTriangle, lawFor, heron, triArea, sinD, cosD, asinD, acosD, V, toPolar, toRect, polarNames, cplx: C_, cisT, TRIG_FN: FN });
+  trigExact, exactOf, exStr, sideT, sqrtRatio, sixFrom, ucPoint, piFmt, sinusoid, sameCurve, keyPts, period, asymptotes, sinEq, trigSolve, solveTriangle, lawFor, heron, triArea, sinD, cosD, asinD, acosD, V, toPolar, toRect, polarNames, cplx: C_, cisT, TRIG_FN: FN,
+  reduceDeg, ratioExact, RATIO_SIDES: RATIO, sixRatios, asymGenT, otherSinCos, angT, refOf, SIGN_QUADS, ssaCase, dirFix, tensions, exTerms, exZStr, cisExact, nthRootT, POLAR_FAMILIES, polarFamily });
 
 /* ---------------- 2. drawing (needs a DOM) ---------------- */
 if (!W.MathKit) return;

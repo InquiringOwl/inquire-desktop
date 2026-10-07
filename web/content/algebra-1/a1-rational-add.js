@@ -67,7 +67,8 @@ ARITH["a1-rational-add"] = {
   },
   unlocksWhy: {
     "a1-rational-eq": "Rational equations are solved by multiplying through by the LCD, the same common denominator built here.",
-    "trig-verify-ids": "Verifying identities often means combining trigonometric fractions, which uses the same common denominator built here."
+    "trig-verify-ids": "Verifying identities often means combining trigonometric fractions, which uses the same common denominator built here.",
+    "pc-partial-fractions": "Partial fractions run the common-denominator step backwards: a single fraction is split into simpler ones, and recombining over an LCD is how each answer is checked."
   },
   beyond: [
     { field: "Algebra II", why: "Complex rational expressions and rational functions are simplified by combining fractions over an LCD." },

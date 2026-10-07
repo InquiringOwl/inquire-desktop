@@ -77,7 +77,8 @@ ARITH["trig-unit-circle"] = {
   },
   unlocksWhy: {
     "trig-any-angle": "The six functions of any angle use a point (x, y) at any distance r from the origin; dividing by r scales it back to the unit circle.",
-    "trig-sin-cos-graphs": "Unwrapping the unit circle onto a number line, with t across and sin t or cos t up, draws the sine and cosine graphs."
+    "trig-sin-cos-graphs": "Unwrapping the unit circle onto a number line, with t across and sin t or cos t up, draws the sine and cosine graphs.",
+    "pc-matrix-transform": "The point (cos <i>θ</i>, sin <i>θ</i>) is where the vector (1, 0) lands after a rotation, so these values fill the columns of the rotation matrix."
   },
   beyond: [
     { field: "Calculus I", why: "The derivatives of sin t and cos t, and the limit of sin t / t as t approaches 0, are proved from the unit circle." },

@@ -74,7 +74,9 @@ ARITH["a2-rational-asym"] = {
     "a1-poly-div": "A slant asymptote is the quotient of polynomial long division, and the remainder shows where the graph crosses it."
   },
   unlocksWhy: {
-    "a2-rational-ineq": "Solving a rational inequality uses the same sign chart, with the zeros of the numerator and denominator as critical values."
+    "a2-rational-ineq": "Solving a rational inequality uses the same sign chart, with the zeros of the numerator and denominator as critical values.",
+    "pc-limits-graph": "Vertical asymptotes, holes and horizontal asymptotes are the three behaviours of a rational graph that a limit statement must describe, such as the limit being infinite at an asymptote and finite at a hole.",
+    "pc-limits-infinity": "Comparing the degrees of numerator and denominator gives the horizontal asymptote, which is the limit of a rational function as <span class=\"m\"><i>x</i> → ±∞</span>, and the vertical asymptotes give the infinite limits."
   },
   beyond: [
     { field: "Calculus I", why: "Horizontal asymptotes are limits at infinity, and slant asymptotes are found the same way; curve sketching adds increasing, decreasing and concavity to this procedure." },

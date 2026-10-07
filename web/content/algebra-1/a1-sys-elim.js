@@ -70,7 +70,8 @@ ARITH["a1-sys-elim"] = {
   },
   unlocksWhy: {
     "a2-sys-three": "Each step of a three-variable system is the two-variable elimination you already know: scale equations so a variable cancels, add, and solve.",
-    "a1-sys-apps": "Word problems about mixtures, tickets, interest and motion usually give two equations in standard form, which elimination solves quickly."
+    "a1-sys-apps": "Word problems about mixtures, tickets, interest and motion usually give two equations in standard form, which elimination solves quickly.",
+    "pc-linear-programming": "The corner points of a feasible region are found by solving pairs of boundary lines, and elimination is the fastest way to solve each pair."
   },
   beyond: [
     { field: "Linear Algebra", why: "Row reduction of a matrix is elimination written in compact form, and it answers existence and uniqueness questions for any linear system." },

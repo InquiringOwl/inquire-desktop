@@ -239,6 +239,41 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   const era = await p.$eval('.era', e => getComputedStyle(e).backgroundImage);
   ok(!/28, 42, 68/.test(era), 'era bar follows the theme', era);
 
+  /* ---------- lab kit: draggable points (mouse + keyboard, curve-glued) and scrubbable numbers ---------- */
+  {
+    const q = await page(); await q.goto(URL0 + '#menu'); await wait(500);
+    await q.addScriptTag({ path: path.join(R, 'tests/fixtures/_kit-demo-lab.js') });
+    await q.evaluate(() => { location.hash = 'a1-slope-forms'; }); await wait(900);
+    const kd = () => q.evaluate(() => window.__kd);
+    const at = (x, y) => q.evaluate(([x, y]) => { const P = window.__kdP, r = document.querySelector('.stage canvas').getBoundingClientRect(); return [r.left + P.X(x), r.top + P.Y(y)]; }, [x, y]);
+    let [px, py] = await at(1, 1); const [tx, ty] = await at(3, 4);
+    await q.mouse.move(px, py); await q.mouse.down(); await q.mouse.move(tx, ty, { steps: 6 }); await q.mouse.up(); await wait(100);
+    ok(JSON.stringify((await kd()).A) === '[3,4]', 'drag: a free point follows the mouse and snaps to 0.5', (await kd()).A);
+    [px, py] = await at(2, 6); const [ux, uy] = await at(-1, 10);
+    await q.mouse.move(px, py); await q.mouse.down(); await q.mouse.move(ux, uy, { steps: 6 }); await q.mouse.up(); await wait(100);
+    let B = (await kd()).B; ok(Math.abs(B[0] + 1) < 0.06 && Math.abs(B[1] - (B[0] * B[0] + 2)) < 1e-6, 'drag: a curve-glued point slides along y = ax² + b', B);
+    await q.focus('.stage canvas'); await q.keyboard.press('ArrowRight'); await wait(60);
+    ok((await kd()).A[0] === 3.5, 'keyboard: arrow moves the focused point one snap step', (await kd()).A);
+    await q.keyboard.press('Tab'); await q.keyboard.press('ArrowRight'); await wait(60); const B2 = (await kd()).B;
+    ok(B2[0] > B[0] && Math.abs(B2[1] - (B2[0] * B2[0] + 2)) < 1e-6, 'keyboard: Tab to the next point, arrows keep it on the curve', B2);
+    await q.$eval('.eqline', e => e.scrollIntoView({ block: 'center' })); await wait(100);
+    const kv = await q.$('.eqline .kv[data-kv="a"]'); const r = await kv.boundingBox();
+    await q.mouse.move(r.x + r.width / 2, r.y + r.height / 2); await q.mouse.down(); await q.mouse.move(r.x + r.width / 2 + 31, r.y + r.height / 2, { steps: 5 }); await q.mouse.up(); await wait(120);
+    ok((await kd()).a === 3.5, 'scrub: dragging a number 31 px right adds 5 steps of 0.5', (await kd()).a);
+    const B3 = (await kd()).B; ok(Math.abs(B3[1] - (3.5 * B3[0] * B3[0] + 2)) < 1e-6, 'scrub: changing a moves the curve-glued point with the curve', B3);
+    const r2 = await (await q.$('.eqline .kv[data-kv="b"]')).boundingBox(); await q.mouse.click(r2.x + r2.width / 2, r2.y + r2.height / 2); await wait(80);
+    ok(!!(await q.$('.kv-edit')), 'click: a number opens a typing box');
+    await q.keyboard.type('x'); await q.keyboard.press('Enter'); await wait(60);
+    ok(!!(await q.$('.kv-edit.bad')) && (await kd()).b === 2, 'typing junk is refused and keeps the value');
+    await q.fill('.kv-edit', '-7/2'); await q.keyboard.press('Enter'); await wait(120);
+    ok((await kd()).b === -3 && !(await q.$('.kv-edit')), 'typing −7/2 sets b (−3.5 snapped to its step of 1)', (await kd()).b);
+    await q.focus('.eqline .kv[data-kv="b"]'); await q.keyboard.press('ArrowUp'); await q.keyboard.press('ArrowUp'); await wait(120);
+    ok((await kd()).b === -1, 'keyboard: ↑ on a focused number steps it (focus survives the re-render)', (await kd()).b);
+    ok(await q.evaluate(() => document.activeElement && document.activeElement.dataset.kv === 'b'), 'focus stays on the number after re-render');
+    ok(/x2 − 1$/.test(await q.$eval('.eqline', e => e.textContent.replace(/\s+/g, ' ').trim())), 'S.term puts the sign outside the number (y = 3.5x² − 1)', await q.$eval('.eqline', e => e.textContent));
+    await q.close();
+  }
+
   ok(!errs.length, 'no page errors', errs);
   await b.close();
   fails.forEach(f => console.log('FAIL ' + f));

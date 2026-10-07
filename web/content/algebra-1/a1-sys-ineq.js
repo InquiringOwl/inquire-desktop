@@ -65,7 +65,9 @@ ARITH["a1-sys-ineq"] = {
     "a1-sys-graph": "You graph two boundary lines on the same axes and find where they cross, exactly as for a system of equations.",
     "a1-compound": "An AND compound inequality is an intersection of solution sets, and a system of inequalities is the same idea in two dimensions."
   },
-  unlocksWhy: {},
+  unlocksWhy: {
+    "pc-linear-programming": "Linear programming starts from a graphed system of inequalities: the shaded feasible region, with solid or dashed boundaries, is the set of allowed choices whose corner points get tested."
+  },
   beyond: [
     { field: "Linear Algebra", why: "Feasible regions in many variables are convex polytopes described by Ax ≤ b." },
     { field: "Operations Research", why: "The simplex method searches the corner points of the feasible region for the optimal solution." },

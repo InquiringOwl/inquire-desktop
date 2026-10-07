@@ -1,5 +1,5 @@
-// Logic tests for the trigonometry rules (web/src/kit-trig.js → MathRules additions).
-const MR = load('web/src/kit-math.js', 'web/src/kit-trig.js').MathRules;
+// Logic tests for the trigonometry rules (web/kits/subjects/trig.js → MathRules additions).
+const MR = load(...kits(), 'web/kits/subjects/math.js', 'web/kits/subjects/trig.js').MathRules;
 const { Q } = MR, PI = Math.PI;
 const near = (a, b, what, tol = 1e-9) => ok(Math.abs(a - b) < tol, `${what}: got ${a}, want ${b}`);
 const FN = { sin: Math.sin, cos: Math.cos, tan: Math.tan, csc: t => 1 / Math.sin(t), sec: t => 1 / Math.cos(t), cot: t => Math.cos(t) / Math.sin(t) };
@@ -94,4 +94,84 @@ test('sinusoids: functions, key points, periods, asymptotes, equation text', () 
 test('which law', () => {
   eq(['AAS', 'ASA', 'SSA', 'SAS', 'SSS', 'AAA'].map(MR.lawFor), ['sines', 'sines', 'sines', 'cosines', 'cosines', null], 'lawFor');
   for (const g of [{ a: 3, b: 4, c: 5 }, { a: 3, b: 4, C: 50 }, { A: 30, B: 70, c: 4 }, { A: 30, b: 8, a: 5 }]) ok(MR.lawFor(MR.solveTriangle(g).kind), 'kind has a law');
+});
+
+// ---------- rules moved from the trigonometry labs (trig-b1 … trig-b11) ----------
+test('coterminal reduction in degrees', () => {
+  eq([-30, 0, 360, 725, -720, 1e-12].map(MR.reduceDeg), [{ r: 330, k: 1 }, { r: 0, k: 0 }, { r: 0, k: -1 }, { r: 5, k: -2 }, { r: 0, k: 2 }, { r: 0, k: 0 }], 'r in [0, 360) and θ + 360k = r');
+  eq(MR.reduceDeg(359.9999999999), { r: 0, k: -1 }, 'rounding noise next to 360° snaps to 0°');
+  for (const th of [-1000, -359, -1, 1, 359, 361, 1085.5]) { const { r, k } = MR.reduceDeg(th); ok(r >= 0 && r < 360 && Math.abs(th + 360 * k - r) < 1e-9, `reduceDeg(${th})`); }
+});
+
+test('right-triangle ratios from the legs, exact', () => {
+  eq([MR.ratioExact(9, 41), MR.ratioExact(9, 25), MR.ratioExact(1, 2), MR.ratioExact(8, 1), MR.ratioExact(25, 4)].map(o => o.t), ['3√41/41', '3/5', '√2/2', '2√2', '5/2'], 'rationalised text');
+  near(MR.ratioExact(9, 41).v, 3 / Math.sqrt(41), 'value');
+  const R = MR.sixRatios(3, 4);
+  eq(['sin', 'cos', 'tan', 'csc', 'sec', 'cot'].map(f => R[f].exact), ['3/5', '4/5', '3/4', '5/3', '5/4', '4/3'], '3-4-5'); eq([R.hyp2, R.hypT, R.sin.rawN, R.sin.rawD, R.sin.num, R.sin.den], [25, '5', '3', '5', 'opp', 'hyp'], 'sides');
+  const U = MR.sixRatios(1, 1); eq(['sin', 'tan', 'sec'].map(f => U[f].exact), ['√2/2', '1', '√2'], '45°'); eq(U.hypT, '√2', 'hypotenuse √2');
+  eq(MR.sixRatios(2, 3).csc.exact, '√13/2', 'irrational hypotenuse');
+  for (const [o, a] of [[1, 2], [5, 12], [2, 7]]) { const S = MR.sixRatios(o, a), t = Math.atan2(o, a); for (const f of Object.keys(FN)) near(S[f].v, FN[f](t), `${f} of the ${o}-${a} triangle`); }
+  eq(MR.RATIO_SIDES.cot, ['adj', 'opp'], 'cot = adj/opp');
+});
+
+test('asymptote text, other function by the Pythagorean identity, angle text, reference angles', () => {
+  eq(['tan', 'sec', 'cot', 'csc'].map(f => MR.asymGenT(f, 1, 0)), ['x = π/2 + nπ', 'x = π/2 + nπ', 'x = nπ', 'x = nπ'], 'basic graphs');
+  eq([MR.asymGenT('tan', 2, 0), MR.asymGenT('tan', 0.5, PI / 4), MR.asymGenT('cot', 3, PI / 6), MR.asymGenT('sec', 2 / 3, 0)], ['x = π/4 + nπ/2', 'x = 5π/4 + 2nπ', 'x = π/6 + nπ/3', 'x = 3π/4 + 3nπ/2'], 'B and C');
+  const o = (v, q, f) => { const r = MR.otherSinCos(v, q, f); return r && r.toString(); };
+  eq([o(Q(3, 5), 2, 'cos'), o(Q(3, 5), 1, 'cos'), o(Q(-5, 13), 3, 'sin'), o(Q(-5, 13), 4, 'cos'), o(Q(0), 2, 'sin')], ['-4/5', '4/5', '-12/13', '12/13', '1'], 'sign from the quadrant');
+  eq(o(Q(1, 2), 1, 'cos'), null, '√3/2 is not rational: null');
+  eq([0, PI / 6, -5 * PI / 6, 2.5, 7 * PI / 48, PI / 49].map(MR.angT), ['0', 'π/6', '−5π/6', '2.5000', '7π/48', '0.0641'], 'angT');
+  eq(['sin', 'cos', 'tan'].map(f => +MR.refOf(f, -0.5).toFixed(6)), [+(PI / 6).toFixed(6), +(PI / 3).toFixed(6), +Math.atan(0.5).toFixed(6)], 'reference angles use |k|');
+  eq([MR.refOf('sin', 1.2), MR.refOf('cos', -1)], [PI / 2, 0], 'clamped at 1');
+  eq([MR.SIGN_QUADS.sin[0], MR.SIGN_QUADS.cos[1], MR.SIGN_QUADS.tan[1]], ['I and II', 'II and III', 'II and IV'], 'sign quadrants');
+});
+
+test('SSA case text agrees with the solver', () => {
+  const cs = g => [MR.ssaCase(g, MR.solveTriangle(g)), MR.solveTriangle(g).count];
+  eq(cs({ A: 40, a: 7, b: 10 }), ['h < a < b ⇒ 2 triangles', 2], 'two triangles'); eq(cs({ A: 35, a: 12, b: 9 }), ['a ≥ b ⇒ 1 triangle', 1], 'a ≥ b');
+  eq(cs({ A: 50, a: 5, b: 8 }), ['a < h ⇒ no triangle', 0], 'too short'); eq(cs({ A: 30, a: 5, b: 10 }), ['a = h ⇒ 1 right triangle', 1], 'exactly h: right triangle');
+  eq(cs({ A: 110, a: 15, b: 10 }), ['A ≥ 90°, a > b ⇒ 1 triangle', 1], 'obtuse, a > b'); eq(cs({ A: 120, a: 8, b: 11 }), ['A ≥ 90°, a ≤ b ⇒ no triangle', 0], 'obtuse, a ≤ b');
+  eq(cs({ A: 90, a: 5, b: 5 }), ['A ≥ 90°, a ≤ b ⇒ no triangle', 0], 'right angle, a = b');
+  for (let A = 15; A < 180; A += 15) for (const a of [2, 4, 6, 8, 10]) { const g = { A, a, b: 7 }, n = MR.solveTriangle(g).count, t = MR.ssaCase(g, MR.solveTriangle(g)); ok(t.endsWith(n === 0 ? 'no triangle' : n === 1 ? '1 triangle' : '2 triangles'), `${A}°, a = ${a}: ${t} vs ${n}`); }
+});
+
+test('vectors: direction correction and cable tensions', () => {
+  eq([[3, 4], [-3, 4], [-3, -4], [3, -4], [0, 5], [5, 0], [0, -2], [-2, 0]].map(MR.dirFix), [0, 180, 180, 360, null, 0, null, 180], 'what to add to tan⁻¹(b/a)');
+  for (const v of [[3, 4], [-3, 4], [-3, -4], [3, -4], [-2, 0]]) near(MR.V.naiveDir(v) + MR.dirFix(v), MR.V.dir(v), `direction of ⟨${v}⟩`, 1e-9);
+  const [a, b] = MR.tensions(100, 30, 60); near(a, 50, 'T1'); near(b, 50 * Math.sqrt(3), 'T2');
+  const [c, d] = MR.tensions(100, 30, 30); near(c, 100, 'symmetric 30°: each cable carries W'); near(d, 100, 'symmetric');
+  for (const [W, al, be] of [[80, 20, 50], [12, 70, 35]]) { const [T1, T2] = MR.tensions(W, al, be), r = PI / 180;
+    near(T1 * Math.cos(al * r), T2 * Math.cos(be * r), 'horizontal balance', 1e-9); near(T1 * Math.sin(al * r) + T2 * Math.sin(be * r), W, 'vertical balance', 1e-9); }
+});
+
+test('exact cis text, nth roots', () => {
+  const T = t => t && t.map(([a, i]) => [a.toString(), i]);
+  eq([T(MR.exTerms('cos', Q(1, 4), 2)), T(MR.exTerms('cos', Q(1, 4), 1, 2)), T(MR.exTerms('sin', Q(1, 12), 4)), T(MR.exTerms('sin', Q(1), 3)), T(MR.exTerms('cos', Q(1, 6), 2, 3))],
+    [[['1', 2]], [['1', 1]], [['1', 6], ['-1', 2]], [], [['3', 1]]], 'terms: √2 merges, zero dropped, 2√3·√3/2 = 3');
+  eq([MR.exTerms('tan', Q(1, 2), 1), MR.exTerms('sin', Q(1, 5), 1)], [null, null], 'undefined or not a multiple of π/12');
+  eq([MR.cisExact(Q(5, 6), 2), MR.cisExact(Q(1, 4), 1, 2), MR.cisExact(Q(3, 2), 3), MR.cisExact(Q(1), 1), MR.cisExact(Q(0), 5), MR.cisExact(Q(1, 3), 1), MR.cisExact(Q(-2, 3), Q(1, 2)), MR.cisExact(Q(1, 12), 1)],
+    ['−√3 + i', '1 + i', '−3i', '−1', '5', '1/2 + (√3/2)i', '−1/4 − (√3/4)i', '(√6 + √2)/4 + ((√6 − √2)/4)i'], 'r cis θ → a + bi');
+  eq(MR.cisExact(Q(1, 5), 1), null, 'not exact');
+  eq([MR.exZStr([], []), MR.exZStr([[Q(1), 1]], [[Q(-1), 1]]), MR.exZStr([], [[Q(1, 2), 3]])], ['0', '1 − i', '(√3/2)i'], 'exZStr');
+  eq([[8, 3], [2, 2], [16, 4], [2, 3], [5, 5], [1, 7], [27, 3]].map(([R, n]) => MR.nthRootT(R, n)), ['2', '√2', '2', '³√2', '⁵√5', '1', '3'], 'nth roots');
+});
+
+test('polar families', () => {
+  const f = (...a) => { const o = MR.polarFamily(...a); return [o.eq, o.kind, +(o.t1 / PI).toFixed(3), o.zeros.map(z => +(z / PI).toFixed(4))]; };
+  eq(f('oc', 4), ['r = 4 cos θ', 'circle, diameter 4', 1, [0.5]], 'circle'); eq(f('os', 1), ['r = sin θ', 'circle, diameter 1', 1, [0]], 'unit coefficient omitted');
+  eq(f('lc+', 1, 2), ['r = 1 + 2 cos θ', 'limaçon with an inner loop', 2, [0.6667, 1.3333]], 'inner loop: r = 0 twice');
+  eq(f('lc-', 2, 2), ['r = 2 − 2 cos θ', 'cardioid', 2, [0]], 'cardioid: one zero'); eq(f('ls+', 3, 2), ['r = 3 + 2 sin θ', 'dimpled limaçon', 2, []], 'dimpled: no zeros');
+  eq(f('ls-', 4, 1), ['r = 4 − sin θ', 'convex limaçon', 2, []], 'convex'); eq(MR.polarFamily('ls-', 4, 1).top.at.map(t => t / PI), [1.5], 'farthest point opposite the + case');
+  eq(f('rc', 3, 1, 3), ['r = 3 cos 3θ', 'rose, 3 petals of length 3', 1, [0.1667, 0.5, 0.8333]], 'odd n: n petals over [0, π)');
+  eq(f('rs', 2, 1, 2), ['r = 2 sin 2θ', 'rose, 4 petals of length 2', 2, [0, 0.5, 1, 1.5]], 'even n: 2n petals over [0, 2π)');
+  eq(f('mc', 2), ['r² = 4 cos 2θ', 'lemniscate', 2, [0.25, 0.75, 1.25, 1.75]], 'lemniscate'); eq(MR.polarFamily('ms', 3).sym, ['pole'], 'sin lemniscate: pole symmetry only');
+  const m = MR.polarFamily('mc', 2); eq([m.br.length, m.br[0](PI / 2), m.br[1](0), isNaN(m.rb[0](PI / 2))], [2, 0, -2, true], 'branches: clamped for the polar trace, NaN for the rectangular graph');
+  eq(f('sp', 1), ['r = θ', 'Archimedean spiral', 3, [0]], 'spiral'); eq(MR.polarFamily('sp', 1).top, null, 'spiral has no maximum');
+  eq(MR.polarFamily('sp', 0.5, 1, 2, (v, d) => v.toFixed(d || 1)).eq, 'r = 0.5θ', 'custom number format');
+  for (const [id] of MR.POLAR_FAMILIES) { const o = MR.polarFamily(id, 2, 1, 3); for (const z of o.zeros) ok(o.br.some(b => Math.abs(b(z)) < 1e-6), `${id}: r = 0 at each listed zero`); }
+});
+
+test('asymptotes: negative B gives the same lines as |B| (used to loop forever)', () => {
+  eq(MR.asymptotes('tan', -2, 0, -2, 2).map(x => +x.toFixed(9)), MR.asymptotes('tan', 2, 0, -2, 2).map(x => +x.toFixed(9)), 'tan, B = −2');
+  eq(MR.asymptotes('cot', 0, 0, -2, 2), [], 'B = 0: no period, no list');
 });

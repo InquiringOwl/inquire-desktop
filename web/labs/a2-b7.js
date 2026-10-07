@@ -4,37 +4,11 @@ const L = window.LABS;
 const MI = "−";
 const MRx = () => window.MathRules;
 
-/* ---------- DOM-free helpers (kit additions: candidates for MathRules, with tests) ---------- */
-// signIntervals(R): R = MathRules.rational(num, den). Sign of f on each interval between its critical values (real zeros
-// of the reduced numerator and of the reduced denominator): [{lo, hi, t, s}], lo/hi = null for ∓∞, t = test value, s = ±1.
-function signIntervals(R){
-  const { Poly } = MRx(), n1 = R.reduced.num, d1 = R.reduced.den;
-  const cr = [...R.zeros.map(z => z.x), ...R.vas.map(v => v.x)].sort((a, b) => a - b).filter((v, i, a) => !i || Math.abs(v - a[i - 1]) > 1e-9);
-  const ends = [null, ...cr, null], out = [];
-  for (let i = 0; i < ends.length - 1; i++) {
-    const lo = ends[i], hi = ends[i + 1], t = lo === null && hi === null ? 0 : lo === null ? hi - 1 : hi === null ? lo + 1 : (lo + hi) / 2;
-    out.push({ lo, hi, t, s: Math.sign(Poly.evalN(n1, t) / Poly.evalN(d1, t)) });
-  }
-  return out;
-}
-// asymCross(R): where the graph meets its horizontal or slant asymptote: real zeros, inside the domain, of the remainder
-// of reduced numerator ÷ reduced denominator (f − Q = rem/den). [] when there is no such asymptote or no crossing.
-function asymCross(R){
-  const { Poly } = MRx();
-  if (R.asym.type !== "horizontal" && R.asym.type !== "slant") return [];
-  const r = Poly.divmod(R.reduced.num, R.reduced.den).r;
-  if (Poly.isZero(r)) return [];
-  return Poly.realRoots(r).filter(z => !R.excluded.some(e => Math.abs(e.x - z.x) < 1e-9));
-}
-// variation(type, x0, y0): exact constant of variation through (x0, y0) for y = kxⁿ or y = k/xⁿ, plus y(x) and the factor
-// a doubling of x causes. type: "direct" | "inverse" | "square" | "invsq".
-const VAR = { direct: { n: 1, inv: false }, inverse: { n: 1, inv: true }, square: { n: 2, inv: false }, invsq: { n: 2, inv: true } };
-function variation(type, x0, y0){
-  const { Q } = MRx(), T = VAR[type], xn = Q.pow(Q(x0), T.n);
-  const kq = T.inv ? Q.mul(Q(y0), xn) : Q.div(Q(y0), xn);
-  const y = x => (T.inv ? Q.div(kq, Q.pow(Q(x), T.n)) : Q.mul(kq, Q.pow(Q(x), T.n)));
-  return { k: kq, y, f: x => (T.inv ? Q.val(kq) / Math.pow(x, T.n) : Q.val(kq) * Math.pow(x, T.n)), dbl: T.inv ? Q(1, 2 ** T.n) : Q(2 ** T.n) };
-}
+/* ---------- DOM-free helpers: sign chart, crossing the asymptote and variation are in MathRules (web/kits/subjects/math.js) ---------- */
+const signIntervals = R => MRx().signIntervals(R);
+const asymCross = R => MRx().asymCross(R);
+const variation = (type, x0, y0) => MRx().variation(type, x0, y0);
+const VAR = window.MathRules.VARIATION;
 
 /* ---------- shared formatting ---------- */
 const ix = "<i>x</i>";

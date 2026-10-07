@@ -1,4 +1,4 @@
-/* ============ Computer Science lab kit (Programming Fundamentals onward) ============
+/* ============ Subject kit: Computer Science (Programming Fundamentals onward) ============
    Every program a lab shows is REAL Python: write it in web/cs-src/<topic-id>.py and run
    `python3 tools/pytrace.py <topic-id>`; that records each step CPython takes into web/traces/<topic-id>.js
    (window.CSTraces["<id>/<program>"]). Labs only play traces back, so a lab can never disagree with Python.

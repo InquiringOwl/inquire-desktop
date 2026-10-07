@@ -72,7 +72,9 @@ ARITH["a2-func-ops"] = {
     "a1-poly-mult": "Products such as (fg)(x) and compositions such as (x + 1)² expand by multiplying polynomials."
   },
   unlocksWhy: {
-    "a2-inverses": "An inverse function is defined by composition: f(f⁻¹(x)) = x and f⁻¹(f(x)) = x."
+    "a2-inverses": "An inverse function is defined by composition: f(f⁻¹(x)) = x and f⁻¹(f(x)) = x.",
+    "pc-function-behavior": "Evaluating <i>f</i> at two inputs and combining the outputs, as in <i>f</i>(<i>b</i>) − <i>f</i>(<i>a</i>), is the arithmetic behind comparing how fast two functions change.",
+    "pc-parametric": "Composing functions, feeding the output of one into the next, is how <i>x</i>(<i>t</i>) and <i>y</i>(<i>t</i>) are combined and how a parameter is eliminated to leave <i>y</i> as a function of <i>x</i>."
   },
   beyond: [
     { field: "Calculus I", why: "The chain rule differentiates a composition f(g(x)) by its outer and inner parts, so decomposing functions is daily work." },

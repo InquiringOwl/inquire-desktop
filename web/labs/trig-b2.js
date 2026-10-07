@@ -3,25 +3,9 @@
 const L = window.LABS;
 const MI = "−";
 
-/* ---------- DOM-free helpers (kit additions: candidates for MathRules, with tests) ---------- */
-// Length √n2 of a side given its square, as text: sideT(25) → "5", sideT(41) → "√41", sideT(8) → "2√2".
-function sideT(n2){ const [s, t] = window.MathRules.sqrtParts(n2); return t === 1 ? String(s) : (s === 1 ? "" : s) + "√" + t; }
-// Exact value of the ratio of two sides given their squares, rationalized: ratioExact(9, 41) → {t: "3√41/41", v: 0.4685…}.
-// √(P/Q2) = s·√t with s rational and t square-free (MathRules.sqrtQ).
-function ratioExact(P, Q2){
-  const MR = window.MathRules, r = MR.sqrtQ(MR.Q(P, Q2)), s = r.s, t = r.t, v = Math.sqrt(P / Q2);
-  if (t === 1) return { t: MR.qT(s), v };
-  const num = (s.n === 1 ? "" : s.n) + "√" + t;
-  return { t: s.d === 1 ? num : num + "/" + s.d, v };
-}
-// The six ratios of the acute angle at the vertex whose opposite leg is o and adjacent leg a (integers).
-// sixRatios(3, 4).sin → {num: "opp", den: "hyp", raw: "3/5", exact: "3/5", v: 0.6}
-const RATIO = { sin: ["opp", "hyp"], cos: ["adj", "hyp"], tan: ["opp", "adj"], csc: ["hyp", "opp"], sec: ["hyp", "adj"], cot: ["adj", "opp"] };
-function sixRatios(o, a){
-  const sq = { opp: o * o, adj: a * a, hyp: o * o + a * a }, out = { hyp2: sq.hyp, hypT: sideT(sq.hyp) };
-  for (const [fn, [n, d]] of Object.entries(RATIO)) { const ex = ratioExact(sq[n], sq[d]); out[fn] = { num: n, den: d, rawN: sideT(sq[n]), rawD: sideT(sq[d]), exact: ex.t, v: ex.v }; }
-  return out;
-}
+/* ---------- DOM-free helpers: sideT, ratioExact and sixRatios are MathRules (web/kits/subjects/trig.js) ---------- */
+const sixRatios = (o, a) => window.MathRules.sixRatios(o, a);
+const RATIO = window.MathRules.RATIO_SIDES;   // fn → [numerator side, denominator side]
 
 const CSS = `.tb2{font-size:15px;line-height:1.35}
 .tb2 .hd{color:var(--muted);font-size:13px;margin:2px 0 8px}

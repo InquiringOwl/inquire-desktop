@@ -7,11 +7,7 @@ const MI = "−";
 // Which law starts a triangle of the given case: AAS, ASA, SSA → "sines" (SSA: check 0, 1 or 2 triangles); SAS, SSS → "cosines".
 const lawFor = kind => (kind === "SAS" || kind === "SSS") ? "cosines" : kind === "AAA" ? "none" : "sines";
 // Exact √(N/D) as text with integer N, D (N/D > 0): rootText(216, 1) → "6√6", rootText(9, 4) → "3/2".
-function rootText(N, D){
-  const MR = window.MathRules, r = MR.sqrtQ(MR.Q(N, D)), s = r.s;
-  if (r.t === 1) return MR.qT(s);
-  const num = (s.n === 1 ? "" : s.n) + "√" + r.t; return s.d === 1 ? num : num + "/" + s.d;
-}
+const rootText = (N, D) => window.MathRules.ratioExact(N, D).t;
 // Compass direction (for label placement) of a math-coordinate offset.
 const DIRS = ["e", "ne", "n", "nw", "w", "sw", "s", "se"];
 const dirOf = (dx, dy) => DIRS[((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) % 8) + 8) % 8];

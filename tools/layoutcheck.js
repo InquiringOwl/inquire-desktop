@@ -9,7 +9,7 @@
 //   readout    the readout panel needs scrolling on desktop
 //   console    JavaScript errors or console errors/warnings
 //   (states: each mode as it opens, after pressing the first two control buttons, and after pressing Step/Next up to 8×)
-//   leak       an answer the lab declared with k.guard([...]) (kit-math) is visible (readout, stage text or canvas)
+//   leak       an answer the lab declared with k.guard([...]) (universal kit) is visible (readout, stage text or canvas)
 //              when a mode first opens, before any step or control has been used
 // Run:  node tools/layoutcheck.js <topic-id> [<id>…]      (no ids: every topic; slower)
 //       ONLY=desktop|phone  one width only.

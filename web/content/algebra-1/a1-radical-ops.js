@@ -67,7 +67,8 @@ ARITH["a1-radical-ops"] = {
   },
   unlocksWhy: {
     "a2-complex": "Writing <span class=\"m\">√(−<i>b</i>) = <i>i</i>√<i>b</i></span> ends with simplifying <span class=\"m\">√<i>b</i></span>, using the product rule for radicals.",
-    "a1-radical-eq": "Solving radical equations requires isolating a radical, squaring binomials that contain radicals, and checking answers by radical arithmetic."
+    "a1-radical-eq": "Solving radical equations requires isolating a radical, squaring binomials that contain radicals, and checking answers by radical arithmetic.",
+    "pc-limit-laws": "Limits that start as 0/0, such as <span class=\"m\">(√(<i>x</i> + 4) − 2)/<i>x</i></span>, are evaluated by multiplying by the conjugate and simplifying the radicals, which is exactly the rationalizing practised here."
   },
   beyond: [
     { field: "Algebra II", why: "Dividing complex numbers uses the same conjugate idea as rationalizing denominators." },

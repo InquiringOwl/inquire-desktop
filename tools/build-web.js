@@ -18,11 +18,11 @@ const dir = d => fs.existsSync(path.join(R, d)) ? fs.readdirSync(path.join(R, d)
 // Content is one file per topic: web/content/<field>/<topic-id>.js
 const tree = d => fs.existsSync(path.join(R, d)) ? fs.readdirSync(path.join(R, d), { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name)).flatMap(e => e.isDirectory() ? tree(d + '/' + e.name) : e.name.endsWith('.js') ? [d + '/' + e.name] : []) : [];
 // Order matters: data (data.js, then each subject's web/src/data-<subject>.js), story art (web/art), every content file,
-// then the lab toolkit, subject kits (web/src/kit-<subject>.js), every lab file, then the app.
+// then the lab kits by layer (web/kits/universal → categorical → subjects, each alphabetical), every lab file, then the app.
+const kitFiles = [...dir('web/kits/universal'), ...dir('web/kits/categorical'), ...dir('web/kits/subjects')];
 const dataSrc = ['web/src/data.js', ...dir('web/src').filter(f => /\/data-[a-z0-9-]+\.js$/.test(f))];
 // Glossary entries (web/glossary/<subject>.js) come right after the data files: they only call DB.addGlossary.
-const files = [...dataSrc, ...dir('web/glossary'), ...dir('web/art'), ...tree('web/content'), 'web/src/labkit.js',
-  ...dir('web/src').filter(f => /\/kit-[a-z0-9-]+\.js$/.test(f)),
+const files = [...dataSrc, ...dir('web/glossary'), ...dir('web/art'), ...tree('web/content'), ...kitFiles,
   ...dir('web/src').filter(f => /\/labs\d*\.js$/.test(f)), ...dir('web/traces'), ...dir('web/labs'), 'web/src/notes.js', 'web/src/notes-widgets.js', 'web/src/app.js', 'web/src/dock.js', 'web/src/achievements.js', 'web/src/textmenu.js', 'web/src/intro.js', 'web/src/eula.js', 'web/src/settings.js'];
 // Files that only define data (DB, ARITH, scenes): safe to run in Node for validate, dump-content and smoke.
 const dataFiles = files.filter(f => dataSrc.includes(f) || f.startsWith('web/glossary/') || f.startsWith('web/art/') || f.startsWith('web/content/'));

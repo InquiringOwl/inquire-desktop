@@ -10,9 +10,8 @@ const nT = v => String(v).replace("-", MI), degN = t => Math.round((((t / D) % 3
 const QN = ["on an axis", "QI", "QII", "QIII", "QIV"];
 const quadXY = (x, y, e = 1e-9) => (Math.abs(x) < e || Math.abs(y) < e ? 0 : x > 0 ? (y > 0 ? 1 : 4) : (y > 0 ? 2 : 3));
 const qF = q => { const s = q.n < 0 ? MI : "", n = Math.abs(q.n); return q.d === 1 ? s + n : s + FR(n, q.d); }, qP = q => `(${qF(q)})`;
-// the other of sin/cos from one exact value and the quadrant (null unless 1 − v² is a rational square)
-function otherQ(MR, v, quad, fn){ const { Q } = MR, r = MR.sqrtQ(Q.sub(1, Q.mul(v, v))); if (r.t !== 1) return null;
-  const pos = fn === "cos" ? (quad === 1 || quad === 4) : (quad === 1 || quad === 2); return pos ? r.s : Q.neg(r.s); }
+// the other of sin/cos from one exact value and the quadrant (null unless 1 − v² is a rational square): MathRules.otherSinCos
+const otherQ = (MR, v, quad, fn) => MR.otherSinCos(v, quad, fn);
 const CSS = `.b6p{font:16px/1.5 var(--math);margin:2px 0 8px}.b6h.narrow~.hintc{display:none}`;   // phone: the steps panel needs the room
 function css(){ if (!document.getElementById("b6-css")) { const s = document.createElement("style"); s.id = "b6-css"; s.textContent = CSS; document.head.appendChild(s); } }
 function box(host){ const e = document.createElement("div"); host.appendChild(e); return h => { if (e.__h !== h) { e.innerHTML = h; e.__h = h; } }; }

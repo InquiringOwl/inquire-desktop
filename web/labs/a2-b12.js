@@ -4,64 +4,13 @@ const L = window.LABS;
 const MI = "−";
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const MRf = () => window.MathRules;
-const gcdI = (a, b) => { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a; };
 
-/* ---------- DOM-free helpers (kit additions: candidates for MathRules, with tests) ---------- */
-// A number in compact scientific text: sci(3162277.66) = "3.16 × 10⁶", sci(31.62) = "31.6", sci(1e14) = "10¹⁴".
-function sci(v, sig = 3){
-  if (v === 0) return "0";
-  const e = Math.floor(Math.log10(Math.abs(v)) + 1e-9);
-  if (e >= -3 && e < 6) return (+v.toPrecision(sig)).toLocaleString("en-US", { maximumFractionDigits: 6 }).replace("-", MI);
-  let m = +(v / 10 ** e).toPrecision(sig), ee = e; if (Math.abs(m) >= 10) { m = +(m / 10).toPrecision(sig); ee++; }
-  return (m === 1 ? "" : String(m).replace("-", MI) + " × ") + "10" + MRf().supT(String(ee));
-}
-// s·√t (s a positive rational Q, t square-free) as text and HTML: radQ(Q(1, 2), 2) → {t: "√2/2", h: …}
-function radQ(s, t){
-  const MR = MRf();
-  if (t === 1) return { t: MR.qT(s), h: MR.qT(s) };
-  const num = (s.n === 1 ? "" : s.n) + "√" + t, numH = (s.n === 1 ? "" : s.n) + `√<span class="mk-ol">${t}</span>`;
-  return { t: s.d === 1 ? num : `${num}/${s.d}`, h: s.d === 1 ? numH : `<span class="fr"><span>${numH}</span><span>${s.d}</span></span>` };
-}
-// Back-substitution for an equation in quadratic form: after solving the u-equation, turn the root u = r (Q) into
-// x-values. kind: "sq" (u = x²), "lin" (u = x − h), "sqrt" (u = √x), "cbrt" (u = ∛x), "inv" (u = 1/x).
-// Returns {xs: [{v, t, h}], rej: reason | null, cand: (for √x = r < 0, the squared candidate x = r²)}.
-function backSub(kind, r, h = 0){
-  const MR = MRf(), Q = MR.Q; r = Q(r); const v = Q.val(r), one = q => ({ v: Q.val(q), t: MR.qT(q), h: MR.qT(q) });
-  if (kind === "sq") {
-    if (v < 0) return { xs: [], rej: "a square is never negative" };
-    if (v === 0) return { xs: [one(Q(0))], rej: null };
-    const s = MR.sqrtQ(r), p = radQ(s.s, s.t), m = Q.val(s.s) * Math.sqrt(s.t);
-    return { xs: [{ v: -m, t: MI + p.t, h: MI + p.h }, { v: m, t: p.t, h: p.h }], rej: null };
-  }
-  if (kind === "lin") return { xs: [one(Q.add(r, h))], rej: null };
-  if (kind === "sqrt") return v < 0 ? { xs: [], rej: "a principal square root is never negative", cand: Q.mul(r, r) } : { xs: [one(Q.mul(r, r))], rej: null };
-  if (kind === "cbrt") return { xs: [one(Q.pow(r, 3))], rej: null };
-  if (kind === "inv") return v === 0 ? { xs: [], rej: "1/x is never 0" } : { xs: [one(Q.inv(r))], rej: null };
-  throw new Error("backSub: unknown kind " + kind);
-}
-// One elimination step on integer equations [a, b, c, d] (ax + by + cz = d): p·A + q·B with variable i removed,
-// signs chosen so the first remaining coefficient is positive, then divided by the common factor g.
-// combine([1,1,1,6], [2,−1,1,3], 0) → {p: 2, q: −1, g: 1, r: [0, 3, 1, 9]}
-function combine(A, B, i){
-  let p, q;
-  if (B[i] === 0) { p = 0; q = 1; }
-  else { p = -B[i]; q = A[i]; const g0 = gcdI(p, q) || 1; p /= g0; q /= g0; }
-  let r = A.map((a, j) => p * a + q * B[j]);
-  const f = r.slice(0, 3).find(v => v !== 0); if (f < 0) { p = -p; q = -q; r = r.map(v => -v); }
-  const g = r.reduce((s, v) => gcdI(s, v), 0) || 1;
-  return { p, q, g, r: r.map(v => v / g) };
-}
-// Solve a 3 × 3 system by the elimination plan used on the page: (4) from (1), (2); (5) from (1), (3), both without x;
-// (6) from (4), (5) without y; then z, y from (4), x from (1). Returns null unless that plan works (a₁ ≠ 0, b₄ ≠ 0,
-// c₆ ≠ 0). Values are exact rationals (Q).
-function elim3(E){
-  const Q = MRf().Q; if (E[0][0] === 0) return null;
-  const s4 = combine(E[0], E[1], 0), s5 = combine(E[0], E[2], 0); if (s4.r[1] === 0) return null;
-  const s6 = combine(s4.r, s5.r, 1); if (s6.r[2] === 0 || s6.r[1] !== 0) return null;
-  const z = Q(s6.r[3], s6.r[2]), y = Q.div(Q.sub(s4.r[3], Q.mul(s4.r[2], z)), s4.r[1]);
-  const x = Q.div(Q.sub(Q.sub(E[0][3], Q.mul(E[0][1], y)), Q.mul(E[0][2], z)), E[0][0]);
-  return { s4, s5, s6, x, y, z };
-}
+/* ---------- DOM-free helpers: sci, radFrac, backSub and the 3 × 3 elimination plan are in MathRules (web/kits/subjects/math.js) ---------- */
+const sci = (v, sig) => MRf().sci(v, sig);
+const radQ = (s, t) => MRf().radFrac(s, t);
+const backSub = (kind, r, h) => MRf().backSub(kind, r, h);
+const combine = (A, B, i) => MRf().elimStep(A, B, i);
+const elim3 = E => MRf().elim3(E);
 // Polygon where the plane n·p = d meets the cube [−L, L]³ (3D points in order around the polygon; [] if it misses).
 function planeBox(n, d, Lc){
   const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2], cr = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];

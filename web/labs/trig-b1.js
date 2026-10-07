@@ -3,17 +3,17 @@
 const L = window.LABS;
 const MI = "−", PI = Math.PI, TAU = 2 * PI, D2R = PI / 180;
 
-/* ---------- DOM-free helpers (kit additions: candidates for MathRules, with tests) ---------- */
+/* ---------- DOM-free helpers (reduceDeg and ucPoint are MathRules, web/kits/subjects/trig.js) ---------- */
 // reduceDeg(θ) → {r, k}: the coterminal angle r in [0°, 360°) and the integer k with r = θ + 360k
-const reduceDeg = th => { const r = +((((th % 360) + 360) % 360).toFixed(9)) % 360; return { r, k: Math.round((r - th) / 360) }; };
+const reduceDeg = th => window.MathRules.reduceDeg(th);
 // numT(v, p): decimal text with at most p places and a real minus sign
 const numT = (v, p = 4) => String(+(+v).toFixed(p)).replace("-", MI);
 const dmsT = (d, m, s) => `${d}° ${m}′ ${s}″`;
 // dmsCase(i): the i-th DMS drill, exact: θ = d + T/3600 with T a multiple of 9, so the decimal ends within 4 places
 // and the minutes T/60 within 2; even i asks decimal → DMS, odd i asks DMS → decimal
 const dmsCase = i => { const d = 7 + (i * 37 + 58) % 166, T = 9 * (1 + (i * 151 + 23) % 399); return { d, T, m: Math.floor(T / 60), s: T % 60, dec: d + T / 3600, toDms: i % 2 === 0 }; };
-// ucPoint(MR, q): exact terminal point of t = qπ on the unit circle, {x, y, text: "(−√3/2, 1/2)"}
-const ucPoint = (MR, q) => { const x = MR.trigExact("cos", q), y = MR.trigExact("sin", q); return { x, y, text: `(${x.text}, ${y.text})` }; };
+// ucPoint(MR, q): exact terminal point of t = qπ on the unit circle, {x, y, text: "(−√3/2, 1/2)", html}
+const ucPoint = (MR, q) => MR.ucPoint(q);
 const ROMAN = ["", "I", "II", "III", "IV"], AXIS = { "+x": "positive x-axis", "+y": "positive y-axis", "−x": "negative x-axis", "−y": "negative y-axis" };
 
 /* ======================= trig-angles ======================= */

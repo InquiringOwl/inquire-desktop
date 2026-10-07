@@ -64,7 +64,8 @@ ARITH["a1-abs-eq"] = {
   },
   unlocksWhy: {
     "a1-abs-ineq": "The solutions of |u| = k are the boundary points that separate the solutions of |u| &lt; k from those of |u| &gt; k.",
-    "a1-piecewise": "The absolute value function is defined piecewise, and solving |u| = k is the same as solving on each piece."
+    "a1-piecewise": "The absolute value function is defined piecewise, and solving |u| = k is the same as solving on each piece.",
+    "pc-piecewise-abs": "Solving |<i>u</i>| = <i>k</i> by cases is the same split into <i>u</i> ≥ 0 and <i>u</i> &lt; 0 that writes |<i>x</i>| as a piecewise function, which Precalculus then uses to reflect and mirror graphs of |<i>f</i>(<i>x</i>)| and <i>f</i>(|<i>x</i>|)."
   },
   beyond: [
     { field: "Precalculus", why: "Transformations of y = |x| and equations mixing absolute value with other functions use the same case split." },

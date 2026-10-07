@@ -4,28 +4,12 @@ const W = window, L = W.LABS = W.LABS || {}, MR = W.MathRules;
 const { Q, Poly, Z } = MR;
 const MI = "−";
 
-/* ---------- DOM-free helpers (candidates for MathRules; exposed as window.B6Rules) ---------- */
-// Linear factor for the zero r: "x − 3", "x + 2", "x" (text; html → italic x)
+/* ---------- DOM-free helpers (exposed as window.B6Rules) ---------- */
+// Linear factor (unlike MR.factorStr, the HTML form keeps a plain-text fraction) for the zero r: "x − 3", "x + 2", "x" (text; html → italic x)
 const linT = (r, html) => { r = Q(r); const v = html ? "<i>x</i>" : "x"; return r.n === 0 ? v : `${v} ${r.n > 0 ? MI : "+"} ${MR.qT(Q.abs(r))}`; };
-// Leading coefficient as a prefix: 1 → "", −1 → "−", 1/2 → "1/2"
-const leadT = a => { a = Q(a); return a.n === a.d ? "" : a.n === -a.d ? MI : MR.qT(a); };
-// a·Π(x − r)^m from [{r, m}] (zero first, then by value): "−2x(x + 1)²(x − 3)" (text) or HTML with <sup>
-function factoredT(a, groups, html){
-  const pw = m => (m > 1 ? (html ? `<sup>${m}</sup>` : MR.supT(m)) : "");
-  const gs = groups.slice().sort((u, v) => (Q(u.r).n !== 0) - (Q(v.r).n !== 0) || Q.val(u.r) - Q.val(v.r));
-  const body = gs.map(g => (Q(g.r).n === 0 ? (html ? "<i>x</i>" : "x") + pw(g.m) : `(${linT(g.r, html)})${pw(g.m)}`)).join("");
-  return (leadT(a) + body) || MR.qT(a);
-}
-// Group equal zeros: [r, r, s] → [{r, m: 2}, {r: s, m: 1}]
-const groupZeros = rs => { const out = []; rs.forEach(r => { const g = out.find(o => Q.eq(o.r, r)); if (g) g.m++; else out.push({ r: Q(r), m: 1 }); }); return out; };
-// Turning points: real zeros of p′ of odd multiplicity (p′ changes sign there). [{x, q, m}]
-const turning = p => (Poly.deg(p) < 2 ? [] : Poly.realRoots(Poly.deriv(p)).filter(o => o.m % 2 === 1));
-// Symmetry from the powers present: "even" (only even powers), "odd" (only odd powers) or "neither"
-const symmetry = p => { const nz = p.map((c, i) => (c.n !== 0 ? i : -1)).filter(i => i >= 0); return nz.every(i => i % 2 === 0) ? "even" : nz.every(i => i % 2 === 1) ? "odd" : "neither"; };
-// Sign of p on each interval between its distinct real zeros xs (sorted): ["+", "−", …]
-const signPattern = (p, xs) => { const f = Poly.fn(p), pts = xs.length ? [xs[0] - 1, ...xs.slice(1).map((x, i) => (xs[i] + x) / 2), xs[xs.length - 1] + 1] : [0]; return pts.map(t => (f(t) > 0 ? "+" : MI)); };
-// End behaviour as text: "x → −∞, f(x) → ∞; x → ∞, f(x) → −∞"
-const endsT = (p, html) => { const e = Poly.ends(p), v = html ? "<i>x</i>" : "x", f = html ? "<i>f</i>(<i>x</i>)" : "f(x)", s = t => (t > 0 ? "∞" : MI + "∞"); return `${v} → ${MI}∞, ${f} → ${s(e.left)}; ${v} → ∞, ${f} → ${s(e.right)}`; };
+// Factored form, multiplicities, turning points, symmetry, signs and end behaviour: MathRules (web/kits/subjects/math.js)
+const leadT = MR.leadStr, factoredT = MR.factoredStr, groupZeros = MR.groupZeros, turning = MR.turningPoints;
+const symmetry = MR.polySymmetry, signPattern = MR.signPattern, endsT = MR.endsStr;
 W.B6Rules = { linT, leadT, factoredT, groupZeros, turning, symmetry, signPattern, endsT };
 
 const pmax = (f, lo, hi, N = 240) => { let m = 0; for (let i = 0; i <= N; i++) { const v = Math.abs(f(lo + (hi - lo) * i / N)); if (isFinite(v) && v > m) m = v; } return m; };

@@ -3,30 +3,14 @@
 const L = window.LABS;
 const MI = "−";
 
-/* ---------- DOM-free helpers (kit additions: candidates for MathRules, with tests) ---------- */
-// log_b(x + p) + log_b(x + q) = n  ⇒  (x + p)(x + q) = bⁿ. Returns {V, D, s, r, lo} with integer roots s (in the domain
-// x > lo = max(−p, −q)) and r (extraneous: both factors negative), or null when the roots are not integers.
-function logSumEq(b, p, q, n){
-  const V = b ** n, D = (p - q) ** 2 + 4 * V, sq = Math.round(Math.sqrt(D));
-  if (sq * sq !== D || (sq - p - q) % 2) return null;
-  const s = (-(p + q) + sq) / 2, r = (-(p + q) - sq) / 2, lo = Math.max(-p, -q);
-  return s > lo && r < Math.min(-p, -q) ? { V, D, s, r, lo } : null;
-}
-// (cᵖ)^(x + h1) = (c^q)^(x + h2), or = cⁿ when q = 0: exponents p·x + p·h1 = q·x + (q ? q·h2 : n). Returns the exact x (Q) or null.
-function sameBaseX(p, h1, q, h2, n){
-  const Q = window.MathRules.Q, a1 = p, b1 = p * h1, a2 = q, b2 = q ? q * h2 : n;
-  return a1 === a2 ? null : Q(b2 - b1, a1 - a2);
-}
-// b^(2x) − (u1 + u2)·bˣ + u1·u2 = 0 with u = bˣ: only u > 0 gives x = log_b u. Returns {keep: [{u, x}], drop: [u]}.
-function quadExpRoots(b, u1, u2){
-  const keep = [], drop = [];
-  [u1, u2].sort((a, c) => a - c).forEach(u => { if (u > 0) keep.push({ u, x: Math.log(u) / Math.log(b) }); else drop.push(u); });
-  return { keep, drop };
-}
-// Compound interest: APY and doubling time for n periods a year (n = Infinity: continuous).
-const apy = (r, n) => (n === Infinity ? Math.exp(r) - 1 : Math.pow(1 + r / n, n) - 1);
-const doublingTime = (r, n) => (n === Infinity ? Math.LN2 / r : Math.LN2 / (n * Math.log1p(r / n)));
-const balance = (P, r, n, t) => (n === Infinity ? P * Math.exp(r * t) : P * Math.pow(1 + r / n, n * Math.floor(n * t + 1e-9) / n));   // paid at period ends
+/* ---------- DOM-free helpers: exp/log equations and compound interest are in MathRules (web/kits/subjects/math.js) ---------- */
+const MRx = () => window.MathRules;
+const logSumEq = (b, p, q, n) => MRx().logSumEq(b, p, q, n);
+const sameBaseX = (p, h1, q, h2, n) => MRx().sameBaseX(p, h1, q, h2, n);
+const quadExpRoots = (b, u1, u2) => MRx().quadExpRoots(b, u1, u2);
+const apy = (r, n) => MRx().apy(r, n);
+const doublingTime = (r, n) => MRx().doublingTime(r, n);
+const balance = (P, r, n, t) => MRx().periodBalance(P, r, n, t);
 
 /* ---------- small formatting helpers ---------- */
 const ix = "<i>x</i>", iy = "<i>y</i>";

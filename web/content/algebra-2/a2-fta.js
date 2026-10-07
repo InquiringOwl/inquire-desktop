@@ -70,7 +70,9 @@ ARITH["a2-fta"] = {
     "a2-factor-theorem": "Each zero found gives a factor x − c and a quotient one degree lower, which is how the n linear factors are produced.",
     "a2-quad-complex": "The last quadratic factor often has a negative discriminant, and its two complex solutions form a conjugate pair."
   },
-  unlocksWhy: {},
+  unlocksWhy: {
+    "pc-ivt-bounds": "Knowing that a degree-<i>n</i> polynomial has at most <i>n</i> real zeros tells you how many to look for, and Descartes' rule and the bound tests narrow where they can be."
+  },
   beyond: [
     { field: "Linear Algebra", why: "An n × n matrix has exactly n complex eigenvalues with multiplicity, because they are the zeros of a degree-n characteristic polynomial." },
     { field: "Precalculus", why: "Complex zeros are written in polar form, and the n-th roots of a complex number are the n zeros of xⁿ − w." },

@@ -74,7 +74,8 @@ ARITH["a2-exp-func"] = {
   unlocksWhy: {
     "a2-logs": "The logarithm log_b x is the inverse of bˣ, so its graph is this curve reflected in y = x.",
     "a2-geom-series": "A geometric sequence a₁rⁿ⁻¹ is an exponential function sampled at whole numbers, and its sums use the same powers.",
-    "trig-modeling": "Damped oscillation multiplies a sinusoid by a decaying exponential <span class=\"m\"><i>e</i><sup>−<i>ct</i></sup></span>, and the base and rate set how fast the swings shrink."
+    "trig-modeling": "Damped oscillation multiplies a sinusoid by a decaying exponential <span class=\"m\"><i>e</i><sup>−<i>ct</i></sup></span>, and the base and rate set how fast the swings shrink.",
+    "pc-limits-infinity": "The limits of <i>e</i><sup><i>x</i></sup> and <i>e</i><sup>−<i>x</i></sup> as <span class=\"m\"><i>x</i> → ±∞</span> are read from the shape of the exponential graph, growing without bound one way and flattening to a horizontal asymptote at 0 the other."
   },
   beyond: [
     { field: "Calculus I", why: "The derivative of eˣ is eˣ, which makes e the natural base for growth rates and differential equations." },

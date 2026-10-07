@@ -72,7 +72,9 @@ ARITH["a2-parabolas"] = {
     "a2-conic-sections": "The parabola is the conic with AC = 0. Classifying from the general equation and completing the square to standard form are done there first.",
     "a2-quad-vertex": "The equation (x − h)² = 4p(y − k) is vertex form y = a(x − h)² + k with a = 1/(4p), so the vertex and axis are read the same way."
   },
-  unlocksWhy: {},
+  unlocksWhy: {
+    "pc-eccentricity": "The focus, the directrix and the fact that every point of the parabola is equally far from both make up the case <i>e</i> = 1 of the general focus-directrix definition."
+  },
   beyond: [
     { field: "Precalculus", why: "Every conic is the set of points whose distance to a focus is e times the distance to a directrix; the parabola is e = 1, and polar form r = ep/(1 − e cos θ) follows." },
     { field: "Calculus I", why: "The reflective property is proved with the tangent line: its slope 2(x − h)/(4p) makes equal angles with the axis and the focal ray." },

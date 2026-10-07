@@ -1,6 +1,6 @@
 # Writer pack: English · Grammar & Usage
 
-Everything a writer needs for an English node, in one file. Read this, your nodes' sections of `web/TREE-SPEC-ENGLISH.md`, your passages in `web/SOURCES-ENGLISH.md`, and the header comment of `web/labs/_englab.js`. Don't read whole finished pages or other briefs unless something here is unclear (to see a field in use: `grep -n "fieldname" web/content/grammar/eng-verbs.js | head`).
+Everything a writer needs for an English node, in one file. Read this, your nodes' sections of `web/TREE-SPEC-ENGLISH.md`, your passages in `web/SOURCES-ENGLISH.md`, and the header comment of `web/kits/subjects/english.js`. Don't read whole finished pages or other briefs unless something here is unclear (to see a field in use: `grep -n "fieldname" web/content/grammar/eng-verbs.js | head`).
 
 Repo `/home/claude/codex`. Other writers work in the same folder: write only your own files.
 

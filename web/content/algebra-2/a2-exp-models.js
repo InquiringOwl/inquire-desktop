@@ -73,7 +73,10 @@ ARITH["a2-exp-models"] = {
   prereqWhy: {
     "a2-exp-log-eq": "Every doubling time, half-life, decay constant and time to a target comes from solving an exponential equation with logs."
   },
-  unlocksWhy: {},
+  unlocksWhy: {
+    "pc-logistic": "Exponential growth <i>a</i>·<i>b<sup>t</sup></i> is the early stage of a logistic curve, and the logistic model adds a carrying capacity that the growth levels off toward.",
+    "pc-fitting-models": "Writing a model as <i>a</i>·<i>b<sup>x</sup></i> and finding its growth factor from data is what a fitted exponential model reports, now found by least squares on ln <i>y</i>."
+  },
   beyond: [
     { field: "Calculus I", why: "Exponential models are the solutions of y′ = ky, the simplest differential equation of growth and decay." },
     { field: "Economics", why: "Present value, continuous discounting and growth rates of GDP use Pe^(rt)." },

@@ -67,7 +67,9 @@ ARITH["a2-sys-three"] = {
   prereqWhy: {
     "a1-sys-elim": "Each step here is the two-variable elimination you already know: scale two equations so one variable cancels, add, and solve."
   },
-  unlocksWhy: {},
+  unlocksWhy: {
+    "pc-matrices": "A three-variable system has coefficients arranged in a rectangular array, which is a matrix, and matrix operations are developed to work with that array directly."
+  },
   beyond: [
     { field: "Linear Algebra", why: "The same row operations on an augmented matrix give Gaussian elimination; rank explains the one, none and infinitely many cases." },
     { field: "Physics", why: "Circuit analysis and equilibrium of forces in space lead directly to 3 × 3 linear systems." },

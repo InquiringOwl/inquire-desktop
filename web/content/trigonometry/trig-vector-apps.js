@@ -75,7 +75,9 @@ ARITH["trig-vector-apps"] = {
     "trig-vectors": "Every problem here writes vectors in components from a magnitude and direction angle, adds them, and finds the magnitude and direction of the sum.",
     "trig-law-cosines": "Two vectors drawn tip to tail form a triangle, and the law of cosines gives the resultant's magnitude directly from the two magnitudes and the angle between them."
   },
-  unlocksWhy: {},
+  unlocksWhy: {
+    "pc-parametric-motion": "Splitting an initial velocity into horizontal and vertical components with <i>v</i> cos <i>θ</i> and <i>v</i> sin <i>θ</i> gives the two parametric equations for a projectile."
+  },
   beyond: [
     { field: "Physics (Mechanics)", why: "Free-body diagrams, Newton's second law and relative motion are these same vector sums with units of force and velocity." },
     { field: "Engineering", why: "Statics courses solve trusses and frames by writing equilibrium at every joint." },

@@ -69,7 +69,8 @@ ARITH["a2-ellipses"] = {
     "a2-conic-sections": "An ellipse is the case AC > 0, A ≠ C of the general equation, and completing the square is how its standard form is found."
   },
   unlocksWhy: {
-    "a2-hyperbolas": "A hyperbola uses the difference of the two focal distances instead of the sum, and c² = a² + b² instead of c² = a² − b²."
+    "a2-hyperbolas": "A hyperbola uses the difference of the two focal distances instead of the sum, and c² = a² + b² instead of c² = a² − b².",
+    "pc-eccentricity": "The foci, the semi-axes <i>a</i> and <i>b</i> and the relation <i>c</i>² = <i>a</i>² − <i>b</i>² give the ratio <i>e</i> = <i>c</i>/<i>a</i>, which measures how stretched the ellipse is and appears in the focus-directrix definition."
   },
   beyond: [
     { field: "Physics", why: "Kepler's laws, and the energy of an orbit, depend on its semi-major axis and eccentricity." },

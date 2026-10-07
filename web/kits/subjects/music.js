@@ -1,9 +1,9 @@
-/* ============ Music lab kit ============
+/* ============ Subject kit: Music ============
    Two layers, so labs only write what is unique to their topic:
    1. window.MusicTheory (MT): pure, DOM-free rules: pitch spelling, MIDI and frequency, intervals,
       transposition, scales, key signatures, clef positions, exact rhythm values, meters, harmonics.
       Tested in tests/music.test.js (node tools/labtest.js music). Put any new rule a lab needs HERE, with a test.
-   2. window.MusicKit.attach(k): drawing and sound on top of the lab kit `k` (web/src/labkit.js):
+   2. window.MusicKit.attach(k): drawing and sound on top of the lab kit `k` (web/kits/universal/core.js):
       staff with vector clefs, notes, rests, accidentals, time and key signatures, beams, a piano keyboard,
       and a small Web Audio synth (never autoplays; sound starts only from a button or a key press).
    API summary is in web/WRITER-PACK-MUSIC.md. */

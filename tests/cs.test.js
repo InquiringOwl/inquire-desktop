@@ -1,5 +1,5 @@
-// Logic tests for the CS lab kit's rules (web/src/kit-cs.js → CSRules), on real traces from web/cs-src/_demo-kit.py.
-const ctx = load('tests/fixtures/_demo-kit.js', 'web/src/kit-cs.js');
+// Logic tests for the CS lab kit's rules (web/kits/subjects/cs.js → CSRules), on real traces from web/cs-src/_demo-kit.py.
+const ctx = load('tests/fixtures/_demo-kit.js', ...kits(), 'web/kits/subjects/cs.js');
 const CR = ctx.CSRules, TR = ctx.CSTraces;
 const last = T => T.steps.length - 1;
 

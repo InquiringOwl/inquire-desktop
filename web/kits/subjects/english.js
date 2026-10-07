@@ -1,5 +1,5 @@
-/* ============ English lab kit (shared by the English labs) ============
-   Loaded before every file in web/labs (the "_" sorts first). Pieces every English lab needs, so a lab
+/* ============ Subject kit: English (shared by the English labs) ============
+   Loaded with the subject kits (web/kits/subjects), after web/kits/universal and web/kits/categorical. Pieces every English lab needs, so a lab
    only writes what is unique to its topic. API (all return HTML strings unless noted):
 
    EngLab.parse(tokens)                    story-style token string → [{w, tag, it, key, glue, br}] (DB.parseStory)
@@ -90,28 +90,9 @@ E.ro = ({ title, big, rows, landmark, narr }) =>
 
 E.on = (root, selector, fn) => root.addEventListener("click", e => { const el = e.target.closest(selector); if (el && root.contains(el)) fn(el, e); });
 
-E.shuffle = (arr, seed) => {
-  const a = arr.slice(); let s = seed == null ? Math.random() * 1e9 : seed;
-  const rnd = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
-  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor((seed == null ? Math.random() : rnd()) * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-  return a;
-};
-
-E.quiz = cfg => {
-  let order = E.shuffle(cfg.items.map((_, i) => i), cfg.seed), pos = 0;
-  const ctl = {
-    score: { right: 0, tries: 0 },
-    state: { answered: false, picked: null, correct: null },
-    get item(){ return cfg.items[order[pos]]; },
-    get index(){ return pos; },
-    get total(){ return cfg.items.length; },
-    pick(v){ if (ctl.state.answered) return ctl.state; const ok = !!cfg.check(ctl.item, v); ctl.state = { answered: true, picked: v, correct: ok }; ctl.score.tries++; if (ok) ctl.score.right++; if (typeof window !== "undefined" && window.dispatchEvent) window.dispatchEvent(new CustomEvent("inquire:quiz", { detail: { correct: ok } })); return ctl.state; }, // inquire:quiz → Achievements
-    next(){ pos++; if (pos >= order.length) { order = E.shuffle(order, cfg.seed == null ? null : cfg.seed + 1); pos = 0; } ctl.state = { answered: false, picked: null, correct: null }; },
-    reset(){ ctl.score = { right: 0, tries: 0 }; pos = 0; ctl.state = { answered: false, picked: null, correct: null }; },
-    html(){ return cfg.render(ctl.item, ctl.state); }
-  };
-  return ctl;
-};
+// shuffle and the quiz controller are shared (universal core + categorical quiz kit); these are aliases.
+E.shuffle = window.LabKit.rules.shuffle;
+E.quiz = window.LabKit.quiz;
 
 E.css = (id, text) => {
   if (typeof document === "undefined" || document.getElementById(id)) return;

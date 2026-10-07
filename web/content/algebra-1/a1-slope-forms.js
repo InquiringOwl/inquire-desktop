@@ -68,7 +68,8 @@ ARITH["a1-slope-forms"] = {
     "pa-slope": "Slope as rise over run and as a rate of change is the m in slope-intercept form."
   },
   unlocksWhy: {
-    "a1-line-forms": "Point-slope and standard form are other ways of writing the same line, converted to and from y = mx + b."
+    "a1-line-forms": "Point-slope and standard form are other ways of writing the same line, converted to and from y = mx + b.",
+    "pc-function-behavior": "The slope between two points, rise over run with units, becomes the average rate of change (<i>f</i>(<i>b</i>) − <i>f</i>(<i>a</i>))/(<i>b</i> − <i>a</i>) of any function over an interval."
   },
   beyond: [
     { field: "Calculus I", why: "The derivative is the slope of the tangent line, and tangent lines are written using slope-intercept or point-slope form." },

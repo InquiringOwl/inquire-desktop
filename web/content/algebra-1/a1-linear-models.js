@@ -68,7 +68,9 @@ ARITH["a1-linear-models"] = {
   prereqWhy: {
     "a1-line-forms": "Writing, interpreting and converting the model line uses slope, intercepts and point-slope form."
   },
-  unlocksWhy: {},
+  unlocksWhy: {
+    "pc-fitting-models": "Fitting a line to scatter data and reading its slope, intercept and correlation is the step Precalculus repeats after taking logarithms, so an exponential or power model is fitted as a straight line on transformed data."
+  },
   beyond: [
     { field: "Statistics", why: "Regression inference, confidence intervals for the slope and multiple regression all build on the least-squares line." },
     { field: "Linear Algebra", why: "Least squares is solved in general by the normal equations AᵀAx = Aᵀb, a projection onto a subspace." },

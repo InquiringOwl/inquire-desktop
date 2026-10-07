@@ -76,7 +76,7 @@ ARITH["mech-2d-motion"] = {
   mathWhy: {
     "pa-coordinate": `Positions are points <span class="m">(<i>x</i>, <i>y</i>)</span> on a coordinate plane; plotting <span class="m"><b>r</b>(<i>t</i>)</span> at several times draws the path.`,
     "trig-vectors": `Velocity and acceleration are written in <span class="m">î, ĵ</span> form and converted to magnitude and direction with <span class="m">√(<i>v<sub>x</sub></i><sup>2</sup> + <i>v<sub>y</sub></i><sup>2</sup>)</span> and <span class="m">tan<sup>−1</sup>(<i>v<sub>y</sub></i>/<i>v<sub>x</sub></i>)</span>.`,
-    "precalculus:Parametric equations": `A trajectory is a parametric curve <span class="m"><i>x</i>(<i>t</i>), <i>y</i>(<i>t</i>)</span> with time as the parameter; eliminating <span class="m"><i>t</i></span> gives the path's equation <span class="m"><i>y</i>(<i>x</i>)</span>. Needed outright for reading <span class="m"><b>r</b>(<i>t</i>)</span>.`
+    "pc-parametric": `A trajectory is a parametric curve <span class="m"><i>x</i>(<i>t</i>), <i>y</i>(<i>t</i>)</span> with time as the parameter; eliminating <span class="m"><i>t</i></span> gives the path's equation <span class="m"><i>y</i>(<i>x</i>)</span>. Needed outright for reading <span class="m"><b>r</b>(<i>t</i>)</span>.`
   },
   beyond: [
     { field: "Classical Mechanics", why: "Lagrangian and Hamiltonian mechanics start from position and velocity vectors in any coordinate system, including polar and spherical ones." },

@@ -68,7 +68,8 @@ ARITH["a2-zeros-mult"] = {
     "a1-quad-factor": "Reading zeros needs the polynomial in factored form, and factoring quadratics and common factors gets it there."
   },
   unlocksWhy: {
-    "a2-poly-ineq": "Solving P(x) > 0 means finding where the graph is above the axis, and the sign changes happen exactly at the odd-multiplicity zeros."
+    "a2-poly-ineq": "Solving P(x) > 0 means finding where the graph is above the axis, and the sign changes happen exactly at the odd-multiplicity zeros.",
+    "pc-ivt-bounds": "Counting zeros with multiplicity and watching where a graph crosses or touches the axis prepares for the Intermediate Value Theorem, which guarantees a crossing when the sign changes."
   },
   beyond: [
     { field: "Calculus I", why: "A zero of even multiplicity is also a zero of the derivative, and the Intermediate Value Theorem is proved for all continuous functions." },

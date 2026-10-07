@@ -6,21 +6,12 @@ const MI = "−", PI = Math.PI, TAU = 2 * PI;
 /* ---------- DOM-free helpers (kit additions: candidates for MathRules, with tests) ---------- */
 // numT(v): decimal text, at most 3 places, real minus sign
 const numT = (v, p = 3) => String(+(+v).toFixed(p)).replace("-", MI);
-// piFmt(MR, x): "5π/6" when x is a multiple of π with denominator ≤ den, else a decimal
-const piFmt = (MR, x, den = 48) => { if (Math.abs(x) < 1e-12) return "0"; const q = MR.piQ(x, den); return q ? MR.piT(q) : numT(x); };
-// sinusoid("sin"|"cos", A, B, C, D) → x ↦ A sin(B(x − C)) + D
-const sinusoid = (fn, A, B, C, D) => x => A * (fn === "cos" ? Math.cos : Math.sin)(B * (x - C)) + D;
-// sameCurve(f, g): equal (to 1e-6) at 401 sample points of [lo, hi]
-const sameCurve = (f, g, lo = -7, hi = 13) => { for (let i = 0; i <= 400; i++) { const x = lo + (hi - lo) * i / 400; if (Math.abs(f(x) - g(x)) > 1e-6) return false; } return true; };
-// keyPts(fn, A, B, C, D): the five key points of the period starting at x = C (quarter-period steps)
-const keyPts = (fn, A, B, C, D) => { const P = TAU / Math.abs(B), h = fn === "cos" ? [1, 0, -1, 0, 1] : [0, 1, 0, -1, 0]; return h.map((s, i) => ({ x: C + i * P / 4, y: D + A * s })); };
-// sinEq(MR, fn, A, B, C, D, html): "y = 2 sin(3(x − π/4)) + 1" in the factored B(x − C) form; html colours A c3, B c2, C c1, D c4
-const sinEq = (MR, fn, A, B, C, D, html) => {
-  const w = (s, cl) => html ? `<span class="${cl}">${s}</span>` : s;
-  const a = A === 1 ? "" : A === -1 ? MI : w(numT(A), "c3") + " ", bq = MR.Q(B), b = B === 1 ? "" : w(bq.d === 1 ? String(bq.n) : `(${MR.qT(bq)})`, "c2");
-  const x = html ? "<i>x</i>" : "x", inner = Math.abs(C) < 1e-12 ? x : `${x} ${C > 0 ? MI : "+"} ${w(piFmt(MR, Math.abs(C)), "c1")}`;
-  const arg = b && inner !== x ? `${b}(${inner})` : b + inner, d = Math.abs(D) < 1e-12 ? "" : ` ${D > 0 ? "+" : MI} ${w(numT(Math.abs(D)), "c4")}`;
-  return `${html ? "<i>y</i>" : "y"} = ${a}${fn}(${arg})${d}`; };
+// piFmt, sinusoid, sameCurve, keyPts and sinEq are MathRules (web/kits/subjects/trig.js); B > 0 and fn sin/cos here
+const piFmt = (MR, x, den) => MR.piFmt(x, den);
+const sinusoid = (fn, A, B, C, D) => window.MathRules.sinusoid(fn, A, B, C, D);
+const sameCurve = (f, g, lo, hi) => window.MathRules.sameCurve(f, g, lo, hi);
+const keyPts = (fn, A, B, C, D) => window.MathRules.keyPts(fn, A, B, C, D);
+const sinEq = (MR, fn, A, B, C, D, html) => MR.sinEq(fn, A, B, C, D, { html });
 // beltPts(xa, ra, xb, rb): open-belt tangent points between circles centred (xa, 0), (xb, 0); φ = contact angle of the upper run
 const beltPts = (xa, ra, xb, rb) => { const phi = Math.acos((ra - rb) / (xb - xa)), cs = Math.cos(phi), sn = Math.sin(phi);
   return { phi, ua: [xa + ra * cs, ra * sn], ub: [xb + rb * cs, rb * sn], la: [xa + ra * cs, -ra * sn], lb: [xb + rb * cs, -rb * sn] }; };

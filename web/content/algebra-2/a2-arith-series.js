@@ -66,7 +66,9 @@ ARITH["a2-arith-series"] = {
   prereqWhy: {
     "a2-sequences": "An arithmetic series is the partial sum Sₙ of an arithmetic sequence, written and evaluated with sigma notation."
   },
-  unlocksWhy: {},
+  unlocksWhy: {
+    "pc-induction": "The formula for 1 + 2 + ⋯ + <i>n</i> and the idea of a sum with a general <i>n</i>th term give the first statements that an induction proof is asked to verify for every <i>n</i>."
+  },
   beyond: [
     { field: "Calculus I", why: "Riemann sums for the area under y = x use 1 + 2 + ⋯ + n = n(n + 1)/2 before taking a limit." },
     { field: "Discrete Mathematics", why: "The formula for an arithmetic series is a first example of proof by induction and of counting pairs." },

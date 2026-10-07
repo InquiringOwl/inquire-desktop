@@ -1,5 +1,5 @@
-// Logic tests for the music lab kit's rules (web/src/kit-music.js → MusicTheory).
-const MT = load('web/src/kit-music.js').MusicTheory;
+// Logic tests for the music lab kit's rules (web/kits/subjects/music.js → MusicTheory).
+const MT = load(...kits(), 'web/kits/subjects/music.js').MusicTheory;
 const N = p => MT.name(p);
 
 test('MIDI numbers and frequencies (A4 = 440 Hz, C4 = middle C = MIDI 60)', () => {
