@@ -4,7 +4,7 @@ Arithmetic first (Oct 2026, Devon). A lesson page shows three tabs above its hea
 
 ## Who it is for (pedagogy + andragogy)
 Adults who never saw why a topic matters, and returning learners who found it hard. Relevance is personal, so give varied, concrete situations (money, work, home, health, travel, building, cooking, games) and let readers find their own.
-- **Respect**: plain adult language. Never childish ("For a ten-year-old" is gone), never condescending ("simply", "just", "easy", "obviously").
+- **Respect**: plain adult language. Never childish ("For a ten-year-old" is gone), never condescending ("simply", "just", "easy", "obviously"). **Concept voice (Oct 2026): 5th-grade reading level, adult tone.** Short common words, sentences under about 15 words, "you" plus a verb, contractions allowed. No exclamation marks, praise, "Let's", mascots or emoji. Give the real word (successor, one-to-one matching) as a tool to pick up. Test: could the sentence hang on a pharmacy wall and in a classroom?
 - **Problem first**: every idea arrives as the answer to a real problem someone had or has.
 - **Why before how**: Concept explains purpose; Intermediate gives each step its reason; Formal gives precise language to explain it to others.
 - **Use what they know**: connect to everyday experience and to earlier lessons.
@@ -39,3 +39,18 @@ Add to `checks/arithmetic/<id>.py`: every number in `layers.concept.examples` sc
 
 ## Finish
 `node tools/build-web.js && node tools/validate.js` (0 errors; `layers` is validated) and `python3 tools/mathcheck.py <ids>`. Do not run the full mathcheck (too slow) or smoke; the reviewer runs browser checks.
+
+## Concept blocks (Oct 2026; Counting first)
+A lesson opts in by adding `layers.concept.ideas`; without it the Concept tab keeps the older layout (What is it · Why it matters · History · Where you will meet it). The rule: **every block must point at something you can see or do in the lab**, or be marked as outside the model (history, careers). Renderer `conceptHTML` in `web/src/app.js`; spec check in `tools/validate.js`; reference page `web/content/arithmetic/counting.js`.
+| Block | Field | Notes |
+|---|---|---|
+| The question | `concept.question {text, sub, figure {sym, value, cap}}` | `figure` echoes the lab's big amber number in the same style. |
+| Idea cards (2 to 4) | `concept.ideas [{c, title, term, text, demo, try}]` | Title ≤ 6 words, `text` ≤ about 25 words. `c` is the lab's colour key (c1 count, c2 successor). `term` is the real word, shown small, using the same words as the Intermediate legend. `demo` is a storyboard, `try` a chip. |
+| What goes wrong | `concept.stakes {title, lead, items [{role, text}], try}` | One strong callout; say plainly what the lab's dashed dot does and does not mean. |
+| Where you will meet it | `concept.examples [{role, figure, scene, takeaway, try}]` | The tile shows `figure` (the number) first; `scene` opens on tap. Add `try` only when the number fits the lab's range. Numbers stay in `checks/<field>/<id>.py`. |
+| A short history | `concept.timeline [{when, what}]` (3 to 5) + `history` + `sources` | Beats in the open; the 3-paragraph story and sources fold under "Read the full story". |
+Subjects-that-rely-on-it is not repeated here; Learning path below already lists it.
+
+**Storyboards** (`web/kits/categorical/demo.js`, `InquireDemo`): plain data, e.g. `{kind: "dots", slots: 5, lit: 5, sweep: true, big: true, alt}` or `{kind: "dots", slots: 8, grow: [4, 5, 6], alt}`. They play once when scrolled into view, replay on tap or ↻, and show the final frame under reduced motion (OS or Settings). Colours are CSS variables, so every theme works. Not GIFs: GIFs bake in the background, ignore Reduce motion and do not scale with Text size. A new lesson that needs another picture adds a `kind` to demo.js (with a test in `tests/universal.test.js`), not a new code path.
+
+**Try-it chips** drive the lab: the lab calls `k.expose({set, plus, play, …})` (`web/kits/universal/core.js`), a chip carries `lab: "set:12,play"` (commands in order, `name[:argument]`), and the page scrolls the lab into view. A chip whose lab does not expose the command does nothing, so expose before writing the chip. `tools/interact.js` has the Counting checks.

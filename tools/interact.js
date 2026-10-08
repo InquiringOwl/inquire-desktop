@@ -59,6 +59,26 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   ok(await p.$eval('.lyr-tab[data-layer=concept]', e => e.getAttribute('aria-selected')) === 'true', 'lesson layers: arrow keys move between tabs');
   await p.goto(URL0 + '#pa-variables'); await wait(900);
   ok(!(await p.$('.lyr-tab')) && !!(await p.$('.notes h2')), 'lesson layers: lessons without layers keep the old page');
+
+  /* ---------- Concept blocks (Counting): storyboards play, "Try it" chips drive the lab ---------- */
+  await p.goto(URL0 + '#counting'); await wait(900);
+  await p.click('.lyr-tab[data-layer=concept]'); await wait(450);
+  ok(await p.$$eval('#layer .idea', e => e.length) === 3 && await p.$$eval('#layer .dm svg', e => e.length) === 3, 'concept blocks: three idea cards, each with a storyboard');
+  const num = () => p.$eval('#readout .ro-big .num', e => e.textContent.trim());
+  await p.click('#layer .stakes .dm-try'); await wait(1100);   // the page scrolls smoothly up to the lab
+  ok(await num() === '19', 'concept blocks: "Set the model to 19" sets the lab to 19', await num());
+  ok(await p.$eval('.lab', e => e.getBoundingClientRect().top > -5 && e.getBoundingClientRect().top < 400), 'concept blocks: the chip brings the lab into view');
+  await p.click('#layer .idea:nth-child(3) .dm-try'); await wait(300);
+  ok(await num() === '20', 'concept blocks: "Add one more dot" presses +1 (successor)', await num());
+  await p.click('#layer .idea:nth-child(2) .dm-try'); await wait(350);
+  ok(await num() === '12' && /Stop/.test(await p.$eval('#controls', e => e.textContent)), 'concept blocks: "Count a group of 12" sets 12 and starts Count aloud', await num());
+  await p.click('.lyr-tab[data-layer=build]'); await wait(450); await p.click('.lyr-tab[data-layer=concept]'); await wait(450);
+  ok(await p.$$eval('#layer .tile', e => e.length) === 6, 'concept blocks: six real-scene tiles');
+  await p.click('#layer .tile summary'); ok(await p.$eval('#layer .tile', e => e.open), 'concept blocks: a tile opens on tap');
+  ok(await p.$$eval('#layer .tl li', e => e.length) === 4 && !(await p.$eval('#layer .hist-more', e => e.open)), 'concept blocks: timeline of four beats, full story folded');
+  await p.emulateMedia({ reducedMotion: 'reduce' }); await p.goto(URL0 + '#counting'); await wait(900); await p.click('.lyr-tab[data-layer=concept]'); await wait(450);
+  ok(await p.$eval('#layer .idea:nth-child(2) .dm-big', e => e.textContent === '5' && e.getAttribute('opacity') === '1') && !(await p.$('#layer .dm-replay')), 'concept blocks: with reduced motion the storyboard shows its final frame, no replay button');
+  await p.emulateMedia({ reducedMotion: 'no-preference' });
   await p.goto(URL0 + '#menu'); await wait(800);
 
   /* ---------- menu ---------- */

@@ -149,6 +149,9 @@ function make(stage, ro, ctl){
   // Declare the current mode's answers (strings as they would appear, e.g. "x = 3"); tools/layoutcheck.js reports any
   // of them visible when the mode opens. Call again with [] or new answers when the mode changes.
   kit.guard = list => { stage.dataset.answers = JSON.stringify(list || []); };
+  // Let the page drive this lab: k.expose({ set: v => …, play: () => … }). Concept-tab "Try it" chips call
+  // LabKit.drive("set:19,play") (comma-separated, name[:argument]); see docs/subjects/LAYERS.md.
+  kit.expose = actions => { live.expose = actions; };
 
   kit.slider = (label, min, max, step, value, onInput, fmtFn) => {
     const id = "lab" + (++uid);
@@ -302,7 +305,12 @@ function make(stage, ro, ctl){
   exts.forEach(fn => fn(kit));
   return kit;
 }
-function stopAll(){ live.loops.forEach(L => L.on = false); live.loops.clear(); live.ros.forEach(o => o.disconnect()); live.ros.clear(); live.timers.forEach(id => clearInterval(id)); live.timers.clear(); live.offs.forEach(f => { try { f(); } catch (_) {} }); live.offs.clear(); document.body.classList.remove("kv-scrubbing"); }
-W.LabKit = { make, stopAll, rules, extend: fn => exts.push(fn), css: addCSS, C, F, alpha };
+function stopAll(){ live.expose = null; live.loops.forEach(L => L.on = false); live.loops.clear(); live.ros.forEach(o => o.disconnect()); live.ros.clear(); live.timers.forEach(id => clearInterval(id)); live.timers.clear(); live.offs.forEach(f => { try { f(); } catch (_) {} }); live.offs.clear(); document.body.classList.remove("kv-scrubbing"); }
+function drive(cmd){
+  const ex = live.expose; if (!ex) return false; let did = false;
+  String(cmd).split(",").forEach(part => { const [name, ...rest] = part.trim().split(":"); if (typeof ex[name] === "function") { ex[name](rest.join(":")); did = true; } });
+  return did;
+}
+W.LabKit = { make, stopAll, rules, extend: fn => exts.push(fn), css: addCSS, C, F, alpha, drive };
 W.LABS = W.LABS || {};
 })();

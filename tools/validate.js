@@ -193,6 +193,25 @@ for (const [id, t] of Object.entries(T)) {
       if (arr(LW, 'concept.sources', C.sources, 1)) C.sources.forEach((x, i) => { checkText(LW, `concept.sources[${i}].title`, x.title); if (!/^https:\/\//.test(x.url || '')) err(LW, `concept.sources[${i}].url must be https`); });
       if (arr(LW, 'concept.examples', C.examples, 3)) C.examples.forEach((x, i) => { checkText(LW, `concept.examples[${i}].role`, x.role); nonEmpty(LW, `concept.examples[${i}].scene`, x.scene); checkHtml(LW, `concept.examples[${i}].scene`, x.scene); if (x.takeaway !== undefined) checkText(LW, `concept.examples[${i}].takeaway`, x.takeaway); });
     }
+    // Concept blocks (conceptHTML in app.js; docs/subjects/LAYERS.md → "Concept blocks"): opt in with concept.ideas
+    if (C && C.ideas !== undefined) {
+      const LABRE = /^[a-z]+(:[-\d.]+)?(,[a-z]+(:[-\d.]+)?)*$/;
+      const tryOk = (P, x) => { if (!x || typeof x !== 'object') { err(LW, `${P} must be {label, lab}`); return; } checkText(LW, `${P}.label`, x.label); if (!LABRE.test(x.lab || '')) err(LW, `${P}.lab must look like "set:19,play" (commands the lab exposes)`); };
+      const demoOk = (P, d) => { if (!d || d.kind !== 'dots') { err(LW, `${P}.kind must be "dots"`); return; } checkText(LW, `${P}.alt`, d.alt);
+        if (!Number.isInteger(d.slots) || d.slots < 2 || d.slots > 12) err(LW, `${P}.slots must be an integer 2 to 12`);
+        if (d.grow !== undefined) { if (!Array.isArray(d.grow) || d.grow.length < 2 || d.grow.some(n => !Number.isInteger(n) || n < 0 || n >= d.slots)) err(LW, `${P}.grow must list 2 or more counts below slots`); }
+        else if (d.frames === undefined && (!Number.isInteger(d.lit) || d.lit < 1 || d.lit > d.slots)) err(LW, `${P}.lit must be 1 to slots`); };
+      if (!C.question || typeof C.question !== 'object') err(LW, 'concept.question must be {text, sub, figure}'); else { checkText(LW, 'concept.question.text', C.question.text); if (C.question.sub !== undefined) { nonEmpty(LW, 'concept.question.sub', C.question.sub); checkHtml(LW, 'concept.question.sub', C.question.sub); } }
+      if (arr(LW, 'concept.ideas', C.ideas, 2)) { if (C.ideas.length > 4) err(LW, 'concept.ideas has more than 4 cards');
+        C.ideas.forEach((x, i) => { const P = `concept.ideas[${i}]`; checkText(LW, `${P}.title`, x.title); nonEmpty(LW, `${P}.text`, x.text); checkHtml(LW, `${P}.text`, x.text);
+          if (x.term !== undefined) checkText(LW, `${P}.term`, x.term); if (x.c !== undefined && !/^c[1-5]$/.test(x.c)) err(LW, `${P}.c must be c1 to c5`);
+          if (x.demo !== undefined) demoOk(`${P}.demo`, x.demo); if (x.try !== undefined) tryOk(`${P}.try`, x.try); }); }
+      if (C.stakes !== undefined) { const S = C.stakes || {}; checkText(LW, 'concept.stakes.title', S.title); nonEmpty(LW, 'concept.stakes.lead', S.lead); checkHtml(LW, 'concept.stakes.lead', S.lead);
+        if (arr(LW, 'concept.stakes.items', S.items, 2)) S.items.forEach((x, i) => { checkText(LW, `concept.stakes.items[${i}].role`, x.role); nonEmpty(LW, `concept.stakes.items[${i}].text`, x.text); checkHtml(LW, `concept.stakes.items[${i}].text`, x.text); });
+        if (S.try !== undefined) tryOk('concept.stakes.try', S.try); }
+      if (arr(LW, 'concept.timeline', C.timeline, 3)) { if (C.timeline.length > 5) err(LW, 'concept.timeline has more than 5 beats'); C.timeline.forEach((x, i) => { checkText(LW, `concept.timeline[${i}].when`, x.when); nonEmpty(LW, `concept.timeline[${i}].what`, x.what); checkHtml(LW, `concept.timeline[${i}].what`, x.what); }); }
+      (C.examples || []).forEach((x, i) => { if (x.figure !== undefined) checkText(LW, `concept.examples[${i}].figure`, x.figure); else err(LW, `concept.examples[${i}].figure is missing (the tile's headline number)`); if (x.try !== undefined) tryOk(`concept.examples[${i}].try`, x.try); });
+    }
     if (B) {
       nonEmpty(LW, 'build.lede', B.lede);
       for (const k of ['intro', 'bridge']) { nonEmpty(LW, `build.${k}`, B[k]); checkHtml(LW, `build.${k}`, B[k]); }

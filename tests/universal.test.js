@@ -65,3 +65,20 @@ test('quiz controller and step reveal', () => {
   eq(Qz.pick(-1).correct, false, 'wrong answer'); eq(Qz.score, { right: 1, tries: 2 }, 'score'); Qz.reset(); eq(Qz.score, { right: 0, tries: 0 }, 'reset');
   eq(LK.reveal(['a', 'b', 'c'], 1), ['a', 'b', null], 'reveal hides later steps');
 });
+
+test('InquireDemo: sweep, big and grow storyboards expand to the right frames', () => {
+  const D = ctx.InquireDemo;
+  const sw = D.frames({ kind: 'dots', slots: 5, lit: 5, sweep: true, big: true });
+  eq(sw.length, 7, 'rest frame + 5 numbered frames + the big total'); eq(sw[0].say, 0, 'starts with nothing said'); eq(sw[3].say, 3, 'the 3rd frame says 3');
+  eq(sw[6].big, 5, 'the last frame lifts out the total'); eq(sw[6].say, 5, 'the total is the last number said');
+  const gr = D.frames({ kind: 'dots', slots: 8, grow: [4, 5, 6] });
+  eq(gr.map(f => f.lit), [4, 5, 6], 'grow lists the counts'); ok(gr.every(f => f.next && f.big === null), 'grow always shows the dashed next dot');
+  eq(D.frames({ kind: 'dots', slots: 4, lit: 3 }).length, 1, 'a still picture is one frame');
+  eq(D.frames({ frames: [{ lit: 2, say: 1 }, { lit: 2, say: 2, big: 2 }] }).map(f => f.big), [null, 2], 'explicit frames pass through');
+});
+test('InquireDemo.slotStates: lit, said, next and empty slots', () => {
+  const D = ctx.InquireDemo;
+  eq(D.slotStates({ lit: 3, say: 2, big: null, next: false }, 5).map(x => x.s + x.n), ['on1', 'say2', 'on', 'off', 'off'], 'numbers only up to the one being said');
+  eq(D.slotStates({ lit: 3, say: 0, big: null, next: true }, 5).map(x => x.s), ['on', 'on', 'on', 'next', 'off'], 'the dashed dot sits right after the last lit one');
+  eq(D.slotStates({ lit: 5, say: 0, big: null, next: true }, 5).map(x => x.s), ['on', 'on', 'on', 'on', 'on'], 'no dashed dot when the row is full');
+});

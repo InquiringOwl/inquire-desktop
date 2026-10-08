@@ -11,6 +11,12 @@ L["counting"] = k => {
   k.button("+1 (successor)", () => { if (n < 40) { n++; s.set(n); } }, "btn ghost");
   const pb = k.button("Count aloud", () => { playing = !playing; say = playing ? 0 : -1; sayT = 0; pb.textContent = playing ? "Stop" : "Count aloud"; });
   k.hint("Each frame holds ten");
+  const rest = () => { say = -1; playing = false; pb.textContent = "Count aloud"; };
+  k.expose({   // the Concept tab's "Try it" chips
+    set: v => { n = Math.max(0, Math.min(40, Math.round(+v) || 0)); s.set(n); rest(); },
+    plus: () => { if (n < 40) { n++; s.set(n); } rest(); },
+    play: () => { playing = true; say = 0; sayT = 0; pb.textContent = "Stop"; }
+  });
   k.loop(dt => {
     acc += dt; if (acc > 0.05) { acc = 0; if (shown < n) shown++; else if (shown > n) shown--; }
     if (playing) { sayT += dt; if (sayT > (k.reduce ? 0.2 : 0.55)) { sayT = 0; say++; if (say > n) { playing = false; pb.textContent = "Count aloud"; } } }

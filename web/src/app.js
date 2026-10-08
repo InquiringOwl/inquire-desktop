@@ -1051,12 +1051,27 @@ function stubTopic(id){
     plain: "", formal: "", legend: [], steps: { title: "Steps", items: [] }, example: { prompt: "", lines: [], answer: "" }, why: "", careers: [], life: [], fields: [],
     prereqWhy: {}, unlocksWhy: {}, beyond: [], mistakes: [], practice: [], origin: "" };
 }
+/* Concept tab, blocks version (Counting first; docs/subjects/LAYERS.md → "Concept blocks"): a topic opts in with layers.concept.ideas.
+   question → idea cards (each with a storyboard and a "Try it" chip that drives the lab) → what goes wrong → real scenes as tiles → history as a timeline. */
+function conceptHTML(t, C, col){
+  const chip = x => x && x.lab ? `<button type="button" class="dm-try" data-lab="${esc(x.lab)}"><span aria-hidden="true">▶</span>${esc(x.label)}</button>` : "";
+  const q = C.question || { text: esc(t.title) }, fig = q.figure;
+  const hist = C.history ? `<details class="hist-more"><summary>Read the full story</summary><div class="lyr-hist">${C.history}</div>${(C.sources || []).length ? `<p class="lyr-src"><span>Sources</span>${C.sources.map(x => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>`).join(" · ")}</p>` : ""}</details>` : "";
+  return `
+    <div class="cq"><div><p class="eyebrow">The question</p><h2>${esc(q.text)}</h2>${q.sub ? `<p>${q.sub}</p>` : ""}</div>
+      ${fig ? `<div class="cq-fig" aria-hidden="true"><div class="cq-num">${esc(fig.value)}</div><div class="cq-cap"><span class="m c1">${fig.sym}</span> ${esc(fig.cap)}</div></div>` : ""}</div>
+    <div><h2>${esc(C.ideasTitle || "The big ideas")}</h2><div class="ideas">${C.ideas.map(x => `<div class="idea" style="--c:var(--${col(x.c || "c1")})"><h3>${esc(x.title)}${x.term ? `<span class="idea-term">${esc(x.term)}</span>` : ""}</h3>${x.demo ? `<div class="dm" data-spec="${esc(JSON.stringify(x.demo))}"></div>` : ""}<p>${x.text}</p>${chip(x.try)}</div>`).join("")}</div></div>
+    ${C.stakes ? `<div class="stakes"><h2>${esc(C.stakes.title)}</h2><p class="stakes-lead">${C.stakes.lead}</p><ul class="stakes-list">${C.stakes.items.map(x => `<li><b>${esc(x.role)}</b><span>${x.text}</span></li>`).join("")}</ul>${chip(C.stakes.try)}</div>` : ""}
+    <div><h2>${esc(C.examplesTitle || "Where you will meet it")}</h2><div class="tiles">${(C.examples || []).map(c => `<details class="tile"><summary><span class="tile-fig">${esc(c.figure || "")}</span><span class="tile-role">${esc(c.role)}</span></summary><div class="tile-body"><p>${c.scene}</p>${c.takeaway ? `<p class="lyr-take">${esc(c.takeaway)}</p>` : ""}${chip(c.try)}</div></details>`).join("")}</div></div>
+    ${(C.timeline || []).length ? `<div><h2>A short history</h2><ol class="tl">${C.timeline.map(x => `<li><span class="tl-when">${esc(x.when)}</span><span class="tl-what">${x.what}</span></li>`).join("")}</ol>${hist}</div>` : ""}`;
+}
 /* Three-layer lessons (Arithmetic first, Oct 2026): Concept · Intermediate · Formal tabs change the text only; the lab stays.
    A topic opts in with t.layers = { concept: {lede, what, why, history, sources, examples}, build: {lede, intro, stepWhy, bridge, tasks}, formal: {lede, setup} };
    the rest comes from the usual fields (fields, legend, steps, example, formal, mistakes, practice). Spec: docs/subjects/LAYERS.md. */
 function layerHTML(t, L){
   const Y = t.layers, C = Y.concept || {}, B = Y.build || {}, F = Y.formal || {};
   const col = c => ({c1:"amber",c2:"cyan",c3:"pink",c4:"violet",c5:"green"}[c]);
+  if (L === "concept" && C.ideas) return conceptHTML(t, C, col);
   if (L === "concept") return `
     <div><h2>${C.heading || `What is ${esc(t.title.toLowerCase())}?`}</h2><span class="voice">Plain language</span>${C.what || t.plain}</div>
     <div><h2>Why it matters</h2>${C.why || t.why}
@@ -1165,6 +1180,12 @@ function renderTopic(main){
       pg.querySelectorAll(".lyr-tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.layer === L)));
       $("#lede", pg).innerHTML = ledeOf(L);
       body.innerHTML = layerHTML(t, L);
+      if (window.InquireDemo) InquireDemo.mountAll(body);
+      body.querySelectorAll("[data-lab]").forEach(b => b.onclick = () => {   // "Try it" chips: drive the lab, then bring it into view
+        if (!LabKit.drive(b.dataset.lab)) return;
+        const lab = pg.querySelector(".lab"), calm = document.documentElement.hasAttribute("data-reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches;
+        lab.scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "start" }); lab.classList.add("ping"); setTimeout(() => lab.classList.remove("ping"), 1200);
+      });
       body.querySelectorAll("[data-ans]").forEach(b => b.onclick = () => { const a = b.nextElementSibling; a.hidden = !a.hidden; b.textContent = a.hidden ? "Show answer" : "Hide answer"; });
       window.dispatchEvent(new CustomEvent("inquire:layer", { detail: { topic: id, layer: L } }));
     };

@@ -65,6 +65,29 @@ ARITH["counting"] = {
   layers: {
     concept: {
       heading: "What are counting and the natural numbers?",
+      question: { text: "How many?", sub: `Every time you check a count, you do the same three things. Watch each one happen in the model above, then try it yourself.`, figure: { sym: `<i>n</i>`, value: "17", cap: "the count" } },
+      ideasTitle: "Three ideas, all in the model",
+      ideas: [
+        { c: "c1", title: "One number for each dot", term: "one-to-one matching", text: `Touch each dot once and say the next number. No dot gets two numbers. No dot gets skipped.`,
+          demo: { kind: "dots", slots: 5, lit: 5, sweep: true, alt: "Five dots light up one at a time and are numbered 1 to 5." }, try: { label: "Press Count aloud", lab: "play" } },
+        { c: "c1", title: "The last number is the total", term: "the count", text: `Say the numbers in order. The last one you say tells you how many there are. There is nothing to add up.`,
+          demo: { kind: "dots", slots: 5, lit: 5, sweep: true, big: true, alt: "Five dots are numbered 1 to 5, then the last number, 5, lifts out as the total." }, try: { label: "Count a group of 12", lab: "set:12,play" } },
+        { c: "c2", title: "There is always a next one", term: "successor", text: `After any number comes one more. After 99 comes 100. After a million comes a million and one. The dashed dot is the next one.`,
+          demo: { kind: "dots", slots: 8, grow: [4, 5, 6], alt: "A dashed dot waits after the last dot. When it fills in, a new dashed dot appears after it." }, try: { label: "Add one more dot", lab: "plus" } }
+      ],
+      stakes: { title: "Where counting goes wrong", lead: `Skip one thing, or count one twice, and your total is off by one.`, items: [
+        { role: "Pharmacy", text: `A bottle that is one tablet light.` },
+        { role: "Operating room", text: `A sponge left inside a patient. The team counts before closing, and closing waits until the count is right. With 19 counted out of 20, the dashed dot is where the last sponge should be.` },
+        { role: "Cash drawer", text: `A drawer that is $20 short.` },
+        { role: "Counting a range", text: `Seats 14 through 22 make 9 seats, not 8. Count both ends.` }
+      ], try: { label: "Set the model to 19", lab: "set:19" } },
+      examplesTitle: "Where you will meet it",
+      timeline: [
+        { when: "About 43,000 years ago", what: `Notches cut in a bone in southern Africa. They may be tallies. Scholars still debate it.` },
+        { when: "From about 7500 BCE", what: `Farmers in the Near East count with small clay tokens: a cone for a small measure of barley, a disc for a sheep. One token for each thing, like one dot for each thing in the model.` },
+        { when: "About 3200 BCE", what: `Marks pressed in clay become the first written records, according to archaeologist Denise Schmandt-Besserat.` },
+        { when: "1888 and 1889", what: `Richard Dedekind and Giuseppe Peano write the counting numbers as rules: a first number, and a next number after every number.` }
+      ],
       lede: `Counting answers the question "how many?" It works by matching each thing to one number, and the last number you say is the total.`,
       history: `<p><b>The problem.</b> Farmers and herders needed to know how many sheep or measures of grain they had, and who owed what. Before there were written numerals, the only way to record a number was to keep something that matched it, one mark or one object for each thing.</p>
 <p><b>The solution.</b> Notched bones may be the oldest attempts. The Lebombo bone from southern Africa is about 42,000 to 43,000 years old and the Ishango bone from central Africa more than 20,000 years old, though whether their notches were tallies is still debated. Clearer evidence comes from the Near East, where from about 7500 BCE farmers kept counts with small clay tokens: a cone for a small measure of barley, a disc for a sheep. Three measures of barley were three cones. By about 3300 BCE, at sites such as Susa in Iran, tokens for unpaid dues were sealed in clay envelopes and pressed into the outside first. According to archaeologist Denise Schmandt-Besserat, those marks on clay became the first written records, around 3200 BCE.</p>
@@ -76,12 +99,12 @@ ARITH["counting"] = {
         { title: "Peano axioms (Wikipedia)", url: "https://en.wikipedia.org/wiki/Peano_axioms" }
       ],
       examples: [
-        { role: "Pharmacy technician", scene: `An order calls for 90 tablets. Counted in fives on a tray, 18 full groups make <span class="m">18 × 5 = 90</span>. If only 17 groups go in, the bottle holds <span class="m">17 × 5 = 85</span>, five short.`, takeaway: "Counting in groups is fast, and a group is quick to recount if something looks off." },
-        { role: "Inventory clerk", scene: `The system lists 60 cases. The shelf holds 4 stacks of 12 and one stack of 9: <span class="m">48 + 9 = 57</span>. Three cases are unaccounted for.`, takeaway: "A count that disagrees with the records starts a search for theft, damage or a data-entry error." },
-        { role: "Surgical nurse", scene: `Twenty sponges were opened during an operation. Before the incision is closed, the team counts 19 on the counter. Closing waits until the 20th is found.`, takeaway: "One skipped item in a count can mean an object left inside a patient." },
-        { role: "Bank teller", scene: `At shift end the drawer holds 12 twenties, 15 tens and 8 fives: <span class="m">240 + 150 + 40 = 430</span> dollars, which should match the $430 the records show.`, takeaway: "Counting each kind of bill separately keeps a large count manageable." },
-        { role: "Wildlife biologist", scene: `Three survey plots of the same size hold 14, 9 and 22 deer: <span class="m">14 + 9 + 22 = 45</span> deer, an average of <span class="m">45 ÷ 3 = 15</span> per plot.`, takeaway: "Careful counts in small areas are how whole populations are estimated." },
-        { role: "Election official", scene: `In a hand recount, ballots are stacked in batches of 50. There are 24 batches and 14 left over: <span class="m">24 × 50 + 14 = 1,214</span>, matching the machine total of 1,214.`, takeaway: "When a hand count matches the machine, voters can trust the result." }
+        { role: "Pharmacy technician", figure: "90 tablets", scene: `An order calls for 90 tablets. Counted in fives on a tray, 18 full groups make <span class="m">18 × 5 = 90</span>. If only 17 groups go in, the bottle holds <span class="m">17 × 5 = 85</span>, five short.`, takeaway: "Counting in groups is fast, and a group is quick to recount if something looks off." },
+        { role: "Inventory clerk", figure: "57 of 60 cases", scene: `The system lists 60 cases. The shelf holds 4 stacks of 12 and one stack of 9: <span class="m">48 + 9 = 57</span>. Three cases are unaccounted for.`, takeaway: "A count that disagrees with the records starts a search for theft, damage or a data-entry error." },
+        { role: "Surgical nurse", figure: "19 of 20 sponges", try: { label: "Show all 20", lab: "set:20" }, scene: `Twenty sponges were opened during an operation. Before the incision is closed, the team counts 19 on the counter. Closing waits until the 20th is found.`, takeaway: "One skipped item in a count can mean an object left inside a patient." },
+        { role: "Bank teller", figure: "$430", scene: `At shift end the drawer holds 12 twenties, 15 tens and 8 fives: <span class="m">240 + 150 + 40 = 430</span> dollars, which should match the $430 the records show.`, takeaway: "Counting each kind of bill separately keeps a large count manageable." },
+        { role: "Wildlife biologist", figure: "45 deer", scene: `Three survey plots of the same size hold 14, 9 and 22 deer: <span class="m">14 + 9 + 22 = 45</span> deer, an average of <span class="m">45 ÷ 3 = 15</span> per plot.`, takeaway: "Careful counts in small areas are how whole populations are estimated." },
+        { role: "Election official", figure: "1,214 ballots", scene: `In a hand recount, ballots are stacked in batches of 50. There are 24 batches and 14 left over: <span class="m">24 × 50 + 14 = 1,214</span>, matching the machine total of 1,214.`, takeaway: "When a hand count matches the machine, voters can trust the result." }
       ]
     },
     build: {

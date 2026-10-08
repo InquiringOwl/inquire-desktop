@@ -1,4 +1,4 @@
-# content: 756a04fd06c5
+# content: 998a2f93a985
 # counting: Counting & the Natural Numbers
 
 # example: seats 14..22
@@ -56,3 +56,11 @@ check("layers.setup", [s - 13 for s in range(14, 23)] == list(range(1, 10)), "f(
 check("layers.setup", all(len(range(a, b + 1)) == b - a + 1 for a in range(0, 30) for b in range(a, 40)), "range rule")
 check("layers.setup", all([s - (a - 1) for s in range(a, b + 1)] == list(range(1, b - a + 2)) for a in range(1, 20) for b in range(a, 30)), "subtract a-1 matches to 1..b-a+1")
 same("layers.setup", 22 - 14 + 1, 9)
+
+# layers.concept blocks (ideas, stakes, tiles): numbers stated on the page
+same("layers.concept", 99 + 1, 100)
+same("layers.concept", 1000000 + 1, 1000001)
+same("layers.concept", 20 - 19, 1)
+same("layers.concept", len(range(14, 23)), 9)
+same("layers.concept", 22 - 14, 8)
+same("layers.concept", len(range(1, 13)), 12)
