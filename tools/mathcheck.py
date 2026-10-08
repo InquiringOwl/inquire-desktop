@@ -51,7 +51,7 @@ def load_content():
 
 
 def content_hash(info):
-    keys = ('formal', 'example', 'practice') + (('stories',) if info.get('stories') else ())   # English pages: quoted passages too
+    keys = ('formal', 'example', 'practice') + (('stories',) if info.get('stories') else ()) + (('layers',) if info.get('layers') else ())   # English pages: quoted passages too; layered lessons: concept examples + formal setup
     blob = json.dumps({k: info.get(k) for k in keys}, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(blob.encode('utf8')).hexdigest()[:12]
 

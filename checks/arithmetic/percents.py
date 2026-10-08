@@ -1,4 +1,4 @@
-# content: 49ce685b89c0
+# content: 7eba517efa41
 # percents: Percents
 same("formal", Rational(250, 100), 2.5)
 same("formal", Rational(4, 10)/100, 0.004)
@@ -12,3 +12,34 @@ same("practice[1]", Rational(3, 8), 0.375)
 same("practice[1]", Rational(3, 8)*100, 37.5)
 same("practice[2]", Rational(18, 72)*100, 25)
 same("practice[3]", solve(Eq(Rational(12, 100)*x, 30), x)[0], 250)
+
+# practice[4]: 0.70 p = 63
+same("practice[4]", solve(Eq(Rational(70, 100)*x, 63), x)[0], 90)
+same("practice[3]", Rational(12, 100)*250, 30)
+
+# plain / why / mistakes: numbers stated on the page
+same("plain", Rational(8, 100)*250, 20)
+same("plain", Rational(42, 48), Rational(875, 1000))
+same("plain", Rational(70, 80), Rational(875, 1000))
+same("why", 100*Rational(3, 2), 150)
+same("why", 150*Rational(1, 2), 75)
+same("mistakes", Rational(100, 40)*100, 250)
+same("mistakes", Rational(5 - 4, 4), Rational(25, 100))
+
+# layers (concept examples, build steps, formal setup)
+same("layers.examples", Rational(25, 1000)*340000, 8500)
+same("layers.examples", 20*9, 180)
+same("layers.examples", Rational(180, 600), Rational(30, 100))
+same("layers.examples", Rational(540, 1200), Rational(45, 100))
+same("layers.examples", Rational(34, 40), Rational(85, 100))
+same("layers.examples", Rational(35, 2500), Rational(14, 1000))
+check("layers.examples", Rational(35, 2500) < Rational(2, 100), "1.4% is inside a 2% target")
+same("layers.examples", Rational(10, 100)*64, Rational(640, 100))
+same("layers.examples", Rational(20, 100)*64, Rational(1280, 100))
+same("layers.steps", Rational(312, 480), Rational(65, 100))
+same("layers.steps", 30 / Rational(12, 100), 250)
+same("layers.tasks", Rational(20, 100)*45, 9)
+same("layers.setup", solve(Eq(312, x/100*480), x)[0], 65)
+same("layers.setup", 100*Rational(312, 480), 65)
+same("layers.setup", Rational(65, 100)*2000, 1300)
+same("layers.setup", Rational(65, 100)*480, 312)

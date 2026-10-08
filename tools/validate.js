@@ -181,6 +181,32 @@ for (const [id, t] of Object.entries(T)) {
   if (arr(W, 'mistakes', t.mistakes, 2)) t.mistakes.forEach((m, i) => { nonEmpty(W, `mistakes[${i}].wrong`, m.wrong); nonEmpty(W, `mistakes[${i}].fix`, m.fix); });
   if (arr(W, 'practice', t.practice, 3)) t.practice.forEach((p, i) => { nonEmpty(W, `practice[${i}].q`, p.q); nonEmpty(W, `practice[${i}].a`, p.a); checkHtml(W, `practice[${i}].a`, p.a); });
 
+  // three-layer lessons (docs/subjects/LAYERS.md): t.layers = {concept, build, formal}
+  if (t.layers !== undefined) {
+    const Y = t.layers || {}, C = Y.concept, B = Y.build, F = Y.formal, LW = W + ' layers';
+    if (!C || !B || !F) err(LW, 'needs concept, build and formal');
+    for (const [k, o] of Object.entries({ concept: C, build: B, formal: F })) if (o && o.lede !== undefined) { nonEmpty(LW, `${k}.lede`, o.lede); checkHtml(LW, `${k}.lede`, o.lede); }
+    if (C) {
+      nonEmpty(LW, 'concept.lede', C.lede); nonEmpty(LW, 'concept.history', C.history); checkHtml(LW, 'concept.history', C.history);
+      for (const k of ['what', 'why']) if (C[k] !== undefined) { nonEmpty(LW, `concept.${k}`, C[k]); checkHtml(LW, `concept.${k}`, C[k]); }  // optional: plain / why are used otherwise
+      if (C.heading !== undefined) checkText(LW, 'concept.heading', C.heading);
+      if (arr(LW, 'concept.sources', C.sources, 1)) C.sources.forEach((x, i) => { checkText(LW, `concept.sources[${i}].title`, x.title); if (!/^https:\/\//.test(x.url || '')) err(LW, `concept.sources[${i}].url must be https`); });
+      if (arr(LW, 'concept.examples', C.examples, 3)) C.examples.forEach((x, i) => { checkText(LW, `concept.examples[${i}].role`, x.role); nonEmpty(LW, `concept.examples[${i}].scene`, x.scene); checkHtml(LW, `concept.examples[${i}].scene`, x.scene); if (x.takeaway !== undefined) checkText(LW, `concept.examples[${i}].takeaway`, x.takeaway); });
+    }
+    if (B) {
+      nonEmpty(LW, 'build.lede', B.lede);
+      for (const k of ['intro', 'bridge']) { nonEmpty(LW, `build.${k}`, B[k]); checkHtml(LW, `build.${k}`, B[k]); }
+      if (arr(LW, 'build.stepWhy', B.stepWhy, 1)) { if (t.steps && t.steps.items && B.stepWhy.length !== t.steps.items.length) err(LW, `build.stepWhy has ${B.stepWhy.length} items but steps.items has ${t.steps.items.length}`); B.stepWhy.forEach((x, i) => { nonEmpty(LW, `build.stepWhy[${i}]`, x); checkHtml(LW, `build.stepWhy[${i}]`, x); }); }
+      if (arr(LW, 'build.tasks', B.tasks, 3)) B.tasks.forEach((x, i) => { checkText(LW, `build.tasks[${i}].task`, x.task); nonEmpty(LW, `build.tasks[${i}].link`, x.link); checkHtml(LW, `build.tasks[${i}].link`, x.link); });
+    }
+    if (F) {
+      if (!F.setup || typeof F.setup !== 'object') err(LW, 'formal.setup must be {title, items}');
+      else { checkText(LW, 'formal.setup.title', F.setup.title); if (arr(LW, 'formal.setup.items', F.setup.items, 3)) F.setup.items.forEach((x, i) => { nonEmpty(LW, `formal.setup.items[${i}].say`, x.say); checkHtml(LW, `formal.setup.items[${i}].say`, x.say); if (x.math !== undefined) { nonEmpty(LW, `formal.setup.items[${i}].math`, x.math); checkHtml(LW, `formal.setup.items[${i}].math`, x.math); } }); }
+    }
+    t.practice && t.practice.forEach((p, i) => { if (p.ctx !== undefined) checkText(LW, `practice[${i}].ctx`, p.ctx); });
+    if (JUNK.test(JSON.stringify(t.layers))) err(LW, 'contains placeholder text');
+  }
+
   // prereqWhy / unlocksWhy must match the tree edges
   const pw = t.prereqWhy || {}, uw = t.unlocksWhy || {};
   const unlocks = Object.values(node).filter(m => (m.pre || []).includes(id)).map(m => m.id);

@@ -1051,6 +1051,31 @@ function stubTopic(id){
     plain: "", formal: "", legend: [], steps: { title: "Steps", items: [] }, example: { prompt: "", lines: [], answer: "" }, why: "", careers: [], life: [], fields: [],
     prereqWhy: {}, unlocksWhy: {}, beyond: [], mistakes: [], practice: [], origin: "" };
 }
+/* Three-layer lessons (Arithmetic first, Oct 2026): Concept · Intermediate · Formal tabs change the text only; the lab stays.
+   A topic opts in with t.layers = { concept: {lede, what, why, history, sources, examples}, build: {lede, intro, stepWhy, bridge, tasks}, formal: {lede, setup} };
+   the rest comes from the usual fields (fields, legend, steps, example, formal, mistakes, practice). Spec: docs/subjects/LAYERS.md. */
+function layerHTML(t, L){
+  const Y = t.layers, C = Y.concept || {}, B = Y.build || {}, F = Y.formal || {};
+  const col = c => ({c1:"amber",c2:"cyan",c3:"pink",c4:"violet",c5:"green"}[c]);
+  if (L === "concept") return `
+    <div><h2>${C.heading || `What is ${esc(t.title.toLowerCase())}?`}</h2><span class="voice">Plain language</span>${C.what || t.plain}</div>
+    <div><h2>Why it matters</h2>${C.why || t.why}
+      <h3 style="margin-top:18px">Subjects that rely on it</h3><div class="fieldrow">${t.fields.map(f => `<div><b>${esc(f.name)}.</b> ${esc(f.use)}</div>`).join("")}</div></div>
+    ${C.history ? `<div><h2>A short history</h2><div class="lyr-hist">${C.history}</div>${(C.sources || []).length ? `<p class="lyr-src"><span>Sources</span>${C.sources.map(x => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>`).join(" · ")}</p>` : ""}</div>` : ""}
+    <div><h2>Where you will meet it</h2><div class="careers lyr-ex">${(C.examples || t.careers.map(c => ({ role: c.role, scene: esc(c.use) }))).map(c => `<div class="career"><h4>${esc(c.role)}</h4><p>${c.scene}</p>${c.takeaway ? `<p class="lyr-take">${esc(c.takeaway)}</p>` : ""}</div>`).join("")}</div></div>`;
+  if (L === "build") return `
+    <div><h2>Reading the model</h2>${B.intro || ""}<div class="legend">${t.legend.map(k => `<div class="key" style="--c:var(--${col(k.c)})"><h3><span class="m">${k.sym}</span>${esc(k.name)}</h3><p>${k.desc}</p></div>`).join("")}</div></div>
+    <div><h2>${esc(t.steps.title)}</h2><ol class="steps lyr-steps">${t.steps.items.map((s, i) => `<li><div>${s}${B.stepWhy && B.stepWhy[i] ? `<p class="lyr-why">${B.stepWhy[i]}</p>` : ""}</div></li>`).join("")}</ol></div>
+    <div><h2>Worked example</h2><div class="ex"><div class="prompt"><p class="eyebrow">Problem</p>${t.example.prompt}</div>
+      <div class="tbl"><table>${t.example.lines.map(l => `<tr><td>${l.math}</td><td>${esc(l.note || "")}</td></tr>`).join("")}</table></div>
+      <div class="ans"><b>Answer.</b> ${t.example.answer}</div></div></div>
+    <div><h2>Everyday tasks</h2>${B.bridge || ""}<ul class="lifelist lyr-tasks">${(B.tasks || t.life.map(x => ({ task: x }))).map(x => `<li><div><b>${esc(x.task)}</b>${x.link ? `<span>${x.link}</span>` : ""}</div></li>`).join("")}</ul></div>`;
+  return `
+    <div><h2>Formal statement</h2><span class="voice f">College level</span>${t.formal}</div>
+    ${F.setup ? `<div><h2>${esc(F.setup.title)}</h2><ol class="steps lyr-setup">${F.setup.items.map(x => `<li><div>${x.say}${x.math ? `<div class="lyr-math">${x.math}</div>` : ""}</div></li>`).join("")}</ol></div>` : ""}
+    <div><h2>Common mistakes</h2><div class="mist">${t.mistakes.map(m => `<div><div class="w">${m.wrong}</div><div class="f">${m.fix}</div></div>`).join("")}</div></div>
+    <div><h2>Practice</h2><div class="prac">${t.practice.map((p, i) => `<div class="pq">${p.ctx ? `<p class="eyebrow lyr-ctx">${esc(p.ctx)}</p>` : ""}<div class="q"><span class="n">${String(i+1).padStart(2,"0")}</span>${p.q}</div><button type="button" class="btn-s" data-ans="${i}">Show answer</button><div class="a" hidden>${p.a}</div></div>`).join("")}</div></div>`;
+}
 function renderTopic(main){
   const id = S.topic, n = NODE[id], f = n.field, FNAME = DB.fields[f].name;
   const t = T[id] || stubTopic(id);
@@ -1065,25 +1090,24 @@ function renderTopic(main){
     if (r.id) { const tp = T[r.id] || { title: r.id, short: "" }; return `<button type="button" class="plink" data-t="${r.id}" data-st="${stateOf(r.id)}"><span class="o">${NODE[r.id].icon}</span><span><b>${esc(tp.title)} <span style="font-weight:400;color:var(--faint)">· ${esc(DB.fields[NODE[r.id].field].name)}</span></b><span>${why || esc(tp.short)}</span></span></button>`; }
     const F2 = DB.fields[r.field]; return `<button type="button" class="plink" data-f="${r.field}" data-st="planned"><span class="o">${F2.icon}</span><span><b>${esc(r.name)} <span style="font-weight:400;color:var(--faint)">· ${esc(F2.name)}${charted(r.field) ? "" : " (planned)"}</span></b><span>${why}</span></span></button>`; };
   const mathList = (n.math || []).map(mathLink).filter(Boolean), physList = (n.physics || []).map(mathLink).filter(Boolean);
-  pg.innerHTML = `
-  <div class="topic-bar">
-    <button type="button" class="btn-s navtoggle" id="navtoggle2">☰</button>
-    <button type="button" class="btn-s" id="back">◀ ${esc(FNAME)} tree</button>
-    <span class="sp"></span>
-    ${st === "mastered" ? '<span class="pill m">Mastered</span>' : st === "avail" ? '<span class="pill a">Ready to study</span>' : '<span class="pill l">Prerequisites open</span>'}
-    <button type="button" class="btn ${st === "mastered" ? "ghost" : "good"}" id="mast">${st === "mastered" ? "Unmark mastered" : "Mark as mastered"}</button>
-  </div>
-  <div class="wrap">
-    <header class="intro">
-      <div><p class="eyebrow">${t.eyebrow}</p><h1>${t.hero}</h1>
-        <div class="meta"><span class="pill l">${esc(t.grade)}</span><span class="pill l">About ${t.hours} h to master</span><span class="pill l">${esc(voiceTxt)}</span></div></div>
-      <p class="lede">${t.lede}</p>
-    </header>
-    <section class="lab" aria-label="Interactive model">
-      <div class="stage" id="stage"></div>
-      <aside class="readout" id="readout" aria-live="off"></aside>
-      <div class="controls" id="controls"></div>
-    </section>
+  const pathHTML = `
+      <div><h2>Learning path</h2><div class="path">
+        ${mathList.length ? `<div class="win"><div class="win-h"><span class="dot"></span>Mathematics you need</div><div class="in">${mathList.join("")}</div></div>` : ""}
+        ${physList.length ? `<div class="win"><div class="win-h"><span class="dot"></span>Physics you need</div><div class="in">${physList.join("")}</div></div>` : ""}
+        <div class="win"><div class="win-h"><span class="dot"></span>Master these first</div><div class="in">${n.pre.length ? n.pre.map(link).join("") : '<span class="empty">This is the starting point of the tree. Nothing is required first.</span>'}</div></div>
+        <div class="win"><div class="win-h"><span class="dot"></span>This unlocks</div><div class="in">${n.post.length ? n.post.map(link).join("") : '<span class="empty">No later charted topic depends on this directly. It feeds the fields below.</span>'}</div></div>
+        <div class="win"><div class="win-h"><span class="dot"></span>Vital in later fields</div><div class="in">${t.beyond.map(b => `<div class="plink" style="cursor:default"><span class="o">→</span><span><b>${esc(b.field)}</b><span>${esc(b.why)}</span></span></div>`).join("")}</div></div>
+      </div></div>`;
+  const pagerHTML = `
+      <div class="pager">${prev ? `<button type="button" class="btn ghost" data-t="${prev}">◀ ${esc((T[prev] || { title: prev }).title)}</button>` : "<span></span>"}${next ? `<button type="button" class="btn ghost" data-t="${next}">${esc((T[next] || { title: next }).title)} ▶</button>` : ""}</div>`;
+  const layered = !!t.layers;
+  const LAYERS = [["concept", "Concept", "New or returning: what it is and why it matters"], ["build", "Intermediate", "How to do it, step by step"], ["formal", "Formal", "State it precisely, then master it"]];
+  let layer = store.get("layer", "concept"); if (!LAYERS.some(L => L[0] === layer)) layer = "concept";
+  const ledeOf = L => (t.layers && t.layers[L] && t.layers[L].lede) || t.lede;
+  const notesHTML = layered ? `<section class="notes"><div id="layer" class="lyr-body" role="tabpanel"></div>
+      ${pathHTML}
+      ${pagerHTML}
+    </section>` : `
     <section class="notes">
       <div><h2>Reading the model</h2><div class="legend">${t.legend.map(k => `<div class="key" style="--c:var(--${{c1:"amber",c2:"cyan",c3:"pink",c4:"violet",c5:"green"}[k.c]})"><h3><span class="m">${k.sym}</span>${esc(k.name)}</h3><p>${k.desc}</p></div>`).join("")}</div></div>
       <div class="two">
@@ -1100,17 +1124,33 @@ function renderTopic(main){
         <div class="two" style="margin-top:22px"><div><h3>Everyday tasks</h3><ul class="lifelist">${t.life.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
         <div><h3>Subjects that rely on it</h3><div class="fieldrow">${t.fields.map(f => `<div><b>${esc(f.name)}.</b> ${esc(f.use)}</div>`).join("")}</div></div></div>
       </div>
-      <div><h2>Learning path</h2><div class="path">
-        ${mathList.length ? `<div class="win"><div class="win-h"><span class="dot"></span>Mathematics you need</div><div class="in">${mathList.join("")}</div></div>` : ""}
-        ${physList.length ? `<div class="win"><div class="win-h"><span class="dot"></span>Physics you need</div><div class="in">${physList.join("")}</div></div>` : ""}
-        <div class="win"><div class="win-h"><span class="dot"></span>Master these first</div><div class="in">${n.pre.length ? n.pre.map(link).join("") : '<span class="empty">This is the starting point of the tree. Nothing is required first.</span>'}</div></div>
-        <div class="win"><div class="win-h"><span class="dot"></span>This unlocks</div><div class="in">${n.post.length ? n.post.map(link).join("") : '<span class="empty">No later charted topic depends on this directly. It feeds the fields below.</span>'}</div></div>
-        <div class="win"><div class="win-h"><span class="dot"></span>Vital in later fields</div><div class="in">${t.beyond.map(b => `<div class="plink" style="cursor:default"><span class="o">→</span><span><b>${esc(b.field)}</b><span>${esc(b.why)}</span></span></div>`).join("")}</div></div>
-      </div></div>
+      ${pathHTML}
       <div><h2>Common mistakes</h2><div class="mist">${t.mistakes.map(m => `<div><div class="w">${m.wrong}</div><div class="f">${m.fix}</div></div>`).join("")}</div></div>
       <div><h2>Practice</h2><div class="prac">${t.practice.map((p, i) => `<div class="pq"><div class="q"><span class="n">${String(i+1).padStart(2,"0")}</span>${p.q}</div><button type="button" class="btn-s" data-ans="${i}">Show answer</button><div class="a" hidden>${p.a}</div></div>`).join("")}</div></div>
       ${t.origin ? `<div><h2>Origin</h2><p class="origin">${t.origin}</p></div>` : ""}
-      <div class="pager">${prev ? `<button type="button" class="btn ghost" data-t="${prev}">◀ ${esc((T[prev] || { title: prev }).title)}</button>` : "<span></span>"}${next ? `<button type="button" class="btn ghost" data-t="${next}">${esc((T[next] || { title: next }).title)} ▶</button>` : ""}</div>
+      ${pagerHTML}
+    </section>`;
+  pg.innerHTML = `
+  <div class="topic-bar">
+    <button type="button" class="btn-s navtoggle" id="navtoggle2">☰</button>
+    <button type="button" class="btn-s" id="back">◀ ${esc(FNAME)} tree</button>
+    <span class="sp"></span>
+    ${st === "mastered" ? '<span class="pill m">Mastered</span>' : st === "avail" ? '<span class="pill a">Ready to study</span>' : '<span class="pill l">Prerequisites open</span>'}
+    <button type="button" class="btn ${st === "mastered" ? "ghost" : "good"}" id="mast">${st === "mastered" ? "Unmark mastered" : "Mark as mastered"}</button>
+  </div>
+  <div class="wrap">
+    ${layered ? `<div class="lyr-tabs" role="tablist" aria-label="Lesson level">${LAYERS.map(([k, name, sub], i) => `<button type="button" role="tab" class="lyr-tab" data-layer="${k}" aria-selected="${k === layer}" aria-controls="layer"><span class="lyr-n">${i + 1}</span><span><b>${name}</b><span>${sub}</span></span></button>`).join("")}</div>` : ""}
+    <header class="intro">
+      <div><p class="eyebrow">${t.eyebrow}</p><h1>${t.hero}</h1>
+        <div class="meta"><span class="pill l">${esc(t.grade)}</span><span class="pill l">About ${t.hours} h to master</span>${layered ? "" : `<span class="pill l">${esc(voiceTxt)}</span>`}</div></div>
+      <p class="lede" id="lede">${layered ? ledeOf(layer) : t.lede}</p>
+    </header>
+    <section class="lab" aria-label="Interactive model">
+      <div class="stage" id="stage"></div>
+      <aside class="readout" id="readout" aria-live="off"></aside>
+      <div class="controls" id="controls"></div>
+    </section>
+    ${notesHTML}
     </section>
   </div>`;
   main.appendChild(pg);
@@ -1118,6 +1158,22 @@ function renderTopic(main){
   $("#back", pg).onclick = () => go({ view: "math", field: f, topic: null });
   $("#navtoggle2", pg).onclick = () => main.parentElement.classList.toggle("navopen");
   $("#mast", pg).onclick = () => { if (mastered.has(id)) mastered.delete(id); else mastered.add(id); saveMastered(); const y = pg.scrollTop; render(); const np = $(".topic"); if (np) np.scrollTop = y; };
+  if (layered) {
+    const body = $("#layer", pg);
+    const draw = L => {
+      layer = L; store.set("layer", L);
+      pg.querySelectorAll(".lyr-tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.layer === L)));
+      $("#lede", pg).innerHTML = ledeOf(L);
+      body.innerHTML = layerHTML(t, L);
+      body.querySelectorAll("[data-ans]").forEach(b => b.onclick = () => { const a = b.nextElementSibling; a.hidden = !a.hidden; b.textContent = a.hidden ? "Show answer" : "Hide answer"; });
+      window.dispatchEvent(new CustomEvent("inquire:layer", { detail: { topic: id, layer: L } }));
+    };
+    pg.querySelectorAll(".lyr-tab").forEach(b => {
+      b.onclick = () => draw(b.dataset.layer);
+      b.onkeydown = e => { if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return; const i = LAYERS.findIndex(L => L[0] === layer), j = (i + (e.key === "ArrowRight" ? 1 : 2)) % 3; draw(LAYERS[j][0]); pg.querySelector(`.lyr-tab[data-layer="${LAYERS[j][0]}"]`).focus(); };
+    });
+    draw(layer);
+  }
   pg.querySelectorAll("[data-t]").forEach(b => b.onclick = () => go({ view: "math", field: fieldOf(b.dataset.t), topic: b.dataset.t }));
   pg.querySelectorAll(".plink[data-f]").forEach(b => b.onclick = () => go({ view: "math", field: b.dataset.f, topic: null }));
   if ((t.stories || []).length) glossaryPopover(pg, subjOf(f));

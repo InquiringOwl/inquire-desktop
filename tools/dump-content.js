@@ -10,6 +10,6 @@ const want = process.argv.slice(2);
 const out = {};
 for (const [id, t] of Object.entries(ctx.ARITH)) {
   if (want.length && !want.includes(id)) continue;
-  out[id] = { field: field[id], title: t.title, formal: t.formal, steps: t.steps, example: t.example, practice: t.practice, mistakes: t.mistakes, ...(t.stories ? { stories: t.stories } : {}) };
+  out[id] = { field: field[id], title: t.title, formal: t.formal, steps: t.steps, example: t.example, practice: t.practice, mistakes: t.mistakes, ...(t.stories ? { stories: t.stories } : {}), ...(t.layers ? { layers: { examples: (t.layers.concept || {}).examples, setup: (t.layers.formal || {}).setup } } : {}) };
 }
 process.stdout.write(JSON.stringify(out, null, 1));

@@ -1,4 +1,4 @@
-# content: acb1ce33beeb
+# content: 029fd4eb89e1
 # multiplication: Multiplication
 same("example", 20*40, 800); same("example", 20*7, 140)
 same("example", 3*40, 120); same("example", 3*7, 21)
@@ -11,3 +11,26 @@ same("practice[2]", 40*20 + 40*5 + 8*20 + 8*5, 1200); same("practice[2]", 48*25,
 check("practice[2]", (40*20, 40*5, 8*20, 8*5) == (800, 200, 160, 40), "partial products")
 same("practice[3]", 124*30, 3720); same("practice[3]", 124*7, 868)
 same("practice[3]", 124*37, 4588)
+same("practice[4]", 10*26, 260); same("practice[4]", 8*26, 208)
+same("practice[4]", 260 + 208, 468); same("practice[4]", 18*26, 468)
+
+# layers (concept examples, build tasks, formal setup): numbers stated on the page
+same("layers.examples", 5*24, 120); same("layers.examples", 12*10, 120)
+same("layers.examples", 15*42, 630)
+same("layers.examples", Rational(125, 10)*120, 1500)
+same("layers.examples", 14*12, 168)
+same("layers.examples", 168*Rational(11, 10), Rational(1848, 10))
+check("layers.examples", round(168*Rational(11, 10)) == 185, "about 185")
+same("layers.examples", Rational(3, 2)*22, 33)
+same("layers.examples", 40*22, 880); same("layers.examples", 6*33, 198)
+same("layers.examples", 880 + 198, 1078)
+same("layers.examples", 12 // 4, 3); same("layers.examples", 3*3, 9)
+same("layers.examples", 48*37, 1776)
+same("layers.examples", 6*20 + 6*3, 138); same("layers.examples", 6*23, 138)
+same("layers.examples", 30*25, 750); same("layers.examples", 8*25, 200); same("layers.examples", 38*25, 950)
+same("layers.examples", 3*Rational(5, 4), Rational(15, 4))
+same("layers.examples", 13*11, 143); same("layers.examples", 13*10 + 13, 143)
+same("layers.examples", 12*10 + 12*2, 144); same("layers.examples", 12*12, 144)
+same("layers.setup", 20*40 + 20*7 + 3*40 + 3*7, 1081)
+same("layers.setup", (20 + 3)*(40 + 7), 23*47)
+check("layers.examples", 12*Rational(30, 12) == 30, "12 ft x 30 in = 30 sq ft")

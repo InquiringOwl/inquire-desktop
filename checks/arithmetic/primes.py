@@ -1,4 +1,4 @@
-# content: 594e10a30246
+# content: 21f2d8e608cc
 # primes: Prime Numbers & Prime Factorization
 same("example", 2*2*2*45, 360); same("example", 3*3*5, 45)
 check("example", factorint(360) == {2: 3, 3: 2, 5: 1}, "360 = 2^3 3^2 5")
@@ -13,3 +13,34 @@ check("practice[2]", abs(sqrt(211).evalf() - 14.5) < 0.05, "sqrt 211 ≈ 14.5")
 check("practice[2]", all(211 % p for p in [2, 3, 5, 7, 11, 13]) and list(primerange(2, 15)) == [2, 3, 5, 7, 11, 13], "no prime ≤ 14 divides")
 check("practice[3]", factorint(1001) == {7: 1, 11: 1, 13: 1}, "1001 = 7*11*13")
 same("practice[3]", Rational(1001, 7), 143); same("practice[3]", 11*13, 143)
+
+# practice[0] reworded: tables
+check("practice[0]", 51 // 3 == 17 and 51 // 17 == 3, "3 tables of 17 / 17 tables of 3")
+# practice[4]: 200 = 2^3 5^2, 12 stack sizes
+check("practice[4]", factorint(200) == {2: 3, 5: 2}, "200 = 2^3 5^2")
+same("practice[4]", (3 + 1) * (2 + 1), 12)
+same("practice[4]", divisors(200), [1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 200])
+# why / mistakes
+same("why", (7 * 13, 8 * 13), (91, 104))
+same("why", Rational(91, 104), Rational(7, 8))
+check("why", isprime(97), "97 prime")
+check("mistakes", abs(sqrt(91).evalf() - 9.5) < 0.05 and 7 * 13 == 91, "sqrt 91 ≈ 9.5")
+
+# layers (concept examples, formal setup)
+check("layers.examples", isprime(61) and isprime(53), "61, 53 prime")
+same("layers.examples", 61 * 53, 3233)
+check("layers.examples", len(str(2**2047)) == 617 and len(str(2**2048 - 1)) == 617, "2048-bit number has 617 digits")
+check("layers.examples", len(str(2**1023)) == 308 and len(str(2**1024 - 1)) == 309, "1024-bit primes ~309 digits")
+check("layers.examples", factorint(12) == {2: 2, 3: 1} and factorint(25) == {5: 2} and igcd(12, 25) == 1, "12, 25 coprime")
+same("layers.examples", ilcm(12, 25), 300)
+same("layers.examples", 12 * 25, 300)
+check("layers.examples", len({(12 * k) % 25 for k in range(25)}) == 25, "each tooth meets every tooth")
+check("layers.examples", isprime(97) and len({(4 * k) % 97 for k in range(1, 200)}) == 97, "multiples of 4 reach all 97 slots")
+check("layers.examples", len({(4 * k) % 100 for k in range(1, 200)}) == 25, "only 25 of 100 slots")
+check("layers.examples", abs(sqrt(221).evalf() - 14.9) < 0.05 and list(primerange(2, 15)) == [2, 3, 5, 7, 11, 13], "sqrt 221 ≈ 14.9, six primes")
+same("layers.examples", 13 * 17, 221)
+check("layers.examples", all(221 % q for q in [2, 3, 5, 7, 11]), "13 is the first divisor")
+check("layers.setup", abs(sqrt(360).evalf() - 18.97) < 0.005 and list(primerange(2, 19)) == [2, 3, 5, 7, 11, 13, 17], "sqrt 360 ≈ 18.97")
+same("layers.setup", 360 // 2 // 2 // 2, 45)
+same("layers.setup", 45 // 3 // 3, 5)
+same("layers.setup", (3 + 1) * (2 + 1) * (1 + 1), 24)

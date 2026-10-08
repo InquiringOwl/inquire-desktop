@@ -1,4 +1,4 @@
-# content: 656b6c5077a2
+# content: e328d15149c5
 # addition: Addition
 
 # formal: commutativity / associativity / identity
@@ -34,3 +34,20 @@ same("practice[2]", 2748 + 1396, 4144)
 same("practice[3]", 1875 + 2409, 4284)
 same("practice[3]", 4284 + 638, 4922)
 same("practice[3]", 1875 + 2409 + 638, 4922)
+
+# practice[4]
+same("practice[4]", 500 + 240, 740)
+same("practice[4]", 740 + 120, 860)
+
+# layers (concept examples, formal setup): numbers stated on the page
+same("layers.examples", 12 + 3 + 8, 23)
+same("layers.examples", 49 + 75 + 20, 144)
+same("layers.examples", Rational(1249 + 375 + 820, 100), Rational(2444, 100))
+same("layers.examples", 40 + 6 + 8, 54)
+same("layers.examples", 84 + 84 + 38, 206)
+check("layers.examples", 17 * 12 < 206 < 18 * 12, "206 in is a little over 17 ft")
+same("layers.examples", 1250 + 980 + 1475, 3705)
+same("layers.examples", 1320 + 985 + 1140, 3445)
+same("layers.setup", 7 * 10**2 + 12 * 10 + 14, 834)
+same("layers.setup", 8 * 10**2 + 3 * 10 + 4, 834)
+same("layers.setup", (4*100 + 7*10 + 8) + (3*100 + 5*10 + 6), 834)

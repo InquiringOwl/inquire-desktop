@@ -43,6 +43,24 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     body: JSON.stringify({ en: [{ partOfSpeech: 'Noun', language: 'English', definitions: [{ definition: '<span>Something whose <a href="/wiki/value">value</a> may change.</span>' }] }] }) }));
   await p.goto(URL0 + '#menu'); await wait(800);
 
+  /* ---------- lesson layers (Concept · Intermediate · Formal) ---------- */
+  await p.goto(URL0 + '#addition'); await wait(900);
+  ok(await p.$$eval('.lyr-tab', b => b.length) === 3, 'lesson layers: three tabs on a layered lesson');
+  const lab0 = await p.$eval('#stage', e => e.innerHTML.length);
+  await p.click('.lyr-tab[data-layer=build]'); await wait(450);
+  ok(await p.$eval('.lyr-tab[data-layer=build]', e => e.getAttribute('aria-selected')) === 'true' && !!(await p.$('#layer .lyr-steps')), 'lesson layers: Intermediate shows the steps with reasons');
+  ok(/routine/i.test(await p.$eval('#lede', e => e.textContent)), 'lesson layers: the lede follows the tab');
+  ok(await p.$eval('#stage', e => e.innerHTML.length) === lab0, 'lesson layers: the lab is untouched by a tab switch');
+  await p.click('.lyr-tab[data-layer=formal]'); await wait(450);
+  await p.click('#layer [data-ans="0"]'); ok(await p.$eval('#layer [data-ans="0"] + .a', e => !e.hidden), 'lesson layers: Formal practice answers open');
+  await p.goto(URL0 + '#subtraction'); await wait(900);
+  ok(await p.$eval('.lyr-tab[data-layer=formal]', e => e.getAttribute('aria-selected')) === 'true', 'lesson layers: the chosen tab is remembered on the next lesson');
+  await p.focus('.lyr-tab[data-layer=formal]'); await p.keyboard.press('ArrowRight'); await wait(300);
+  ok(await p.$eval('.lyr-tab[data-layer=concept]', e => e.getAttribute('aria-selected')) === 'true', 'lesson layers: arrow keys move between tabs');
+  await p.goto(URL0 + '#pa-variables'); await wait(900);
+  ok(!(await p.$('.lyr-tab')) && !!(await p.$('.notes h2')), 'lesson layers: lessons without layers keep the old page');
+  await p.goto(URL0 + '#menu'); await wait(800);
+
   /* ---------- menu ---------- */
   ok(await p.$eval('.hello h1', e => e.textContent) === 'Main Menu', 'menu heading is Main Menu');
   ok(!(await p.$('#chk')), 'menu has no Check for updates button');
