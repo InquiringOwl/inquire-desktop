@@ -1,4 +1,4 @@
-# content: 998a2f93a985
+# content: 6e1d3d6a4eff
 # counting: Counting & the Natural Numbers
 
 # example: seats 14..22
@@ -85,3 +85,4 @@ same("build.tasks[1].lines", (10 - 3, 10 - 3 + 1), (7, len(range(3, 11))))
 same("build.tasks[2].lines", len(range(1, 15)), 14)
 same("build.tasks[3].lines", (list(range(10, 41, 10)), len(range(41, 48)), 4 * 10 + 7), ([10, 20, 30, 40], 7, 47))
 same("build.tasks[4].lines", (list(range(5, 46, 5)), 45 // 5, 45 % 5), ([5, 10, 15, 20, 25, 30, 35, 40, 45], 9, 0))
+check("build.stepGoal[3]", 0 <= 23 <= 40, "the goal 23 fits the lab's slider range 0 to 40")

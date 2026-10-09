@@ -314,6 +314,6 @@ function drive(cmd){
   String(cmd).split(",").forEach(part => { const [name, ...rest] = part.trim().split(":"); if (typeof ex[name] === "function") { ex[name](rest.join(":")); did = true; } });
   return did;
 }
-W.LabKit = { make, stopAll, rules, extend: fn => exts.push(fn), css: addCSS, C, F, alpha, drive, value: key => live.values[key] };
+W.LabKit = { make, stopAll, rules, extend: fn => exts.push(fn), css: addCSS, C, F, alpha, drive, value: key => live.values[key], commands: () => Object.keys(live.expose || {}), values: () => Object.keys(live.values) };   // commands/values: what the open lab exposes and publishes (interact.js checks every chip and goal against them)
 W.LABS = W.LABS || {};
 })();

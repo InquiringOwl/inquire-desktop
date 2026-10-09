@@ -95,3 +95,32 @@ test('InquireDemo.slotStates: lit, said, next and empty slots', () => {
   eq(D.slotStates({ lit: 3, say: 0, big: null, next: true }, 5).map(x => x.s), ['on', 'on', 'on', 'next', 'off'], 'the dashed dot sits right after the last lit one');
   eq(D.slotStates({ lit: 5, say: 0, big: null, next: true }, 5).map(x => x.s), ['on', 'on', 'on', 'on', 'on'], 'no dashed dot when the row is full');
 });
+test('InquireDemo line: points, jumps, distance and checks', () => {
+  const D = ctx.InquireDemo;
+  const j = D.seqFrames({ kind: 'line', from: 0, to: 20, start: 8, jumps: [5, -3] });
+  eq(j.length, 1 + 2 + 1, 'start, two hops, the end'); eq(j[2].jumps, 2); eq(j[3].big, 10, '8 + 5 − 3 = 10'); eq(D.lineEnd({ start: 8, jumps: [5, -3] }), 10);
+  const d = D.seqFrames({ kind: 'line', from: 0, to: 20, points: [{ v: 7 }, { v: 12 }], show: 'dist' });
+  eq(d.map(f => f.pts), [0, 1, 2, 2]); eq(d[3].dist, true); eq(d[3].big, 5, '|7 − 12| = 5');
+  eq(D.check({ kind: 'line', from: 0, to: 20, start: 8, jumps: [5, -3], alt: 'A dot hops along a line.' }), [], 'a good line spec');
+  ok(D.check({ kind: 'line', from: 0, to: 10, start: 8, jumps: [5], alt: 'A dot hops along a line.' }).some(x => /outside/.test(x)), 'a jump off the line is refused');
+});
+test('InquireDemo columns: place value, carries and regrouping', () => {
+  const D = ctx.InquireDemo;
+  const pv = D.seqFrames({ kind: 'columns', n: 2354 }); eq(pv.length, 6, 'empty, 4 places, total'); eq(pv[5].big, 2354);
+  const a = D.colPlan({ add: [368, 457] }); eq(a.steps.map(s => s.digit), [5, 2, 8]); eq(a.steps.map(s => s.cout), [1, 1, 0]); eq(a.result, 825);
+  const c = D.colPlan({ add: [999, 1] }); eq(c.steps.map(s => s.digit), [0, 0, 0, 1], 'a last carry becomes a new digit'); eq(c.n, 4);
+  const s = D.colPlan({ sub: [503, 168] }); eq(s.steps.map(x => x.digit), [5, 3, 3], '503 − 168 = 335'); eq(s.result, 335);
+  eq(s.marks[1].map(m => m.v), [9], 'the tens zero becomes 9'); eq(s.marks[2].map(m => m.v), [4], 'the hundreds 5 lends one');
+  const f = D.seqFrames({ kind: 'columns', add: [368, 457] }); eq(f.length, 5); eq(f[4].big, 825);
+  ok(D.check({ kind: 'columns', sub: [100, 200], alt: 'Column subtraction picture.' }).length > 0, 'a negative difference is refused');
+});
+test('InquireDemo bar and array: parts, unknowns, rows', () => {
+  const D = ctx.InquireDemo;
+  eq(D.barParts({ parts: [340, 125] }).total, 465);
+  const u = D.barParts({ parts: [340, null], total: 465 }); eq(u.parts, [340, 125]); eq(u.unknown, 1);
+  const f = D.seqFrames({ kind: 'bar', parts: [340, null], total: 465 }); eq(f.length, 5, 'empty, 2 parts, brace, reveal'); eq(f[3].big, null); eq(f[4].big, 125);
+  eq(D.seqFrames({ kind: 'bar', parts: [3, 4] }).pop().big, 7);
+  const r = D.seqFrames({ kind: 'array', rows: 3, cols: 4 }); eq(r.length, 5); eq(r[4].big, 12);
+  eq(D.check({ kind: 'bar', parts: [3, null], total: 2, alt: 'A bar model picture.' }).length, 1, 'total must exceed the known parts');
+  eq(D.check({ kind: 'nope' }).length, 1); eq(D.check({ kind: 'dots', slots: 5, lit: 5, alt: 'Five dots in a row.' }), []);
+});

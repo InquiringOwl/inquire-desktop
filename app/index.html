@@ -406,8 +406,29 @@ input[type=checkbox]{accent-color:var(--amber);width:16px;height:16px}
 .pq .a{font-size:14px;color:var(--muted);border-top:1px dashed var(--line-2);padding-top:10px}
 .pq .a b{color:var(--green)}
 .origin{border-left:2px solid var(--violet);padding:4px 0 4px 14px;color:var(--muted);max-width:72ch;font-size:14.5px}
-.pager{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:18px}
-.pager button{max-width:48%}
+/* Bottom pager: mirrored console cards (Previous left, Next right), corner ticks in the theme colour, a lit arrow cell. */
+.pager{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;border-top:1px solid var(--line);padding-top:20px}
+.pg-b{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:flex;align-items:stretch;min-height:68px;border:1px solid color-mix(in srgb,var(--frame) 35%,var(--line));
+  background:linear-gradient(180deg,var(--win-1),var(--win-2));backdrop-filter:blur(var(--blur));transition:border-color .2s,box-shadow .2s,background .2s}
+.pg-next{flex-direction:row-reverse;text-align:right}
+.pg-b::before,.pg-b::after{content:"";position:absolute;width:14px;height:14px;pointer-events:none;border:0 solid var(--frame)}
+.pg-prev::before{left:-1px;top:-1px;border-left-width:2px;border-top-width:2px;opacity:.8}
+.pg-prev::after{right:-1px;bottom:-1px;border-right-width:2px;border-bottom-width:2px;opacity:.4}
+.pg-next::before{right:-1px;top:-1px;border-right-width:2px;border-top-width:2px;opacity:.8}
+.pg-next::after{left:-1px;bottom:-1px;border-left-width:2px;border-bottom-width:2px;opacity:.4}
+.pg-arr{flex:none;width:56px;display:grid;place-items:center;font-size:15px;color:var(--frame);text-shadow:0 0 10px color-mix(in srgb,var(--frame) 70%,transparent);
+  background:color-mix(in srgb,var(--frame) 8%,transparent);transition:transform .2s,background .2s}
+.pg-prev .pg-arr{border-right:1px solid color-mix(in srgb,var(--frame) 30%,var(--line))}
+.pg-next .pg-arr{border-left:1px solid color-mix(in srgb,var(--frame) 30%,var(--line))}
+.pg-tx{display:grid;align-content:center;gap:6px;padding:12px 18px;min-width:0}
+.pg-k{font:600 10.5px/1 var(--ui);letter-spacing:.24em;text-transform:uppercase;color:var(--frame)}
+.pg-t{font:400 19px/1.25 var(--math);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pg-b:hover,.pg-b:focus-visible{border-color:var(--frame);box-shadow:0 0 18px color-mix(in srgb,var(--frame) 30%,transparent),inset 0 0 24px color-mix(in srgb,var(--frame) 8%,transparent)}
+.pg-b:hover .pg-arr,.pg-b:focus-visible .pg-arr{background:color-mix(in srgb,var(--frame) 18%,transparent)}
+.pg-prev:hover .pg-arr{transform:translateX(-3px)}.pg-next:hover .pg-arr{transform:translateX(3px)}
+.pg-b:focus-visible{outline:2px solid var(--frame);outline-offset:2px}
+[data-reduce-motion] .pg-arr{transition:none;transform:none!important}
+@media (max-width:760px){.pager{gap:10px}.pg-arr{width:38px}.pg-tx{padding:10px 12px}.pg-t{font-size:16px;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}}
 .dom-expr{font:400 clamp(24px,3.6vw,40px)/1.5 var(--math);text-align:center;padding-top:40px}
 .tok{display:inline-block;padding:0 .12em;border-radius:4px;transition:background .3s,color .3s}
 .tok.hot{background:rgba(242,184,75,.18);color:var(--amber);box-shadow:0 0 0 1px rgba(242,184,75,.5)}
@@ -772,7 +793,7 @@ button.gl-chip.sm{cursor:pointer}
 /* Why it matters (+ where it goes wrong): one console panel. Concept = side by side with a red rule between, Formal = stacked */
 .why{display:grid;grid-template-columns:minmax(0,1fr);padding:24px 30px 26px;background:radial-gradient(ellipse 60% 90% at 0% 0%,color-mix(in srgb,var(--frame) 8%,transparent),transparent 70%),linear-gradient(180deg,var(--win-1),var(--win-2))}
 .why .matters{padding:0}
-.why:not(.why-pair){justify-self:start;width:min(100%,880px)}
+.why:not(.why-pair){width:100%}
 .why h2{margin-top:0}
 .why-k{display:flex;align-items:center;gap:9px;font:600 11px/1 var(--ui)!important;letter-spacing:.24em;text-transform:uppercase;color:var(--frame)!important;margin:0 0 12px!important}
 .why-k i{width:7px;height:7px;background:currentColor;box-shadow:0 0 9px currentColor;transform:rotate(45deg)}
@@ -1004,21 +1025,51 @@ button.gl-chip.sm{cursor:pointer}
 .dq-cap{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;fill:var(--muted);transition:opacity .3s}
 .dq-frame{fill:none;stroke:var(--line-2);stroke-width:1}
 .dq-d{stroke-width:1}
+/* storyboard kinds line, columns, bar, array (1.18.5; web/kits/categorical/demo.js) */
+.dq-g{transition:opacity .3s}
+.dq-axis{fill:none;stroke:var(--muted);stroke-width:1.6}
+.dq-tick{stroke:var(--faint);stroke-width:1.2}
+.dq-tl{font:500 10.5px var(--mono);fill:var(--faint);text-anchor:middle}
+.dq-pt{fill:var(--c,var(--amber));stroke:none}
+.dq-cur{transition:cx .35s ease}
+.dq-pl{font:italic 600 14px var(--math);fill:var(--c,var(--amber));text-anchor:middle}
+.dq-arc{fill:none;stroke:var(--cyan);stroke-width:1.6}
+.dq-al{font:600 11px var(--mono);fill:var(--cyan);text-anchor:middle}
+.dq-tot{fill:var(--violet)}
+.dq-brk{fill:none;stroke:var(--violet);stroke-width:1.6;transition:opacity .3s}
+.dq-ch{font:600 9.5px var(--ui);letter-spacing:.06em;fill:var(--faint);text-anchor:middle}
+.dq-dg{font:500 22px var(--mono);fill:var(--text);text-anchor:middle}
+.dq-dg[data-k=a]{fill:var(--cyan)}.dq-dg[data-k=b]{fill:var(--pink)}.dq-dg[data-k=r]{fill:var(--green)}
+.dq-dg[data-k=p0]{fill:var(--amber)}.dq-dg[data-k=p1]{fill:var(--cyan)}.dq-dg[data-k=p2]{fill:var(--pink)}.dq-dg[data-k=p3]{fill:var(--violet)}
+.dq-cv{font:600 11px var(--mono);fill:var(--amber);text-anchor:middle}
+.dq-cy{font:600 12px var(--mono);fill:var(--amber);text-anchor:middle}
+.dq-colhl{fill:color-mix(in srgb,var(--amber) 10%,transparent);stroke:color-mix(in srgb,var(--amber) 40%,transparent);transition:x .3s,opacity .3s}
+.dq-rule{stroke:var(--text);stroke-width:1.4}
+.dq-x{stroke:var(--pink);stroke-width:1.8;transition:opacity .3s}
+.dq-sep{stroke:var(--line-2);stroke-width:1}
+.dq-bar{fill:color-mix(in srgb,var(--amber) 22%,var(--panel-2));stroke:var(--amber);stroke-width:1.2}
+.dq-bar[data-k="1"]{fill:color-mix(in srgb,var(--cyan) 20%,var(--panel-2));stroke:var(--cyan)}
+.dq-bar[data-k=u]{fill:var(--panel-2);stroke:var(--pink);stroke-dasharray:4 3}
+.dq-bv{font:600 12px var(--mono);fill:var(--text);text-anchor:middle;dominant-baseline:middle}
+.dq-bl{font:500 10.5px var(--sans);fill:var(--muted);text-anchor:middle}
+@media (prefers-reduced-motion:reduce){.dq-g,.dq-cur,.dq-brk,.dq-colhl,.dq-x{transition:none}}
+[data-reduce-motion] .dq-g,[data-reduce-motion] .dq-cur,[data-reduce-motion] .dq-brk,[data-reduce-motion] .dq-colhl,[data-reduce-motion] .dq-x{transition:none}
 /* colour cues (Concept + Intermediate): numbers amber, the counted objects violet. Fixed content colours, never themed */
 mark.hl-n,mark.hl-o{background:none;padding:0;border:0;display:inline;font-size:inherit;letter-spacing:inherit;text-transform:inherit;margin:0}
 .hl-n{color:var(--amber);font-weight:600;font-variant-numeric:tabular-nums;text-shadow:0 0 12px rgba(242,184,75,.28)}
 .hl-o{color:#C9B8FF;font-weight:500;text-decoration:underline;text-decoration-color:rgba(180,155,255,.45);text-decoration-thickness:1.5px;text-underline-offset:3px}
 h2 .hl-n,h3 .hl-n{text-shadow:none}
 /* Concept "count it together": the situation and its picture on the left, the lines on the right */
-.walk-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:22px;align-items:start}
+.walk-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:22px;align-items:stretch}
 .notes .walk-lead{color:var(--text);font-size:17px;max-width:62ch}
-.walk-l{position:sticky;top:70px;padding:16px 18px;border:1px solid color-mix(in srgb,var(--frame) 40%,var(--line));border-radius:4px;background:linear-gradient(180deg,var(--win-1),var(--win-2))}
+.walk-l{border:1px solid color-mix(in srgb,var(--frame) 40%,var(--line));border-radius:4px;background:linear-gradient(180deg,var(--win-1),var(--win-2))}
+.walk-in{position:sticky;top:70px;padding:14px 16px 16px}   /* both boxes stretch to the same height; the picture stays in view while the steps grow */
 .notes .walk-q{color:var(--text);font-size:18px;line-height:1.5;margin:0 0 12px}
 .walk-dm{padding:10px 12px 6px;border:1px solid var(--line);border-radius:4px;background:var(--stage-sky,var(--panel));margin:0}
 .walk-dm svg{max-height:110px}
 .walk-wk .ans{padding:12px 14px;background:#162418;border-top:1px solid rgba(123,216,143,.35);color:var(--text)}.walk-wk .ans b{color:var(--green)}
 .walk-wk td:last-child{color:var(--text);font-size:15px}
-@media (max-width:900px){.walk-grid{grid-template-columns:minmax(0,1fr)}.walk-l{position:static}}
+@media (max-width:900px){.walk-grid{grid-template-columns:minmax(0,1fr)}.walk-in{position:static}}
 /* Your moves (Intermediate method): a clear tracker + Check my move on each goal */
 .moves{border:1px solid color-mix(in srgb,var(--frame) 40%,var(--line));background:color-mix(in srgb,var(--frame) 6%,var(--panel));border-radius:4px;padding:12px 16px;margin:0 0 18px;max-width:78ch}
 .moves-h{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
@@ -1031,6 +1082,36 @@ h2 .hl-n,h3 .hl-n{text-shadow:none}
 .goal-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:8px}
 .notes .goal-fb{margin:6px 0 0;font-size:14px}.goal-fb[data-k=ok]{color:var(--green)}.goal-fb[data-k=no]{color:var(--amber)}
 .goal.done .goal-chk{display:none}
+
+/* 1.18.4 refinements (Devon): two-column method rails fill the width (step on the left, why / your move / math on the right),
+   and the Formal practice cards centre the last row. Container queries, so a folded or open sidebar both work. */
+#b-method,#f-setup,#f-prac{container-type:inline-size}
+#b-method .moves{max-width:none}
+.method.m2{max-width:none}
+.method.m2 li{grid-template-columns:40px minmax(0,1fr);row-gap:2px}
+.method.m2 .m-r{grid-column:2}
+.method.m2 .m-r:empty{display:none}
+.method.m2 .m-r>:first-child{margin-top:0}
+@container (min-width:820px){
+  .method.m2 li{grid-template-columns:40px minmax(0,1fr) minmax(0,1.1fr);column-gap:28px}
+  .method.m2 .m-l .method-do{margin-top:7px}
+  .method.m2 .m-r{grid-column:3;grid-row:1;padding-top:6px}
+  .method.m2 .m-r .lyr-math{margin-top:0}
+}
+#f-prac .prac{grid-template-columns:repeat(6,minmax(0,1fr))}
+#f-prac .prac>*{grid-column:span 2}
+#f-prac .prac>:nth-child(3n+1):nth-last-child(2){grid-column:2/span 2}
+#f-prac .prac>:nth-child(3n+1):last-child{grid-column:3/span 2}
+@container (max-width:900px){
+  #f-prac .prac{grid-template-columns:repeat(4,minmax(0,1fr))}
+  #f-prac .prac>*,#f-prac .prac>:nth-child(3n+1):nth-last-child(2){grid-column:span 2}
+  #f-prac .prac>:nth-child(3n+1):last-child{grid-column:span 2}
+  #f-prac .prac>:nth-child(2n+1):last-child{grid-column:2/span 2}
+}
+@container (max-width:580px){
+  #f-prac .prac{grid-template-columns:minmax(0,1fr)}
+  #f-prac .prac>*,#f-prac .prac>:nth-child(n){grid-column:1}
+}
 
 /* Intro / sign-in screen (web/src/intro.js). Same look as the app: void black, cyan accent, Saira caps, clipped corners.
    Sequence (classes on #intro): is-bg → is-logo → is-form. Everything is skipped for reduced motion or a click/key press. */
@@ -12502,6 +12583,7 @@ ARITH["counting"] = {
     { name: "Logic and set theory", use: "Cardinality and mathematical induction are both built on the natural numbers." }
   ],
   layers: {
+    nudge: "Not yet. Check for an end you might have dropped.",
     concept: {
       heading: "What are counting and the natural numbers?",
       question: { text: "How many?", sub: `Every time you check a count, you do the same three things. Watch each one happen in the model above, then try it yourself.`, figure: { sym: `<i>n</i>`, value: "17", cap: "the count", echo: "n" } },
@@ -12589,7 +12671,7 @@ ARITH["counting"] = {
         null,
         { key: "counted", eq: 23, notYet: `Not yet. Set the slider to 23, then press <b>Count aloud</b> and let it finish.`, text: `Set the slider to 23 yourself, then press <b>Count aloud</b>. The last number said should be 23.`, after: `The last number said is the count: <span class="m c1"><i>n</i> = 23</span>.` },
         { key: "n", eq: 34, text: `Make the model show 34 dots. How many full frames is that, and how many left over?`, after: `3 full frames and 4 more: <span class="m">30 + 4 = 34</span>.` }],
-      matters: { title: "Why a method beats a guess", text: `<p>Anyone can count a handful of things. Mistakes start when the group is big, or the things look alike, or someone talks to you halfway through.</p><ul class="why-chips"><li><b>Big</b> groups</li><li><b>Look-alike</b> things</li><li><b>Interruptions</b></li></ul><p>A method is <b>the same few moves every time</b>. It lets you stop, pick up where you left off, and check your own count.</p>` },
+      matters: { title: "Why a Method Beats a Guess", text: `<p>Anyone can count a handful of things. Mistakes start when the group is big, or the things look alike, or someone talks to you halfway through.</p><ul class="why-chips"><li><b>Big</b> groups</li><li><b>Look-alike</b> things</li><li><b>Interruptions</b></li></ul><p>A method is <b>the same few moves every time</b>. It lets you stop, pick up where you left off, and check your own count.</p>` },
       lede: `To count, match each object to the next counting number, one at a time, and read the last number as the total.`,
       intro: `<p>The model above shows objects as dots in a ten-frame. Each dot gets one counting number, and the <span class="c1">count</span> is the last number said. Adding one more dot moves the count to its <span class="c2">successor</span>, one more.</p>`,
       stepWhy: [
@@ -12647,6 +12729,7 @@ ARITH["counting"] = {
         { hint: `Page 45 and page 112 are both read, so use <span class="m"><i>b</i> − <i>a</i> + 1</span>.`, parts: [{ label: "pages", ans: 68 }] },
         { hint: `Name the set <span class="m">{101, 102, …, 136}</span>, then use the range rule.`, parts: [{ label: "rooms r", ans: 36 }] }
       ],
+      practiceDone: "All 5 solved. You can write a count the formal way.",
       practiceTip: `Type your answer and press Check. Work it the formal way: name the set, match it to 1, …, <i>n</i>, and state the count. Stuck? Each one has a hint.`,
       setup: { title: "Writing a counting problem", items: [
         { say: `<b>Name the set.</b> Say exactly what is being counted.`, math: `<span class="m"><i>A</i> = {14, 15, 16, …, 22}</span> &nbsp;(seat numbers in the row)` },
@@ -39004,7 +39087,7 @@ function drive(cmd){
   String(cmd).split(",").forEach(part => { const [name, ...rest] = part.trim().split(":"); if (typeof ex[name] === "function") { ex[name](rest.join(":")); did = true; } });
   return did;
 }
-W.LabKit = { make, stopAll, rules, extend: fn => exts.push(fn), css: addCSS, C, F, alpha, drive, value: key => live.values[key] };
+W.LabKit = { make, stopAll, rules, extend: fn => exts.push(fn), css: addCSS, C, F, alpha, drive, value: key => live.values[key], commands: () => Object.keys(live.expose || {}), values: () => Object.keys(live.values) };   // commands/values: what the open lab exposes and publishes (interact.js checks every chip and goal against them)
 W.LABS = W.LABS || {};
 })();
 
@@ -39073,10 +39156,93 @@ function seqFrames(spec){
     for (let i = 0; i <= T; i++) out.push({ tens: i, ones: 0, big: null });
     for (let j = 1; j <= O; j++) out.push({ tens: T, ones: j, big: null });
     out.push({ tens: T, ones: O, big: spec.n });
+  } else if (spec.kind === "line") {
+    const P = (spec.points || []).length, J = (spec.jumps || []).length;
+    for (let i = 0; i <= P; i++) out.push({ pts: i, jumps: 0, big: null, dist: false });
+    for (let j = 1; j <= J; j++) out.push({ pts: P, jumps: j, big: null, dist: false });
+    if (J) out.push({ pts: P, jumps: J, big: lineEnd(spec), dist: false });
+    else if (spec.show === "dist" && P >= 2) out.push({ pts: P, jumps: 0, big: Math.abs(spec.points[0].v - spec.points[1].v), dist: true });
+  } else if (spec.kind === "columns") {
+    const pl = colPlan(spec), S = pl.op ? pl.steps.length : pl.n;
+    for (let i = 0; i <= S; i++) out.push({ k: i, big: null });
+    out.push({ k: S, big: pl.result });
+  } else if (spec.kind === "bar") {
+    const b = barParts(spec), P = b.parts.length;
+    for (let i = 0; i <= P; i++) out.push({ parts: i, brace: false, reveal: false, big: null });
+    out.push({ parts: P, brace: true, reveal: false, big: b.unknown >= 0 ? null : b.total });
+    if (b.unknown >= 0) out.push({ parts: P, brace: true, reveal: true, big: b.parts[b.unknown] });
+  } else if (spec.kind === "array") {
+    for (let r = 0; r <= spec.rows; r++) out.push({ rows: r, big: null });
+    out.push({ rows: spec.rows, big: spec.rows * spec.cols });
   }
   return out;
 }
-W.InquireDemo = { frames, slotStates, rangeCells, seqFrames, plural };
+/* ---------- more kinds (1.18.5, for the Arithmetic rollout): line, columns, bar, array ----------
+   { kind: "line", from: 0, to: 20, points: [{v: 7, c: "c2", label: "a"}, {v: 12, c: "c3", label: "b"}], show: "dist", alt }
+     a number line; the points appear in turn; show: "dist" ends on a bracket between the first two points and lifts out the distance.
+   { kind: "line", from: 0, to: 20, start: 8, jumps: [5, -3], unit: "step", alt }
+     a dot starts at `start` and hops each jump in turn (arcs labelled +5, −3); the end value lifts out.
+   { kind: "columns", n: 2354, alt }            place-value columns, filled from the left: digit, then its value (2 × 1,000 = 2,000).
+   { kind: "columns", add: [368, 457], alt }    column addition right to left, carries written above the next column.
+   { kind: "columns", sub: [503, 168], alt }    column subtraction right to left, regrouping shown above the top digits.
+   { kind: "bar", parts: [340, 125], labels: ["rent", "food"], unit: "dollar", alt }   a bar model; parts appear, then the brace and the total.
+     One part may be null with `total` given: it shows "?" until the last frame, which reveals it (missing part / subtraction).
+   { kind: "array", rows: 3, cols: 4, unit: "chair", alt }   equal rows lit one row at a time (4, 8, 12), then the product.
+   Any kind takes `cap` (the small caption under the big number). All are still-able (`still: true` + host._demo.goto(i) in
+   Concept walks) and DOM-free in seqFrames for tests. InquireDemo.check(spec) lists problems with a spec (validate.js uses it). */
+function lineEnd(spec){ return (spec.start || 0) + (spec.jumps || []).reduce((s, j) => s + j, 0); }
+function niceTick(span){ for (const s of [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000]) if (span / s <= 10) return s; return Math.ceil(span / 10); }
+function digitsR(N, n){ return String(N).padStart(n, "0").split("").reverse().map(Number); }
+function colPlan(spec){
+  if (spec.add) { const [A, B] = spec.add, n = Math.max(String(A).length, String(B).length), a = digitsR(A, n + 1), b = digitsR(B, n + 1), steps = []; let carry = 0;
+    for (let i = 0; i < n; i++) { const s = a[i] + b[i] + carry, cin = carry; carry = s >= 10 ? 1 : 0; steps.push({ i, s, digit: s % 10, cin, cout: carry }); }
+    if (carry) steps.push({ i: n, s: carry, digit: carry, cin: carry, cout: 0, final: true });
+    return { op: "+", A, B, a, b, n: n + (carry ? 1 : 0), steps, result: A + B }; }
+  if (spec.sub) { const [A, B] = spec.sub, n = String(A).length, a = digitsR(A, n), b = digitsR(B, n), top = a.slice(), marks = a.map(() => []), steps = [];
+    for (let i = 0; i < n; i++) { let borrow = null;
+      if (top[i] < b[i]) { let j = i + 1; while (top[j] === 0) j++; borrow = j; top[j] -= 1; marks[j].push({ v: top[j], at: i }); for (let q = j - 1; q > i; q--) { top[q] = 9; marks[q].push({ v: 9, at: i }); } top[i] += 10; marks[i].push({ v: top[i], at: i }); }
+      steps.push({ i, t: top[i], b: b[i], digit: top[i] - b[i], borrow }); }
+    return { op: "−", A, B, a, b, n, steps, marks, result: A - B }; }
+  const ds = String(spec.n).split("").map(Number); return { op: "", n: ds.length, ds, result: spec.n };
+}
+function barParts(spec){
+  const P = spec.parts.slice(), u = P.indexOf(null), known = P.filter(x => x != null).reduce((s, x) => s + x, 0);
+  const total = u >= 0 ? spec.total : known;
+  if (u >= 0) P[u] = spec.total - known;
+  return { parts: P, unknown: u, total };
+}
+const KINDS = ["dots", "range", "tens", "line", "columns", "bar", "array"];
+function check(spec){
+  const out = [], int = v => Number.isInteger(v), num = v => typeof v === "number" && isFinite(v);
+  if (!spec || !KINDS.includes(spec.kind)) return [`kind must be one of ${KINDS.join(", ")}`];
+  if (typeof spec.alt !== "string" || spec.alt.length < 12) out.push("alt must describe the picture (a sentence)");
+  const k = spec.kind;
+  if (k === "dots") { if (!int(spec.slots) || spec.slots < 2 || spec.slots > 14) out.push("slots must be an integer 2 to 14");
+    if (spec.grow !== undefined && (!Array.isArray(spec.grow) || spec.grow.length < 2 || spec.grow.some(n => !int(n) || n < 0 || n >= spec.slots))) out.push("grow must list 2 or more counts below slots"); }
+  if (k === "range" && (!int(spec.from) || !int(spec.to) || (spec.to - spec.from) / (spec.step || 1) < 1)) out.push("range needs integers from < to");
+  if (k === "tens" && (!int(spec.n) || spec.n < 1 || spec.n > 99)) out.push("tens needs an integer n from 1 to 99");
+  if (k === "line") { if (!num(spec.from) || !num(spec.to) || spec.to <= spec.from) out.push("line needs from < to");
+    const pts = spec.points || [], J = spec.jumps || [];
+    if (!pts.length && spec.start === undefined) out.push("line needs points or a start");
+    pts.forEach((p, i) => { if (!num(p.v) || p.v < spec.from || p.v > spec.to) out.push(`points[${i}].v must be inside from..to`); });
+    if (J.length && !num(spec.start)) out.push("jumps need a start");
+    let at = spec.start; J.forEach((j, i) => { if (!num(j) || !j) out.push(`jumps[${i}] must be a non-zero number`); at += j; if (at < spec.from || at > spec.to) out.push(`jump ${i + 1} lands at ${at}, outside from..to`); });
+    if (spec.show === "dist" && pts.length < 2) out.push('show: "dist" needs two points'); }
+  if (k === "columns") { const ok = v => int(v) && v >= 0 && v <= 9999999;
+    if (spec.add) { if (!Array.isArray(spec.add) || spec.add.length !== 2 || !spec.add.every(ok)) out.push("columns.add must be two whole numbers"); }
+    else if (spec.sub) { if (!Array.isArray(spec.sub) || spec.sub.length !== 2 || !spec.sub.every(ok) || spec.sub[1] > spec.sub[0]) out.push("columns.sub must be two whole numbers, the first not smaller"); }
+    else if (!ok(spec.n)) out.push("columns needs n, add or sub"); }
+  if (k === "bar") { const P = spec.parts;
+    if (!Array.isArray(P) || P.length < 1 || P.length > 6) out.push("bar.parts must list 1 to 6 parts");
+    else { const nul = P.filter(x => x === null).length;
+      if (nul > 1) out.push("bar: at most one unknown (null) part");
+      if (P.some(x => x !== null && (!num(x) || x <= 0))) out.push("bar parts must be positive numbers");
+      if (nul && (!num(spec.total) || spec.total <= P.filter(x => x != null).reduce((s, x) => s + x, 0))) out.push("bar with an unknown part needs a total larger than the known parts"); }
+    if (spec.labels !== undefined && (!Array.isArray(spec.labels) || spec.labels.length !== (P || []).length)) out.push("bar.labels needs one label per part"); }
+  if (k === "array" && (!int(spec.rows) || !int(spec.cols) || spec.rows < 1 || spec.cols < 1 || spec.rows > 10 || spec.cols > 12)) out.push("array needs rows 1–10 and cols 1–12");
+  return out;
+}
+W.InquireDemo = { frames, slotStates, rangeCells, seqFrames, plural, colPlan, barParts, lineEnd, check, KINDS };
 if (typeof document === "undefined") return;
 
 const NS = "http://www.w3.org/2000/svg";
@@ -39158,8 +39324,99 @@ function mountTens(host, spec){
     cap.textContent = f.big == null ? "" : `${T} ten${T === 1 ? "" : "s"} + ${O} ${plural(spec.unit || "one", 2)}`.replace(/ \+ 0 \w+$/, ""); cap.setAttribute("opacity", f.big == null ? 0 : 1); };
   return player(host, svg, fr.length, show, spec);
 }
+// ---- line, columns, bar, array (1.18.5) ----
+const COLV = { c1: "amber", c2: "cyan", c3: "pink", c4: "violet", c5: "green" };
+const fmtN = v => (v < 0 ? "−" : "") + Math.abs(v).toLocaleString("en-US");
+const svgFor = (host, spec, W, H) => { host.textContent = ""; const s = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": spec.alt || "Animation", preserveAspectRatio: "xMinYMid meet" }, host); s.style.maxHeight = Math.round(H * 1.25) + "px"; return s; };
+const bigCap = (svg, x, y) => [el("text", { class: "dm-big dq-big", x, y, opacity: 0 }, svg), el("text", { class: "dq-cap", x: x + 2, y: y + 20, opacity: 0 }, svg)];
+const setBig = (big, cap, v, text) => { big.textContent = v == null ? "" : fmtN(v); big.setAttribute("opacity", v == null ? 0 : 1); cap.textContent = v == null ? "" : text; cap.setAttribute("opacity", v == null ? 0 : 1); };
+function mountLine(host, spec){
+  const fr = seqFrames(spec), W = 540, H = 92, L = 18, Rr = W - 128, Y = 58, span = spec.to - spec.from, X = v => L + (Rr - L) * (v - spec.from) / span;
+  const svg = svgFor(host, spec, W, H);
+  el("line", { class: "dq-axis", x1: L - 10, y1: Y, x2: Rr + 10, y2: Y }, svg); el("path", { class: "dq-axis", d: `M${Rr + 4} ${Y - 4} L${Rr + 10} ${Y} L${Rr + 4} ${Y + 4}` }, svg);
+  const lab = spec.tick || niceTick(span), minor = span <= 40 && Number.isInteger(spec.from) ? 1 : lab;
+  for (let v = Math.ceil(spec.from / minor) * minor; v <= spec.to + 1e-9; v += minor) { const major = Math.abs(v / lab - Math.round(v / lab)) < 1e-9;
+    el("line", { class: "dq-tick", x1: X(v), y1: Y - (major ? 6 : 3), x2: X(v), y2: Y + (major ? 6 : 3) }, svg);
+    if (major) el("text", { class: "dq-tl", x: X(v), y: Y + 20 }, svg).textContent = fmtN(+v.toFixed(6)); }
+  const P = spec.points || [], J = spec.jumps || [];
+  const brk = P.length >= 2 ? el("path", { class: "dq-brk", d: `M${X(P[0].v)} ${Y - 26} v-6 H${X(P[1].v)} v6`, opacity: 0 }, svg) : null;
+  const pts = P.map(p => { const g = el("g", { class: "dq-g", opacity: 0, style: `--c:var(--${COLV[p.c || "c1"]})` }, svg);
+    el("circle", { class: "dq-pt", cx: X(p.v), cy: Y, r: 5.5 }, g); el("text", { class: "dq-pl", x: X(p.v), y: Y - 12 }, g).textContent = p.label != null ? p.label : fmtN(p.v); return g; });
+  let at = spec.start; const arcs = J.map(j => { const x0 = X(at), x1 = X(at + j), h = 14 + Math.min(20, Math.abs(x1 - x0) * .25), mx = (x0 + x1) / 2, g = el("g", { class: "dq-g", opacity: 0 }, svg);
+    el("path", { class: "dq-arc", d: `M${x0} ${Y - 5} Q${mx} ${Y - 5 - 2 * h} ${x1} ${Y - 5}` }, g);
+    const s = Math.sign(j); el("path", { class: "dq-arc", d: `M${x1 - 5 * s} ${Y - 11} L${x1} ${Y - 5} L${x1 - 7 * s} ${Y - 4}` }, g);
+    el("text", { class: "dq-al", x: mx, y: Y - 9 - h }, g).textContent = (j > 0 ? "+" : "−") + Math.abs(j).toLocaleString("en-US"); at += j; return g; });
+  const cur = spec.start != null ? el("circle", { class: "dq-pt dq-cur", cx: X(spec.start), cy: Y, r: 6 }, svg) : null;
+  const [big, cap] = bigCap(svg, Rr + 24, 46);
+  const show = i => { const f = fr[i];
+    pts.forEach((g, j) => g.setAttribute("opacity", j < f.pts ? 1 : 0)); arcs.forEach((g, j) => g.setAttribute("opacity", j < f.jumps ? 1 : 0));
+    if (cur) cur.setAttribute("cx", X(spec.start + J.slice(0, f.jumps).reduce((s, j) => s + j, 0)));
+    if (brk) brk.setAttribute("opacity", f.dist ? 1 : 0);
+    setBig(big, cap, f.big, spec.cap || (f.dist ? (spec.unit ? plural(spec.unit, 2) + " apart" : "apart") : J.length ? "lands here" : "")); };
+  return player(host, svg, fr.length, show, spec);
+}
+function mountColumns(host, spec){
+  const pl = colPlan(spec), fr = seqFrames(spec), names = ["1s", "10s", "100s", "1,000s", "10,000s", "100,000s", "1,000,000s"];
+  if (!pl.op) {   // place value: digits filled from the left, each with its value
+    const CW = 62, n = pl.n, W = 8 + n * CW + 140, H = 84, svg = svgFor(host, spec, W, H), cols = [];
+    pl.ds.forEach((d, j) => { const x = 8 + j * CW + CW / 2, p = n - 1 - j, val = d * 10 ** p;
+      if (j) el("line", { class: "dq-sep", x1: 8 + j * CW, y1: 4, x2: 8 + j * CW, y2: 74 }, svg);
+      el("text", { class: "dq-ch", x, y: 14 }, svg).textContent = names[p] || "10^" + p;
+      const g = el("g", { class: "dq-g", opacity: 0 }, svg); el("text", { class: "dq-dg", x, y: 44, "data-k": "p" + (p % 4) }, g).textContent = String(d); el("text", { class: "dq-cv", x, y: 66 }, g).textContent = fmtN(val); cols.push(g); });
+    const [big, cap] = bigCap(svg, 8 + n * CW + 14, 44);
+    return player(host, svg, fr.length, i => { const f = fr[i]; cols.forEach((g, j) => g.setAttribute("opacity", j < f.k ? 1 : 0)); setBig(big, cap, f.big, spec.cap || "in all"); }, spec);
+  }
+  const CW = 26, n = pl.n, xR = 30 + n * CW, W = xR + 150, H = 100, svg = svgFor(host, spec, W, H), cx = i => xR - (i + .5) * CW;
+  const hl = el("rect", { class: "dq-colhl", x: 0, y: 2, width: CW, height: 94, rx: 3, opacity: 0 }, svg);
+  const lenA = String(pl.A).length, lenB = String(pl.B).length, lenR = String(pl.result).length;
+  const res = [], up = [], cross = [];
+  for (let i = 0; i < n; i++) {
+    if (i < lenA) { el("text", { class: "dq-dg", x: cx(i), y: 44, "data-k": "a" }, svg).textContent = String(pl.a[i]); cross[i] = el("line", { class: "dq-x", x1: cx(i) - 7, y1: 37, x2: cx(i) + 7, y2: 29, opacity: 0 }, svg); }
+    if (i < lenB) el("text", { class: "dq-dg", x: cx(i), y: 68, "data-k": "b" }, svg).textContent = String(pl.b[i]);
+    up[i] = el("text", { class: "dq-cy", x: cx(i), y: 17 }, svg); res[i] = el("text", { class: "dq-dg", x: cx(i), y: 94, "data-k": "r" }, svg);
+  }
+  el("text", { class: "dq-dg", x: xR - (n + .55) * CW, y: 68 }, svg).textContent = pl.op;
+  el("line", { class: "dq-rule", x1: xR - (n + 1) * CW, y1: 75, x2: xR + 4, y2: 75 }, svg);
+  const [big, cap] = bigCap(svg, xR + 18, 52);
+  const show = i => { const f = fr[i], K = f.k, S = pl.steps;
+    const s = K < S.length ? S[K] : null; hl.setAttribute("opacity", s ? 1 : 0); if (s) hl.setAttribute("x", cx(s.i) - CW / 2);
+    for (let c = 0; c < n; c++) { const st = S.find(x => x.i === c), done = st && S.indexOf(st) < K;
+      res[c].textContent = done && c < lenR ? String(st.digit) : "";
+      if (pl.op === "+") up[c].textContent = S.some((x, j) => j < K && x.i === c - 1 && x.cout && !x.final) ? "1" : "";
+      else { const ms = (pl.marks[c] || []).filter(m => m.at < K); up[c].textContent = ms.length ? String(ms[ms.length - 1].v) : ""; if (cross[c]) cross[c].setAttribute("opacity", ms.length ? 1 : 0); } }
+    setBig(big, cap, f.big, spec.cap || (pl.op === "+" ? "the sum" : "the difference")); };
+  return player(host, svg, fr.length, show, spec);
+}
+function mountBar(host, spec){
+  const b = barParts(spec), fr = seqFrames(spec), BW = 340, sc = BW / b.total, ws = b.parts.map(p => Math.max(40, p * sc)), tw = ws.reduce((s, w) => s + w, 0);
+  const L = 4, W = L + tw + 150, H = 96, svg = svgFor(host, spec, W, H), labs = spec.labels || [];
+  const brace = el("g", { class: "dq-g", opacity: 0 }, svg), mid = L + tw / 2;
+  el("path", { class: "dq-brk", d: `M${L} 30 q0 -7 7 -7 H${mid - 7} q7 0 7 -7 q0 7 7 7 H${L + tw - 7} q7 0 7 7` }, brace);
+  el("text", { class: "dq-al dq-tot", x: mid, y: 11 }, brace).textContent = fmtN(b.total);
+  let x = L; const parts = b.parts.map((p, i) => { const g = el("g", { class: "dq-g", opacity: 0 }, svg), w = ws[i], u = i === b.unknown;
+    el("rect", { class: "dq-bar", x, y: 34, width: w, height: 28, "data-k": u ? "u" : String(i % 2) }, g);
+    const v = el("text", { class: "dq-bv", x: x + w / 2, y: 49 }, g); v.textContent = u ? "?" : fmtN(p);
+    if (labs[i]) el("text", { class: "dq-bl", x: x + w / 2, y: 78 }, g).textContent = labs[i];
+    x += w; return { g, v, u, p }; });
+  const [big, cap] = bigCap(svg, L + tw + 16, 54);
+  const show = i => { const f = fr[i];
+    parts.forEach((q, j) => { q.g.setAttribute("opacity", j < f.parts ? 1 : 0); if (q.u) q.v.textContent = f.reveal ? fmtN(q.p) : "?"; });
+    brace.setAttribute("opacity", f.brace ? 1 : 0);
+    setBig(big, cap, f.big, spec.cap || (b.unknown >= 0 ? (labs[b.unknown] || "the missing part") : spec.unit ? plural(spec.unit, b.total) + " in all" : "in all")); };
+  return player(host, svg, fr.length, show, spec);
+}
+function mountArray(host, spec){
+  const fr = seqFrames(spec), R = spec.rows, Cn = spec.cols, D = 14, W = 8 + Cn * D + 46 + 140, H = Math.max(56, 8 + R * D + 6), svg = svgFor(host, spec, W, H);
+  const rows = []; for (let r = 0; r < R; r++) { const dots = []; for (let c = 0; c < Cn; c++) dots.push(el("circle", { class: "dm-c dq-d", cx: 8 + D / 2 + c * D, cy: 8 + D / 2 + r * D, r: 4.6, "data-s": "off" }, svg));
+    rows.push({ dots, t: el("text", { class: "dq-n", x: 8 + Cn * D + 20, y: 8 + D / 2 + r * D + 4 }, svg) }); }
+  const [big, cap] = bigCap(svg, 8 + Cn * D + 52, Math.min(H - 24, 34));
+  const show = i => { const f = fr[i]; rows.forEach((q, r) => { const on = r < f.rows; q.dots.forEach(d => d.setAttribute("data-s", on ? (r === f.rows - 1 && f.big == null ? "say" : "on") : "off")); q.t.textContent = on ? fmtN((r + 1) * Cn) : ""; });
+    setBig(big, cap, f.big, spec.cap || `${R} × ${Cn}${spec.unit ? " " + plural(spec.unit, 2) : ""}`); };
+  return player(host, svg, fr.length, show, spec);
+}
+const MOUNTS = { range: mountRange, tens: mountTens, line: mountLine, columns: mountColumns, bar: mountBar, array: mountArray };
 function mount(host, spec){
-  const api = spec.kind === "range" ? mountRange(host, spec) : spec.kind === "tens" ? mountTens(host, spec) : mountDots(host, spec);
+  const api = (MOUNTS[spec.kind] || mountDots)(host, spec);
   host._demo = api; return api;
 }
 function mountDots(host, spec){
@@ -41801,9 +42058,12 @@ L["place-value"] = k => {
   const s = k.slider("number", 0, 9999, 1, n, v => n = v, v => v.toLocaleString("en-US"));
   [["+1",1],["+10",10],["+100",100],["+1000",1000],["−1",-1],["−10",-10]].forEach(([t, v]) => k.button(t, () => { n = Math.max(0, Math.min(9999, n + v)); s.set(n); }, "btn-s"));
   const cols = [ ["Thousands", C.violet, 1000], ["Hundreds", C.pink, 100], ["Tens", C.cyan, 10], ["Ones", C.amber, 1] ];
+  const put = v => { n = Math.max(0, Math.min(9999, Math.round(+v) || 0)); s.set(n); };
+  k.expose({ set: put, add: v => put(n + (+v || 1)) });   // lesson chips: "set:3405", "add:10", "add:-1"
   k.loop(() => {
     c.begin(); const { w, h } = c;
     const dg = [Math.floor(n / 1000), Math.floor(n / 100) % 10, Math.floor(n / 10) % 10, n % 10];
+    k.publish("n", n); k.publish("thousands", dg[0]); k.publish("hundreds", dg[1]); k.publish("tens", dg[2]); k.publish("ones", dg[3]);   // live figure + Your move goals
     const cw = w / 4;
     const u = Math.max(2, Math.min(cw / 16, (h - 140) / 15.5));
     cols.forEach(([name, col, pv], i) => {
@@ -41853,7 +42113,10 @@ L["number-line"] = k => {
   const sb = k.slider(`<span class="c3"><i>b</i></span>`, 0, 20, 1, b, v => b = v);
   k.button("Swap", () => { [a, b] = [b, a]; sa.set(a); sb.set(b); }, "btn ghost");
   k.button("Random", () => { a = Math.floor(Math.random() * 21); b = Math.floor(Math.random() * 21); sa.set(a); sb.set(b); }, "btn ghost");
+  const pin = v => Math.max(0, Math.min(20, Math.round(+v) || 0));
+  k.expose({ a: v => { a = pin(v); sa.set(a); }, b: v => { b = pin(v); sb.set(b); }, swap: () => { [a, b] = [b, a]; sa.set(a); sb.set(b); } });   // chips: "a:7,b:12", "swap"
   k.loop(dt => {
+    k.publish("a", a); k.publish("b", b); k.publish("dist", Math.abs(a - b));   // live figure + Your move goals
     da = lerp(da, a, Math.min(1, dt * 10)); db = lerp(db, b, Math.min(1, dt * 10));
     c.begin(); const { w, h } = c;
     const x0 = 40, x1 = w - 40, y = h * .62, X = v => x0 + (x1 - x0) * v / 20;
@@ -41952,7 +42215,13 @@ function columnLab(k, op){
   const nb = k.number(`<span class="c3"><i>b</i></span>`, 0, 999999, B, v => { B = v; build(); na.set(A); nb.set(B); st.reset(); });
   const st = k.stepper(() => plan.steps.length, () => {}, { ms: 1100 });
   k.button("New numbers", () => { A = 1000 + Math.floor(Math.random() * 9000); B = 100 + Math.floor(Math.random() * 9000); build(); na.set(A); nb.set(B); st.reset(); }, "btn ghost");
+  const whole = v => Math.max(0, Math.min(999999, Math.round(+v) || 0));
+  k.expose({ a: v => { A = whole(v); build(); na.set(A); nb.set(B); st.reset(); }, b: v => { B = whole(v); build(); na.set(A); nb.set(B); st.reset(); },   // chips: "a:368,b:457,play"
+    step: () => { st.pause(); st.step(); }, play: () => st.play(), finish: () => st.finish(), reset: () => st.reset() });
+  const regroups = () => op === "+" ? plan.steps.filter(s => s.cout).length : plan.steps.filter(s => s.note.length).length;
   k.loop(() => {
+    const done = st.k >= plan.steps.length;   // Your move goals: a, b, steps done (k), the result once every column is worked, carries/borrows
+    k.publish("a", A); k.publish("b", B); k.publish("k", st.k); k.publish("result", done ? (op === "+" ? A + B : A - B) : null); k.publish("regroups", regroups());
     c.begin(); const { w, h } = c; const K = st.k;
     const ncol = op === "+" ? plan.n : plan.n;
     const cw = Math.min(64, (w - 120) / (ncol + 1)), fs = Math.round(cw * .72);
@@ -76307,11 +76576,11 @@ function conceptHTML(t, C, col){
 /* Concept "count it together": one continuous situation, a picture that follows each line (InquireDemo with still: true,
    line.frame = the frame to show), lines one at a time with predict questions ("Just show the line" skips one). */
 function walkHTML(W){
-  const L = W.lines;
-  return `<div id="c-walk" class="walk"><h2>${esc(W.title || "Count it together")}</h2>${W.lead ? `<p class="walk-lead">${W.lead}</p>` : ""}
-    <div class="walk-grid"><div class="walk-l"><p class="eyebrow">The situation</p><p class="walk-q">${W.prompt}</p>${W.demo ? `<div class="dm walk-dm" data-spec="${esc(JSON.stringify({ ...W.demo, still: true }))}"></div>` : ""}</div>
+  const L = W.lines, first = !(W.predict || [])[0];   // the first line shows on load unless it waits for a predict question
+  return `<div id="c-walk" class="walk"><h2>${esc(W.title || "Work it together")}</h2>${W.lead ? `<p class="walk-lead">${W.lead}</p>` : ""}
+    <div class="walk-grid"><div class="walk-l"><p class="tk-wk-h">The situation</p><div class="walk-in"><p class="walk-q">${W.prompt}</p>${W.demo ? `<div class="dm walk-dm" data-spec="${esc(JSON.stringify({ ...W.demo, still: true }))}"></div>` : ""}</div></div>
     <div class="tk-wk walk-wk" data-walk><p class="tk-wk-h">One step at a time</p>
-      <div class="tbl"><table>${L.map(l => `<tr class="wk-row" hidden><td>${l.math}</td><td>${l.note || ""}</td></tr>`).join("")}</table></div>
+      <div class="tbl"><table>${L.map((l, i) => `<tr class="wk-row"${i || !first ? " hidden" : ""}><td>${l.math}</td><td>${l.note || ""}</td></tr>`).join("")}</table></div>
       <div class="wk-ask" hidden></div>
       <div class="wk-bar"><button type="button" class="btn-s" data-wk-next>Show the first line</button><button type="button" class="btn-s ghost" data-wk-all>Show all</button><span class="wk-n">0 of ${L.length}</span></div>
       <div class="ans" hidden><b>Answer.</b> ${W.answer}</div></div></div></div>`;
@@ -76336,6 +76605,7 @@ function pzHTML(k){
   return `${body}<p class="pz-fb" aria-live="polite"></p>${k.hint ? `<p class="pz-hint" hidden><b>Hint.</b> ${k.hint}</p>` : ""}
     <div class="pz-acts">${k.hint ? `<button type="button" class="pz-link" data-pz-hint>Need a hint?</button>` : ""}<button type="button" class="pz-link" data-pz-show${k.showNow ? "" : " hidden"}>${esc(k.showLabel || "Show the worked answer")}</button></div>`;
 }
+let pzNudge = "";   // a lesson's own first "Not yet" (layers.nudge, set by layerHTML); a question's k.nudge wins
 const pzNum = s => { const m = String(s).replace(/[,\s]/g, "").match(/-?\d+(\.\d+)?/); return m ? +m[0] : NaN; };
 // Wires one checker inside c. o.right() after a right answer, o.show() when the learner asks for the answer.
 function pzWire(c, k, o){
@@ -76346,7 +76616,7 @@ function pzWire(c, k, o){
   const verdict = (all, partial, why) => { tries++;
     window.dispatchEvent(new CustomEvent("inquire:quiz", { detail: { correct: all } }));
     if (all) { fb.textContent = k.right || o.rightText || "Correct."; fb.dataset.k = "ok"; end(); o.right(); return; }
-    fb.textContent = why || (partial ? "One part is right. Check the other one." : tries === 1 ? (k.nudge || "Not yet. Check for an end you might have dropped.") : "Still off. Try the hint, or look at the answer.");
+    fb.textContent = why || (partial ? "One part is right. Check the other one." : tries === 1 ? (k.nudge || pzNudge || "Not yet. Check your work and try again.") : "Still off. Try the hint, or look at the answer.");
     fb.dataset.k = "no"; show.hidden = false; if (tries >= 2) showHint(); };
   const form = c.querySelector(".pz-form");
   if (form) form.onsubmit = e => { e.preventDefault(); if (over) return;
@@ -76398,7 +76668,7 @@ function buildHTML(t, B, col){
   return `
     ${cqHTML(B.task, "The task")}
     <div><h2>${esc(B.keysTitle || "Reading the model")}</h2>${B.intro || ""}<div class="ideas keys">${t.legend.map((k, i) => `<div class="idea" style="--c:var(--${col(k.c)})"><div class="key-sym m">${k.sym}</div><h3>${esc(k.name)}</h3><p>${k.desc}</p>${chip(kt[i])}</div>`).join("")}</div></div>
-    <div id="b-method"${ng ? " data-goals" : ""}><h2>${esc(t.steps.title)}</h2>${ng ? `<div class="moves"><div class="moves-h"><span class="moves-k">Your moves</span>${bar(ng, "Moves done")}</div>${B.goalsIntro ? `<p class="prac-tip">${B.goalsIntro}</p>` : ""}<p class="moves-done" hidden>All ${ng} moves done ✓ You used every step of the method in the model.</p></div>` : ""}<ol class="method">${t.steps.items.map((s, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div><p class="method-do">${s}</p>${B.stepWhy && B.stepWhy[i] ? `<p class="method-why"><span>Why</span>${B.stepWhy[i]}</p>` : ""}${sg[i] ? goal(sg[i], i) : chip(st[i])}</div></li>`).join("")}</ol></div>
+    <div id="b-method"${ng ? " data-goals" : ""}><h2>${esc(t.steps.title)}</h2>${ng ? `<div class="moves"><div class="moves-h"><span class="moves-k">Your moves</span>${bar(ng, "Moves done")}</div>${B.goalsIntro ? `<p class="prac-tip">${B.goalsIntro}</p>` : ""}<p class="moves-done" hidden>All ${ng} moves done ✓ You used every step of the method in the model.</p></div>` : ""}<ol class="method m2">${t.steps.items.map((s, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div class="m-l"><p class="method-do">${s}</p></div><div class="m-r">${B.stepWhy && B.stepWhy[i] ? `<p class="method-why"><span>Why</span>${B.stepWhy[i]}</p>` : ""}${sg[i] ? goal(sg[i], i) : chip(st[i])}</div></li>`).join("")}</ol></div>
     ${whyHTML(B.matters)}
     ${merged ? "" : `<div id="b-example"><h2>${esc(B.exampleTitle || "Worked example")}</h2><div class="ex wk" data-wk="ex">
       <div class="prompt"><p class="eyebrow">Problem</p>${E.prompt}${B.exampleTip ? `<p class="wk-tip">${B.exampleTip}</p>` : ""}</div>
@@ -76426,11 +76696,11 @@ function formalHTML(t, F, col){
     ${cqHTML(F.question, F.eyebrow || "The definition", def ? `<div class="f-def">${def}</div>` : "")}
     ${(F.vocab || []).length ? `<div id="f-vocab"><h2>${esc(F.vocabTitle || "The vocabulary")}</h2>${F.vocabIntro || ""}<div class="ideas vocab">${F.vocab.map(v => `<div class="idea" style="--c:var(--${col(v.c || "c1")})"><div class="key-sym m">${v.sym}</div><h3>${esc(v.term)}</h3><p>${v.def}</p>${v.was ? `<p class="voc-was"><span>You met it as</span>${v.was}</p>` : ""}</div>`).join("")}</div>${full}</div>` : `<div><h2>Formal statement</h2><span class="voice f">College level</span>${t.formal}</div>`}
     ${whyHTML(F.matters, `<div id="f-mist" class="stakes f-mist">${whyKey("Where it goes wrong", "red")}<h2>${esc(F.mistakesTitle || "Common mistakes")}</h2>${F.mistakesLead ? `<p class="stakes-lead">${F.mistakesLead}</p>` : ""}<div class="mist">${t.mistakes.map(m => `<div><div class="w">${m.wrong}</div><div class="f">${m.fix}</div></div>`).join("")}</div></div>`, true)}
-    ${F.setup ? `<div id="f-setup"><h2>${esc(F.setup.title)}</h2>${F.setupIntro || ""}<ol class="method">${F.setup.items.map((x, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div><p class="method-do">${x.say}</p>${x.math ? `<div class="lyr-math">${x.math}</div>` : ""}</div></li>`).join("")}</ol></div>` : ""}
+    ${F.setup ? `<div id="f-setup"><h2>${esc(F.setup.title)}</h2>${F.setupIntro || ""}<ol class="method m2">${F.setup.items.map((x, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div class="m-l"><p class="method-do">${x.say}</p></div><div class="m-r">${x.math ? `<div class="lyr-math">${x.math}</div>` : ""}</div></li>`).join("")}</ol></div>` : ""}
     <div id="f-prac"><h2>${esc(F.practiceTitle || "Your turn")}</h2>${F.practiceTip ? `<p class="prac-tip">${F.practiceTip}</p>` : ""}
       ${K.length ? `<div class="pz-prog" data-pz-prog><div class="pz-bar">${P.map((_, i) => `<span data-i="${i}"></span>`).join("")}</div><p class="pz-sum">Solved <b>0</b> of ${P.length}</p></div>` : ""}
       <div class="prac" data-pzs>${P.map(card).join("")}</div>
-      ${K.length ? `<p class="pz-done" hidden>${F.practiceDone || `All ${P.length} solved. You can write a count the formal way.`}</p>` : ""}</div>`;
+      ${K.length ? `<p class="pz-done" hidden>${F.practiceDone || `All ${P.length} solved. You can work these the formal way.`}</p>` : ""}</div>`;
 }
 /* Colour cues (Concept and Intermediate, Devon Oct 2026): the numbers of a situation glow amber (.hl-n) and its objects
    violet (.hl-o) (<mark> elements, so no "x span" rule restyles them), so the eye finds "what is counted" and "how many" first. Objects come from layers.concept.objects /
@@ -76527,6 +76797,7 @@ window.addEventListener("inquire:lab-value", e => document.querySelectorAll(".cq
    A topic opts in with t.layers = { concept: {lede, what, why, history, sources, examples}, build: {lede, intro, stepWhy, bridge, tasks}, formal: {lede, setup} };
    the rest comes from the usual fields (fields, legend, steps, example, formal, mistakes, practice). Spec: docs/subjects/LAYERS.md. */
 function layerHTML(t, L){
+  pzNudge = (t.layers || {}).nudge || "";
   const Y = t.layers, C = Y.concept || {}, B = Y.build || {}, F = Y.formal || {};
   const col = c => ({c1:"amber",c2:"cyan",c3:"pink",c4:"violet",c5:"green"}[c]);
   if (L === "concept" && C.ideas) return conceptHTML(t, C, col);
@@ -76573,8 +76844,11 @@ function renderTopic(main){
         <div class="win"><div class="win-h"><span class="dot"></span>This unlocks</div><div class="in">${n.post.length ? n.post.map(link).join("") : '<span class="empty">No later charted topic depends on this directly. It feeds the fields below.</span>'}</div></div>
         <div class="win"><div class="win-h"><span class="dot"></span>Vital in later fields</div><div class="in">${t.beyond.map(b => `<div class="plink" style="cursor:default"><span class="o">→</span><span><b>${esc(b.field)}</b><span>${esc(b.why)}</span></span></div>`).join("")}</div></div>
       </div></div>`;
+  /* Bottom pager (1.18.4): two mirrored console cards, Previous lesson ◀ on the left and Next lesson ▶ on the right.
+     At either end of the field the empty side leads back to the field's tree, so the pair always stays symmetric. */
+  const pgCard = (dir, key, title, attr) => `<button type="button" class="pg-b pg-${dir}" ${attr}><span class="pg-arr" aria-hidden="true">${dir === "prev" ? "◀" : "▶"}</span><span class="pg-tx"><span class="pg-k">${key}</span><span class="pg-t">${esc(title)}</span></span></button>`;
   const pagerHTML = `
-      <div class="pager">${prev ? `<button type="button" class="btn ghost" data-t="${prev}">◀ ${esc((T[prev] || { title: prev }).title)}</button>` : "<span></span>"}${next ? `<button type="button" class="btn ghost" data-t="${next}">${esc((T[next] || { title: next }).title)} ▶</button>` : ""}</div>`;
+      <nav class="pager" aria-label="Lessons">${prev ? pgCard("prev", "Previous lesson", (T[prev] || { title: prev }).title, `data-t="${prev}"`) : pgCard("prev", "Back to", `${FNAME} tree`, "data-pg-tree")}${next ? pgCard("next", "Next lesson", (T[next] || { title: next }).title, `data-t="${next}"`) : pgCard("next", "Back to", `${FNAME} tree`, "data-pg-tree")}</nav>`;
   const layered = !!t.layers;
   const LAYERS = [["concept", "Concept", "New or returning: what it is and why it matters"], ["build", "Intermediate", "How to do it, step by step"], ["formal", "Formal", "State it precisely, then master it"]];
   let layer = store.get("layer", "concept"); if (!LAYERS.some(L => L[0] === layer)) layer = "concept";
@@ -76632,6 +76906,7 @@ function renderTopic(main){
   main.appendChild(pg);
   pg.scrollTop = 0;
   $("#back", pg).onclick = () => go({ view: "math", field: f, topic: null });
+  pg.querySelectorAll("[data-pg-tree]").forEach(b => b.onclick = () => go({ view: "math", field: f, topic: null }));
   $("#navtoggle2", pg).onclick = () => main.parentElement.classList.toggle("navopen");
   $("#mast", pg).onclick = () => { if (mastered.has(id)) mastered.delete(id); else mastered.add(id); saveMastered(); const y = pg.scrollTop, now = mastered.has(id); render(); const np = $(".topic"); if (np) np.scrollTop = y;
     const nb = np && np.querySelector(".next-btn"); if (nb && now) nb.classList.add("nudge"); };   // just mastered: the Next button glows once

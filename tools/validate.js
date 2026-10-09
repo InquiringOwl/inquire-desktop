@@ -19,6 +19,9 @@ for (const f of dataFiles) {
   catch (e) { err(f, 'failed to load: ' + e.message); }
 }
 const DB = ctx.DB, T = ctx.ARITH || {};
+// storyboards (InquireDemo, web/kits/categorical/demo.js) check their own specs: kinds, ranges, alt text
+const DEMO = (() => { const c = vm.createContext({}); vm.runInContext(fs.readFileSync(path.join(R, 'web/kits/categorical/demo.js'), 'utf8'), c, { filename: 'demo.js' }); return c.InquireDemo; })();
+const demoFrames = d => d.kind === 'dots' || !d.kind ? DEMO.frames(d).length : DEMO.seqFrames(d).length;
 if (!DB || !DB.trees) { console.error('DB.trees missing, cannot continue'); process.exit(1); }
 
 // ---- content files: web/content/<field>/<id>.js holding exactly ARITH["<id>"] ----
@@ -185,6 +188,7 @@ for (const [id, t] of Object.entries(T)) {
   if (t.layers !== undefined) {
     const Y = t.layers || {}, C = Y.concept, B = Y.build, F = Y.formal, LW = W + ' layers';
     if (!C || !B || !F) err(LW, 'needs concept, build and formal');
+    if (Y.nudge !== undefined) checkText(LW, 'nudge', Y.nudge);   // the lesson's first "Not yet" in every checker
     for (const [k, o] of Object.entries({ concept: C, build: B, formal: F })) if (o && o.lede !== undefined) { nonEmpty(LW, `${k}.lede`, o.lede); checkHtml(LW, `${k}.lede`, o.lede); }
     if (C) {
       nonEmpty(LW, 'concept.lede', C.lede); nonEmpty(LW, 'concept.history', C.history); checkHtml(LW, 'concept.history', C.history);
@@ -197,10 +201,7 @@ for (const [id, t] of Object.entries(T)) {
     if (C && C.ideas !== undefined) {
       const LABRE = /^[a-z]+(:[-\d.]+)?(,[a-z]+(:[-\d.]+)?)*$/;
       const tryOk = (P, x) => { if (!x || typeof x !== 'object') { err(LW, `${P} must be {label, lab}`); return; } checkText(LW, `${P}.label`, x.label); if (!LABRE.test(x.lab || '')) err(LW, `${P}.lab must look like "set:19,play" (commands the lab exposes)`); };
-      const demoOk = (P, d) => { if (!d || d.kind !== 'dots') { err(LW, `${P}.kind must be "dots"`); return; } checkText(LW, `${P}.alt`, d.alt);
-        if (!Number.isInteger(d.slots) || d.slots < 2 || d.slots > 12) err(LW, `${P}.slots must be an integer 2 to 12`);
-        if (d.grow !== undefined) { if (!Array.isArray(d.grow) || d.grow.length < 2 || d.grow.some(n => !Number.isInteger(n) || n < 0 || n >= d.slots)) err(LW, `${P}.grow must list 2 or more counts below slots`); }
-        else if (d.frames === undefined && (!Number.isInteger(d.lit) || d.lit < 1 || d.lit > d.slots)) err(LW, `${P}.lit must be 1 to slots`); };
+      const demoOk = (P, d) => { DEMO.check(d).forEach(m => err(LW, `${P}: ${m}`)); if (d && d.kind === 'dots' && d.grow === undefined && d.frames === undefined && (!Number.isInteger(d.lit) || d.lit < 1 || d.lit > d.slots)) err(LW, `${P}.lit must be 1 to slots`); };
       if (!C.question || typeof C.question !== 'object') err(LW, 'concept.question must be {text, sub, figure}'); else { checkText(LW, 'concept.question.text', C.question.text); if (C.question.sub !== undefined) { nonEmpty(LW, 'concept.question.sub', C.question.sub); checkHtml(LW, 'concept.question.sub', C.question.sub); } }
       if (arr(LW, 'concept.ideas', C.ideas, 2)) { if (C.ideas.length > 4) err(LW, 'concept.ideas has more than 4 cards');
         C.ideas.forEach((x, i) => { const P = `concept.ideas[${i}]`; checkText(LW, `${P}.title`, x.title); nonEmpty(LW, `${P}.text`, x.text); checkHtml(LW, `${P}.text`, x.text);
@@ -217,7 +218,8 @@ for (const [id, t] of Object.entries(T)) {
       if (C.walk !== undefined) { const K = C.walk || {}; nonEmpty(LW, 'concept.walk.prompt', K.prompt); checkHtml(LW, 'concept.walk.prompt', K.prompt); nonEmpty(LW, 'concept.walk.answer', K.answer); checkHtml(LW, 'concept.walk.answer', K.answer);
         if (arr(LW, 'concept.walk.lines', K.lines, 2)) K.lines.forEach((l, i) => { nonEmpty(LW, `concept.walk.lines[${i}].math`, l.math); checkHtml(LW, `concept.walk.lines[${i}].math`, l.math); if (l.note !== undefined) checkHtml(LW, `concept.walk.lines[${i}].note`, l.note); if (l.frame !== undefined && !Number.isInteger(l.frame)) err(LW, `concept.walk.lines[${i}].frame must be a frame number`); });
         if (K.predict !== undefined && (!Array.isArray(K.predict) || K.predict.length > (K.lines || []).length)) err(LW, 'concept.walk.predict must have at most one item per line');
-        if (K.demo !== undefined && !['dots', 'range', 'tens'].includes((K.demo || {}).kind)) err(LW, 'concept.walk.demo.kind must be dots, range or tens'); }
+        if (K.demo !== undefined) { demoOk('concept.walk.demo', K.demo); if (!DEMO.check(K.demo).length) { const nf = demoFrames(K.demo); (K.lines || []).forEach((l, i) => { if (l.frame !== undefined && (!Number.isInteger(l.frame) || l.frame < 0 || l.frame >= nf)) err(LW, `concept.walk.lines[${i}].frame must be 0 to ${nf - 1} (the picture has ${nf} frames)`); }); } }
+        if (K.title !== undefined) checkText(LW, 'concept.walk.title', K.title); }
       (C.examples || []).forEach((x, i) => { if (x.figure !== undefined) checkText(LW, `concept.examples[${i}].figure`, x.figure); else err(LW, `concept.examples[${i}].figure is missing (the tile's headline number)`); if (x.try !== undefined) tryOk(`concept.examples[${i}].try`, x.try); });
     }
     for (const [k, o] of [['concept', C], ['build', B]]) if (o && o.objects !== undefined && (!Array.isArray(o.objects) || o.objects.some(w => typeof w !== 'string' || !/^[A-Za-z][A-Za-z' -]*$/.test(w)))) err(LW, `${k}.objects must be a list of words (the things counted, as written on the page)`);
@@ -237,7 +239,8 @@ for (const [id, t] of Object.entries(T)) {
         if (B.matters !== undefined) { const M = B.matters || {}; checkText(LW, 'build.matters.title', M.title); nonEmpty(LW, 'build.matters.text', M.text); checkHtml(LW, 'build.matters.text', M.text); }
         if (B.exampleTip !== undefined) { nonEmpty(LW, 'build.exampleTip', B.exampleTip); checkHtml(LW, 'build.exampleTip', B.exampleTip); }
         if (B.exampleTry !== undefined) tryOk('build.exampleTry', B.exampleTry);
-        (B.tasks || []).forEach((x, i) => { if (x.figure !== undefined) checkText(LW, `build.tasks[${i}].figure`, x.figure); if (x.try !== undefined) tryOk(`build.tasks[${i}].try`, x.try); });
+        (B.tasks || []).forEach((x, i) => { if (x.figure !== undefined) checkText(LW, `build.tasks[${i}].figure`, x.figure); if (x.try !== undefined) tryOk(`build.tasks[${i}].try`, x.try);  if (x.demo !== undefined) DEMO.check(x.demo).forEach(m => err(LW, `build.tasks[${i}].demo: ${m}`)); });
+        if (B.exampleTask && B.exampleTask.demo !== undefined) DEMO.check(B.exampleTask.demo).forEach(m => err(LW, `build.exampleTask.demo: ${m}`));
         const chk = (P, k) => { if (!k || typeof k !== 'object') { err(LW, `${P} must be an object`); return; } if (k.hint !== undefined) { nonEmpty(LW, `${P}.hint`, k.hint); checkHtml(LW, `${P}.hint`, k.hint); }
           if (k.choices !== undefined) { if (arr(LW, `${P}.choices`, k.choices, 2)) { if (k.choices.filter(c => c.ok).length !== 1) err(LW, `${P}.choices needs exactly one ok: true`); k.choices.forEach((c, j) => { nonEmpty(LW, `${P}.choices[${j}].t`, c.t); checkHtml(LW, `${P}.choices[${j}].t`, c.t); if (!c.ok && c.why === undefined) err(LW, `${P}.choices[${j}] needs a why (shown when it is picked)`); }); } }
           else if (arr(LW, `${P}.parts`, k.parts, 1)) k.parts.forEach((x, j) => { checkText(LW, `${P}.parts[${j}].label`, x.label); if (typeof x.ans !== 'number' || !isFinite(x.ans)) err(LW, `${P}.parts[${j}].ans must be a number (add it to the check file too)`); }); };

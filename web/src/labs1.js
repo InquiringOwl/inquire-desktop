@@ -74,9 +74,12 @@ L["place-value"] = k => {
   const s = k.slider("number", 0, 9999, 1, n, v => n = v, v => v.toLocaleString("en-US"));
   [["+1",1],["+10",10],["+100",100],["+1000",1000],["−1",-1],["−10",-10]].forEach(([t, v]) => k.button(t, () => { n = Math.max(0, Math.min(9999, n + v)); s.set(n); }, "btn-s"));
   const cols = [ ["Thousands", C.violet, 1000], ["Hundreds", C.pink, 100], ["Tens", C.cyan, 10], ["Ones", C.amber, 1] ];
+  const put = v => { n = Math.max(0, Math.min(9999, Math.round(+v) || 0)); s.set(n); };
+  k.expose({ set: put, add: v => put(n + (+v || 1)) });   // lesson chips: "set:3405", "add:10", "add:-1"
   k.loop(() => {
     c.begin(); const { w, h } = c;
     const dg = [Math.floor(n / 1000), Math.floor(n / 100) % 10, Math.floor(n / 10) % 10, n % 10];
+    k.publish("n", n); k.publish("thousands", dg[0]); k.publish("hundreds", dg[1]); k.publish("tens", dg[2]); k.publish("ones", dg[3]);   // live figure + Your move goals
     const cw = w / 4;
     const u = Math.max(2, Math.min(cw / 16, (h - 140) / 15.5));
     cols.forEach(([name, col, pv], i) => {
@@ -126,7 +129,10 @@ L["number-line"] = k => {
   const sb = k.slider(`<span class="c3"><i>b</i></span>`, 0, 20, 1, b, v => b = v);
   k.button("Swap", () => { [a, b] = [b, a]; sa.set(a); sb.set(b); }, "btn ghost");
   k.button("Random", () => { a = Math.floor(Math.random() * 21); b = Math.floor(Math.random() * 21); sa.set(a); sb.set(b); }, "btn ghost");
+  const pin = v => Math.max(0, Math.min(20, Math.round(+v) || 0));
+  k.expose({ a: v => { a = pin(v); sa.set(a); }, b: v => { b = pin(v); sb.set(b); }, swap: () => { [a, b] = [b, a]; sa.set(a); sb.set(b); } });   // chips: "a:7,b:12", "swap"
   k.loop(dt => {
+    k.publish("a", a); k.publish("b", b); k.publish("dist", Math.abs(a - b));   // live figure + Your move goals
     da = lerp(da, a, Math.min(1, dt * 10)); db = lerp(db, b, Math.min(1, dt * 10));
     c.begin(); const { w, h } = c;
     const x0 = 40, x1 = w - 40, y = h * .62, X = v => x0 + (x1 - x0) * v / 20;
@@ -225,7 +231,13 @@ function columnLab(k, op){
   const nb = k.number(`<span class="c3"><i>b</i></span>`, 0, 999999, B, v => { B = v; build(); na.set(A); nb.set(B); st.reset(); });
   const st = k.stepper(() => plan.steps.length, () => {}, { ms: 1100 });
   k.button("New numbers", () => { A = 1000 + Math.floor(Math.random() * 9000); B = 100 + Math.floor(Math.random() * 9000); build(); na.set(A); nb.set(B); st.reset(); }, "btn ghost");
+  const whole = v => Math.max(0, Math.min(999999, Math.round(+v) || 0));
+  k.expose({ a: v => { A = whole(v); build(); na.set(A); nb.set(B); st.reset(); }, b: v => { B = whole(v); build(); na.set(A); nb.set(B); st.reset(); },   // chips: "a:368,b:457,play"
+    step: () => { st.pause(); st.step(); }, play: () => st.play(), finish: () => st.finish(), reset: () => st.reset() });
+  const regroups = () => op === "+" ? plan.steps.filter(s => s.cout).length : plan.steps.filter(s => s.note.length).length;
   k.loop(() => {
+    const done = st.k >= plan.steps.length;   // Your move goals: a, b, steps done (k), the result once every column is worked, carries/borrows
+    k.publish("a", A); k.publish("b", B); k.publish("k", st.k); k.publish("result", done ? (op === "+" ? A + B : A - B) : null); k.publish("regroups", regroups());
     c.begin(); const { w, h } = c; const K = st.k;
     const ncol = op === "+" ? plan.n : plan.n;
     const cw = Math.min(64, (w - 120) / (ncol + 1)), fs = Math.round(cw * .72);

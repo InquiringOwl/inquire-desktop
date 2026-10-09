@@ -61,10 +61,93 @@ function seqFrames(spec){
     for (let i = 0; i <= T; i++) out.push({ tens: i, ones: 0, big: null });
     for (let j = 1; j <= O; j++) out.push({ tens: T, ones: j, big: null });
     out.push({ tens: T, ones: O, big: spec.n });
+  } else if (spec.kind === "line") {
+    const P = (spec.points || []).length, J = (spec.jumps || []).length;
+    for (let i = 0; i <= P; i++) out.push({ pts: i, jumps: 0, big: null, dist: false });
+    for (let j = 1; j <= J; j++) out.push({ pts: P, jumps: j, big: null, dist: false });
+    if (J) out.push({ pts: P, jumps: J, big: lineEnd(spec), dist: false });
+    else if (spec.show === "dist" && P >= 2) out.push({ pts: P, jumps: 0, big: Math.abs(spec.points[0].v - spec.points[1].v), dist: true });
+  } else if (spec.kind === "columns") {
+    const pl = colPlan(spec), S = pl.op ? pl.steps.length : pl.n;
+    for (let i = 0; i <= S; i++) out.push({ k: i, big: null });
+    out.push({ k: S, big: pl.result });
+  } else if (spec.kind === "bar") {
+    const b = barParts(spec), P = b.parts.length;
+    for (let i = 0; i <= P; i++) out.push({ parts: i, brace: false, reveal: false, big: null });
+    out.push({ parts: P, brace: true, reveal: false, big: b.unknown >= 0 ? null : b.total });
+    if (b.unknown >= 0) out.push({ parts: P, brace: true, reveal: true, big: b.parts[b.unknown] });
+  } else if (spec.kind === "array") {
+    for (let r = 0; r <= spec.rows; r++) out.push({ rows: r, big: null });
+    out.push({ rows: spec.rows, big: spec.rows * spec.cols });
   }
   return out;
 }
-W.InquireDemo = { frames, slotStates, rangeCells, seqFrames, plural };
+/* ---------- more kinds (1.18.5, for the Arithmetic rollout): line, columns, bar, array ----------
+   { kind: "line", from: 0, to: 20, points: [{v: 7, c: "c2", label: "a"}, {v: 12, c: "c3", label: "b"}], show: "dist", alt }
+     a number line; the points appear in turn; show: "dist" ends on a bracket between the first two points and lifts out the distance.
+   { kind: "line", from: 0, to: 20, start: 8, jumps: [5, -3], unit: "step", alt }
+     a dot starts at `start` and hops each jump in turn (arcs labelled +5, −3); the end value lifts out.
+   { kind: "columns", n: 2354, alt }            place-value columns, filled from the left: digit, then its value (2 × 1,000 = 2,000).
+   { kind: "columns", add: [368, 457], alt }    column addition right to left, carries written above the next column.
+   { kind: "columns", sub: [503, 168], alt }    column subtraction right to left, regrouping shown above the top digits.
+   { kind: "bar", parts: [340, 125], labels: ["rent", "food"], unit: "dollar", alt }   a bar model; parts appear, then the brace and the total.
+     One part may be null with `total` given: it shows "?" until the last frame, which reveals it (missing part / subtraction).
+   { kind: "array", rows: 3, cols: 4, unit: "chair", alt }   equal rows lit one row at a time (4, 8, 12), then the product.
+   Any kind takes `cap` (the small caption under the big number). All are still-able (`still: true` + host._demo.goto(i) in
+   Concept walks) and DOM-free in seqFrames for tests. InquireDemo.check(spec) lists problems with a spec (validate.js uses it). */
+function lineEnd(spec){ return (spec.start || 0) + (spec.jumps || []).reduce((s, j) => s + j, 0); }
+function niceTick(span){ for (const s of [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000]) if (span / s <= 10) return s; return Math.ceil(span / 10); }
+function digitsR(N, n){ return String(N).padStart(n, "0").split("").reverse().map(Number); }
+function colPlan(spec){
+  if (spec.add) { const [A, B] = spec.add, n = Math.max(String(A).length, String(B).length), a = digitsR(A, n + 1), b = digitsR(B, n + 1), steps = []; let carry = 0;
+    for (let i = 0; i < n; i++) { const s = a[i] + b[i] + carry, cin = carry; carry = s >= 10 ? 1 : 0; steps.push({ i, s, digit: s % 10, cin, cout: carry }); }
+    if (carry) steps.push({ i: n, s: carry, digit: carry, cin: carry, cout: 0, final: true });
+    return { op: "+", A, B, a, b, n: n + (carry ? 1 : 0), steps, result: A + B }; }
+  if (spec.sub) { const [A, B] = spec.sub, n = String(A).length, a = digitsR(A, n), b = digitsR(B, n), top = a.slice(), marks = a.map(() => []), steps = [];
+    for (let i = 0; i < n; i++) { let borrow = null;
+      if (top[i] < b[i]) { let j = i + 1; while (top[j] === 0) j++; borrow = j; top[j] -= 1; marks[j].push({ v: top[j], at: i }); for (let q = j - 1; q > i; q--) { top[q] = 9; marks[q].push({ v: 9, at: i }); } top[i] += 10; marks[i].push({ v: top[i], at: i }); }
+      steps.push({ i, t: top[i], b: b[i], digit: top[i] - b[i], borrow }); }
+    return { op: "−", A, B, a, b, n, steps, marks, result: A - B }; }
+  const ds = String(spec.n).split("").map(Number); return { op: "", n: ds.length, ds, result: spec.n };
+}
+function barParts(spec){
+  const P = spec.parts.slice(), u = P.indexOf(null), known = P.filter(x => x != null).reduce((s, x) => s + x, 0);
+  const total = u >= 0 ? spec.total : known;
+  if (u >= 0) P[u] = spec.total - known;
+  return { parts: P, unknown: u, total };
+}
+const KINDS = ["dots", "range", "tens", "line", "columns", "bar", "array"];
+function check(spec){
+  const out = [], int = v => Number.isInteger(v), num = v => typeof v === "number" && isFinite(v);
+  if (!spec || !KINDS.includes(spec.kind)) return [`kind must be one of ${KINDS.join(", ")}`];
+  if (typeof spec.alt !== "string" || spec.alt.length < 12) out.push("alt must describe the picture (a sentence)");
+  const k = spec.kind;
+  if (k === "dots") { if (!int(spec.slots) || spec.slots < 2 || spec.slots > 14) out.push("slots must be an integer 2 to 14");
+    if (spec.grow !== undefined && (!Array.isArray(spec.grow) || spec.grow.length < 2 || spec.grow.some(n => !int(n) || n < 0 || n >= spec.slots))) out.push("grow must list 2 or more counts below slots"); }
+  if (k === "range" && (!int(spec.from) || !int(spec.to) || (spec.to - spec.from) / (spec.step || 1) < 1)) out.push("range needs integers from < to");
+  if (k === "tens" && (!int(spec.n) || spec.n < 1 || spec.n > 99)) out.push("tens needs an integer n from 1 to 99");
+  if (k === "line") { if (!num(spec.from) || !num(spec.to) || spec.to <= spec.from) out.push("line needs from < to");
+    const pts = spec.points || [], J = spec.jumps || [];
+    if (!pts.length && spec.start === undefined) out.push("line needs points or a start");
+    pts.forEach((p, i) => { if (!num(p.v) || p.v < spec.from || p.v > spec.to) out.push(`points[${i}].v must be inside from..to`); });
+    if (J.length && !num(spec.start)) out.push("jumps need a start");
+    let at = spec.start; J.forEach((j, i) => { if (!num(j) || !j) out.push(`jumps[${i}] must be a non-zero number`); at += j; if (at < spec.from || at > spec.to) out.push(`jump ${i + 1} lands at ${at}, outside from..to`); });
+    if (spec.show === "dist" && pts.length < 2) out.push('show: "dist" needs two points'); }
+  if (k === "columns") { const ok = v => int(v) && v >= 0 && v <= 9999999;
+    if (spec.add) { if (!Array.isArray(spec.add) || spec.add.length !== 2 || !spec.add.every(ok)) out.push("columns.add must be two whole numbers"); }
+    else if (spec.sub) { if (!Array.isArray(spec.sub) || spec.sub.length !== 2 || !spec.sub.every(ok) || spec.sub[1] > spec.sub[0]) out.push("columns.sub must be two whole numbers, the first not smaller"); }
+    else if (!ok(spec.n)) out.push("columns needs n, add or sub"); }
+  if (k === "bar") { const P = spec.parts;
+    if (!Array.isArray(P) || P.length < 1 || P.length > 6) out.push("bar.parts must list 1 to 6 parts");
+    else { const nul = P.filter(x => x === null).length;
+      if (nul > 1) out.push("bar: at most one unknown (null) part");
+      if (P.some(x => x !== null && (!num(x) || x <= 0))) out.push("bar parts must be positive numbers");
+      if (nul && (!num(spec.total) || spec.total <= P.filter(x => x != null).reduce((s, x) => s + x, 0))) out.push("bar with an unknown part needs a total larger than the known parts"); }
+    if (spec.labels !== undefined && (!Array.isArray(spec.labels) || spec.labels.length !== (P || []).length)) out.push("bar.labels needs one label per part"); }
+  if (k === "array" && (!int(spec.rows) || !int(spec.cols) || spec.rows < 1 || spec.cols < 1 || spec.rows > 10 || spec.cols > 12)) out.push("array needs rows 1–10 and cols 1–12");
+  return out;
+}
+W.InquireDemo = { frames, slotStates, rangeCells, seqFrames, plural, colPlan, barParts, lineEnd, check, KINDS };
 if (typeof document === "undefined") return;
 
 const NS = "http://www.w3.org/2000/svg";
@@ -146,8 +229,99 @@ function mountTens(host, spec){
     cap.textContent = f.big == null ? "" : `${T} ten${T === 1 ? "" : "s"} + ${O} ${plural(spec.unit || "one", 2)}`.replace(/ \+ 0 \w+$/, ""); cap.setAttribute("opacity", f.big == null ? 0 : 1); };
   return player(host, svg, fr.length, show, spec);
 }
+// ---- line, columns, bar, array (1.18.5) ----
+const COLV = { c1: "amber", c2: "cyan", c3: "pink", c4: "violet", c5: "green" };
+const fmtN = v => (v < 0 ? "−" : "") + Math.abs(v).toLocaleString("en-US");
+const svgFor = (host, spec, W, H) => { host.textContent = ""; const s = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": spec.alt || "Animation", preserveAspectRatio: "xMinYMid meet" }, host); s.style.maxHeight = Math.round(H * 1.25) + "px"; return s; };
+const bigCap = (svg, x, y) => [el("text", { class: "dm-big dq-big", x, y, opacity: 0 }, svg), el("text", { class: "dq-cap", x: x + 2, y: y + 20, opacity: 0 }, svg)];
+const setBig = (big, cap, v, text) => { big.textContent = v == null ? "" : fmtN(v); big.setAttribute("opacity", v == null ? 0 : 1); cap.textContent = v == null ? "" : text; cap.setAttribute("opacity", v == null ? 0 : 1); };
+function mountLine(host, spec){
+  const fr = seqFrames(spec), W = 540, H = 92, L = 18, Rr = W - 128, Y = 58, span = spec.to - spec.from, X = v => L + (Rr - L) * (v - spec.from) / span;
+  const svg = svgFor(host, spec, W, H);
+  el("line", { class: "dq-axis", x1: L - 10, y1: Y, x2: Rr + 10, y2: Y }, svg); el("path", { class: "dq-axis", d: `M${Rr + 4} ${Y - 4} L${Rr + 10} ${Y} L${Rr + 4} ${Y + 4}` }, svg);
+  const lab = spec.tick || niceTick(span), minor = span <= 40 && Number.isInteger(spec.from) ? 1 : lab;
+  for (let v = Math.ceil(spec.from / minor) * minor; v <= spec.to + 1e-9; v += minor) { const major = Math.abs(v / lab - Math.round(v / lab)) < 1e-9;
+    el("line", { class: "dq-tick", x1: X(v), y1: Y - (major ? 6 : 3), x2: X(v), y2: Y + (major ? 6 : 3) }, svg);
+    if (major) el("text", { class: "dq-tl", x: X(v), y: Y + 20 }, svg).textContent = fmtN(+v.toFixed(6)); }
+  const P = spec.points || [], J = spec.jumps || [];
+  const brk = P.length >= 2 ? el("path", { class: "dq-brk", d: `M${X(P[0].v)} ${Y - 26} v-6 H${X(P[1].v)} v6`, opacity: 0 }, svg) : null;
+  const pts = P.map(p => { const g = el("g", { class: "dq-g", opacity: 0, style: `--c:var(--${COLV[p.c || "c1"]})` }, svg);
+    el("circle", { class: "dq-pt", cx: X(p.v), cy: Y, r: 5.5 }, g); el("text", { class: "dq-pl", x: X(p.v), y: Y - 12 }, g).textContent = p.label != null ? p.label : fmtN(p.v); return g; });
+  let at = spec.start; const arcs = J.map(j => { const x0 = X(at), x1 = X(at + j), h = 14 + Math.min(20, Math.abs(x1 - x0) * .25), mx = (x0 + x1) / 2, g = el("g", { class: "dq-g", opacity: 0 }, svg);
+    el("path", { class: "dq-arc", d: `M${x0} ${Y - 5} Q${mx} ${Y - 5 - 2 * h} ${x1} ${Y - 5}` }, g);
+    const s = Math.sign(j); el("path", { class: "dq-arc", d: `M${x1 - 5 * s} ${Y - 11} L${x1} ${Y - 5} L${x1 - 7 * s} ${Y - 4}` }, g);
+    el("text", { class: "dq-al", x: mx, y: Y - 9 - h }, g).textContent = (j > 0 ? "+" : "−") + Math.abs(j).toLocaleString("en-US"); at += j; return g; });
+  const cur = spec.start != null ? el("circle", { class: "dq-pt dq-cur", cx: X(spec.start), cy: Y, r: 6 }, svg) : null;
+  const [big, cap] = bigCap(svg, Rr + 24, 46);
+  const show = i => { const f = fr[i];
+    pts.forEach((g, j) => g.setAttribute("opacity", j < f.pts ? 1 : 0)); arcs.forEach((g, j) => g.setAttribute("opacity", j < f.jumps ? 1 : 0));
+    if (cur) cur.setAttribute("cx", X(spec.start + J.slice(0, f.jumps).reduce((s, j) => s + j, 0)));
+    if (brk) brk.setAttribute("opacity", f.dist ? 1 : 0);
+    setBig(big, cap, f.big, spec.cap || (f.dist ? (spec.unit ? plural(spec.unit, 2) + " apart" : "apart") : J.length ? "lands here" : "")); };
+  return player(host, svg, fr.length, show, spec);
+}
+function mountColumns(host, spec){
+  const pl = colPlan(spec), fr = seqFrames(spec), names = ["1s", "10s", "100s", "1,000s", "10,000s", "100,000s", "1,000,000s"];
+  if (!pl.op) {   // place value: digits filled from the left, each with its value
+    const CW = 62, n = pl.n, W = 8 + n * CW + 140, H = 84, svg = svgFor(host, spec, W, H), cols = [];
+    pl.ds.forEach((d, j) => { const x = 8 + j * CW + CW / 2, p = n - 1 - j, val = d * 10 ** p;
+      if (j) el("line", { class: "dq-sep", x1: 8 + j * CW, y1: 4, x2: 8 + j * CW, y2: 74 }, svg);
+      el("text", { class: "dq-ch", x, y: 14 }, svg).textContent = names[p] || "10^" + p;
+      const g = el("g", { class: "dq-g", opacity: 0 }, svg); el("text", { class: "dq-dg", x, y: 44, "data-k": "p" + (p % 4) }, g).textContent = String(d); el("text", { class: "dq-cv", x, y: 66 }, g).textContent = fmtN(val); cols.push(g); });
+    const [big, cap] = bigCap(svg, 8 + n * CW + 14, 44);
+    return player(host, svg, fr.length, i => { const f = fr[i]; cols.forEach((g, j) => g.setAttribute("opacity", j < f.k ? 1 : 0)); setBig(big, cap, f.big, spec.cap || "in all"); }, spec);
+  }
+  const CW = 26, n = pl.n, xR = 30 + n * CW, W = xR + 150, H = 100, svg = svgFor(host, spec, W, H), cx = i => xR - (i + .5) * CW;
+  const hl = el("rect", { class: "dq-colhl", x: 0, y: 2, width: CW, height: 94, rx: 3, opacity: 0 }, svg);
+  const lenA = String(pl.A).length, lenB = String(pl.B).length, lenR = String(pl.result).length;
+  const res = [], up = [], cross = [];
+  for (let i = 0; i < n; i++) {
+    if (i < lenA) { el("text", { class: "dq-dg", x: cx(i), y: 44, "data-k": "a" }, svg).textContent = String(pl.a[i]); cross[i] = el("line", { class: "dq-x", x1: cx(i) - 7, y1: 37, x2: cx(i) + 7, y2: 29, opacity: 0 }, svg); }
+    if (i < lenB) el("text", { class: "dq-dg", x: cx(i), y: 68, "data-k": "b" }, svg).textContent = String(pl.b[i]);
+    up[i] = el("text", { class: "dq-cy", x: cx(i), y: 17 }, svg); res[i] = el("text", { class: "dq-dg", x: cx(i), y: 94, "data-k": "r" }, svg);
+  }
+  el("text", { class: "dq-dg", x: xR - (n + .55) * CW, y: 68 }, svg).textContent = pl.op;
+  el("line", { class: "dq-rule", x1: xR - (n + 1) * CW, y1: 75, x2: xR + 4, y2: 75 }, svg);
+  const [big, cap] = bigCap(svg, xR + 18, 52);
+  const show = i => { const f = fr[i], K = f.k, S = pl.steps;
+    const s = K < S.length ? S[K] : null; hl.setAttribute("opacity", s ? 1 : 0); if (s) hl.setAttribute("x", cx(s.i) - CW / 2);
+    for (let c = 0; c < n; c++) { const st = S.find(x => x.i === c), done = st && S.indexOf(st) < K;
+      res[c].textContent = done && c < lenR ? String(st.digit) : "";
+      if (pl.op === "+") up[c].textContent = S.some((x, j) => j < K && x.i === c - 1 && x.cout && !x.final) ? "1" : "";
+      else { const ms = (pl.marks[c] || []).filter(m => m.at < K); up[c].textContent = ms.length ? String(ms[ms.length - 1].v) : ""; if (cross[c]) cross[c].setAttribute("opacity", ms.length ? 1 : 0); } }
+    setBig(big, cap, f.big, spec.cap || (pl.op === "+" ? "the sum" : "the difference")); };
+  return player(host, svg, fr.length, show, spec);
+}
+function mountBar(host, spec){
+  const b = barParts(spec), fr = seqFrames(spec), BW = 340, sc = BW / b.total, ws = b.parts.map(p => Math.max(40, p * sc)), tw = ws.reduce((s, w) => s + w, 0);
+  const L = 4, W = L + tw + 150, H = 96, svg = svgFor(host, spec, W, H), labs = spec.labels || [];
+  const brace = el("g", { class: "dq-g", opacity: 0 }, svg), mid = L + tw / 2;
+  el("path", { class: "dq-brk", d: `M${L} 30 q0 -7 7 -7 H${mid - 7} q7 0 7 -7 q0 7 7 7 H${L + tw - 7} q7 0 7 7` }, brace);
+  el("text", { class: "dq-al dq-tot", x: mid, y: 11 }, brace).textContent = fmtN(b.total);
+  let x = L; const parts = b.parts.map((p, i) => { const g = el("g", { class: "dq-g", opacity: 0 }, svg), w = ws[i], u = i === b.unknown;
+    el("rect", { class: "dq-bar", x, y: 34, width: w, height: 28, "data-k": u ? "u" : String(i % 2) }, g);
+    const v = el("text", { class: "dq-bv", x: x + w / 2, y: 49 }, g); v.textContent = u ? "?" : fmtN(p);
+    if (labs[i]) el("text", { class: "dq-bl", x: x + w / 2, y: 78 }, g).textContent = labs[i];
+    x += w; return { g, v, u, p }; });
+  const [big, cap] = bigCap(svg, L + tw + 16, 54);
+  const show = i => { const f = fr[i];
+    parts.forEach((q, j) => { q.g.setAttribute("opacity", j < f.parts ? 1 : 0); if (q.u) q.v.textContent = f.reveal ? fmtN(q.p) : "?"; });
+    brace.setAttribute("opacity", f.brace ? 1 : 0);
+    setBig(big, cap, f.big, spec.cap || (b.unknown >= 0 ? (labs[b.unknown] || "the missing part") : spec.unit ? plural(spec.unit, b.total) + " in all" : "in all")); };
+  return player(host, svg, fr.length, show, spec);
+}
+function mountArray(host, spec){
+  const fr = seqFrames(spec), R = spec.rows, Cn = spec.cols, D = 14, W = 8 + Cn * D + 46 + 140, H = Math.max(56, 8 + R * D + 6), svg = svgFor(host, spec, W, H);
+  const rows = []; for (let r = 0; r < R; r++) { const dots = []; for (let c = 0; c < Cn; c++) dots.push(el("circle", { class: "dm-c dq-d", cx: 8 + D / 2 + c * D, cy: 8 + D / 2 + r * D, r: 4.6, "data-s": "off" }, svg));
+    rows.push({ dots, t: el("text", { class: "dq-n", x: 8 + Cn * D + 20, y: 8 + D / 2 + r * D + 4 }, svg) }); }
+  const [big, cap] = bigCap(svg, 8 + Cn * D + 52, Math.min(H - 24, 34));
+  const show = i => { const f = fr[i]; rows.forEach((q, r) => { const on = r < f.rows; q.dots.forEach(d => d.setAttribute("data-s", on ? (r === f.rows - 1 && f.big == null ? "say" : "on") : "off")); q.t.textContent = on ? fmtN((r + 1) * Cn) : ""; });
+    setBig(big, cap, f.big, spec.cap || `${R} × ${Cn}${spec.unit ? " " + plural(spec.unit, 2) : ""}`); };
+  return player(host, svg, fr.length, show, spec);
+}
+const MOUNTS = { range: mountRange, tens: mountTens, line: mountLine, columns: mountColumns, bar: mountBar, array: mountArray };
 function mount(host, spec){
-  const api = spec.kind === "range" ? mountRange(host, spec) : spec.kind === "tens" ? mountTens(host, spec) : mountDots(host, spec);
+  const api = (MOUNTS[spec.kind] || mountDots)(host, spec);
   host._demo = api; return api;
 }
 function mountDots(host, spec){

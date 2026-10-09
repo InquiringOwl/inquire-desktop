@@ -1068,11 +1068,11 @@ function conceptHTML(t, C, col){
 /* Concept "count it together": one continuous situation, a picture that follows each line (InquireDemo with still: true,
    line.frame = the frame to show), lines one at a time with predict questions ("Just show the line" skips one). */
 function walkHTML(W){
-  const L = W.lines;
-  return `<div id="c-walk" class="walk"><h2>${esc(W.title || "Count it together")}</h2>${W.lead ? `<p class="walk-lead">${W.lead}</p>` : ""}
-    <div class="walk-grid"><div class="walk-l"><p class="eyebrow">The situation</p><p class="walk-q">${W.prompt}</p>${W.demo ? `<div class="dm walk-dm" data-spec="${esc(JSON.stringify({ ...W.demo, still: true }))}"></div>` : ""}</div>
+  const L = W.lines, first = !(W.predict || [])[0];   // the first line shows on load unless it waits for a predict question
+  return `<div id="c-walk" class="walk"><h2>${esc(W.title || "Work it together")}</h2>${W.lead ? `<p class="walk-lead">${W.lead}</p>` : ""}
+    <div class="walk-grid"><div class="walk-l"><p class="tk-wk-h">The situation</p><div class="walk-in"><p class="walk-q">${W.prompt}</p>${W.demo ? `<div class="dm walk-dm" data-spec="${esc(JSON.stringify({ ...W.demo, still: true }))}"></div>` : ""}</div></div>
     <div class="tk-wk walk-wk" data-walk><p class="tk-wk-h">One step at a time</p>
-      <div class="tbl"><table>${L.map(l => `<tr class="wk-row" hidden><td>${l.math}</td><td>${l.note || ""}</td></tr>`).join("")}</table></div>
+      <div class="tbl"><table>${L.map((l, i) => `<tr class="wk-row"${i || !first ? " hidden" : ""}><td>${l.math}</td><td>${l.note || ""}</td></tr>`).join("")}</table></div>
       <div class="wk-ask" hidden></div>
       <div class="wk-bar"><button type="button" class="btn-s" data-wk-next>Show the first line</button><button type="button" class="btn-s ghost" data-wk-all>Show all</button><span class="wk-n">0 of ${L.length}</span></div>
       <div class="ans" hidden><b>Answer.</b> ${W.answer}</div></div></div></div>`;
@@ -1097,6 +1097,7 @@ function pzHTML(k){
   return `${body}<p class="pz-fb" aria-live="polite"></p>${k.hint ? `<p class="pz-hint" hidden><b>Hint.</b> ${k.hint}</p>` : ""}
     <div class="pz-acts">${k.hint ? `<button type="button" class="pz-link" data-pz-hint>Need a hint?</button>` : ""}<button type="button" class="pz-link" data-pz-show${k.showNow ? "" : " hidden"}>${esc(k.showLabel || "Show the worked answer")}</button></div>`;
 }
+let pzNudge = "";   // a lesson's own first "Not yet" (layers.nudge, set by layerHTML); a question's k.nudge wins
 const pzNum = s => { const m = String(s).replace(/[,\s]/g, "").match(/-?\d+(\.\d+)?/); return m ? +m[0] : NaN; };
 // Wires one checker inside c. o.right() after a right answer, o.show() when the learner asks for the answer.
 function pzWire(c, k, o){
@@ -1107,7 +1108,7 @@ function pzWire(c, k, o){
   const verdict = (all, partial, why) => { tries++;
     window.dispatchEvent(new CustomEvent("inquire:quiz", { detail: { correct: all } }));
     if (all) { fb.textContent = k.right || o.rightText || "Correct."; fb.dataset.k = "ok"; end(); o.right(); return; }
-    fb.textContent = why || (partial ? "One part is right. Check the other one." : tries === 1 ? (k.nudge || "Not yet. Check for an end you might have dropped.") : "Still off. Try the hint, or look at the answer.");
+    fb.textContent = why || (partial ? "One part is right. Check the other one." : tries === 1 ? (k.nudge || pzNudge || "Not yet. Check your work and try again.") : "Still off. Try the hint, or look at the answer.");
     fb.dataset.k = "no"; show.hidden = false; if (tries >= 2) showHint(); };
   const form = c.querySelector(".pz-form");
   if (form) form.onsubmit = e => { e.preventDefault(); if (over) return;
@@ -1159,7 +1160,7 @@ function buildHTML(t, B, col){
   return `
     ${cqHTML(B.task, "The task")}
     <div><h2>${esc(B.keysTitle || "Reading the model")}</h2>${B.intro || ""}<div class="ideas keys">${t.legend.map((k, i) => `<div class="idea" style="--c:var(--${col(k.c)})"><div class="key-sym m">${k.sym}</div><h3>${esc(k.name)}</h3><p>${k.desc}</p>${chip(kt[i])}</div>`).join("")}</div></div>
-    <div id="b-method"${ng ? " data-goals" : ""}><h2>${esc(t.steps.title)}</h2>${ng ? `<div class="moves"><div class="moves-h"><span class="moves-k">Your moves</span>${bar(ng, "Moves done")}</div>${B.goalsIntro ? `<p class="prac-tip">${B.goalsIntro}</p>` : ""}<p class="moves-done" hidden>All ${ng} moves done ✓ You used every step of the method in the model.</p></div>` : ""}<ol class="method">${t.steps.items.map((s, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div><p class="method-do">${s}</p>${B.stepWhy && B.stepWhy[i] ? `<p class="method-why"><span>Why</span>${B.stepWhy[i]}</p>` : ""}${sg[i] ? goal(sg[i], i) : chip(st[i])}</div></li>`).join("")}</ol></div>
+    <div id="b-method"${ng ? " data-goals" : ""}><h2>${esc(t.steps.title)}</h2>${ng ? `<div class="moves"><div class="moves-h"><span class="moves-k">Your moves</span>${bar(ng, "Moves done")}</div>${B.goalsIntro ? `<p class="prac-tip">${B.goalsIntro}</p>` : ""}<p class="moves-done" hidden>All ${ng} moves done ✓ You used every step of the method in the model.</p></div>` : ""}<ol class="method m2">${t.steps.items.map((s, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div class="m-l"><p class="method-do">${s}</p></div><div class="m-r">${B.stepWhy && B.stepWhy[i] ? `<p class="method-why"><span>Why</span>${B.stepWhy[i]}</p>` : ""}${sg[i] ? goal(sg[i], i) : chip(st[i])}</div></li>`).join("")}</ol></div>
     ${whyHTML(B.matters)}
     ${merged ? "" : `<div id="b-example"><h2>${esc(B.exampleTitle || "Worked example")}</h2><div class="ex wk" data-wk="ex">
       <div class="prompt"><p class="eyebrow">Problem</p>${E.prompt}${B.exampleTip ? `<p class="wk-tip">${B.exampleTip}</p>` : ""}</div>
@@ -1187,11 +1188,11 @@ function formalHTML(t, F, col){
     ${cqHTML(F.question, F.eyebrow || "The definition", def ? `<div class="f-def">${def}</div>` : "")}
     ${(F.vocab || []).length ? `<div id="f-vocab"><h2>${esc(F.vocabTitle || "The vocabulary")}</h2>${F.vocabIntro || ""}<div class="ideas vocab">${F.vocab.map(v => `<div class="idea" style="--c:var(--${col(v.c || "c1")})"><div class="key-sym m">${v.sym}</div><h3>${esc(v.term)}</h3><p>${v.def}</p>${v.was ? `<p class="voc-was"><span>You met it as</span>${v.was}</p>` : ""}</div>`).join("")}</div>${full}</div>` : `<div><h2>Formal statement</h2><span class="voice f">College level</span>${t.formal}</div>`}
     ${whyHTML(F.matters, `<div id="f-mist" class="stakes f-mist">${whyKey("Where it goes wrong", "red")}<h2>${esc(F.mistakesTitle || "Common mistakes")}</h2>${F.mistakesLead ? `<p class="stakes-lead">${F.mistakesLead}</p>` : ""}<div class="mist">${t.mistakes.map(m => `<div><div class="w">${m.wrong}</div><div class="f">${m.fix}</div></div>`).join("")}</div></div>`, true)}
-    ${F.setup ? `<div id="f-setup"><h2>${esc(F.setup.title)}</h2>${F.setupIntro || ""}<ol class="method">${F.setup.items.map((x, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div><p class="method-do">${x.say}</p>${x.math ? `<div class="lyr-math">${x.math}</div>` : ""}</div></li>`).join("")}</ol></div>` : ""}
+    ${F.setup ? `<div id="f-setup"><h2>${esc(F.setup.title)}</h2>${F.setupIntro || ""}<ol class="method m2">${F.setup.items.map((x, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div class="m-l"><p class="method-do">${x.say}</p></div><div class="m-r">${x.math ? `<div class="lyr-math">${x.math}</div>` : ""}</div></li>`).join("")}</ol></div>` : ""}
     <div id="f-prac"><h2>${esc(F.practiceTitle || "Your turn")}</h2>${F.practiceTip ? `<p class="prac-tip">${F.practiceTip}</p>` : ""}
       ${K.length ? `<div class="pz-prog" data-pz-prog><div class="pz-bar">${P.map((_, i) => `<span data-i="${i}"></span>`).join("")}</div><p class="pz-sum">Solved <b>0</b> of ${P.length}</p></div>` : ""}
       <div class="prac" data-pzs>${P.map(card).join("")}</div>
-      ${K.length ? `<p class="pz-done" hidden>${F.practiceDone || `All ${P.length} solved. You can write a count the formal way.`}</p>` : ""}</div>`;
+      ${K.length ? `<p class="pz-done" hidden>${F.practiceDone || `All ${P.length} solved. You can work these the formal way.`}</p>` : ""}</div>`;
 }
 /* Colour cues (Concept and Intermediate, Devon Oct 2026): the numbers of a situation glow amber (.hl-n) and its objects
    violet (.hl-o) (<mark> elements, so no "x span" rule restyles them), so the eye finds "what is counted" and "how many" first. Objects come from layers.concept.objects /
@@ -1288,6 +1289,7 @@ window.addEventListener("inquire:lab-value", e => document.querySelectorAll(".cq
    A topic opts in with t.layers = { concept: {lede, what, why, history, sources, examples}, build: {lede, intro, stepWhy, bridge, tasks}, formal: {lede, setup} };
    the rest comes from the usual fields (fields, legend, steps, example, formal, mistakes, practice). Spec: docs/subjects/LAYERS.md. */
 function layerHTML(t, L){
+  pzNudge = (t.layers || {}).nudge || "";
   const Y = t.layers, C = Y.concept || {}, B = Y.build || {}, F = Y.formal || {};
   const col = c => ({c1:"amber",c2:"cyan",c3:"pink",c4:"violet",c5:"green"}[c]);
   if (L === "concept" && C.ideas) return conceptHTML(t, C, col);
@@ -1334,8 +1336,11 @@ function renderTopic(main){
         <div class="win"><div class="win-h"><span class="dot"></span>This unlocks</div><div class="in">${n.post.length ? n.post.map(link).join("") : '<span class="empty">No later charted topic depends on this directly. It feeds the fields below.</span>'}</div></div>
         <div class="win"><div class="win-h"><span class="dot"></span>Vital in later fields</div><div class="in">${t.beyond.map(b => `<div class="plink" style="cursor:default"><span class="o">→</span><span><b>${esc(b.field)}</b><span>${esc(b.why)}</span></span></div>`).join("")}</div></div>
       </div></div>`;
+  /* Bottom pager (1.18.4): two mirrored console cards, Previous lesson ◀ on the left and Next lesson ▶ on the right.
+     At either end of the field the empty side leads back to the field's tree, so the pair always stays symmetric. */
+  const pgCard = (dir, key, title, attr) => `<button type="button" class="pg-b pg-${dir}" ${attr}><span class="pg-arr" aria-hidden="true">${dir === "prev" ? "◀" : "▶"}</span><span class="pg-tx"><span class="pg-k">${key}</span><span class="pg-t">${esc(title)}</span></span></button>`;
   const pagerHTML = `
-      <div class="pager">${prev ? `<button type="button" class="btn ghost" data-t="${prev}">◀ ${esc((T[prev] || { title: prev }).title)}</button>` : "<span></span>"}${next ? `<button type="button" class="btn ghost" data-t="${next}">${esc((T[next] || { title: next }).title)} ▶</button>` : ""}</div>`;
+      <nav class="pager" aria-label="Lessons">${prev ? pgCard("prev", "Previous lesson", (T[prev] || { title: prev }).title, `data-t="${prev}"`) : pgCard("prev", "Back to", `${FNAME} tree`, "data-pg-tree")}${next ? pgCard("next", "Next lesson", (T[next] || { title: next }).title, `data-t="${next}"`) : pgCard("next", "Back to", `${FNAME} tree`, "data-pg-tree")}</nav>`;
   const layered = !!t.layers;
   const LAYERS = [["concept", "Concept", "New or returning: what it is and why it matters"], ["build", "Intermediate", "How to do it, step by step"], ["formal", "Formal", "State it precisely, then master it"]];
   let layer = store.get("layer", "concept"); if (!LAYERS.some(L => L[0] === layer)) layer = "concept";
@@ -1393,6 +1398,7 @@ function renderTopic(main){
   main.appendChild(pg);
   pg.scrollTop = 0;
   $("#back", pg).onclick = () => go({ view: "math", field: f, topic: null });
+  pg.querySelectorAll("[data-pg-tree]").forEach(b => b.onclick = () => go({ view: "math", field: f, topic: null }));
   $("#navtoggle2", pg).onclick = () => main.parentElement.classList.toggle("navopen");
   $("#mast", pg).onclick = () => { if (mastered.has(id)) mastered.delete(id); else mastered.add(id); saveMastered(); const y = pg.scrollTop, now = mastered.has(id); render(); const np = $(".topic"); if (np) np.scrollTop = y;
     const nb = np && np.querySelector(".next-btn"); if (nb && now) nb.classList.add("nudge"); };   // just mastered: the Next button glows once

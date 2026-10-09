@@ -3,7 +3,9 @@
 
 Every topic has a file checks/<field>/<topic-id>.py that re-computes, with sympy, each
 number the page states: the worked example and all practice answers (plus any formal
-claims worth pinning down). This runner executes them all and also enforces coverage:
+claims worth pinning down). Block lessons (layers.concept.ideas) also need the Concept walk,
+the Intermediate tasks and exact-value goals, the Concept example tiles and the Formal setup
+(see block_labels). This runner executes them all and also enforces coverage:
 every topic needs a file, and every labelled item ("example", "practice[0]" …) must be
 checked or explicitly skipped with a reason.
 
@@ -140,6 +142,27 @@ class Run:
         return dict(check=check, same=same, text=text, solves=solves, near=near, skip=skip, quote=quote, detok=detok)
 
 
+def block_labels(L):
+    """Block lessons (layers.concept.ideas; the whole `layers` is dumped and hashed): every number a learner is asked
+    for or shown worked out needs a check. Labels: concept.walk, layers.examples, layers.setup, build.tasks[i],
+    build.exampleTask, build.stepGoal[i] (goals with eq). A longer label covers its prefix ("build.tasks[2].lines")."""
+    if 'concept' not in L or not (L.get('concept') or {}).get('ideas'):
+        return []
+    C, B, F = L.get('concept') or {}, L.get('build') or {}, L.get('formal') or {}
+    out = []
+    if C.get('walk'): out.append('concept.walk')
+    if C.get('examples'): out.append('layers.examples')
+    if F.get('setup'): out.append('layers.setup')
+    if B.get('exampleTask'): out.append('build.exampleTask')
+    out += [f'build.tasks[{i}]' for i, x in enumerate(B.get('tasks') or []) if x.get('check') or x.get('lines')]
+    out += [f'build.stepGoal[{i}]' for i, g in enumerate(B.get('stepGoal') or []) if g and 'eq' in g]
+    return out
+
+
+def covers(covered, label):
+    return any(c == label or c.startswith((label + '.', label + ' ', label + '[')) for c in covered)
+
+
 def main(argv):
     content = load_content()
     stamp = '--stamp' in argv
@@ -173,7 +196,8 @@ def main(argv):
             continue
         need = ['example'] + [f'practice[{i}]' for i in range(len(info.get('practice') or []))]
         need += [f'story[{i}]' for i in range(len(info.get('stories') or []))]   # each quoted passage checked against its source
-        missing = [lbl for lbl in need if lbl not in run.covered]
+        need += block_labels(info.get('layers') or {})
+        missing = [lbl for lbl in need if not covers(run.covered, lbl)]
         if missing:
             problems.append(f'{tid}: not checked: {", ".join(missing)}')
         problems += [f'{tid}: {m}' for m in run.fail]

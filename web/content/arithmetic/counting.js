@@ -63,6 +63,7 @@ ARITH["counting"] = {
     { name: "Logic and set theory", use: "Cardinality and mathematical induction are both built on the natural numbers." }
   ],
   layers: {
+    nudge: "Not yet. Check for an end you might have dropped.",
     concept: {
       heading: "What are counting and the natural numbers?",
       question: { text: "How many?", sub: `Every time you check a count, you do the same three things. Watch each one happen in the model above, then try it yourself.`, figure: { sym: `<i>n</i>`, value: "17", cap: "the count", echo: "n" } },
@@ -150,7 +151,7 @@ ARITH["counting"] = {
         null,
         { key: "counted", eq: 23, notYet: `Not yet. Set the slider to 23, then press <b>Count aloud</b> and let it finish.`, text: `Set the slider to 23 yourself, then press <b>Count aloud</b>. The last number said should be 23.`, after: `The last number said is the count: <span class="m c1"><i>n</i> = 23</span>.` },
         { key: "n", eq: 34, text: `Make the model show 34 dots. How many full frames is that, and how many left over?`, after: `3 full frames and 4 more: <span class="m">30 + 4 = 34</span>.` }],
-      matters: { title: "Why a method beats a guess", text: `<p>Anyone can count a handful of things. Mistakes start when the group is big, or the things look alike, or someone talks to you halfway through.</p><ul class="why-chips"><li><b>Big</b> groups</li><li><b>Look-alike</b> things</li><li><b>Interruptions</b></li></ul><p>A method is <b>the same few moves every time</b>. It lets you stop, pick up where you left off, and check your own count.</p>` },
+      matters: { title: "Why a Method Beats a Guess", text: `<p>Anyone can count a handful of things. Mistakes start when the group is big, or the things look alike, or someone talks to you halfway through.</p><ul class="why-chips"><li><b>Big</b> groups</li><li><b>Look-alike</b> things</li><li><b>Interruptions</b></li></ul><p>A method is <b>the same few moves every time</b>. It lets you stop, pick up where you left off, and check your own count.</p>` },
       lede: `To count, match each object to the next counting number, one at a time, and read the last number as the total.`,
       intro: `<p>The model above shows objects as dots in a ten-frame. Each dot gets one counting number, and the <span class="c1">count</span> is the last number said. Adding one more dot moves the count to its <span class="c2">successor</span>, one more.</p>`,
       stepWhy: [
@@ -208,6 +209,7 @@ ARITH["counting"] = {
         { hint: `Page 45 and page 112 are both read, so use <span class="m"><i>b</i> − <i>a</i> + 1</span>.`, parts: [{ label: "pages", ans: 68 }] },
         { hint: `Name the set <span class="m">{101, 102, …, 136}</span>, then use the range rule.`, parts: [{ label: "rooms r", ans: 36 }] }
       ],
+      practiceDone: "All 5 solved. You can write a count the formal way.",
       practiceTip: `Type your answer and press Check. Work it the formal way: name the set, match it to 1, …, <i>n</i>, and state the count. Stuck? Each one has a hint.`,
       setup: { title: "Writing a counting problem", items: [
         { say: `<b>Name the set.</b> Say exactly what is being counted.`, math: `<span class="m"><i>A</i> = {14, 15, 16, …, 22}</span> &nbsp;(seat numbers in the row)` },
