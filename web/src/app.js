@@ -1060,18 +1060,35 @@ function conceptHTML(t, C, col){
   return `
     ${cqHTML(q, "The question")}
     <div><h2>${esc(C.ideasTitle || "The big ideas")}</h2><div class="ideas">${C.ideas.map(x => `<div class="idea" style="--c:var(--${col(x.c || "c1")})"><h3>${esc(x.title)}${x.term ? `<span class="idea-term">${esc(x.term)}</span>` : ""}</h3>${x.demo ? `<div class="dm" data-spec="${esc(JSON.stringify(x.demo))}"></div>` : ""}<p>${x.text}</p>${chip(x.try)}</div>`).join("")}</div></div>
+    ${C.walk ? walkHTML(C.walk) : ""}
     ${(C.timeline || []).length ? `<div class="c-hist"><h2>${esc(C.timelineTitle || "A short history")}</h2>${C.timelineLead ? `<p class="hist-lead">${C.timelineLead}</p>` : ""}<ol class="tl">${C.timeline.map(x => `<li><span class="tl-when">${esc(x.when)}</span><span class="tl-what">${x.what}</span></li>`).join("")}</ol>${hist}</div>` : ""}
-    ${mattersHTML(C.matters)}
-    ${C.stakes ? `<div class="stakes"><h2>${esc(C.stakes.title)}</h2><p class="stakes-lead">${C.stakes.lead}</p><ul class="stakes-list">${C.stakes.items.map(x => `<li><b>${esc(x.role)}</b><span>${x.text}</span></li>`).join("")}</ul>${chip(C.stakes.try)}</div>` : ""}
+    ${whyHTML(C.matters, C.stakes ? `<div class="stakes">${whyKey("Where it goes wrong", "red")}<h2>${esc(C.stakes.title)}</h2><p class="stakes-lead">${C.stakes.lead}</p><ul class="stakes-list">${C.stakes.items.map(x => `<li><b>${esc(x.role)}</b><span>${x.text}</span></li>`).join("")}</ul>${chip(C.stakes.try)}</div>` : "")}
     <div><h2>${esc(C.examplesTitle || "Where you will meet it")}</h2><div class="tiles">${(C.examples || []).map(c => `<details class="tile"><summary><span class="tile-fig">${esc(c.figure || "")}</span><span class="tile-role">${esc(c.role)}</span></summary><div class="tile-body"><p>${c.scene}</p>${c.takeaway ? `<p class="lyr-take">${esc(c.takeaway)}</p>` : ""}${chip(c.try)}</div></details>`).join("")}</div></div>`;
+}
+/* Concept "count it together": one continuous situation, a picture that follows each line (InquireDemo with still: true,
+   line.frame = the frame to show), lines one at a time with predict questions ("Just show the line" skips one). */
+function walkHTML(W){
+  const L = W.lines;
+  return `<div id="c-walk" class="walk"><h2>${esc(W.title || "Count it together")}</h2>${W.lead ? `<p class="walk-lead">${W.lead}</p>` : ""}
+    <div class="walk-grid"><div class="walk-l"><p class="eyebrow">The situation</p><p class="walk-q">${W.prompt}</p>${W.demo ? `<div class="dm walk-dm" data-spec="${esc(JSON.stringify({ ...W.demo, still: true }))}"></div>` : ""}</div>
+    <div class="tk-wk walk-wk" data-walk><p class="tk-wk-h">One step at a time</p>
+      <div class="tbl"><table>${L.map(l => `<tr class="wk-row" hidden><td>${l.math}</td><td>${l.note || ""}</td></tr>`).join("")}</table></div>
+      <div class="wk-ask" hidden></div>
+      <div class="wk-bar"><button type="button" class="btn-s" data-wk-next>Show the first line</button><button type="button" class="btn-s ghost" data-wk-all>Show all</button><span class="wk-n">0 of ${L.length}</span></div>
+      <div class="ans" hidden><b>Answer.</b> ${W.answer}</div></div></div></div>`;
 }
 // Shared by the Concept and Intermediate blocks: the big question/task with the lab's live number beside it, and the large-text "why" block.
 function cqHTML(q, eyebrow, extra){
   const fig = q.figure, jump = (q.jump || []).length ? `<p class="cq-jump"><span>Jump to</span>${q.jump.map(j => `<button type="button" class="cq-go" data-jump="${esc(j.to)}">${esc(j.label)}</button>`).join("")}</p>` : "";
-  return `<div class="cq"><div><p class="eyebrow">${esc(eyebrow)}</p><h2>${esc(q.text)}</h2>${q.sub ? `<p>${q.sub}</p>` : ""}${extra || ""}${jump}</div>
+  return `<div class="cq win${fig ? "" : " nofig"}"><div class="win-h"><span class="dot"></span>${esc(eyebrow)}${fig && fig.echo ? `<span class="cq-live">Live from the model</span>` : ""}</div>
+      <div class="cq-main"><h2>${esc(q.text)}</h2>${q.sub ? `<p>${q.sub}</p>` : ""}${extra || ""}${jump}</div>
       ${fig ? `<div class="cq-fig" aria-hidden="true"><div class="cq-num"${fig.echo ? ` data-echo="${esc(fig.echo)}"` : ""}>${esc(fig.echo && LabKit.value(fig.echo) !== undefined ? String(LabKit.value(fig.echo)) : fig.value)}</div><div class="cq-cap"><span class="m c1">${fig.sym}</span> ${esc(fig.cap)}</div></div>` : ""}</div>`;
 }
-const mattersHTML = M => M ? `<div class="matters"><h2>${esc(M.title)}</h2>${M.text}</div>` : "";
+/* The "why" block in an Inquire console panel. With a second block (where it goes wrong) the two share the panel:
+   side by side with a red rule between them (Concept), or stacked with the rule across (Formal, stack = true).
+   Lesson order everywhere: what (question, ideas) → why → where it goes wrong (wrong vs right) → the rest. */
+const whyKey = (label, tone) => `<div class="why-k${tone ? " " + tone : ""}"><i aria-hidden="true"></i>${esc(label)}</div>`;
+const whyHTML = (M, where, stack) => !M && !where ? "" : `<section class="win why${M && where ? " why-pair" : ""}${stack ? " stack" : ""}">${M ? `<div class="matters">${whyKey("Why it matters")}<h2>${esc(M.title)}</h2>${M.text}</div>` : ""}${where || ""}</section>`;
 /* Answer checker shared by the Intermediate and Formal blocks. k = {parts: [{label, ans}], hint} for typed numbers
    (commas, spaces and words ignored) or {choices: [{t, ok, why}], hint} for a pick. */
 function pzHTML(k){
@@ -1106,35 +1123,50 @@ function pzWire(c, k, o){
 // Step goals (Intermediate): done when the lab reports the value (k.publish). Remembered per lesson while the app is open.
 const goalDone = {};
 function goalMet(g, v){ if (v === undefined) return false; const d = g.dataset; return d.eq !== undefined ? +v === +d.eq : +v >= +(d.min || 1); }
-function goalTally(){ document.querySelectorAll("[data-goals]").forEach(w => { const gs = [...w.querySelectorAll(".goal")], n = gs.filter(g => g.classList.contains("done")).length, s = w.querySelector(".pz-sum b"); if (s) s.textContent = n; gs.forEach((g, i) => { const b = w.querySelector(`.pz-bar [data-i="${i}"]`); if (b) b.dataset.s = g.classList.contains("done") ? "solved" : ""; }); }); }
+function goalTally(){ document.querySelectorAll("[data-goals]").forEach(w => { const gs = [...w.querySelectorAll(".goal")], n = gs.filter(g => g.classList.contains("done")).length, s = w.querySelector(".pz-sum b"); if (s) s.textContent = n;
+  const md = w.querySelector(".moves-done"); if (md) md.hidden = n < gs.length; w.classList.toggle("moves-all", n === gs.length); gs.forEach((g, i) => { const b = w.querySelector(`.pz-bar [data-i="${i}"]`); if (b) b.dataset.s = g.classList.contains("done") ? "solved" : ""; }); }); }
 function goalCheck(key, v){ let hit = false; document.querySelectorAll(`.goal[data-key="${key}"]:not(.done)`).forEach(g => { if (!goalMet(g, v)) return;
   g.classList.add("done"); g.querySelector(".goal-box").textContent = "✓"; const a = g.querySelector(".goal-after"); if (a) a.hidden = false; (goalDone[g.dataset.topic] = goalDone[g.dataset.topic] || new Set()).add(g.dataset.i); hit = true; }); if (hit) goalTally(); }
 window.addEventListener("inquire:lab-value", e => goalCheck(e.detail.key, e.detail.value));
 /* Intermediate tab, blocks version (Counting first; docs/subjects/LAYERS.md → "Intermediate blocks"): a topic opts in with layers.build.task.
    The task (live number, jump links) → key cards from the legend (with Try chips) → the method as a numbered rail (why + Try per step)
    → why a method matters (large text) → the worked example, one line at a time → everyday tasks as tiles. */
+/* Intermediate "Everyday tasks". With build.exampleTask the worked example becomes the first task (open, its lines shown one at a time
+   with the build.predict questions); every task may carry lines (a worked solution revealed line by line) and a demo (its own picture). */
+function buildTasks(t){
+  const B = t.layers.build, E = t.example, X = B.exampleTask, tasks = B.tasks || t.life.map(x => ({ task: x }));
+  if (!X) return tasks;
+  return [{ task: X.task, guided: true, check: { q: E.prompt, parts: X.parts, hint: X.hint }, lines: E.lines, predict: B.predict, tip: B.exampleTip, answer: E.answer, figure: X.figure, link: X.link, demo: X.demo, try: B.exampleTry }, ...tasks];
+}
 function buildHTML(t, B, col){
   const chip = x => x && x.lab ? `<button type="button" class="dm-try" data-lab="${esc(x.lab)}"><span aria-hidden="true">▶</span>${esc(x.label)}</button>` : "";
-  const E = t.example, kt = B.keyTry || [], st = B.stepTry || [], sg = B.stepGoal || [], ng = sg.filter(Boolean).length, tasks = B.tasks || t.life.map(x => ({ task: x })), nt = tasks.filter(x => x.check).length;
+  const E = t.example, kt = B.keyTry || [], st = B.stepTry || [], sg = B.stepGoal || [], ng = sg.filter(Boolean).length, tasks = buildTasks(t), nt = tasks.filter(x => x.check).length;
   const bar = (n, label) => `<div class="pz-prog"><div class="pz-bar">${Array.from({ length: n }, (_, i) => `<span data-i="${i}"></span>`).join("")}</div><p class="pz-sum">${label} <b>0</b> of ${n}</p></div>`;
   let gi = 0;
   const goal = (g, i) => { const j = gi++; return `<div class="goal" data-key="${esc(g.key)}"${g.eq !== undefined ? ` data-eq="${g.eq}"` : ""}${g.min !== undefined ? ` data-min="${g.min}"` : ""} data-topic="${esc(S.topic || "")}" data-i="${j}">
-      <span class="goal-box" aria-hidden="true">○</span><div><p class="goal-t"><span>Your move</span>${g.text}</p>${g.after ? `<p class="goal-after" hidden>${g.after}</p>` : ""}</div><button type="button" class="pz-link" data-to-lab>Go to the model ↑</button></div>`; };
-  const task = (x, i) => x.check ? `<details class="tile tk" data-tk="${i}" data-state="open"><summary><span class="tile-role tile-task">${esc(x.task)}</span><span class="pz-badge">Solve it</span></summary>
-      <div class="tile-body"><p class="tk-q">${x.check.q}</p>${pzHTML({ ...x.check, showLabel: "Show the answer" })}
-      <div class="tk-after" hidden>${x.figure ? `<p class="tile-fig">${esc(x.figure)}</p>` : ""}${x.link ? `<p>${x.link}</p>` : ""}${chip(x.try)}</div></div></details>`
+      <span class="goal-box" aria-hidden="true">○</span><div><p class="goal-t"><span>Your move</span>${g.text}</p>${g.after ? `<p class="goal-after" hidden>${g.after}</p>` : ""}<div class="goal-acts"><button type="button" class="btn-s good goal-chk" data-goal-check>Check my move</button><button type="button" class="pz-link" data-to-lab>Go to the model ↑</button></div><p class="goal-fb" aria-live="polite"></p>${g.notYet ? `<template class="goal-ny">${g.notYet}</template>` : ""}</div></div>`; };
+  const wkHTML = (lines, i) => !lines.length ? "" : `<div class="tk-wk" data-wk="${i}"><p class="tk-wk-h">Work it out line by line</p>
+      <div class="tbl"><table>${lines.map(l => `<tr class="wk-row" hidden><td>${l.math}</td><td>${l.note || ""}</td></tr>`).join("")}</table></div>
+      <div class="wk-ask" hidden></div>
+      <div class="wk-bar"><button type="button" class="btn-s" data-wk-next>Show the first line</button><button type="button" class="btn-s ghost" data-wk-all>Show all</button><span class="wk-n">0 of ${lines.length}</span></div></div>`;
+  const task = (x, i) => x.check ? `<details class="tile tk${x.guided ? " tk-ex" : ""}" data-tk="${i}" data-state="open"${x.guided ? " open" : ""}><summary><span class="tile-role tile-task">${esc(x.task)}</span><span class="pz-badge">${x.guided ? "Worked example · solve it" : "Solve it"}</span></summary>
+      <div class="tile-body">${x.demo ? `<div class="dm tk-dm" data-spec="${esc(JSON.stringify(x.demo))}"></div>` : ""}<p class="tk-q">${x.check.q}</p>${x.tip ? `<p class="wk-tip">${x.tip}</p>` : ""}
+      <div class="tk-chk">${pzHTML({ ...x.check, showLabel: "Show the answer" })}</div>
+      ${wkHTML(x.lines || [], i)}
+      <div class="tk-after" hidden>${x.answer ? `<p class="tk-ans"><b>Answer.</b> ${x.answer}</p>` : ""}${x.figure ? `<p class="tile-fig">${esc(x.figure)}</p>` : ""}${x.link ? `<p>${x.link}</p>` : ""}${chip(x.try)}</div></div></details>`
     : `<details class="tile"><summary>${x.figure ? `<span class="tile-fig">${esc(x.figure)}</span>` : ""}<span class="tile-role tile-task">${esc(x.task)}</span></summary><div class="tile-body">${x.link ? `<p>${x.link}</p>` : ""}${chip(x.try)}</div></details>`;
+  const merged = !!B.exampleTask || !!(t.layers.concept && t.layers.concept.walk);   // the worked example lives elsewhere
   return `
     ${cqHTML(B.task, "The task")}
     <div><h2>${esc(B.keysTitle || "Reading the model")}</h2>${B.intro || ""}<div class="ideas keys">${t.legend.map((k, i) => `<div class="idea" style="--c:var(--${col(k.c)})"><div class="key-sym m">${k.sym}</div><h3>${esc(k.name)}</h3><p>${k.desc}</p>${chip(kt[i])}</div>`).join("")}</div></div>
-    <div id="b-method"${ng ? " data-goals" : ""}><h2>${esc(t.steps.title)}</h2>${ng ? `${B.goalsIntro ? `<p class="prac-tip">${B.goalsIntro}</p>` : ""}${bar(ng, "Moves done")}` : ""}<ol class="method">${t.steps.items.map((s, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div><p class="method-do">${s}</p>${B.stepWhy && B.stepWhy[i] ? `<p class="method-why"><span>Why</span>${B.stepWhy[i]}</p>` : ""}${sg[i] ? goal(sg[i], i) : chip(st[i])}</div></li>`).join("")}</ol></div>
-    ${mattersHTML(B.matters)}
-    <div id="b-example"><h2>${esc(B.exampleTitle || "Worked example")}</h2><div class="ex wk" data-wk="1">
+    <div id="b-method"${ng ? " data-goals" : ""}><h2>${esc(t.steps.title)}</h2>${ng ? `<div class="moves"><div class="moves-h"><span class="moves-k">Your moves</span>${bar(ng, "Moves done")}</div>${B.goalsIntro ? `<p class="prac-tip">${B.goalsIntro}</p>` : ""}<p class="moves-done" hidden>All ${ng} moves done ✓ You used every step of the method in the model.</p></div>` : ""}<ol class="method">${t.steps.items.map((s, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div><p class="method-do">${s}</p>${B.stepWhy && B.stepWhy[i] ? `<p class="method-why"><span>Why</span>${B.stepWhy[i]}</p>` : ""}${sg[i] ? goal(sg[i], i) : chip(st[i])}</div></li>`).join("")}</ol></div>
+    ${whyHTML(B.matters)}
+    ${merged ? "" : `<div id="b-example"><h2>${esc(B.exampleTitle || "Worked example")}</h2><div class="ex wk" data-wk="ex">
       <div class="prompt"><p class="eyebrow">Problem</p>${E.prompt}${B.exampleTip ? `<p class="wk-tip">${B.exampleTip}</p>` : ""}</div>
       <div class="tbl"><table>${E.lines.map((l, i) => `<tr class="wk-row"${i ? " hidden" : ""}><td>${l.math}</td><td>${esc(l.note || "")}</td></tr>`).join("")}</table></div>
       <div class="wk-ask" hidden></div>
       <div class="wk-bar"><button type="button" class="btn-s" data-wk-next>Show the next line</button><button type="button" class="btn-s ghost" data-wk-all>Show all</button><span class="wk-n">1 of ${E.lines.length}</span>${chip(B.exampleTry)}</div>
-      <div class="ans" hidden><b>Answer.</b> ${E.answer}</div></div></div>
+      <div class="ans" hidden><b>Answer.</b> ${E.answer}</div></div></div>`}
     <div id="b-tasks"${nt ? " data-tks" : ""}><h2>${esc(B.tasksTitle || "Everyday tasks")}</h2>${B.bridge || ""}${nt ? bar(nt, "Solved") : ""}<div class="tiles">${tasks.map(task).join("")}</div></div>`;
 }
 /* Formal tab, blocks version (Counting first; docs/subjects/LAYERS.md → "Formal blocks"): a topic opts in with layers.formal.question.
@@ -1154,38 +1186,82 @@ function formalHTML(t, F, col){
   return `
     ${cqHTML(F.question, F.eyebrow || "The definition", def ? `<div class="f-def">${def}</div>` : "")}
     ${(F.vocab || []).length ? `<div id="f-vocab"><h2>${esc(F.vocabTitle || "The vocabulary")}</h2>${F.vocabIntro || ""}<div class="ideas vocab">${F.vocab.map(v => `<div class="idea" style="--c:var(--${col(v.c || "c1")})"><div class="key-sym m">${v.sym}</div><h3>${esc(v.term)}</h3><p>${v.def}</p>${v.was ? `<p class="voc-was"><span>You met it as</span>${v.was}</p>` : ""}</div>`).join("")}</div>${full}</div>` : `<div><h2>Formal statement</h2><span class="voice f">College level</span>${t.formal}</div>`}
-    ${mattersHTML(F.matters)}
+    ${whyHTML(F.matters, `<div id="f-mist" class="stakes f-mist">${whyKey("Where it goes wrong", "red")}<h2>${esc(F.mistakesTitle || "Common mistakes")}</h2>${F.mistakesLead ? `<p class="stakes-lead">${F.mistakesLead}</p>` : ""}<div class="mist">${t.mistakes.map(m => `<div><div class="w">${m.wrong}</div><div class="f">${m.fix}</div></div>`).join("")}</div></div>`, true)}
     ${F.setup ? `<div id="f-setup"><h2>${esc(F.setup.title)}</h2>${F.setupIntro || ""}<ol class="method">${F.setup.items.map((x, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div><p class="method-do">${x.say}</p>${x.math ? `<div class="lyr-math">${x.math}</div>` : ""}</div></li>`).join("")}</ol></div>` : ""}
-    <div id="f-mist" class="stakes f-mist"><h2>${esc(F.mistakesTitle || "Common mistakes")}</h2>${F.mistakesLead ? `<p class="stakes-lead">${F.mistakesLead}</p>` : ""}<div class="mist">${t.mistakes.map(m => `<div><div class="w">${m.wrong}</div><div class="f">${m.fix}</div></div>`).join("")}</div></div>
     <div id="f-prac"><h2>${esc(F.practiceTitle || "Your turn")}</h2>${F.practiceTip ? `<p class="prac-tip">${F.practiceTip}</p>` : ""}
       ${K.length ? `<div class="pz-prog" data-pz-prog><div class="pz-bar">${P.map((_, i) => `<span data-i="${i}"></span>`).join("")}</div><p class="pz-sum">Solved <b>0</b> of ${P.length}</p></div>` : ""}
       <div class="prac" data-pzs>${P.map(card).join("")}</div>
       ${K.length ? `<p class="pz-done" hidden>${F.practiceDone || `All ${P.length} solved. You can write a count the formal way.`}</p>` : ""}</div>`;
 }
+/* Colour cues (Concept and Intermediate, Devon Oct 2026): the numbers of a situation glow amber (.hl-n) and its objects
+   violet (.hl-o) (<mark> elements, so no "x span" rule restyles them), so the eye finds "what is counted" and "how many" first. Objects come from layers.concept.objects /
+   layers.build.objects (word forms as written: "seat", "seats"); numbers are found automatically. Math (.m), inputs,
+   pictures, headings' numerals in tiles and the live figures are left alone. Re-run on content drawn later (predict boxes). */
+const HL_SKIP = "h2,label,.wk-q>span,.m,.math,svg,input,textarea,button,code,pre,.key-sym,.cq-num,.tile-fig,.tl-when,.pz-sum,.wk-n,.eyebrow,.why-k,.lyr-src,.idea-term,.tile-role,.pz-badge,.goal-t>span,.method-why>span,a,td:first-child,.hl-n,.hl-o,.lyr-tabs,template";
+function hlText(root){
+  const host = root && root.closest && root.closest("[data-hl]"); if (!host) return;
+  const objs = JSON.parse(host.dataset.hl || "[]").map(w => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).sort((a, b) => b.length - a.length);
+  const re = new RegExp(`(\\$?(?<![\\w.,])\\d[\\d,]*(?:\\.\\d+)?(?:st|nd|rd|th|%)?(?![\\w]))${objs.length ? `|\\b(${objs.join("|")})\\b` : ""}`, "gi");
+  const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => !n.nodeValue.trim() || (n.parentElement && n.parentElement.closest(HL_SKIP)) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const nodes = []; while (tw.nextNode()) nodes.push(tw.currentNode);
+  nodes.forEach(n => { const t = n.nodeValue; re.lastIndex = 0; if (!re.test(t)) return; re.lastIndex = 0;
+    const f = document.createDocumentFragment(); let i = 0, m;
+    while ((m = re.exec(t))) { if (m.index > i) f.appendChild(document.createTextNode(t.slice(i, m.index)));
+      const sp = document.createElement("mark"); sp.className = m[1] ? "hl-n" : "hl-o"; sp.textContent = m[0]; f.appendChild(sp); i = m.index + m[0].length; }
+    if (i < t.length) f.appendChild(document.createTextNode(t.slice(i)));
+    n.parentNode.replaceChild(f, n); });
+}
+/* A worked solution shown one line at a time. A line with a predict question waits for the learner (or "Just show the line").
+   o.skip() when a line is shown without being predicted, o.end() once every line is out. Returns {all()} to reveal everything. */
+function wireWk(w, PR, o){
+  const rows = [...w.querySelectorAll(".wk-row")], n = w.querySelector(".wk-n"), nx = w.querySelector("[data-wk-next]"), al = w.querySelector("[data-wk-all]"), ans = w.querySelector(".ans"), ask = w.querySelector(".wk-ask");
+  let ended = false;
+  const upd = () => { const k = rows.filter(r => !r.hidden).length, done = k === rows.length; if (o.onShow) o.onShow(k); n.textContent = `${k} of ${rows.length}`; if (ans) ans.hidden = !done; al.hidden = done; nx.textContent = k ? "Show the next line" : "Show the first line";
+    const q = done ? null : PR[k];
+    if (q && ask && ask.dataset.i !== String(k)) { ask.dataset.i = k; ask.innerHTML = `<p class="wk-q"><span>Predict line ${k + 1}</span>${q.ask}</p>${pzHTML({ ...q, showLabel: "Just show the line", showNow: true })}`;
+      hlText(ask); pzWire(ask, q, { rightText: q.right || "Right. Here is the line.", right: () => setTimeout(() => { rows[k].hidden = false; upd(); }, 650), show: () => { if (o.skip) o.skip(); rows[k].hidden = false; upd(); } }); }
+    if (ask) ask.hidden = !q; nx.hidden = done || !!q;
+    if (done && !ended) { ended = true; if (o.end) o.end(); } };
+  nx.onclick = () => { const r = rows.find(r => r.hidden); if (r) r.hidden = false; upd(); };
+  al.onclick = () => { if (o.skip) o.skip(); rows.forEach(r => r.hidden = false); upd(); };
+  upd();
+  return { all: () => { if (rows.some(r => r.hidden)) { rows.forEach(r => r.hidden = false); upd(); } } };
+}
+/* Brings the whole lab into view under the sticky topic bar (scrollIntoView alone left its top hidden behind the bar),
+   then pings its outline. Used by Try-it chips and "Go to the model" buttons. */
+function labIntoView(pg){
+  const lab = pg.querySelector(".lab"); if (!lab) return;
+  const bar = pg.querySelector(".topic-bar"), calm = document.documentElement.hasAttribute("data-reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches;
+  lab.style.scrollMarginTop = ((bar ? bar.offsetHeight : 0) + 16) + "px";
+  lab.scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "start" });
+  lab.classList.add("ping"); setTimeout(() => lab.classList.remove("ping"), 1200);
+}
 // Wires the Intermediate blocks after they are drawn: jump links and the one-line-at-a-time worked example.
 function wireBlocks(body, pg, t){
   body.querySelectorAll("[data-jump]").forEach(b => b.onclick = () => { const el = body.querySelector("#" + b.dataset.jump); if (el) el.scrollIntoView({ behavior: document.documentElement.hasAttribute("data-reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); });
-  body.querySelectorAll("[data-wk]").forEach(w => {
-    const rows = [...w.querySelectorAll(".wk-row")], n = w.querySelector(".wk-n"), nx = w.querySelector("[data-wk-next]"), al = w.querySelector("[data-wk-all]"), ans = w.querySelector(".ans");
-    const PR = (t && t.layers && t.layers.build && t.layers.build.predict) || [], ask = w.querySelector(".wk-ask");
-    const upd = () => { const k = rows.filter(r => !r.hidden).length; n.textContent = `${k} of ${rows.length}`; const done = k === rows.length; ans.hidden = !done; al.hidden = done;
-      const q = done ? null : PR[k];
-      if (q && ask && ask.dataset.i !== String(k)) { ask.dataset.i = k; ask.innerHTML = `<p class="wk-q"><span>Predict line ${k + 1}</span>${q.ask}</p>${pzHTML({ ...q, showLabel: "Just show the line", showNow: true })}`;
-        pzWire(ask, q, { rightText: q.right || "Right. Here is the line.", right: () => setTimeout(() => { rows[k].hidden = false; upd(); }, 650), show: () => { rows[k].hidden = false; upd(); } }); }
-      if (ask) ask.hidden = !q; nx.hidden = done || !!q; };
-    nx.onclick = () => { const r = rows.find(r => r.hidden); if (r) r.hidden = false; upd(); };
-    al.onclick = () => { rows.forEach(r => r.hidden = false); upd(); };
-    upd();
-  });
+  const PRx = (t && t.layers && t.layers.build && t.layers.build.predict) || [];
+  body.querySelectorAll('[data-wk="ex"]').forEach(w => wireWk(w, PRx, {}));
+  const WK = t && t.layers && t.layers.concept && t.layers.concept.walk;
+  body.querySelectorAll("[data-walk]").forEach(w => { const host = body.querySelector(".walk-dm"), F = WK.lines.map(l => l.frame);
+    wireWk(w, WK.predict || [], { onShow: k => { const d = host && host._demo; if (d && d.goto) d.goto(k ? (F[k - 1] == null ? 0 : F[k - 1]) : 0); } }); });   // stand-alone worked example (lessons without build.exampleTask)
   body.querySelectorAll(".goal").forEach(g => { if ((goalDone[g.dataset.topic] || new Set()).has(g.dataset.i) || goalMet(g, LabKit.value(g.dataset.key))) { g.classList.add("done"); g.querySelector(".goal-box").textContent = "✓"; const a = g.querySelector(".goal-after"); if (a) a.hidden = false; (goalDone[g.dataset.topic] = goalDone[g.dataset.topic] || new Set()).add(g.dataset.i); } });
-  body.querySelectorAll("[data-to-lab]").forEach(b => b.onclick = () => { const lab = pg.querySelector(".lab"); if (!lab) return; lab.scrollIntoView({ behavior: document.documentElement.hasAttribute("data-reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); lab.classList.add("ping"); setTimeout(() => lab.classList.remove("ping"), 1200); });
+  body.querySelectorAll("[data-to-lab]").forEach(b => b.onclick = () => labIntoView(pg));
+  body.querySelectorAll("[data-goal-check]").forEach(b => b.onclick = () => {   // "Check my move": confirms against what the model shows now
+    const g = b.closest(".goal"), fb = g.querySelector(".goal-fb"), v = LabKit.value(g.dataset.key);
+    if (g.classList.contains("done") || goalMet(g, v)) { goalCheck(g.dataset.key, v); fb.textContent = "Done ✓ The model shows it."; fb.dataset.k = "ok"; return; }
+    const ny = g.querySelector(".goal-ny");
+    fb.innerHTML = ny ? ny.innerHTML : g.dataset.eq !== undefined ? `Not yet. The model shows ${v === undefined ? "nothing for this yet" : esc(String(v))}; this move needs ${g.dataset.eq}.` : "Not yet. Make the move in the model above, then check again.";
+    fb.dataset.k = "no"; });
   goalTally();
-  const TK = (t && t.layers && t.layers.build && t.layers.build.tasks) || [];
+  const TK = t && t.layers && t.layers.build ? buildTasks(t) : [];
   body.querySelectorAll("[data-tks]").forEach(w => {
     const tiles = [...w.querySelectorAll(".tk")], tally = () => { const s = tiles.filter(x => x.dataset.state === "solved").length; w.querySelector(".pz-sum b").textContent = s; tiles.forEach((x, i) => { const b = w.querySelector(`.pz-bar [data-i="${i}"]`); if (b) b.dataset.s = x.dataset.state === "open" ? "" : x.dataset.state; }); };
-    tiles.forEach(x => { const k = TK[+x.dataset.tk].check, badge = x.querySelector(".pz-badge"), after = x.querySelector(".tk-after");
-      const fin = st => { after.hidden = false; x.dataset.state = st; badge.textContent = st === "solved" ? "Solved ✓" : "Answer shown"; tally(); };
-      pzWire(x, k, { rightText: "Correct.", right: () => fin(x.dataset.state === "shown" ? "shown" : "solved"), show: () => fin("shown") }); });
+    tiles.forEach(x => { const T = TK[+x.dataset.tk], badge = x.querySelector(".pz-badge"), after = x.querySelector(".tk-after"), wk = x.querySelector(".tk-wk");
+      let skipped = false, lines = null;
+      // The first way to finish counts: a right answer (or every prediction right) = solved; Show the answer / reading all lines = shown.
+      const fin = st => { if (x.dataset.state !== "open") return; after.hidden = false; x.dataset.state = st; badge.textContent = st === "solved" ? "Solved ✓" : "Answer shown"; tally(); if (lines) lines.all(); };
+      if (wk) lines = wireWk(wk, T.predict || [], { skip: () => { skipped = true; }, end: () => fin((T.predict || []).some(Boolean) && !skipped ? "solved" : "shown") });
+      pzWire(x.querySelector(".tk-chk"), T.check, { rightText: "Correct.", right: () => fin("solved"), show: () => fin("shown") }); });
     tally();
   });
   const K = t && t.layers && t.layers.formal && t.layers.formal.checks;
@@ -1297,9 +1373,10 @@ function renderTopic(main){
     <span class="sp"></span>
     ${st === "mastered" ? '<span class="pill m">Mastered</span>' : st === "avail" ? '<span class="pill a">Ready to study</span>' : '<span class="pill l">Prerequisites open</span>'}
     <button type="button" class="btn ${st === "mastered" ? "ghost" : "good"}" id="mast">${st === "mastered" ? "Unmark mastered" : "Mark as mastered"}</button>
+    ${next && st === "mastered" ? `<button type="button" class="btn next-btn" data-t="${next}" title="Next lesson: ${esc((T[next] || { title: next }).title)}"><span class="nb-k">Next lesson</span><span class="nb-t">${esc((T[next] || { title: next }).title)}</span> ▶</button>` : ""}
   </div>
   <div class="wrap">
-    ${layered ? `<div class="lyr-tabs" role="tablist" aria-label="Lesson level">${LAYERS.map(([k, name, sub], i) => `<button type="button" role="tab" class="lyr-tab" data-layer="${k}" aria-selected="${k === layer}" aria-controls="layer"><span class="lyr-n">${i + 1}</span><span><b>${name}</b><span>${sub}</span></span></button>`).join("")}</div>` : ""}
+    ${layered ? `<div class="lyr-tabs win" role="tablist" aria-label="Lesson level">${LAYERS.map(([k, name, sub], i) => `<button type="button" role="tab" class="lyr-tab" data-layer="${k}" aria-selected="${k === layer}" aria-controls="layer"><span class="lyr-n"><i>${i + 1}</i></span><span><b>${name}</b><span>${sub}</span></span></button>`).join("")}</div>` : ""}
     <header class="intro">
       <div><p class="eyebrow">${t.eyebrow}</p><h1>${t.hero}</h1>
         <p class="lede" id="lede">${layered ? ledeOf(layer) : t.lede}</p>
@@ -1317,7 +1394,8 @@ function renderTopic(main){
   pg.scrollTop = 0;
   $("#back", pg).onclick = () => go({ view: "math", field: f, topic: null });
   $("#navtoggle2", pg).onclick = () => main.parentElement.classList.toggle("navopen");
-  $("#mast", pg).onclick = () => { if (mastered.has(id)) mastered.delete(id); else mastered.add(id); saveMastered(); const y = pg.scrollTop; render(); const np = $(".topic"); if (np) np.scrollTop = y; };
+  $("#mast", pg).onclick = () => { if (mastered.has(id)) mastered.delete(id); else mastered.add(id); saveMastered(); const y = pg.scrollTop, now = mastered.has(id); render(); const np = $(".topic"); if (np) np.scrollTop = y;
+    const nb = np && np.querySelector(".next-btn"); if (nb && now) nb.classList.add("nudge"); };   // just mastered: the Next button glows once
   if (layered) {
     const body = $("#layer", pg);
     const draw = L => {
@@ -1325,12 +1403,13 @@ function renderTopic(main){
       pg.querySelectorAll(".lyr-tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.layer === L)));
       $("#lede", pg).innerHTML = ledeOf(L);
       body.innerHTML = layerHTML(t, L);
+      const hlObjs = L === "concept" || L === "build" ? (((t.layers[L] || {}).objects) || []) : null;   // colour cues on Concept and Intermediate
+      if (hlObjs && (t.layers.concept.objects || t.layers.build.objects)) { body.dataset.hl = JSON.stringify(hlObjs); hlText(body); const ld = $("#lede", pg); ld.dataset.hl = body.dataset.hl; hlText(ld); } else { delete body.dataset.hl; delete $("#lede", pg).dataset.hl; }
       if (window.InquireDemo) InquireDemo.mountAll(body);
       wireBlocks(body, pg, t);
       body.querySelectorAll("[data-lab]").forEach(b => b.onclick = () => {   // "Try it" chips: drive the lab, then bring it into view
         if (!LabKit.drive(b.dataset.lab)) return;
-        const lab = pg.querySelector(".lab"), calm = document.documentElement.hasAttribute("data-reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches;
-        lab.scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "start" }); lab.classList.add("ping"); setTimeout(() => lab.classList.remove("ping"), 1200);
+        labIntoView(pg);
       });
       body.querySelectorAll("[data-ans]").forEach(b => b.onclick = () => { const a = b.nextElementSibling; a.hidden = !a.hidden; b.textContent = a.hidden ? "Show answer" : "Hide answer"; });
       window.dispatchEvent(new CustomEvent("inquire:layer", { detail: { topic: id, layer: L } }));

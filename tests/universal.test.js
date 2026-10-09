@@ -76,6 +76,19 @@ test('InquireDemo: sweep, big and grow storyboards expand to the right frames', 
   eq(D.frames({ kind: 'dots', slots: 4, lit: 3 }).length, 1, 'a still picture is one frame');
   eq(D.frames({ frames: [{ lit: 2, say: 1 }, { lit: 2, say: 2, big: 2 }] }).map(f => f.big), [null, 2], 'explicit frames pass through');
 });
+test('InquireDemo range and tens: cells, elision and frames', () => {
+  const D = ctx.InquireDemo;
+  const c = D.rangeCells({ kind: 'range', from: 14, to: 22 });
+  eq(c.length, 9); eq(c[0].v, 14); eq(c[8].n, 9);
+  const e = D.rangeCells({ kind: 'range', from: 12, to: 40 });
+  eq(e.length, 10); eq(!!e[6].dots, true); eq(e[9].v, 40); eq(e[9].n, 29);
+  const r = D.rangeCells({ kind: 'range', from: 5, to: 45, step: 5 }); eq(r.length, 9); eq(r[8].v, 45);
+  const f = D.seqFrames({ kind: 'range', from: 14, to: 22, gaps: true });
+  eq(f.length, 12); eq(f[10].big, 9); eq(f[11].gaps, true);
+  const t = D.seqFrames({ kind: 'tens', n: 47 });
+  eq(t.length, 1 + 4 + 7 + 1); eq(t[4].tens, 4); eq(t[t.length - 1].big, 47);
+  eq(D.plural('day', 8), 'days'); eq(D.plural('stitch', 2), 'stitches'); eq(D.plural('seat', 1), 'seat');
+});
 test('InquireDemo.slotStates: lit, said, next and empty slots', () => {
   const D = ctx.InquireDemo;
   eq(D.slotStates({ lit: 3, say: 2, big: null, next: false }, 5).map(x => x.s + x.n), ['on1', 'say2', 'on', 'off', 'off'], 'numbers only up to the one being said');

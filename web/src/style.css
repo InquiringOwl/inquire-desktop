@@ -708,15 +708,22 @@ button.gl-chip.sm{cursor:pointer}
 .gx{font-family:var(--mono);font-size:.74em;font-weight:500;letter-spacing:-.08em;white-space:nowrap}
 
 /* three-layer lessons (Concept · Intermediate · Formal); tabs follow the theme (--frame) */
-.lyr-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 18px}
-.lyr-tab{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);background:var(--panel);border-radius:4px;color:var(--muted);min-width:0}
-.lyr-tab b{display:block;font:600 13px/1.2 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--text)}
-.lyr-tab span span{display:block;font-size:12.5px;line-height:1.35;margin-top:3px}
-.lyr-n{flex:none;width:24px;height:24px;display:grid;place-items:center;border:1px solid var(--line-2);font:600 12px/1 var(--mono);color:var(--muted)}
-.lyr-tab:hover{border-color:color-mix(in srgb,var(--frame) 50%,transparent)}
-.lyr-tab:focus-visible{outline:2px solid var(--frame);outline-offset:2px}
-.lyr-tab[aria-selected="true"]{border-color:var(--frame);background:color-mix(in srgb,var(--frame) 10%,var(--panel))}
-.lyr-tab[aria-selected="true"] b,.lyr-tab[aria-selected="true"] .lyr-n{color:var(--frame);border-color:var(--frame)}
+/* the tab strip is one console window (.win): three segments, the open one lit from below like a selected item */
+.lyr-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin:0 0 22px}
+.lyr-tab{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:flex;gap:14px;align-items:center;padding:14px 18px 15px;color:var(--muted);min-width:0;transition:background .2s}
+.lyr-tab+.lyr-tab{border-left:1px solid var(--line)}
+.lyr-tab b{display:block;font:600 13.5px/1.2 var(--ui);letter-spacing:.2em;text-transform:uppercase;color:var(--text)}
+.lyr-tab span span{display:block;font-size:12.5px;line-height:1.35;margin-top:4px}
+.lyr-n{flex:none;width:30px;height:30px;display:grid;place-items:center;border:1px solid var(--line-2);font:500 13px/1 var(--mono);color:var(--muted);background:linear-gradient(180deg,var(--panel-3),var(--panel-2));transform:rotate(45deg) scale(.82)}
+.lyr-n i{font-style:normal;transform:rotate(-45deg) scale(1.22)}
+.lyr-tab:hover{background:color-mix(in srgb,var(--frame) 6%,transparent)}
+.lyr-tab:hover b{color:var(--frame)}
+.lyr-tab:focus-visible{outline:2px solid var(--frame);outline-offset:-3px}
+.lyr-tab[aria-selected="true"]{background:linear-gradient(180deg,color-mix(in srgb,var(--frame) 4%,transparent),color-mix(in srgb,var(--frame) 15%,transparent))}
+.lyr-tab[aria-selected="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--frame);box-shadow:0 0 12px var(--frame)}
+.lyr-tab[aria-selected="true"] b{color:var(--frame);text-shadow:0 0 14px color-mix(in srgb,var(--frame) 45%,transparent)}
+.lyr-tab[aria-selected="true"] span span{color:var(--text)}
+.lyr-tab[aria-selected="true"] .lyr-n{color:var(--ink);border-color:var(--frame);background:var(--frame);box-shadow:0 0 12px color-mix(in srgb,var(--frame) 60%,transparent)}
 .lyr-body{display:grid;grid-template-columns:minmax(0,1fr);gap:36px;animation:vt-in .35s ease both}
 .lyr-body>*{min-width:0}
 .lyr-hist{border-left:2px solid var(--violet);padding:2px 0 2px 14px;max-width:72ch}
@@ -730,21 +737,48 @@ button.gl-chip.sm{cursor:pointer}
 .lyr-tasks li span{color:var(--muted)}
 .lyr-math{margin-top:6px;padding:8px 12px;border:1px solid var(--line);background:var(--panel);border-radius:4px;overflow-x:auto;font-size:16px}
 .lyr-ctx{margin:0;color:var(--frame)}
-@media (max-width:760px){.lyr-tabs{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.lyr-tab{padding:8px;gap:6px}.lyr-tab span span{display:none}.lyr-n{display:none}.lyr-tab b{font-size:11.5px;letter-spacing:.08em;text-align:center}.lyr-tab>span{width:100%}}
+@media (max-width:760px){.lyr-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.lyr-tab{padding:10px 8px;gap:6px}.lyr-tab span span{display:none}.lyr-n{display:none}.lyr-tab b{font-size:11.5px;letter-spacing:.08em;text-align:center}.lyr-tab>span{width:100%}}
 @media (prefers-reduced-motion:reduce){.lyr-body{animation:none}}
 /* Concept blocks (conceptHTML in app.js): question, idea cards with storyboards and "Try it" chips, stakes, tiles, timeline.
    Colour = meaning: card rules take the lab's c1/c2; chips and tab-like UI follow the theme (--frame). */
-.cq{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px 36px;align-items:center;padding:4px 0 6px}
-.cq h2{font-size:clamp(34px,5vw,52px);line-height:1.05;margin:0 0 10px}
+/* the question / task / definition: an Inquire console window (.win) with a header strip, the live figure in its own readout cell */
+.cq{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 1fr;align-items:stretch;overflow:hidden}
+.cq.nofig{grid-template-columns:minmax(0,1fr)}
+.cq>.win-h{grid-column:1/-1;color:var(--frame);letter-spacing:.24em}
+.cq-live{margin-left:auto;font:500 10.5px/1 var(--ui);letter-spacing:.18em;color:var(--muted);display:inline-flex;align-items:center;gap:7px}
+.cq-live::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:cq-pulse 2.4s ease-in-out infinite}
+@keyframes cq-pulse{50%{opacity:.35}}
+[data-reduce-motion] .cq-live::before{animation:none}
+@media (prefers-reduced-motion: reduce){.cq-live::before{animation:none}}
+.cq-main{padding:22px 28px 24px;min-width:0;background:radial-gradient(ellipse 70% 120% at 0% 0%,color-mix(in srgb,var(--frame) 7%,transparent),transparent 70%)}
+.cq h2{font-size:clamp(34px,5vw,52px);line-height:1.05;margin:0 0 12px}
 .cq p{max-width:56ch}
-.cq .eyebrow{margin-bottom:8px}
-.cq-fig{text-align:center;padding:0 8px}
-.cq-num{font:400 clamp(64px,9vw,96px)/1 var(--math);color:var(--amber)}
+.cq-fig{text-align:center;padding:20px 34px;min-width:190px;display:flex;flex-direction:column;justify-content:center;align-items:center;border-left:1px solid var(--line);
+  background:radial-gradient(circle at 50% 45%,rgba(242,184,75,.10),transparent 65%),linear-gradient(180deg,rgba(255,255,255,.02),transparent)}
+.cq-num{font:400 clamp(64px,9vw,96px)/1 var(--math);color:var(--amber);text-shadow:0 0 28px rgba(242,184,75,.28)}
 .cq-num.bump{animation:cq-bump .35s ease-out}
 @keyframes cq-bump{from{transform:scale(1.12);text-shadow:0 0 18px rgba(242,184,75,.55)}to{transform:none;text-shadow:none}}
 [data-reduce-motion] .cq-num.bump{animation:none}
 @media (prefers-reduced-motion: reduce){.cq-num.bump{animation:none}}
 .matters{max-width:68ch;padding:4px 0}
+/* Why it matters (+ where it goes wrong): one console panel. Concept = side by side with a red rule between, Formal = stacked */
+.why{display:grid;grid-template-columns:minmax(0,1fr);padding:24px 30px 26px;background:radial-gradient(ellipse 60% 90% at 0% 0%,color-mix(in srgb,var(--frame) 8%,transparent),transparent 70%),linear-gradient(180deg,var(--win-1),var(--win-2))}
+.why .matters{padding:0}
+.why:not(.why-pair){justify-self:start;width:min(100%,880px)}
+.why h2{margin-top:0}
+.why-k{display:flex;align-items:center;gap:9px;font:600 11px/1 var(--ui)!important;letter-spacing:.24em;text-transform:uppercase;color:var(--frame)!important;margin:0 0 12px!important}
+.why-k i{width:7px;height:7px;background:currentColor;box-shadow:0 0 9px currentColor;transform:rotate(45deg)}
+.why-k.red{color:var(--red)!important}
+.why .stakes{max-width:none}
+.why-pair:not(.stack){grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.why-pair:not(.stack) .matters{padding-right:32px}
+.why-pair:not(.stack) .stakes{border-left:2px solid var(--red);padding:0 0 0 32px}
+.notes .why-pair .matters p{font-size:clamp(18px,1.7vw,21px)}
+.why-pair:not(.stack) .stakes-list li{grid-template-columns:minmax(0,1fr);gap:2px}
+.why-pair.stack .stakes{border-left:none;border-top:2px solid var(--red);margin-top:26px;padding:24px 0 0}
+@media (max-width:1100px){.why-pair:not(.stack){grid-template-columns:minmax(0,1fr)}.why-pair:not(.stack) .matters{padding-right:0}
+  .why-pair:not(.stack) .stakes{border-left:none;box-shadow:none;border-top:2px solid var(--red);margin-top:24px;padding:22px 0 0}}
+@media (max-width:760px){.why{padding:18px 16px 20px}.cq-main{padding:16px 16px 18px}}
 .notes .matters p,.matters p{font:400 clamp(20px,2.2vw,24px)/1.5 var(--sans);color:var(--text);margin:0 0 .6em}
 .notes .matters p:last-child{margin-bottom:0}
 .cq-cap{font:500 12px/1.3 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:4px}
@@ -771,7 +805,7 @@ button.gl-chip.sm{cursor:pointer}
 .dm-try:hover{background:color-mix(in srgb,var(--frame) 12%,transparent)}
 .dm-try:focus-visible{outline:2px solid var(--frame);outline-offset:2px}
 .lab.ping{outline:2px solid var(--frame);outline-offset:3px;transition:outline-color 1.1s ease}
-.lab{scroll-margin-top:12px}
+.lab{scroll-margin-top:72px}
 .stakes{border-left:3px solid var(--pink);padding:2px 0 2px 18px;max-width:78ch}
 .notes .stakes-lead{color:var(--text);font-size:18px}
 .stakes-list{list-style:none;margin:0 0 6px;padding:0;display:grid;gap:8px}
@@ -851,7 +885,7 @@ button.gl-chip.sm{cursor:pointer}
 .pz-link{all:unset;cursor:pointer;color:var(--frame);font:500 13px/1.3 var(--sans);border-bottom:1px solid color-mix(in srgb,var(--frame) 40%,transparent)}
 .pz-link[hidden]{display:none}.pz-link:focus-visible{outline:2px solid var(--frame);outline-offset:2px}
 .notes .pz-done{color:var(--green);font-size:18px;margin:14px 0 0}
-.goal{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;margin:4px 0 2px;padding:10px 12px;border:1px dashed color-mix(in srgb,var(--frame) 45%,var(--line));border-radius:6px;background:color-mix(in srgb,var(--frame) 5%,transparent);transition:border-color .3s,background .3s}
+.goal{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;margin:4px 0 2px;padding:10px 12px;border:1px dashed color-mix(in srgb,var(--frame) 45%,var(--line));border-radius:6px;background:color-mix(in srgb,var(--frame) 5%,transparent);transition:border-color .3s,background .3s}
 .goal-box{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--frame);color:var(--frame);font:600 13px/1 var(--ui)}
 .goal.done{border-style:solid;border-color:rgba(123,216,143,.55);background:rgba(123,216,143,.06)}
 .goal.done .goal-box{border-color:var(--green);background:var(--green);color:var(--ink)}
@@ -859,7 +893,7 @@ button.gl-chip.sm{cursor:pointer}
 .goal-t span{display:block;font:600 10.5px/1 var(--ui);letter-spacing:.16em;text-transform:uppercase;color:var(--frame);margin-bottom:5px}
 .goal.done .goal-t span{color:var(--green)}
 .notes .goal-after{margin:6px 0 0;color:var(--green);font-size:14.5px}
-.goal [data-to-lab]{align-self:center;white-space:nowrap}
+.goal [data-to-lab]{white-space:nowrap}
 .goal.done [data-to-lab]{display:none}
 .wk-ask{padding:12px 16px;border-top:1px solid color-mix(in srgb,var(--line) 60%,transparent);background:color-mix(in srgb,var(--frame) 5%,transparent);display:grid;gap:8px}
 .notes .wk-q{margin:0;color:var(--text);font-size:16px}
@@ -880,11 +914,112 @@ button.gl-chip.sm{cursor:pointer}
 .notes .tk-after .tile-fig{margin:0 0 4px;font:400 26px/1.15 var(--math);color:var(--amber)}
 .tk[open]{grid-column:1/-1}
 .tk[open] .tile-body{max-width:72ch}
-@media (max-width:760px){.goal{grid-template-columns:24px minmax(0,1fr)}.goal [data-to-lab]{grid-column:2;justify-self:start}}
+@media (max-width:760px){.goal{grid-template-columns:24px minmax(0,1fr)}}
 .notes .tile-task{font:500 15px/1.35 var(--sans);letter-spacing:0;text-transform:none;color:var(--text);padding-right:22px}
 @media (max-width:760px){.method li{grid-template-columns:32px minmax(0,1fr);gap:12px}.method-n{width:30px;height:30px;font-size:14px}.method li:not(:last-child)::before{left:15px;top:32px}.wk-bar .dm-try{margin-left:0}}
-@media (max-width:760px){.cq{grid-template-columns:minmax(0,1fr)}.cq-fig{text-align:left;padding:0}.stakes-list li,.tl li{grid-template-columns:minmax(0,1fr);gap:2px}.tile summary::after{margin-top:0;position:absolute;right:14px;top:12px}.tile{position:relative}}
+@media (max-width:760px){.cq{grid-template-columns:minmax(0,1fr)}.cq-fig{flex-direction:row;gap:14px;justify-content:flex-start;padding:12px 16px;border-left:none;border-top:1px solid var(--line);min-width:0}.cq-num{font-size:52px}.stakes-list li,.tl li{grid-template-columns:minmax(0,1fr);gap:2px}.tile summary::after{margin-top:0;position:absolute;right:14px;top:12px}.tile{position:relative}}
 @media (prefers-reduced-motion:reduce){.dm-c,.dm-big,.lab.ping{transition:none}}
 [data-reduce-motion] .dm-c,[data-reduce-motion] .dm-big,[data-reduce-motion] .lab.ping{transition:none}
 
 [data-reduce-motion] .lyr-body{animation:none}
+
+/* ---- 1.18.4: livelier lesson headings, Why panels, Next button, task visuals ---- */
+/* section headings in layered lessons: a lit diamond, the title, then a fading rule in the theme colour */
+.lyr-body h2{display:flex;align-items:center;gap:12px;color:#F4F7FC;text-shadow:0 0 22px color-mix(in srgb,var(--frame) 22%,transparent)}
+.lyr-body h2::before{content:"";flex:none;width:9px;height:9px;transform:rotate(45deg);border:1.5px solid var(--frame);background:color-mix(in srgb,var(--frame) 35%,transparent);box-shadow:0 0 10px color-mix(in srgb,var(--frame) 70%,transparent)}
+.lyr-body h2::after{content:"";flex:1 1 40px;min-width:40px;height:1px;background:linear-gradient(90deg,color-mix(in srgb,var(--frame) 60%,transparent),transparent 85%)}
+.lyr-body .cq h2,.lyr-body .why h2{display:block;text-shadow:none}
+.lyr-body .cq h2::before,.lyr-body .cq h2::after,.lyr-body .why h2::before,.lyr-body .why h2::after{content:none}
+/* Why panel: a lit console screen. Big serif headline, the first line as a lead, key words glowing in the theme colour,
+   the "is counting…" facts as chips, a large faint glyph in the corner. Where-it-goes-wrong keeps its red side. */
+.why{overflow:hidden;background:
+  radial-gradient(ellipse 55% 85% at 0% 0%,color-mix(in srgb,var(--frame) 16%,transparent),transparent 70%),
+  radial-gradient(ellipse 40% 70% at 100% 100%,color-mix(in srgb,var(--frame) 7%,transparent),transparent 70%),
+  repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px),
+  linear-gradient(180deg,var(--win-1),var(--win-2))}
+.why .matters{position:relative}
+.why .matters h2{font-size:clamp(28px,3vw,36px);line-height:1.15;margin:0 0 14px;color:#F4F7FC}
+.notes .why .matters p:first-of-type{font:400 clamp(21px,2vw,25px)/1.45 var(--math);color:var(--text)}
+.notes .why .matters p{color:color-mix(in srgb,var(--text) 88%,var(--muted))}
+.notes .why .matters b{font-weight:600;color:var(--frame);text-shadow:0 0 14px color-mix(in srgb,var(--frame) 45%,transparent)}
+.why-chips{list-style:none;margin:2px 0 16px;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.why-chips li{font:500 14.5px/1.3 var(--sans);color:var(--text);padding:8px 13px;border:1px solid color-mix(in srgb,var(--frame) 40%,var(--line));background:color-mix(in srgb,var(--frame) 9%,var(--panel));border-radius:3px;position:relative}
+.why-chips li::before{content:"";position:absolute;left:-1px;top:-1px;width:6px;height:6px;border-left:2px solid var(--frame);border-top:2px solid var(--frame)}
+.notes .why-chips b{text-shadow:none}
+.why .stakes h2{font-size:clamp(26px,2.6vw,32px);line-height:1.15;margin:0 0 12px}
+.why .stakes-list li{padding:8px 0 8px 14px;border-left:2px solid color-mix(in srgb,var(--red) 35%,transparent);background:linear-gradient(90deg,color-mix(in srgb,var(--red) 7%,transparent),transparent 70%)}
+.why .stakes-list b{color:color-mix(in srgb,var(--red) 30%,var(--text))}
+/* Next lesson, beside Mark as mastered */
+/* Next lesson: shown only once the lesson is mastered. Gold, like a "ready" node on the tree: the next step is open */
+.next-btn{display:inline-flex;align-items:center;gap:10px;max-width:440px;color:#1A1204;border:1px solid #FFD98A;background:linear-gradient(180deg,#FFD27A,#F2B84B 55%,#D99A2B);
+  box-shadow:0 0 14px rgba(242,184,75,.45),inset 0 1px 0 rgba(255,255,255,.45);text-shadow:none;font-weight:700}
+.next-btn:hover{background:linear-gradient(180deg,#FFE09A,#F7C562 55%,#E3A73A);box-shadow:0 0 22px rgba(242,184,75,.7),inset 0 1px 0 rgba(255,255,255,.5)}
+.next-btn:focus-visible{outline:2px solid #FFE3A3;outline-offset:2px}
+.next-btn .nb-k{opacity:.7;font-weight:600;white-space:nowrap;flex:none}
+.next-btn .nb-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.next-btn{animation:nb-in .45s cubic-bezier(.2,.7,.2,1)}
+.next-btn.nudge{animation:nb-in .45s cubic-bezier(.2,.7,.2,1),nb-nudge 1.6s ease-out .45s 3}
+@keyframes nb-in{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+@keyframes nb-nudge{0%{box-shadow:0 0 0 0 rgba(242,184,75,.75),0 0 14px rgba(242,184,75,.45)}70%{box-shadow:0 0 0 12px rgba(242,184,75,0),0 0 14px rgba(242,184,75,.45)}100%{box-shadow:0 0 14px rgba(242,184,75,.45)}}
+[data-reduce-motion] .next-btn,[data-reduce-motion] .next-btn.nudge{animation:none}
+@media (prefers-reduced-motion:reduce){.next-btn,.next-btn.nudge{animation:none}}
+@media (max-width:760px){.next-btn .nb-t{display:none}}
+/* Everyday tasks: own picture, answer, then the worked solution one line at a time */
+.tk-dm{margin:2px 0 4px;padding:10px 40px 6px 12px;border:1px solid var(--line);border-radius:4px;background:var(--stage-sky,var(--panel))}
+.tk-dm svg{max-height:84px}
+.tk-ex{border-color:color-mix(in srgb,var(--frame) 45%,var(--line))}
+.tk-ex .pz-badge{color:var(--frame)}
+.tk-wk{border:1px solid var(--line);border-radius:4px;background:var(--panel);overflow:hidden}
+.tk-wk-h{max-width:none!important;margin:0;padding:9px 14px;font:600 11px/1 var(--ui)!important;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)!important;border-bottom:1px solid var(--line)}
+.tk-wk table{width:100%;border-collapse:collapse}
+.tk-wk td{padding:8px 14px;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent);vertical-align:top}
+.tk-wk td:first-child{font:400 18px/1.5 var(--math);white-space:nowrap;width:1%;color:var(--text)}
+.tk-wk td:last-child{color:var(--muted);font-size:14px}
+.tk-wk .tbl{overflow-x:auto}
+.tk-wk .wk-ask{padding:10px 14px;border-top:1px solid var(--line)}
+.tk-wk [hidden]{display:none!important}
+/* an open task on a wide screen: picture, question and answer on the left, the worked lines on the right */
+@media (min-width:1000px){.tk[open] .tile-body{max-width:none;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:22px;align-items:start}
+  .tk[open] .tile-body>*{grid-column:1}.tk[open] .tile-body>.tk-wk{grid-column:2;grid-row:1/span 8}.tk[open] .tile-body>.tk-after{grid-column:1/-1}}
+.notes .tk-ans{margin:0 0 6px;color:var(--text)}.tk-ans b{color:var(--green)}
+@media (max-width:760px){.tk-wk td:first-child{white-space:normal;width:auto;min-width:40%}}
+/* range / tens storyboards (demo.js) */
+.dq-cell{fill:var(--panel-2);stroke:var(--line-2);stroke-width:1.2;transition:fill .25s,stroke .25s}
+.dq-cell[data-s=on]{fill:color-mix(in srgb,var(--amber) 22%,var(--panel-2));stroke:var(--amber)}
+.dq-cell[data-s=say]{fill:color-mix(in srgb,var(--amber) 45%,var(--panel-2));stroke:#FFE3A3;stroke-width:2}
+.dq-cell[data-s=dim]{fill:var(--panel-2);stroke:color-mix(in srgb,var(--amber) 40%,var(--line-2))}
+.dq-v{font:500 12px var(--mono);fill:var(--text);text-anchor:middle;dominant-baseline:middle;pointer-events:none}
+.dq-n{font:600 13px var(--mono);fill:var(--amber);text-anchor:middle;pointer-events:none}
+.dq-dots{font:500 16px var(--mono);fill:var(--muted);text-anchor:middle;dominant-baseline:middle}
+.dq-gap{fill:none;stroke:var(--cyan);stroke-width:1.6;transition:opacity .3s}
+.dq-big{text-anchor:start}.dq-big[data-k=gap]{fill:var(--cyan)}
+.dq-cap{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;fill:var(--muted);transition:opacity .3s}
+.dq-frame{fill:none;stroke:var(--line-2);stroke-width:1}
+.dq-d{stroke-width:1}
+/* colour cues (Concept + Intermediate): numbers amber, the counted objects violet. Fixed content colours, never themed */
+mark.hl-n,mark.hl-o{background:none;padding:0;border:0;display:inline;font-size:inherit;letter-spacing:inherit;text-transform:inherit;margin:0}
+.hl-n{color:var(--amber);font-weight:600;font-variant-numeric:tabular-nums;text-shadow:0 0 12px rgba(242,184,75,.28)}
+.hl-o{color:#C9B8FF;font-weight:500;text-decoration:underline;text-decoration-color:rgba(180,155,255,.45);text-decoration-thickness:1.5px;text-underline-offset:3px}
+h2 .hl-n,h3 .hl-n{text-shadow:none}
+/* Concept "count it together": the situation and its picture on the left, the lines on the right */
+.walk-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:22px;align-items:start}
+.notes .walk-lead{color:var(--text);font-size:17px;max-width:62ch}
+.walk-l{position:sticky;top:70px;padding:16px 18px;border:1px solid color-mix(in srgb,var(--frame) 40%,var(--line));border-radius:4px;background:linear-gradient(180deg,var(--win-1),var(--win-2))}
+.notes .walk-q{color:var(--text);font-size:18px;line-height:1.5;margin:0 0 12px}
+.walk-dm{padding:10px 12px 6px;border:1px solid var(--line);border-radius:4px;background:var(--stage-sky,var(--panel));margin:0}
+.walk-dm svg{max-height:110px}
+.walk-wk .ans{padding:12px 14px;background:#162418;border-top:1px solid rgba(123,216,143,.35);color:var(--text)}.walk-wk .ans b{color:var(--green)}
+.walk-wk td:last-child{color:var(--text);font-size:15px}
+@media (max-width:900px){.walk-grid{grid-template-columns:minmax(0,1fr)}.walk-l{position:static}}
+/* Your moves (Intermediate method): a clear tracker + Check my move on each goal */
+.moves{border:1px solid color-mix(in srgb,var(--frame) 40%,var(--line));background:color-mix(in srgb,var(--frame) 6%,var(--panel));border-radius:4px;padding:12px 16px;margin:0 0 18px;max-width:78ch}
+.moves-h{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.moves-k{font:600 12px/1 var(--ui);letter-spacing:.2em;text-transform:uppercase;color:var(--frame)}
+.moves .pz-prog{margin:0}.moves .pz-bar span{width:54px;height:8px}
+.moves .pz-sum{font-size:14px;color:var(--text)}
+.notes .moves .prac-tip{margin:10px 0 0;font-size:15px}
+.notes .moves-done{margin:10px 0 0;color:var(--green);font:600 14px/1.4 var(--ui);letter-spacing:.06em}
+.moves-all .moves{border-color:rgba(123,216,143,.6)}
+.goal-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:8px}
+.notes .goal-fb{margin:6px 0 0;font-size:14px}.goal-fb[data-k=ok]{color:var(--green)}.goal-fb[data-k=no]{color:var(--amber)}
+.goal.done .goal-chk{display:none}

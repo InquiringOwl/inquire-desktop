@@ -716,15 +716,22 @@ button.gl-chip.sm{cursor:pointer}
 .gx{font-family:var(--mono);font-size:.74em;font-weight:500;letter-spacing:-.08em;white-space:nowrap}
 
 /* three-layer lessons (Concept · Intermediate · Formal); tabs follow the theme (--frame) */
-.lyr-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 18px}
-.lyr-tab{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);background:var(--panel);border-radius:4px;color:var(--muted);min-width:0}
-.lyr-tab b{display:block;font:600 13px/1.2 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--text)}
-.lyr-tab span span{display:block;font-size:12.5px;line-height:1.35;margin-top:3px}
-.lyr-n{flex:none;width:24px;height:24px;display:grid;place-items:center;border:1px solid var(--line-2);font:600 12px/1 var(--mono);color:var(--muted)}
-.lyr-tab:hover{border-color:color-mix(in srgb,var(--frame) 50%,transparent)}
-.lyr-tab:focus-visible{outline:2px solid var(--frame);outline-offset:2px}
-.lyr-tab[aria-selected="true"]{border-color:var(--frame);background:color-mix(in srgb,var(--frame) 10%,var(--panel))}
-.lyr-tab[aria-selected="true"] b,.lyr-tab[aria-selected="true"] .lyr-n{color:var(--frame);border-color:var(--frame)}
+/* the tab strip is one console window (.win): three segments, the open one lit from below like a selected item */
+.lyr-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin:0 0 22px}
+.lyr-tab{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:flex;gap:14px;align-items:center;padding:14px 18px 15px;color:var(--muted);min-width:0;transition:background .2s}
+.lyr-tab+.lyr-tab{border-left:1px solid var(--line)}
+.lyr-tab b{display:block;font:600 13.5px/1.2 var(--ui);letter-spacing:.2em;text-transform:uppercase;color:var(--text)}
+.lyr-tab span span{display:block;font-size:12.5px;line-height:1.35;margin-top:4px}
+.lyr-n{flex:none;width:30px;height:30px;display:grid;place-items:center;border:1px solid var(--line-2);font:500 13px/1 var(--mono);color:var(--muted);background:linear-gradient(180deg,var(--panel-3),var(--panel-2));transform:rotate(45deg) scale(.82)}
+.lyr-n i{font-style:normal;transform:rotate(-45deg) scale(1.22)}
+.lyr-tab:hover{background:color-mix(in srgb,var(--frame) 6%,transparent)}
+.lyr-tab:hover b{color:var(--frame)}
+.lyr-tab:focus-visible{outline:2px solid var(--frame);outline-offset:-3px}
+.lyr-tab[aria-selected="true"]{background:linear-gradient(180deg,color-mix(in srgb,var(--frame) 4%,transparent),color-mix(in srgb,var(--frame) 15%,transparent))}
+.lyr-tab[aria-selected="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--frame);box-shadow:0 0 12px var(--frame)}
+.lyr-tab[aria-selected="true"] b{color:var(--frame);text-shadow:0 0 14px color-mix(in srgb,var(--frame) 45%,transparent)}
+.lyr-tab[aria-selected="true"] span span{color:var(--text)}
+.lyr-tab[aria-selected="true"] .lyr-n{color:var(--ink);border-color:var(--frame);background:var(--frame);box-shadow:0 0 12px color-mix(in srgb,var(--frame) 60%,transparent)}
 .lyr-body{display:grid;grid-template-columns:minmax(0,1fr);gap:36px;animation:vt-in .35s ease both}
 .lyr-body>*{min-width:0}
 .lyr-hist{border-left:2px solid var(--violet);padding:2px 0 2px 14px;max-width:72ch}
@@ -738,21 +745,48 @@ button.gl-chip.sm{cursor:pointer}
 .lyr-tasks li span{color:var(--muted)}
 .lyr-math{margin-top:6px;padding:8px 12px;border:1px solid var(--line);background:var(--panel);border-radius:4px;overflow-x:auto;font-size:16px}
 .lyr-ctx{margin:0;color:var(--frame)}
-@media (max-width:760px){.lyr-tabs{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.lyr-tab{padding:8px;gap:6px}.lyr-tab span span{display:none}.lyr-n{display:none}.lyr-tab b{font-size:11.5px;letter-spacing:.08em;text-align:center}.lyr-tab>span{width:100%}}
+@media (max-width:760px){.lyr-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.lyr-tab{padding:10px 8px;gap:6px}.lyr-tab span span{display:none}.lyr-n{display:none}.lyr-tab b{font-size:11.5px;letter-spacing:.08em;text-align:center}.lyr-tab>span{width:100%}}
 @media (prefers-reduced-motion:reduce){.lyr-body{animation:none}}
 /* Concept blocks (conceptHTML in app.js): question, idea cards with storyboards and "Try it" chips, stakes, tiles, timeline.
    Colour = meaning: card rules take the lab's c1/c2; chips and tab-like UI follow the theme (--frame). */
-.cq{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px 36px;align-items:center;padding:4px 0 6px}
-.cq h2{font-size:clamp(34px,5vw,52px);line-height:1.05;margin:0 0 10px}
+/* the question / task / definition: an Inquire console window (.win) with a header strip, the live figure in its own readout cell */
+.cq{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 1fr;align-items:stretch;overflow:hidden}
+.cq.nofig{grid-template-columns:minmax(0,1fr)}
+.cq>.win-h{grid-column:1/-1;color:var(--frame);letter-spacing:.24em}
+.cq-live{margin-left:auto;font:500 10.5px/1 var(--ui);letter-spacing:.18em;color:var(--muted);display:inline-flex;align-items:center;gap:7px}
+.cq-live::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:cq-pulse 2.4s ease-in-out infinite}
+@keyframes cq-pulse{50%{opacity:.35}}
+[data-reduce-motion] .cq-live::before{animation:none}
+@media (prefers-reduced-motion: reduce){.cq-live::before{animation:none}}
+.cq-main{padding:22px 28px 24px;min-width:0;background:radial-gradient(ellipse 70% 120% at 0% 0%,color-mix(in srgb,var(--frame) 7%,transparent),transparent 70%)}
+.cq h2{font-size:clamp(34px,5vw,52px);line-height:1.05;margin:0 0 12px}
 .cq p{max-width:56ch}
-.cq .eyebrow{margin-bottom:8px}
-.cq-fig{text-align:center;padding:0 8px}
-.cq-num{font:400 clamp(64px,9vw,96px)/1 var(--math);color:var(--amber)}
+.cq-fig{text-align:center;padding:20px 34px;min-width:190px;display:flex;flex-direction:column;justify-content:center;align-items:center;border-left:1px solid var(--line);
+  background:radial-gradient(circle at 50% 45%,rgba(242,184,75,.10),transparent 65%),linear-gradient(180deg,rgba(255,255,255,.02),transparent)}
+.cq-num{font:400 clamp(64px,9vw,96px)/1 var(--math);color:var(--amber);text-shadow:0 0 28px rgba(242,184,75,.28)}
 .cq-num.bump{animation:cq-bump .35s ease-out}
 @keyframes cq-bump{from{transform:scale(1.12);text-shadow:0 0 18px rgba(242,184,75,.55)}to{transform:none;text-shadow:none}}
 [data-reduce-motion] .cq-num.bump{animation:none}
 @media (prefers-reduced-motion: reduce){.cq-num.bump{animation:none}}
 .matters{max-width:68ch;padding:4px 0}
+/* Why it matters (+ where it goes wrong): one console panel. Concept = side by side with a red rule between, Formal = stacked */
+.why{display:grid;grid-template-columns:minmax(0,1fr);padding:24px 30px 26px;background:radial-gradient(ellipse 60% 90% at 0% 0%,color-mix(in srgb,var(--frame) 8%,transparent),transparent 70%),linear-gradient(180deg,var(--win-1),var(--win-2))}
+.why .matters{padding:0}
+.why:not(.why-pair){justify-self:start;width:min(100%,880px)}
+.why h2{margin-top:0}
+.why-k{display:flex;align-items:center;gap:9px;font:600 11px/1 var(--ui)!important;letter-spacing:.24em;text-transform:uppercase;color:var(--frame)!important;margin:0 0 12px!important}
+.why-k i{width:7px;height:7px;background:currentColor;box-shadow:0 0 9px currentColor;transform:rotate(45deg)}
+.why-k.red{color:var(--red)!important}
+.why .stakes{max-width:none}
+.why-pair:not(.stack){grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.why-pair:not(.stack) .matters{padding-right:32px}
+.why-pair:not(.stack) .stakes{border-left:2px solid var(--red);padding:0 0 0 32px}
+.notes .why-pair .matters p{font-size:clamp(18px,1.7vw,21px)}
+.why-pair:not(.stack) .stakes-list li{grid-template-columns:minmax(0,1fr);gap:2px}
+.why-pair.stack .stakes{border-left:none;border-top:2px solid var(--red);margin-top:26px;padding:24px 0 0}
+@media (max-width:1100px){.why-pair:not(.stack){grid-template-columns:minmax(0,1fr)}.why-pair:not(.stack) .matters{padding-right:0}
+  .why-pair:not(.stack) .stakes{border-left:none;box-shadow:none;border-top:2px solid var(--red);margin-top:24px;padding:22px 0 0}}
+@media (max-width:760px){.why{padding:18px 16px 20px}.cq-main{padding:16px 16px 18px}}
 .notes .matters p,.matters p{font:400 clamp(20px,2.2vw,24px)/1.5 var(--sans);color:var(--text);margin:0 0 .6em}
 .notes .matters p:last-child{margin-bottom:0}
 .cq-cap{font:500 12px/1.3 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:4px}
@@ -779,7 +813,7 @@ button.gl-chip.sm{cursor:pointer}
 .dm-try:hover{background:color-mix(in srgb,var(--frame) 12%,transparent)}
 .dm-try:focus-visible{outline:2px solid var(--frame);outline-offset:2px}
 .lab.ping{outline:2px solid var(--frame);outline-offset:3px;transition:outline-color 1.1s ease}
-.lab{scroll-margin-top:12px}
+.lab{scroll-margin-top:72px}
 .stakes{border-left:3px solid var(--pink);padding:2px 0 2px 18px;max-width:78ch}
 .notes .stakes-lead{color:var(--text);font-size:18px}
 .stakes-list{list-style:none;margin:0 0 6px;padding:0;display:grid;gap:8px}
@@ -859,7 +893,7 @@ button.gl-chip.sm{cursor:pointer}
 .pz-link{all:unset;cursor:pointer;color:var(--frame);font:500 13px/1.3 var(--sans);border-bottom:1px solid color-mix(in srgb,var(--frame) 40%,transparent)}
 .pz-link[hidden]{display:none}.pz-link:focus-visible{outline:2px solid var(--frame);outline-offset:2px}
 .notes .pz-done{color:var(--green);font-size:18px;margin:14px 0 0}
-.goal{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;margin:4px 0 2px;padding:10px 12px;border:1px dashed color-mix(in srgb,var(--frame) 45%,var(--line));border-radius:6px;background:color-mix(in srgb,var(--frame) 5%,transparent);transition:border-color .3s,background .3s}
+.goal{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;margin:4px 0 2px;padding:10px 12px;border:1px dashed color-mix(in srgb,var(--frame) 45%,var(--line));border-radius:6px;background:color-mix(in srgb,var(--frame) 5%,transparent);transition:border-color .3s,background .3s}
 .goal-box{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--frame);color:var(--frame);font:600 13px/1 var(--ui)}
 .goal.done{border-style:solid;border-color:rgba(123,216,143,.55);background:rgba(123,216,143,.06)}
 .goal.done .goal-box{border-color:var(--green);background:var(--green);color:var(--ink)}
@@ -867,7 +901,7 @@ button.gl-chip.sm{cursor:pointer}
 .goal-t span{display:block;font:600 10.5px/1 var(--ui);letter-spacing:.16em;text-transform:uppercase;color:var(--frame);margin-bottom:5px}
 .goal.done .goal-t span{color:var(--green)}
 .notes .goal-after{margin:6px 0 0;color:var(--green);font-size:14.5px}
-.goal [data-to-lab]{align-self:center;white-space:nowrap}
+.goal [data-to-lab]{white-space:nowrap}
 .goal.done [data-to-lab]{display:none}
 .wk-ask{padding:12px 16px;border-top:1px solid color-mix(in srgb,var(--line) 60%,transparent);background:color-mix(in srgb,var(--frame) 5%,transparent);display:grid;gap:8px}
 .notes .wk-q{margin:0;color:var(--text);font-size:16px}
@@ -888,14 +922,115 @@ button.gl-chip.sm{cursor:pointer}
 .notes .tk-after .tile-fig{margin:0 0 4px;font:400 26px/1.15 var(--math);color:var(--amber)}
 .tk[open]{grid-column:1/-1}
 .tk[open] .tile-body{max-width:72ch}
-@media (max-width:760px){.goal{grid-template-columns:24px minmax(0,1fr)}.goal [data-to-lab]{grid-column:2;justify-self:start}}
+@media (max-width:760px){.goal{grid-template-columns:24px minmax(0,1fr)}}
 .notes .tile-task{font:500 15px/1.35 var(--sans);letter-spacing:0;text-transform:none;color:var(--text);padding-right:22px}
 @media (max-width:760px){.method li{grid-template-columns:32px minmax(0,1fr);gap:12px}.method-n{width:30px;height:30px;font-size:14px}.method li:not(:last-child)::before{left:15px;top:32px}.wk-bar .dm-try{margin-left:0}}
-@media (max-width:760px){.cq{grid-template-columns:minmax(0,1fr)}.cq-fig{text-align:left;padding:0}.stakes-list li,.tl li{grid-template-columns:minmax(0,1fr);gap:2px}.tile summary::after{margin-top:0;position:absolute;right:14px;top:12px}.tile{position:relative}}
+@media (max-width:760px){.cq{grid-template-columns:minmax(0,1fr)}.cq-fig{flex-direction:row;gap:14px;justify-content:flex-start;padding:12px 16px;border-left:none;border-top:1px solid var(--line);min-width:0}.cq-num{font-size:52px}.stakes-list li,.tl li{grid-template-columns:minmax(0,1fr);gap:2px}.tile summary::after{margin-top:0;position:absolute;right:14px;top:12px}.tile{position:relative}}
 @media (prefers-reduced-motion:reduce){.dm-c,.dm-big,.lab.ping{transition:none}}
 [data-reduce-motion] .dm-c,[data-reduce-motion] .dm-big,[data-reduce-motion] .lab.ping{transition:none}
 
 [data-reduce-motion] .lyr-body{animation:none}
+
+/* ---- 1.18.4: livelier lesson headings, Why panels, Next button, task visuals ---- */
+/* section headings in layered lessons: a lit diamond, the title, then a fading rule in the theme colour */
+.lyr-body h2{display:flex;align-items:center;gap:12px;color:#F4F7FC;text-shadow:0 0 22px color-mix(in srgb,var(--frame) 22%,transparent)}
+.lyr-body h2::before{content:"";flex:none;width:9px;height:9px;transform:rotate(45deg);border:1.5px solid var(--frame);background:color-mix(in srgb,var(--frame) 35%,transparent);box-shadow:0 0 10px color-mix(in srgb,var(--frame) 70%,transparent)}
+.lyr-body h2::after{content:"";flex:1 1 40px;min-width:40px;height:1px;background:linear-gradient(90deg,color-mix(in srgb,var(--frame) 60%,transparent),transparent 85%)}
+.lyr-body .cq h2,.lyr-body .why h2{display:block;text-shadow:none}
+.lyr-body .cq h2::before,.lyr-body .cq h2::after,.lyr-body .why h2::before,.lyr-body .why h2::after{content:none}
+/* Why panel: a lit console screen. Big serif headline, the first line as a lead, key words glowing in the theme colour,
+   the "is counting…" facts as chips, a large faint glyph in the corner. Where-it-goes-wrong keeps its red side. */
+.why{overflow:hidden;background:
+  radial-gradient(ellipse 55% 85% at 0% 0%,color-mix(in srgb,var(--frame) 16%,transparent),transparent 70%),
+  radial-gradient(ellipse 40% 70% at 100% 100%,color-mix(in srgb,var(--frame) 7%,transparent),transparent 70%),
+  repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px),
+  linear-gradient(180deg,var(--win-1),var(--win-2))}
+.why .matters{position:relative}
+.why .matters h2{font-size:clamp(28px,3vw,36px);line-height:1.15;margin:0 0 14px;color:#F4F7FC}
+.notes .why .matters p:first-of-type{font:400 clamp(21px,2vw,25px)/1.45 var(--math);color:var(--text)}
+.notes .why .matters p{color:color-mix(in srgb,var(--text) 88%,var(--muted))}
+.notes .why .matters b{font-weight:600;color:var(--frame);text-shadow:0 0 14px color-mix(in srgb,var(--frame) 45%,transparent)}
+.why-chips{list-style:none;margin:2px 0 16px;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.why-chips li{font:500 14.5px/1.3 var(--sans);color:var(--text);padding:8px 13px;border:1px solid color-mix(in srgb,var(--frame) 40%,var(--line));background:color-mix(in srgb,var(--frame) 9%,var(--panel));border-radius:3px;position:relative}
+.why-chips li::before{content:"";position:absolute;left:-1px;top:-1px;width:6px;height:6px;border-left:2px solid var(--frame);border-top:2px solid var(--frame)}
+.notes .why-chips b{text-shadow:none}
+.why .stakes h2{font-size:clamp(26px,2.6vw,32px);line-height:1.15;margin:0 0 12px}
+.why .stakes-list li{padding:8px 0 8px 14px;border-left:2px solid color-mix(in srgb,var(--red) 35%,transparent);background:linear-gradient(90deg,color-mix(in srgb,var(--red) 7%,transparent),transparent 70%)}
+.why .stakes-list b{color:color-mix(in srgb,var(--red) 30%,var(--text))}
+/* Next lesson, beside Mark as mastered */
+/* Next lesson: shown only once the lesson is mastered. Gold, like a "ready" node on the tree: the next step is open */
+.next-btn{display:inline-flex;align-items:center;gap:10px;max-width:440px;color:#1A1204;border:1px solid #FFD98A;background:linear-gradient(180deg,#FFD27A,#F2B84B 55%,#D99A2B);
+  box-shadow:0 0 14px rgba(242,184,75,.45),inset 0 1px 0 rgba(255,255,255,.45);text-shadow:none;font-weight:700}
+.next-btn:hover{background:linear-gradient(180deg,#FFE09A,#F7C562 55%,#E3A73A);box-shadow:0 0 22px rgba(242,184,75,.7),inset 0 1px 0 rgba(255,255,255,.5)}
+.next-btn:focus-visible{outline:2px solid #FFE3A3;outline-offset:2px}
+.next-btn .nb-k{opacity:.7;font-weight:600;white-space:nowrap;flex:none}
+.next-btn .nb-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.next-btn{animation:nb-in .45s cubic-bezier(.2,.7,.2,1)}
+.next-btn.nudge{animation:nb-in .45s cubic-bezier(.2,.7,.2,1),nb-nudge 1.6s ease-out .45s 3}
+@keyframes nb-in{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+@keyframes nb-nudge{0%{box-shadow:0 0 0 0 rgba(242,184,75,.75),0 0 14px rgba(242,184,75,.45)}70%{box-shadow:0 0 0 12px rgba(242,184,75,0),0 0 14px rgba(242,184,75,.45)}100%{box-shadow:0 0 14px rgba(242,184,75,.45)}}
+[data-reduce-motion] .next-btn,[data-reduce-motion] .next-btn.nudge{animation:none}
+@media (prefers-reduced-motion:reduce){.next-btn,.next-btn.nudge{animation:none}}
+@media (max-width:760px){.next-btn .nb-t{display:none}}
+/* Everyday tasks: own picture, answer, then the worked solution one line at a time */
+.tk-dm{margin:2px 0 4px;padding:10px 40px 6px 12px;border:1px solid var(--line);border-radius:4px;background:var(--stage-sky,var(--panel))}
+.tk-dm svg{max-height:84px}
+.tk-ex{border-color:color-mix(in srgb,var(--frame) 45%,var(--line))}
+.tk-ex .pz-badge{color:var(--frame)}
+.tk-wk{border:1px solid var(--line);border-radius:4px;background:var(--panel);overflow:hidden}
+.tk-wk-h{max-width:none!important;margin:0;padding:9px 14px;font:600 11px/1 var(--ui)!important;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)!important;border-bottom:1px solid var(--line)}
+.tk-wk table{width:100%;border-collapse:collapse}
+.tk-wk td{padding:8px 14px;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent);vertical-align:top}
+.tk-wk td:first-child{font:400 18px/1.5 var(--math);white-space:nowrap;width:1%;color:var(--text)}
+.tk-wk td:last-child{color:var(--muted);font-size:14px}
+.tk-wk .tbl{overflow-x:auto}
+.tk-wk .wk-ask{padding:10px 14px;border-top:1px solid var(--line)}
+.tk-wk [hidden]{display:none!important}
+/* an open task on a wide screen: picture, question and answer on the left, the worked lines on the right */
+@media (min-width:1000px){.tk[open] .tile-body{max-width:none;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:22px;align-items:start}
+  .tk[open] .tile-body>*{grid-column:1}.tk[open] .tile-body>.tk-wk{grid-column:2;grid-row:1/span 8}.tk[open] .tile-body>.tk-after{grid-column:1/-1}}
+.notes .tk-ans{margin:0 0 6px;color:var(--text)}.tk-ans b{color:var(--green)}
+@media (max-width:760px){.tk-wk td:first-child{white-space:normal;width:auto;min-width:40%}}
+/* range / tens storyboards (demo.js) */
+.dq-cell{fill:var(--panel-2);stroke:var(--line-2);stroke-width:1.2;transition:fill .25s,stroke .25s}
+.dq-cell[data-s=on]{fill:color-mix(in srgb,var(--amber) 22%,var(--panel-2));stroke:var(--amber)}
+.dq-cell[data-s=say]{fill:color-mix(in srgb,var(--amber) 45%,var(--panel-2));stroke:#FFE3A3;stroke-width:2}
+.dq-cell[data-s=dim]{fill:var(--panel-2);stroke:color-mix(in srgb,var(--amber) 40%,var(--line-2))}
+.dq-v{font:500 12px var(--mono);fill:var(--text);text-anchor:middle;dominant-baseline:middle;pointer-events:none}
+.dq-n{font:600 13px var(--mono);fill:var(--amber);text-anchor:middle;pointer-events:none}
+.dq-dots{font:500 16px var(--mono);fill:var(--muted);text-anchor:middle;dominant-baseline:middle}
+.dq-gap{fill:none;stroke:var(--cyan);stroke-width:1.6;transition:opacity .3s}
+.dq-big{text-anchor:start}.dq-big[data-k=gap]{fill:var(--cyan)}
+.dq-cap{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;fill:var(--muted);transition:opacity .3s}
+.dq-frame{fill:none;stroke:var(--line-2);stroke-width:1}
+.dq-d{stroke-width:1}
+/* colour cues (Concept + Intermediate): numbers amber, the counted objects violet. Fixed content colours, never themed */
+mark.hl-n,mark.hl-o{background:none;padding:0;border:0;display:inline;font-size:inherit;letter-spacing:inherit;text-transform:inherit;margin:0}
+.hl-n{color:var(--amber);font-weight:600;font-variant-numeric:tabular-nums;text-shadow:0 0 12px rgba(242,184,75,.28)}
+.hl-o{color:#C9B8FF;font-weight:500;text-decoration:underline;text-decoration-color:rgba(180,155,255,.45);text-decoration-thickness:1.5px;text-underline-offset:3px}
+h2 .hl-n,h3 .hl-n{text-shadow:none}
+/* Concept "count it together": the situation and its picture on the left, the lines on the right */
+.walk-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:22px;align-items:start}
+.notes .walk-lead{color:var(--text);font-size:17px;max-width:62ch}
+.walk-l{position:sticky;top:70px;padding:16px 18px;border:1px solid color-mix(in srgb,var(--frame) 40%,var(--line));border-radius:4px;background:linear-gradient(180deg,var(--win-1),var(--win-2))}
+.notes .walk-q{color:var(--text);font-size:18px;line-height:1.5;margin:0 0 12px}
+.walk-dm{padding:10px 12px 6px;border:1px solid var(--line);border-radius:4px;background:var(--stage-sky,var(--panel));margin:0}
+.walk-dm svg{max-height:110px}
+.walk-wk .ans{padding:12px 14px;background:#162418;border-top:1px solid rgba(123,216,143,.35);color:var(--text)}.walk-wk .ans b{color:var(--green)}
+.walk-wk td:last-child{color:var(--text);font-size:15px}
+@media (max-width:900px){.walk-grid{grid-template-columns:minmax(0,1fr)}.walk-l{position:static}}
+/* Your moves (Intermediate method): a clear tracker + Check my move on each goal */
+.moves{border:1px solid color-mix(in srgb,var(--frame) 40%,var(--line));background:color-mix(in srgb,var(--frame) 6%,var(--panel));border-radius:4px;padding:12px 16px;margin:0 0 18px;max-width:78ch}
+.moves-h{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.moves-k{font:600 12px/1 var(--ui);letter-spacing:.2em;text-transform:uppercase;color:var(--frame)}
+.moves .pz-prog{margin:0}.moves .pz-bar span{width:54px;height:8px}
+.moves .pz-sum{font-size:14px;color:var(--text)}
+.notes .moves .prac-tip{margin:10px 0 0;font-size:15px}
+.notes .moves-done{margin:10px 0 0;color:var(--green);font:600 14px/1.4 var(--ui);letter-spacing:.06em}
+.moves-all .moves{border-color:rgba(123,216,143,.6)}
+.goal-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:8px}
+.notes .goal-fb{margin:6px 0 0;font-size:14px}.goal-fb[data-k=ok]{color:var(--green)}.goal-fb[data-k=no]{color:var(--amber)}
+.goal.done .goal-chk{display:none}
 
 /* Intro / sign-in screen (web/src/intro.js). Same look as the app: void black, cyan accent, Saira caps, clipped corners.
    Sequence (classes on #intro): is-bg → is-logo → is-form. Everything is skipped for reduced motion or a click/key press. */
@@ -12371,6 +12506,33 @@ ARITH["counting"] = {
       heading: "What are counting and the natural numbers?",
       question: { text: "How many?", sub: `Every time you check a count, you do the same three things. Watch each one happen in the model above, then try it yourself.`, figure: { sym: `<i>n</i>`, value: "17", cap: "the count", echo: "n" } },
       ideasTitle: "Three ideas, all in the model",
+      objects: ["dot", "dots", "seat", "seats", "friend", "friends", "tablet", "tablets", "bottle", "sponge", "sponges", "drawer", "cases", "stacks", "deer", "ballots", "batches", "twenties", "tens", "fives", "bills", "tokens", "token", "sheep", "marks", "notches", "bone"],
+      walk: { title: "Count it together: a row of seats",
+        lead: `One situation, step by step. Try each question before you show the next line.`,
+        prompt: `Your group of 9 friends is going to a show. Your row has seats numbered 14 to 22. Is there a seat for every friend?`,
+        demo: { kind: "range", from: 14, to: 22, gaps: true, unit: "seat", alt: "Seats 14 to 22. Step by step each seat gets a counting number, 1 to 9; the last number, 9, is the count; then the 8 spaces between seats are marked." },
+        lines: [
+          { math: `14, 15, 16, …, 22`, note: `Here is the row. Each box is one seat.`, frame: 0 },
+          { math: `14 → 1,  15 → 2`, note: `Give the first seat the number 1, the next seat 2.`, frame: 2 },
+          { math: `22 → 9`, note: `Keep going, one seat and one number at a time. No seat is skipped. No seat gets two numbers.`, frame: 9 },
+          { math: `<span class="c1"><i>n</i></span> = 9`, note: `The last number you said is how many seats there are: 9. Yes, a seat for every friend.`, frame: 10 },
+          { math: `22 − 14 = 8`, note: `A shortcut gives 8. It counts the spaces between seats, not the seats.`, frame: 11 },
+          { math: `22 − 14 + 1 = 9`, note: `Add back the first seat, and the shortcut agrees: 9 seats.`, frame: 10 }
+        ],
+        predict: [null,
+          { ask: `Seat 14 gets the number 1. What number does seat 15 get?`, parts: [{ label: "seat 15 gets", ans: 2 }], hint: `One more seat, one more number.` },
+          { ask: `Keep matching. What number does seat 22 get?`, parts: [{ label: "seat 22 gets", ans: 9 }], hint: `Say them in order: 14 gets 1, 15 gets 2, 16 gets 3 … all the way to 22.` },
+          { ask: `So how many seats are in the row?`, choices: [
+            { t: "9, the last number said", ok: true },
+            { t: "22, the last seat number", why: "22 is the seat's name, not the count. The count is the last counting number you said." },
+            { t: "We have to add the numbers up", why: "No adding needed. The last number said is already the total." }
+          ], hint: `Look at the number seat 22 got.` },
+          { ask: `A friend says: "22 − 14 = 8, so there are 8 seats." Why is that one short?`, choices: [
+            { t: "It counts the spaces between seats", ok: true },
+            { t: "Seat 14 should not count", why: "Seat 14 is in the row. It got the number 1." },
+            { t: "Subtracting is always wrong", why: "22 − 14 really is 8. It just counts something else: the spaces." }
+          ], hint: `Seats 14 and 15 are two seats, with one space between them.` }],
+        answer: `The row has <span class="m c1">9</span> seats, one for each of the 9 friends.` },
       ideas: [
         { c: "c1", title: "One number for each dot", term: "one-to-one matching", text: `Touch each dot once and say the next number. No dot gets two numbers. No dot gets skipped.`,
           demo: { kind: "dots", slots: 5, lit: 5, sweep: true, alt: "Five dots light up one at a time and are numbered 1 to 5." }, try: { label: "Press Count aloud", lab: "play" } },
@@ -12379,7 +12541,7 @@ ARITH["counting"] = {
         { c: "c2", title: "There is always a next one", term: "successor", text: `After any number comes one more. After 99 comes 100. After a million comes a million and one. The dashed dot is the next one.`,
           demo: { kind: "dots", slots: 8, grow: [4, 5, 6], alt: "A dashed dot waits after the last dot. When it fills in, a new dashed dot appears after it." }, try: { label: "Add one more dot", lab: "plus" } }
       ],
-      matters: { title: "Why counting comes first", text: `<p>Counting is the first thing in math you have to get exactly right. Almost everything else is built on it. Adding is counting on. Multiplying is counting groups. Measuring is counting units.</p><p>So when a count is right, the math built on it can be trusted. When a count is off by just one, every answer that uses it is off too.</p>` },
+      matters: { title: "Why counting comes first", text: `<p>Counting is the first thing in math you have to get <b>exactly right</b>. Almost everything else is built on it.</p><ul class="why-chips"><li><b>Adding</b> is counting on</li><li><b>Multiplying</b> is counting groups</li><li><b>Measuring</b> is counting units</li></ul><p>So when a count is right, the math built on it can be <b>trusted</b>. When a count is <b>off by just one</b>, every answer that uses it is off too.</p>` },
       stakes: { title: "Where counting goes wrong", lead: `Skip one thing, or count one twice, and your total is off by one.`, items: [
         { role: "Pharmacy", text: `A bottle that is one tablet light.` },
         { role: "Operating room", text: `A sponge left inside a patient. The team counts before closing, and closing waits until the count is right. With 19 counted out of 20, the dashed dot is where the last sponge should be.` },
@@ -12417,27 +12579,17 @@ ARITH["counting"] = {
     build: {
       task: { text: "Count it so the total can be trusted.", sub: `The same five moves work for any group, from 9 seats in a row to 1,214 ballots. Try each one in the model above as you go.`,
         figure: { sym: `<i>n</i>`, value: "17", cap: "in the model", echo: "n" },
-        jump: [{ label: "The method", to: "b-method" }, { label: "Worked example", to: "b-example" }, { label: "Everyday tasks", to: "b-tasks" }] },
+        jump: [{ label: "The method", to: "b-method" }, { label: "Everyday tasks", to: "b-tasks" }] },
       keysTitle: "What the model shows",
       keyTry: [{ label: "Set the count to 30", lab: "set:30" }, { label: "Press +1", lab: "plus" }, null],
-      goalsIntro: `Three of the steps have a move for you to make in the model. Each one ticks itself off when the model shows it.`,
+      goalsIntro: `Three of the steps have a move for you to make in the model. Make the move, then press <b>Check my move</b>. A move also ticks itself off as soon as the model shows it.`,
+      objects: ["object", "objects", "dot", "dots", "seat", "seats", "rider", "riders", "day", "days", "item", "items", "stitch", "stitches", "reps", "fives", "frame", "frames", "ballots"],
       stepGoal: [null,
-        { key: "aloud", min: 1, text: `Press <b>Count aloud</b> and watch each dot get exactly one number.`, after: `One number per dot, in order. That is one-to-one matching.` },
+        { key: "aloud", min: 1, notYet: `Not yet. Press <b>Count aloud</b> in the model and let it give every dot a number.`, text: `Press <b>Count aloud</b> and watch each dot get exactly one number.`, after: `One number per dot, in order. That is one-to-one matching.` },
         null,
-        { key: "counted", eq: 23, text: `Set the slider to 23 yourself, then press <b>Count aloud</b>. The last number said should be 23.`, after: `The last number said is the count: <span class="m c1"><i>n</i> = 23</span>.` },
+        { key: "counted", eq: 23, notYet: `Not yet. Set the slider to 23, then press <b>Count aloud</b> and let it finish.`, text: `Set the slider to 23 yourself, then press <b>Count aloud</b>. The last number said should be 23.`, after: `The last number said is the count: <span class="m c1"><i>n</i> = 23</span>.` },
         { key: "n", eq: 34, text: `Make the model show 34 dots. How many full frames is that, and how many left over?`, after: `3 full frames and 4 more: <span class="m">30 + 4 = 34</span>.` }],
-      predict: [null,
-        { ask: `Match the seats to 1, 2, 3, …, starting with seat 14. Which number does seat 22 get?`, parts: [{ label: "seat 22 gets", ans: 9 }], hint: `Seat 14 gets 1, seat 15 gets 2. Keep going one seat at a time.` },
-        null,
-        { ask: `A shortcut some people try: what is 22 − 14?`, parts: [{ label: "22 − 14", ans: 8 }], hint: `Count up from 14 to 22 in steps of one.` },
-        { ask: `You counted 9 seats, but 22 − 14 is 8. Why is the shortcut one short?`, choices: [
-          { t: "It counts the gaps between the seats, not the seats.", ok: true },
-          { t: "Seat 14 should not be counted.", why: "Seat 14 is in the row, so it gets a number. Look again at the matching in line 2." },
-          { t: "Subtraction always gives one too few.", why: "Not always: 22 − 14 = 8 is right as a subtraction. The question is what it counts." }
-        ], hint: `Seats 14 and 15 have one gap between them but are two seats.` }],
-      matters: { title: "Why a method beats a guess", text: `<p>Anyone can count a handful of things. Mistakes start when the group is big, or the things look alike, or someone talks to you halfway through.</p><p>A method is the same few moves every time. It lets you stop, pick up where you left off, and check your own count.</p>` },
-      exampleTip: `Try it yourself first, then show one line at a time.`,
-      exampleTry: { label: "Set the model to 9", lab: "set:9" },
+      matters: { title: "Why a method beats a guess", text: `<p>Anyone can count a handful of things. Mistakes start when the group is big, or the things look alike, or someone talks to you halfway through.</p><ul class="why-chips"><li><b>Big</b> groups</li><li><b>Look-alike</b> things</li><li><b>Interruptions</b></li></ul><p>A method is <b>the same few moves every time</b>. It lets you stop, pick up where you left off, and check your own count.</p>` },
       lede: `To count, match each object to the next counting number, one at a time, and read the last number as the total.`,
       intro: `<p>The model above shows objects as dots in a ten-frame. Each dot gets one counting number, and the <span class="c1">count</span> is the last number said. Adding one more dot moves the count to its <span class="c2">successor</span>, one more.</p>`,
       stepWhy: [
@@ -12450,17 +12602,30 @@ ARITH["counting"] = {
       bridge: `<p>The theater row used the two habits that matter most: match each item once, and when counting a range, include both ends. Here is where the same moves show up.</p>`,
       tasksTitle: "Everyday tasks: solve them",
       tasks: [
-        { task: "Checking that everyone is back on the bus", check: { q: `Riders sit in seats 12 through 40, every seat full. How many riders should be back on the bus?`, parts: [{ label: "riders", ans: 29 }], hint: `Both seat 12 and seat 40 count, so use <span class="m"><i>b</i> − <i>a</i> + 1</span>.` }, figure: "1 per rider", link: `Give each person one number as they board, the way each seat got one number from 1 to 9 in the worked example.` },
-        { task: "Counting the days of a trip on a calendar", check: { q: `A trip runs from the 3rd to the 10th of the month, counting both days. How many days is the trip?`, parts: [{ label: "days", ans: 8 }], hint: `List them: 3rd, 4th, … 10th. Or use <span class="m"><i>b</i> − <i>a</i> + 1</span>.` }, figure: "8 days", link: `A trip from the 3rd to the 10th, both days included, is <span class="m">10 − 3 + 1 = 8</span> days. It is the same rule as the last line of the worked example.` },
-        { task: "Making sure a bag has the right number of items", check: { q: `You take items out one at a time and say 1, 2, 3, … The bag is empty when you say 14. How many items were in the bag?`, parts: [{ label: "items", ans: 14 }], hint: `The last number said is the count.` }, figure: "1 at a time", link: `Take items out one at a time and count as you go (steps 1 and 2). The last number said is how many there are (step 4).` },
-        { task: "Counting stitches or rows when knitting", check: { q: `A row has 47 stitches, with a marker after every 10. How many full groups of 10 are there, and how many stitches are left over?`, parts: [{ label: "full groups", ans: 4 }, { label: "left over", ans: 7 }], hint: `Count by tens: 10, 20, 30, 40. Then count the rest by ones.` }, figure: "10 a group", try: { label: "Show 30 in frames", lab: "set:30" }, link: `Place a marker every 10 stitches, like filling a ten-frame (step 5). A lost count means recounting one group, not the whole row.` },
-        { task: "Counting reps and sets during exercise", check: { q: `You count reps by fives: 5, 10, 15, … and stop at 45. How many fives did you say?`, parts: [{ label: "fives", ans: 9 }], hint: `Count the numbers you said, one for each five.` }, figure: "by fives", link: `Count by fives or tens when the numbers are large, as in practice item 1, and say each number once per rep.` }
+        { task: "Checking that everyone is back on the bus", check: { q: `Riders sit in seats 12 through 40, every seat full. How many riders should be back on the bus?`, parts: [{ label: "riders", ans: 29 }], hint: `Both seat 12 and seat 40 count, so use <span class="m"><i>b</i> − <i>a</i> + 1</span>.` }, figure: "1 per rider",
+          demo: { kind: "range", from: 12, to: 40, gaps: true, unit: "seat", alt: "Seats 12 to 40 get counting numbers 1 to 29; the gaps between seats number one fewer, 28." },
+          lines: [{ math: `12, 13, 14, …, 40`, note: "Every seat from 12 to 40 has one rider." }, { math: `40 − 12 = 28`, note: "The difference counts the gaps between seats, one short." }, { math: `40 − 12 + 1 = 29`, note: "Both end seats count, so add one." }],
+          predict: [null, { ask: `First the shortcut: what is 40 − 12?`, parts: [{ label: "40 − 12", ans: 28 }], hint: `40 − 10 = 30, then take away 2 more.` }], link: `Give each person one number as they board, the way each seat got one number from 1 to 9 in the theater row on the Concept tab.` },
+        { task: "Counting the days of a trip on a calendar", check: { q: `A trip runs from the 3rd to the 10th of the month, counting both days. How many days is the trip?`, parts: [{ label: "days", ans: 8 }], hint: `List them: 3rd, 4th, … 10th. Or use <span class="m"><i>b</i> − <i>a</i> + 1</span>.` }, figure: "8 days",
+          demo: { kind: "range", from: 3, to: 10, gaps: true, unit: "day", alt: "Calendar days 3 to 10 get counting numbers 1 to 8; the 7 gaps between them are the nights." },
+          lines: [{ math: `3, 4, 5, 6, 7, 8, 9, 10`, note: "List the days, both ends included." }, { math: `10 − 3 = 7`, note: "The difference counts the nights between the days." }, { math: `10 − 3 + 1 = 8`, note: "Add one for the first day: 8 days." }],
+          predict: [null, { ask: `What is 10 − 3? (It counts something, but not the days.)`, parts: [{ label: "10 − 3", ans: 7 }], hint: `Count up from 3 to 10 in steps of one.` }], link: `A trip from the 3rd to the 10th, both days included, is <span class="m">10 − 3 + 1 = 8</span> days. It is the same rule as the last line of the theater row on the Concept tab.` },
+        { task: "Making sure a bag has the right number of items", check: { q: `You take items out one at a time and say 1, 2, 3, … The bag is empty when you say 14. How many items were in the bag?`, parts: [{ label: "items", ans: 14 }], hint: `The last number said is the count.` }, figure: "1 at a time",
+          demo: { kind: "dots", slots: 14, lit: 14, sweep: true, big: true, ms: 260, alt: "Fourteen items each get the next number as they come out of the bag; the last number said, 14, is the count." },
+          lines: [{ math: `1, 2, 3, …, 14`, note: "One number for each item as it comes out." }, { math: `<span class="c1"><i>n</i></span> = 14`, note: "The last number said is the count." }], link: `Take items out one at a time and count as you go (steps 1 and 2). The last number said is how many there are (step 4).` },
+        { task: "Counting stitches or rows when knitting", check: { q: `A row has 47 stitches, with a marker after every 10. How many full groups of 10 are there, and how many stitches are left over?`, parts: [{ label: "full groups", ans: 4 }, { label: "left over", ans: 7 }], hint: `Count by tens: 10, 20, 30, 40. Then count the rest by ones.` }, figure: "10 a group",
+          demo: { kind: "tens", n: 47, unit: "stitch", alt: "Four groups of ten stitches are counted 10, 20, 30, 40, then 7 more stitches: 47." },
+          lines: [{ math: `10, 20, 30, 40`, note: "Count the full groups by tens: 4 groups." }, { math: `41, 42, 43, 44, 45, 46, 47`, note: "Count the rest by ones: 7 left over." }, { math: `4 × 10 + 7 = 47`, note: "4 tens and 7 ones make 47." }],
+          predict: [null, { ask: `After the 4 full groups (40 stitches), how many stitches are left in the row of 47?`, parts: [{ label: "left over", ans: 7 }], hint: `Count on from 40 to 47.` }], try: { label: "Show 30 in frames", lab: "set:30" }, link: `Place a marker every 10 stitches, like filling a ten-frame (step 5). A lost count means recounting one group, not the whole row.` },
+        { task: "Counting reps and sets during exercise", check: { q: `You count reps by fives: 5, 10, 15, … and stop at 45. How many fives did you say?`, parts: [{ label: "fives", ans: 9 }], hint: `Count the numbers you said, one for each five.` }, figure: "by fives",
+          demo: { kind: "range", from: 5, to: 45, step: 5, unit: "five", alt: "The numbers 5, 10, 15 up to 45 each get a counting number, 1 to 9: nine fives." },
+          lines: [{ math: `5, 10, 15, 20, 25, 30, 35, 40, 45`, note: "Write every number you said." }, { math: `1, 2, 3, 4, 5, 6, 7, 8, 9`, note: "Match each one to a counting number." }, { math: `45 ÷ 5 = 9`, note: "Each five is one number said: 9 fives." }], link: `Count by fives or tens when the numbers are large, as in practice item 1, and say each number once per rep.` }
       ]
     },
     formal: {
       question: { text: "What does “how many” mean, exactly?", sub: `You can count, and you can count so the total holds up. Here are the words a textbook uses for the same ideas, and how to write a counting problem out in full.`,
         figure: { sym: `|<i>A</i>|`, value: "17", cap: "the cardinality", echo: "n" },
-        jump: [{ label: "Vocabulary", to: "f-vocab" }, { label: "Writing it out", to: "f-setup" }, { label: "Common mistakes", to: "f-mist" }, { label: "Practice", to: "f-prac" }] },
+        jump: [{ label: "Vocabulary", to: "f-vocab" }, { label: "Where it goes wrong", to: "f-mist" }, { label: "Writing it out", to: "f-setup" }, { label: "Practice", to: "f-prac" }] },
       vocabTitle: "From your words to the textbook's",
       vocabIntro: `<p>Each card is an idea you already used in the Concept and Intermediate tabs, with its proper name and its exact meaning.</p>`,
       vocab: [
@@ -12471,7 +12636,7 @@ ARITH["counting"] = {
         { c: "c2", sym: `<i>S</i>(<i>n</i>) = <i>n</i> + 1`, term: "Successor function", def: `Sends each natural number to the next one. Different numbers have different successors, and the first natural number is not the successor of any number.`, was: "there is always a next one" },
         { c: "c2", sym: `<i>P</i>(1), <i>P</i>(<i>k</i>) ⇒ <i>P</i>(<i>k</i> + 1)`, term: "Axiom of induction", def: `A set of natural numbers that contains the first natural number, and contains the successor of each of its members, contains every natural number.`, was: "after every number comes one more, without end" }
       ],
-      matters: { title: "Why the exact words matter", text: `<p>In everyday talk, “counting numbers” and “natural numbers” mean the same thing. In a textbook, one word can decide whether 0 is included, and that changes answers. How many natural numbers are less than 10? It is 9 if ℕ starts at 1, and 10 if it starts at 0.</p><p>Exact words let you read any book, follow a proof, and write an answer someone else can check.</p>` },
+      matters: { title: "Why the exact words matter", text: `<p>In everyday talk, “counting numbers” and “natural numbers” mean the same thing. In a textbook, <b>one word can decide whether 0 is included</b>, and that changes answers.</p><ul class="why-chips"><li>How many natural numbers are less than 10?</li><li><b>9</b> if ℕ starts at 1</li><li><b>10</b> if ℕ starts at 0</li></ul><p>Exact words let you read any book, follow a proof, and write an answer <b>someone else can check</b>.</p>` },
       setupIntro: `<p>The theater row from the Intermediate tab, written the way a textbook would.</p>`,
       mistakesTitle: "Where formal answers go wrong",
       mistakesLead: `Most wrong answers here are off by one. The set is named carelessly, an end is dropped, or the gaps are counted instead of the things.`,
@@ -38853,8 +39018,15 @@ W.LABS = W.LABS || {};
        lit     dots filled (amber, c1)
        sweep   each lit dot is lit in turn and stamped 1, 2, 3 … (like the lab's Count aloud)
        big     last frame lifts the final number out as a big amber numeral
+       still   (any kind) no autoplay or ↻: the page shows frame i with api.goto(i); mount() leaves the api on host._demo
        grow    [5, 6, 7]  the count grows; a dashed cyan "n+1" dot always waits after the last lit dot (c2)
        frames  explicit [{lit, say, big, next}] when the shortcuts above are not enough
+     { kind: "range", from: 14, to: 22, step: 1, gaps: true, unit: "seat", alt }   a numbered row (seats, days, pages…):
+       each item gets its counting number 1, 2, 3 … in turn, the total lifts out; gaps: true then marks the gaps between
+       neighbours (one fewer than the items: the b − a slip). Rows over 11 items show the first 6, "…", the last 3.
+     { kind: "tens", n: 47, unit: "stitches", alt }   groups of ten (ten-frames) counted 10, 20, 30 …, then the ones.
+   Task visuals (Intermediate "Everyday tasks") use these so each problem gets a picture of its own situation in a few bytes.
+   InquireDemo.rangeCells(spec) → [{v, n} | {dots: true}] and InquireDemo.seqFrames(spec) (DOM-free, tested)
    InquireDemo.frames(spec) → frames, InquireDemo.slotStates(frame, slots) → [{s: "off|on|say|next", n}]  (DOM-free, tested)
    InquireDemo.mount(host, spec) → {replay, stop}; InquireDemo.mountAll(root) mounts every [data-spec] inside root.
    It plays once when it scrolls into view and again on tap or on the ↻ button. With reduced motion (OS or the app's
@@ -38881,14 +39053,116 @@ function slotStates(f, slots){
   }
   return out;
 }
-W.InquireDemo = { frames, slotStates };
+const plural = (u, n) => !u ? "" : n === 1 ? u : /(s|x|ch|sh)$/.test(u) ? u + "es" : /[^aeiou]y$/.test(u) ? u.slice(0, -1) + "ies" : u + "s";
+function rangeCells(spec){
+  const step = spec.step || 1, vals = [];
+  for (let v = spec.from; step > 0 ? v <= spec.to : v >= spec.to; v += step) vals.push(v);
+  const cells = vals.map((v, i) => ({ v, n: i + 1 }));
+  return cells.length > 11 ? [...cells.slice(0, 6), { dots: true }, ...cells.slice(-3)] : cells;
+}
+// One frame = {say: how many shown items carry their number, big: total or null, gaps: bool} (range) or {tens, ones, big} (tens)
+function seqFrames(spec){
+  const out = [];
+  if (spec.kind === "range") {
+    const cells = rangeCells(spec), shown = cells.filter(c => !c.dots).length, total = Math.round((spec.to - spec.from) / (spec.step || 1)) + 1;
+    for (let i = 0; i <= shown; i++) out.push({ say: i, big: null, gaps: false });
+    out.push({ say: shown, big: total, gaps: false });
+    if (spec.gaps) out.push({ say: shown, big: total, gaps: true });
+  } else if (spec.kind === "tens") {
+    const T = Math.floor(spec.n / 10), O = spec.n % 10;
+    for (let i = 0; i <= T; i++) out.push({ tens: i, ones: 0, big: null });
+    for (let j = 1; j <= O; j++) out.push({ tens: T, ones: j, big: null });
+    out.push({ tens: T, ones: O, big: spec.n });
+  }
+  return out;
+}
+W.InquireDemo = { frames, slotStates, rangeCells, seqFrames, plural };
 if (typeof document === "undefined") return;
 
 const NS = "http://www.w3.org/2000/svg";
 const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
 const calm = () => document.documentElement.hasAttribute("data-reduce-motion") || (W.matchMedia && W.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
+// Plays frames on a host: once when scrolled into view, again on tap or ↻; final frame only under reduced motion.
+function player(host, svg, n, show, spec){
+  let timer = null, played = false;
+  const stop = () => { clearTimeout(timer); timer = null; };
+  const ms = spec.ms || 420;
+  const play = () => {
+    stop(); played = true;
+    if (calm() || n < 2) { show(n - 1); return; }
+    let i = 0; show(0);
+    const step = () => { i++; if (i >= n || !host.isConnected) return; show(i); timer = setTimeout(step, i >= n - 2 ? ms * 2.2 : ms); };
+    timer = setTimeout(step, ms);
+  };
+  const goto = i => { stop(); played = true; show(Math.max(0, Math.min(n - 1, i))); };
+  if (spec.still) { show(0); return { replay: () => {}, stop, goto }; }   // still: the page steps it with goto(i) (Concept "count it together")
+  show(calm() ? n - 1 : 0);
+  if (!calm()) {
+    const btn = document.createElement("button"); btn.type = "button"; btn.className = "dm-replay"; btn.setAttribute("aria-label", "Replay the animation"); btn.textContent = "↻";
+    btn.addEventListener("click", play); host.appendChild(btn);
+    svg.addEventListener("click", play);
+    if (W.IntersectionObserver) {
+      const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting) && !played) { play(); io.disconnect(); } }, { threshold: 0.5 });
+      io.observe(host);
+    } else play();
+  }
+  return { replay: play, stop, goto };
+}
+function mountRange(host, spec){
+  const cells = rangeCells(spec), fr = seqFrames(spec), CW = 36, GAP = 8, H = 70, X0 = 4;
+  const total = Math.round((spec.to - spec.from) / (spec.step || 1)) + 1, width = X0 + cells.length * (CW + GAP) + 132;
+  host.textContent = "";
+  const svg = el("svg", { viewBox: `0 0 ${width} ${H}`, role: "img", "aria-label": spec.alt || "Animation", preserveAspectRatio: "xMinYMid meet" }, host);
+  const parts = cells.map((c, i) => {
+    const x = X0 + i * (CW + GAP);
+    if (c.dots) { el("text", { class: "dq-dots", x: x + CW / 2, y: 26 }, svg).textContent = "…"; return null; }
+    const r = el("rect", { class: "dq-cell", x, y: 10, width: CW, height: 26, rx: 4, "data-s": "off" }, svg);
+    el("text", { class: "dq-v", x: x + CW / 2, y: 24 }, svg).textContent = String(c.v);
+    const n = el("text", { class: "dq-n", x: x + CW / 2, y: 54 }, svg);
+    return { r, n, c, x };
+  });
+  const gaps = [];
+  cells.forEach((c, i) => { const nx = cells[i + 1]; if (c.dots || !nx || nx.dots) return;
+    const x = X0 + i * (CW + GAP) + CW + GAP / 2; gaps.push(el("path", { class: "dq-gap", d: `M${x - 3} 6 L${x} 2 L${x + 3} 6 M${x} 2 V40`, opacity: 0 }, svg)); });
+  const bx = X0 + cells.length * (CW + GAP) + 6;
+  const big = el("text", { class: "dm-big dq-big", x: bx, y: 34, opacity: 0 }, svg), cap = el("text", { class: "dq-cap", x: bx + 2, y: 54, opacity: 0 }, svg);
+  const shown = parts.filter(Boolean);
+  const show = i => { const f = fr[i];
+    shown.forEach((p, j) => { const on = j < f.say; p.r.setAttribute("data-s", f.gaps ? "dim" : on ? (j === f.say - 1 && f.big == null ? "say" : "on") : "off"); p.n.textContent = on && !f.gaps ? String(p.c.n) : ""; });
+    gaps.forEach(g => g.setAttribute("opacity", f.gaps ? 1 : 0));
+    big.textContent = f.big == null ? "" : String(f.gaps ? total - 1 : f.big); big.setAttribute("opacity", f.big == null ? 0 : 1); big.setAttribute("data-k", f.gaps ? "gap" : "n");
+    cap.textContent = f.big == null ? "" : f.gaps ? `gaps, not ${plural(spec.unit || "item", 2)}` : plural(spec.unit || "item", total); cap.setAttribute("opacity", f.big == null ? 0 : 1); };
+  return player(host, svg, fr.length, show, spec);
+}
+function mountTens(host, spec){
+  const fr = seqFrames(spec), T = Math.floor(spec.n / 10), O = spec.n % 10, D = 9, GW = 5 * D + 10, H = 70, X0 = 4;
+  const width = X0 + T * (GW + 8) + Math.max(O, 1) * 0 + (O ? Math.ceil(O / 2) * D + 14 : 0) + 120;
+  host.textContent = "";
+  const svg = el("svg", { viewBox: `0 0 ${width} ${H}`, role: "img", "aria-label": spec.alt || "Animation", preserveAspectRatio: "xMinYMid meet" }, host);
+  const groups = [];
+  for (let g = 0; g < T; g++) { const gx = X0 + g * (GW + 8), dots = [];
+    el("rect", { class: "dq-frame", x: gx, y: 8, width: GW, height: 2 * D + 10, rx: 3 }, svg);
+    for (let k = 0; k < 10; k++) dots.push(el("circle", { class: "dm-c dq-d", cx: gx + 5 + D / 2 + (k % 5) * D, cy: 13 + D / 2 + Math.floor(k / 5) * D, r: 3.4, "data-s": "off" }, svg));
+    const lab = el("text", { class: "dq-n", x: gx + GW / 2, y: 54 }, svg); groups.push({ dots, lab, v: (g + 1) * 10 }); }
+  const ox = X0 + T * (GW + 8) + 4, ones = [];
+  for (let j = 0; j < O; j++) ones.push(el("circle", { class: "dm-c dq-d", cx: ox + D / 2 + Math.floor(j / 2) * D, cy: 13 + D / 2 + (j % 2) * D, r: 3.4, "data-s": "off" }, svg));
+  const olab = el("text", { class: "dq-n", x: ox + Math.ceil(O / 2) * D / 2, y: 54 }, svg);
+  const bx = ox + (O ? Math.ceil(O / 2) * D + 14 : 4);
+  const big = el("text", { class: "dm-big dq-big", x: bx, y: 34, opacity: 0 }, svg), cap = el("text", { class: "dq-cap", x: bx + 2, y: 54, opacity: 0 }, svg);
+  const show = i => { const f = fr[i];
+    groups.forEach((g, k) => { const on = k < f.tens; g.dots.forEach(d => d.setAttribute("data-s", on ? (k === f.tens - 1 && !f.ones && f.big == null ? "say" : "on") : "off")); g.lab.textContent = on ? String(g.v) : ""; });
+    ones.forEach((d, j) => d.setAttribute("data-s", j < f.ones ? (j === f.ones - 1 && f.big == null ? "say" : "on") : "off"));
+    olab.textContent = f.ones ? `+${f.ones}` : "";
+    big.textContent = f.big == null ? "" : String(f.big); big.setAttribute("opacity", f.big == null ? 0 : 1);
+    cap.textContent = f.big == null ? "" : `${T} ten${T === 1 ? "" : "s"} + ${O} ${plural(spec.unit || "one", 2)}`.replace(/ \+ 0 \w+$/, ""); cap.setAttribute("opacity", f.big == null ? 0 : 1); };
+  return player(host, svg, fr.length, show, spec);
+}
 function mount(host, spec){
+  const api = spec.kind === "range" ? mountRange(host, spec) : spec.kind === "tens" ? mountTens(host, spec) : mountDots(host, spec);
+  host._demo = api; return api;
+}
+function mountDots(host, spec){
   const slots = spec.slots || 6, fr = frames(spec), P = 36, R = 15, H = 44;
   const hasBig = fr.some(f => f.big != null), width = Math.max(slots, 8) * P + 4;   // same width for every row, so dots match across cards
   host.textContent = "";
@@ -76025,18 +76299,35 @@ function conceptHTML(t, C, col){
   return `
     ${cqHTML(q, "The question")}
     <div><h2>${esc(C.ideasTitle || "The big ideas")}</h2><div class="ideas">${C.ideas.map(x => `<div class="idea" style="--c:var(--${col(x.c || "c1")})"><h3>${esc(x.title)}${x.term ? `<span class="idea-term">${esc(x.term)}</span>` : ""}</h3>${x.demo ? `<div class="dm" data-spec="${esc(JSON.stringify(x.demo))}"></div>` : ""}<p>${x.text}</p>${chip(x.try)}</div>`).join("")}</div></div>
+    ${C.walk ? walkHTML(C.walk) : ""}
     ${(C.timeline || []).length ? `<div class="c-hist"><h2>${esc(C.timelineTitle || "A short history")}</h2>${C.timelineLead ? `<p class="hist-lead">${C.timelineLead}</p>` : ""}<ol class="tl">${C.timeline.map(x => `<li><span class="tl-when">${esc(x.when)}</span><span class="tl-what">${x.what}</span></li>`).join("")}</ol>${hist}</div>` : ""}
-    ${mattersHTML(C.matters)}
-    ${C.stakes ? `<div class="stakes"><h2>${esc(C.stakes.title)}</h2><p class="stakes-lead">${C.stakes.lead}</p><ul class="stakes-list">${C.stakes.items.map(x => `<li><b>${esc(x.role)}</b><span>${x.text}</span></li>`).join("")}</ul>${chip(C.stakes.try)}</div>` : ""}
+    ${whyHTML(C.matters, C.stakes ? `<div class="stakes">${whyKey("Where it goes wrong", "red")}<h2>${esc(C.stakes.title)}</h2><p class="stakes-lead">${C.stakes.lead}</p><ul class="stakes-list">${C.stakes.items.map(x => `<li><b>${esc(x.role)}</b><span>${x.text}</span></li>`).join("")}</ul>${chip(C.stakes.try)}</div>` : "")}
     <div><h2>${esc(C.examplesTitle || "Where you will meet it")}</h2><div class="tiles">${(C.examples || []).map(c => `<details class="tile"><summary><span class="tile-fig">${esc(c.figure || "")}</span><span class="tile-role">${esc(c.role)}</span></summary><div class="tile-body"><p>${c.scene}</p>${c.takeaway ? `<p class="lyr-take">${esc(c.takeaway)}</p>` : ""}${chip(c.try)}</div></details>`).join("")}</div></div>`;
+}
+/* Concept "count it together": one continuous situation, a picture that follows each line (InquireDemo with still: true,
+   line.frame = the frame to show), lines one at a time with predict questions ("Just show the line" skips one). */
+function walkHTML(W){
+  const L = W.lines;
+  return `<div id="c-walk" class="walk"><h2>${esc(W.title || "Count it together")}</h2>${W.lead ? `<p class="walk-lead">${W.lead}</p>` : ""}
+    <div class="walk-grid"><div class="walk-l"><p class="eyebrow">The situation</p><p class="walk-q">${W.prompt}</p>${W.demo ? `<div class="dm walk-dm" data-spec="${esc(JSON.stringify({ ...W.demo, still: true }))}"></div>` : ""}</div>
+    <div class="tk-wk walk-wk" data-walk><p class="tk-wk-h">One step at a time</p>
+      <div class="tbl"><table>${L.map(l => `<tr class="wk-row" hidden><td>${l.math}</td><td>${l.note || ""}</td></tr>`).join("")}</table></div>
+      <div class="wk-ask" hidden></div>
+      <div class="wk-bar"><button type="button" class="btn-s" data-wk-next>Show the first line</button><button type="button" class="btn-s ghost" data-wk-all>Show all</button><span class="wk-n">0 of ${L.length}</span></div>
+      <div class="ans" hidden><b>Answer.</b> ${W.answer}</div></div></div></div>`;
 }
 // Shared by the Concept and Intermediate blocks: the big question/task with the lab's live number beside it, and the large-text "why" block.
 function cqHTML(q, eyebrow, extra){
   const fig = q.figure, jump = (q.jump || []).length ? `<p class="cq-jump"><span>Jump to</span>${q.jump.map(j => `<button type="button" class="cq-go" data-jump="${esc(j.to)}">${esc(j.label)}</button>`).join("")}</p>` : "";
-  return `<div class="cq"><div><p class="eyebrow">${esc(eyebrow)}</p><h2>${esc(q.text)}</h2>${q.sub ? `<p>${q.sub}</p>` : ""}${extra || ""}${jump}</div>
+  return `<div class="cq win${fig ? "" : " nofig"}"><div class="win-h"><span class="dot"></span>${esc(eyebrow)}${fig && fig.echo ? `<span class="cq-live">Live from the model</span>` : ""}</div>
+      <div class="cq-main"><h2>${esc(q.text)}</h2>${q.sub ? `<p>${q.sub}</p>` : ""}${extra || ""}${jump}</div>
       ${fig ? `<div class="cq-fig" aria-hidden="true"><div class="cq-num"${fig.echo ? ` data-echo="${esc(fig.echo)}"` : ""}>${esc(fig.echo && LabKit.value(fig.echo) !== undefined ? String(LabKit.value(fig.echo)) : fig.value)}</div><div class="cq-cap"><span class="m c1">${fig.sym}</span> ${esc(fig.cap)}</div></div>` : ""}</div>`;
 }
-const mattersHTML = M => M ? `<div class="matters"><h2>${esc(M.title)}</h2>${M.text}</div>` : "";
+/* The "why" block in an Inquire console panel. With a second block (where it goes wrong) the two share the panel:
+   side by side with a red rule between them (Concept), or stacked with the rule across (Formal, stack = true).
+   Lesson order everywhere: what (question, ideas) → why → where it goes wrong (wrong vs right) → the rest. */
+const whyKey = (label, tone) => `<div class="why-k${tone ? " " + tone : ""}"><i aria-hidden="true"></i>${esc(label)}</div>`;
+const whyHTML = (M, where, stack) => !M && !where ? "" : `<section class="win why${M && where ? " why-pair" : ""}${stack ? " stack" : ""}">${M ? `<div class="matters">${whyKey("Why it matters")}<h2>${esc(M.title)}</h2>${M.text}</div>` : ""}${where || ""}</section>`;
 /* Answer checker shared by the Intermediate and Formal blocks. k = {parts: [{label, ans}], hint} for typed numbers
    (commas, spaces and words ignored) or {choices: [{t, ok, why}], hint} for a pick. */
 function pzHTML(k){
@@ -76071,35 +76362,50 @@ function pzWire(c, k, o){
 // Step goals (Intermediate): done when the lab reports the value (k.publish). Remembered per lesson while the app is open.
 const goalDone = {};
 function goalMet(g, v){ if (v === undefined) return false; const d = g.dataset; return d.eq !== undefined ? +v === +d.eq : +v >= +(d.min || 1); }
-function goalTally(){ document.querySelectorAll("[data-goals]").forEach(w => { const gs = [...w.querySelectorAll(".goal")], n = gs.filter(g => g.classList.contains("done")).length, s = w.querySelector(".pz-sum b"); if (s) s.textContent = n; gs.forEach((g, i) => { const b = w.querySelector(`.pz-bar [data-i="${i}"]`); if (b) b.dataset.s = g.classList.contains("done") ? "solved" : ""; }); }); }
+function goalTally(){ document.querySelectorAll("[data-goals]").forEach(w => { const gs = [...w.querySelectorAll(".goal")], n = gs.filter(g => g.classList.contains("done")).length, s = w.querySelector(".pz-sum b"); if (s) s.textContent = n;
+  const md = w.querySelector(".moves-done"); if (md) md.hidden = n < gs.length; w.classList.toggle("moves-all", n === gs.length); gs.forEach((g, i) => { const b = w.querySelector(`.pz-bar [data-i="${i}"]`); if (b) b.dataset.s = g.classList.contains("done") ? "solved" : ""; }); }); }
 function goalCheck(key, v){ let hit = false; document.querySelectorAll(`.goal[data-key="${key}"]:not(.done)`).forEach(g => { if (!goalMet(g, v)) return;
   g.classList.add("done"); g.querySelector(".goal-box").textContent = "✓"; const a = g.querySelector(".goal-after"); if (a) a.hidden = false; (goalDone[g.dataset.topic] = goalDone[g.dataset.topic] || new Set()).add(g.dataset.i); hit = true; }); if (hit) goalTally(); }
 window.addEventListener("inquire:lab-value", e => goalCheck(e.detail.key, e.detail.value));
 /* Intermediate tab, blocks version (Counting first; docs/subjects/LAYERS.md → "Intermediate blocks"): a topic opts in with layers.build.task.
    The task (live number, jump links) → key cards from the legend (with Try chips) → the method as a numbered rail (why + Try per step)
    → why a method matters (large text) → the worked example, one line at a time → everyday tasks as tiles. */
+/* Intermediate "Everyday tasks". With build.exampleTask the worked example becomes the first task (open, its lines shown one at a time
+   with the build.predict questions); every task may carry lines (a worked solution revealed line by line) and a demo (its own picture). */
+function buildTasks(t){
+  const B = t.layers.build, E = t.example, X = B.exampleTask, tasks = B.tasks || t.life.map(x => ({ task: x }));
+  if (!X) return tasks;
+  return [{ task: X.task, guided: true, check: { q: E.prompt, parts: X.parts, hint: X.hint }, lines: E.lines, predict: B.predict, tip: B.exampleTip, answer: E.answer, figure: X.figure, link: X.link, demo: X.demo, try: B.exampleTry }, ...tasks];
+}
 function buildHTML(t, B, col){
   const chip = x => x && x.lab ? `<button type="button" class="dm-try" data-lab="${esc(x.lab)}"><span aria-hidden="true">▶</span>${esc(x.label)}</button>` : "";
-  const E = t.example, kt = B.keyTry || [], st = B.stepTry || [], sg = B.stepGoal || [], ng = sg.filter(Boolean).length, tasks = B.tasks || t.life.map(x => ({ task: x })), nt = tasks.filter(x => x.check).length;
+  const E = t.example, kt = B.keyTry || [], st = B.stepTry || [], sg = B.stepGoal || [], ng = sg.filter(Boolean).length, tasks = buildTasks(t), nt = tasks.filter(x => x.check).length;
   const bar = (n, label) => `<div class="pz-prog"><div class="pz-bar">${Array.from({ length: n }, (_, i) => `<span data-i="${i}"></span>`).join("")}</div><p class="pz-sum">${label} <b>0</b> of ${n}</p></div>`;
   let gi = 0;
   const goal = (g, i) => { const j = gi++; return `<div class="goal" data-key="${esc(g.key)}"${g.eq !== undefined ? ` data-eq="${g.eq}"` : ""}${g.min !== undefined ? ` data-min="${g.min}"` : ""} data-topic="${esc(S.topic || "")}" data-i="${j}">
-      <span class="goal-box" aria-hidden="true">○</span><div><p class="goal-t"><span>Your move</span>${g.text}</p>${g.after ? `<p class="goal-after" hidden>${g.after}</p>` : ""}</div><button type="button" class="pz-link" data-to-lab>Go to the model ↑</button></div>`; };
-  const task = (x, i) => x.check ? `<details class="tile tk" data-tk="${i}" data-state="open"><summary><span class="tile-role tile-task">${esc(x.task)}</span><span class="pz-badge">Solve it</span></summary>
-      <div class="tile-body"><p class="tk-q">${x.check.q}</p>${pzHTML({ ...x.check, showLabel: "Show the answer" })}
-      <div class="tk-after" hidden>${x.figure ? `<p class="tile-fig">${esc(x.figure)}</p>` : ""}${x.link ? `<p>${x.link}</p>` : ""}${chip(x.try)}</div></div></details>`
+      <span class="goal-box" aria-hidden="true">○</span><div><p class="goal-t"><span>Your move</span>${g.text}</p>${g.after ? `<p class="goal-after" hidden>${g.after}</p>` : ""}<div class="goal-acts"><button type="button" class="btn-s good goal-chk" data-goal-check>Check my move</button><button type="button" class="pz-link" data-to-lab>Go to the model ↑</button></div><p class="goal-fb" aria-live="polite"></p>${g.notYet ? `<template class="goal-ny">${g.notYet}</template>` : ""}</div></div>`; };
+  const wkHTML = (lines, i) => !lines.length ? "" : `<div class="tk-wk" data-wk="${i}"><p class="tk-wk-h">Work it out line by line</p>
+      <div class="tbl"><table>${lines.map(l => `<tr class="wk-row" hidden><td>${l.math}</td><td>${l.note || ""}</td></tr>`).join("")}</table></div>
+      <div class="wk-ask" hidden></div>
+      <div class="wk-bar"><button type="button" class="btn-s" data-wk-next>Show the first line</button><button type="button" class="btn-s ghost" data-wk-all>Show all</button><span class="wk-n">0 of ${lines.length}</span></div></div>`;
+  const task = (x, i) => x.check ? `<details class="tile tk${x.guided ? " tk-ex" : ""}" data-tk="${i}" data-state="open"${x.guided ? " open" : ""}><summary><span class="tile-role tile-task">${esc(x.task)}</span><span class="pz-badge">${x.guided ? "Worked example · solve it" : "Solve it"}</span></summary>
+      <div class="tile-body">${x.demo ? `<div class="dm tk-dm" data-spec="${esc(JSON.stringify(x.demo))}"></div>` : ""}<p class="tk-q">${x.check.q}</p>${x.tip ? `<p class="wk-tip">${x.tip}</p>` : ""}
+      <div class="tk-chk">${pzHTML({ ...x.check, showLabel: "Show the answer" })}</div>
+      ${wkHTML(x.lines || [], i)}
+      <div class="tk-after" hidden>${x.answer ? `<p class="tk-ans"><b>Answer.</b> ${x.answer}</p>` : ""}${x.figure ? `<p class="tile-fig">${esc(x.figure)}</p>` : ""}${x.link ? `<p>${x.link}</p>` : ""}${chip(x.try)}</div></div></details>`
     : `<details class="tile"><summary>${x.figure ? `<span class="tile-fig">${esc(x.figure)}</span>` : ""}<span class="tile-role tile-task">${esc(x.task)}</span></summary><div class="tile-body">${x.link ? `<p>${x.link}</p>` : ""}${chip(x.try)}</div></details>`;
+  const merged = !!B.exampleTask || !!(t.layers.concept && t.layers.concept.walk);   // the worked example lives elsewhere
   return `
     ${cqHTML(B.task, "The task")}
     <div><h2>${esc(B.keysTitle || "Reading the model")}</h2>${B.intro || ""}<div class="ideas keys">${t.legend.map((k, i) => `<div class="idea" style="--c:var(--${col(k.c)})"><div class="key-sym m">${k.sym}</div><h3>${esc(k.name)}</h3><p>${k.desc}</p>${chip(kt[i])}</div>`).join("")}</div></div>
-    <div id="b-method"${ng ? " data-goals" : ""}><h2>${esc(t.steps.title)}</h2>${ng ? `${B.goalsIntro ? `<p class="prac-tip">${B.goalsIntro}</p>` : ""}${bar(ng, "Moves done")}` : ""}<ol class="method">${t.steps.items.map((s, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div><p class="method-do">${s}</p>${B.stepWhy && B.stepWhy[i] ? `<p class="method-why"><span>Why</span>${B.stepWhy[i]}</p>` : ""}${sg[i] ? goal(sg[i], i) : chip(st[i])}</div></li>`).join("")}</ol></div>
-    ${mattersHTML(B.matters)}
-    <div id="b-example"><h2>${esc(B.exampleTitle || "Worked example")}</h2><div class="ex wk" data-wk="1">
+    <div id="b-method"${ng ? " data-goals" : ""}><h2>${esc(t.steps.title)}</h2>${ng ? `<div class="moves"><div class="moves-h"><span class="moves-k">Your moves</span>${bar(ng, "Moves done")}</div>${B.goalsIntro ? `<p class="prac-tip">${B.goalsIntro}</p>` : ""}<p class="moves-done" hidden>All ${ng} moves done ✓ You used every step of the method in the model.</p></div>` : ""}<ol class="method">${t.steps.items.map((s, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div><p class="method-do">${s}</p>${B.stepWhy && B.stepWhy[i] ? `<p class="method-why"><span>Why</span>${B.stepWhy[i]}</p>` : ""}${sg[i] ? goal(sg[i], i) : chip(st[i])}</div></li>`).join("")}</ol></div>
+    ${whyHTML(B.matters)}
+    ${merged ? "" : `<div id="b-example"><h2>${esc(B.exampleTitle || "Worked example")}</h2><div class="ex wk" data-wk="ex">
       <div class="prompt"><p class="eyebrow">Problem</p>${E.prompt}${B.exampleTip ? `<p class="wk-tip">${B.exampleTip}</p>` : ""}</div>
       <div class="tbl"><table>${E.lines.map((l, i) => `<tr class="wk-row"${i ? " hidden" : ""}><td>${l.math}</td><td>${esc(l.note || "")}</td></tr>`).join("")}</table></div>
       <div class="wk-ask" hidden></div>
       <div class="wk-bar"><button type="button" class="btn-s" data-wk-next>Show the next line</button><button type="button" class="btn-s ghost" data-wk-all>Show all</button><span class="wk-n">1 of ${E.lines.length}</span>${chip(B.exampleTry)}</div>
-      <div class="ans" hidden><b>Answer.</b> ${E.answer}</div></div></div>
+      <div class="ans" hidden><b>Answer.</b> ${E.answer}</div></div></div>`}
     <div id="b-tasks"${nt ? " data-tks" : ""}><h2>${esc(B.tasksTitle || "Everyday tasks")}</h2>${B.bridge || ""}${nt ? bar(nt, "Solved") : ""}<div class="tiles">${tasks.map(task).join("")}</div></div>`;
 }
 /* Formal tab, blocks version (Counting first; docs/subjects/LAYERS.md → "Formal blocks"): a topic opts in with layers.formal.question.
@@ -76119,38 +76425,82 @@ function formalHTML(t, F, col){
   return `
     ${cqHTML(F.question, F.eyebrow || "The definition", def ? `<div class="f-def">${def}</div>` : "")}
     ${(F.vocab || []).length ? `<div id="f-vocab"><h2>${esc(F.vocabTitle || "The vocabulary")}</h2>${F.vocabIntro || ""}<div class="ideas vocab">${F.vocab.map(v => `<div class="idea" style="--c:var(--${col(v.c || "c1")})"><div class="key-sym m">${v.sym}</div><h3>${esc(v.term)}</h3><p>${v.def}</p>${v.was ? `<p class="voc-was"><span>You met it as</span>${v.was}</p>` : ""}</div>`).join("")}</div>${full}</div>` : `<div><h2>Formal statement</h2><span class="voice f">College level</span>${t.formal}</div>`}
-    ${mattersHTML(F.matters)}
+    ${whyHTML(F.matters, `<div id="f-mist" class="stakes f-mist">${whyKey("Where it goes wrong", "red")}<h2>${esc(F.mistakesTitle || "Common mistakes")}</h2>${F.mistakesLead ? `<p class="stakes-lead">${F.mistakesLead}</p>` : ""}<div class="mist">${t.mistakes.map(m => `<div><div class="w">${m.wrong}</div><div class="f">${m.fix}</div></div>`).join("")}</div></div>`, true)}
     ${F.setup ? `<div id="f-setup"><h2>${esc(F.setup.title)}</h2>${F.setupIntro || ""}<ol class="method">${F.setup.items.map((x, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div><p class="method-do">${x.say}</p>${x.math ? `<div class="lyr-math">${x.math}</div>` : ""}</div></li>`).join("")}</ol></div>` : ""}
-    <div id="f-mist" class="stakes f-mist"><h2>${esc(F.mistakesTitle || "Common mistakes")}</h2>${F.mistakesLead ? `<p class="stakes-lead">${F.mistakesLead}</p>` : ""}<div class="mist">${t.mistakes.map(m => `<div><div class="w">${m.wrong}</div><div class="f">${m.fix}</div></div>`).join("")}</div></div>
     <div id="f-prac"><h2>${esc(F.practiceTitle || "Your turn")}</h2>${F.practiceTip ? `<p class="prac-tip">${F.practiceTip}</p>` : ""}
       ${K.length ? `<div class="pz-prog" data-pz-prog><div class="pz-bar">${P.map((_, i) => `<span data-i="${i}"></span>`).join("")}</div><p class="pz-sum">Solved <b>0</b> of ${P.length}</p></div>` : ""}
       <div class="prac" data-pzs>${P.map(card).join("")}</div>
       ${K.length ? `<p class="pz-done" hidden>${F.practiceDone || `All ${P.length} solved. You can write a count the formal way.`}</p>` : ""}</div>`;
 }
+/* Colour cues (Concept and Intermediate, Devon Oct 2026): the numbers of a situation glow amber (.hl-n) and its objects
+   violet (.hl-o) (<mark> elements, so no "x span" rule restyles them), so the eye finds "what is counted" and "how many" first. Objects come from layers.concept.objects /
+   layers.build.objects (word forms as written: "seat", "seats"); numbers are found automatically. Math (.m), inputs,
+   pictures, headings' numerals in tiles and the live figures are left alone. Re-run on content drawn later (predict boxes). */
+const HL_SKIP = "h2,label,.wk-q>span,.m,.math,svg,input,textarea,button,code,pre,.key-sym,.cq-num,.tile-fig,.tl-when,.pz-sum,.wk-n,.eyebrow,.why-k,.lyr-src,.idea-term,.tile-role,.pz-badge,.goal-t>span,.method-why>span,a,td:first-child,.hl-n,.hl-o,.lyr-tabs,template";
+function hlText(root){
+  const host = root && root.closest && root.closest("[data-hl]"); if (!host) return;
+  const objs = JSON.parse(host.dataset.hl || "[]").map(w => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).sort((a, b) => b.length - a.length);
+  const re = new RegExp(`(\\$?(?<![\\w.,])\\d[\\d,]*(?:\\.\\d+)?(?:st|nd|rd|th|%)?(?![\\w]))${objs.length ? `|\\b(${objs.join("|")})\\b` : ""}`, "gi");
+  const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => !n.nodeValue.trim() || (n.parentElement && n.parentElement.closest(HL_SKIP)) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const nodes = []; while (tw.nextNode()) nodes.push(tw.currentNode);
+  nodes.forEach(n => { const t = n.nodeValue; re.lastIndex = 0; if (!re.test(t)) return; re.lastIndex = 0;
+    const f = document.createDocumentFragment(); let i = 0, m;
+    while ((m = re.exec(t))) { if (m.index > i) f.appendChild(document.createTextNode(t.slice(i, m.index)));
+      const sp = document.createElement("mark"); sp.className = m[1] ? "hl-n" : "hl-o"; sp.textContent = m[0]; f.appendChild(sp); i = m.index + m[0].length; }
+    if (i < t.length) f.appendChild(document.createTextNode(t.slice(i)));
+    n.parentNode.replaceChild(f, n); });
+}
+/* A worked solution shown one line at a time. A line with a predict question waits for the learner (or "Just show the line").
+   o.skip() when a line is shown without being predicted, o.end() once every line is out. Returns {all()} to reveal everything. */
+function wireWk(w, PR, o){
+  const rows = [...w.querySelectorAll(".wk-row")], n = w.querySelector(".wk-n"), nx = w.querySelector("[data-wk-next]"), al = w.querySelector("[data-wk-all]"), ans = w.querySelector(".ans"), ask = w.querySelector(".wk-ask");
+  let ended = false;
+  const upd = () => { const k = rows.filter(r => !r.hidden).length, done = k === rows.length; if (o.onShow) o.onShow(k); n.textContent = `${k} of ${rows.length}`; if (ans) ans.hidden = !done; al.hidden = done; nx.textContent = k ? "Show the next line" : "Show the first line";
+    const q = done ? null : PR[k];
+    if (q && ask && ask.dataset.i !== String(k)) { ask.dataset.i = k; ask.innerHTML = `<p class="wk-q"><span>Predict line ${k + 1}</span>${q.ask}</p>${pzHTML({ ...q, showLabel: "Just show the line", showNow: true })}`;
+      hlText(ask); pzWire(ask, q, { rightText: q.right || "Right. Here is the line.", right: () => setTimeout(() => { rows[k].hidden = false; upd(); }, 650), show: () => { if (o.skip) o.skip(); rows[k].hidden = false; upd(); } }); }
+    if (ask) ask.hidden = !q; nx.hidden = done || !!q;
+    if (done && !ended) { ended = true; if (o.end) o.end(); } };
+  nx.onclick = () => { const r = rows.find(r => r.hidden); if (r) r.hidden = false; upd(); };
+  al.onclick = () => { if (o.skip) o.skip(); rows.forEach(r => r.hidden = false); upd(); };
+  upd();
+  return { all: () => { if (rows.some(r => r.hidden)) { rows.forEach(r => r.hidden = false); upd(); } } };
+}
+/* Brings the whole lab into view under the sticky topic bar (scrollIntoView alone left its top hidden behind the bar),
+   then pings its outline. Used by Try-it chips and "Go to the model" buttons. */
+function labIntoView(pg){
+  const lab = pg.querySelector(".lab"); if (!lab) return;
+  const bar = pg.querySelector(".topic-bar"), calm = document.documentElement.hasAttribute("data-reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches;
+  lab.style.scrollMarginTop = ((bar ? bar.offsetHeight : 0) + 16) + "px";
+  lab.scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "start" });
+  lab.classList.add("ping"); setTimeout(() => lab.classList.remove("ping"), 1200);
+}
 // Wires the Intermediate blocks after they are drawn: jump links and the one-line-at-a-time worked example.
 function wireBlocks(body, pg, t){
   body.querySelectorAll("[data-jump]").forEach(b => b.onclick = () => { const el = body.querySelector("#" + b.dataset.jump); if (el) el.scrollIntoView({ behavior: document.documentElement.hasAttribute("data-reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); });
-  body.querySelectorAll("[data-wk]").forEach(w => {
-    const rows = [...w.querySelectorAll(".wk-row")], n = w.querySelector(".wk-n"), nx = w.querySelector("[data-wk-next]"), al = w.querySelector("[data-wk-all]"), ans = w.querySelector(".ans");
-    const PR = (t && t.layers && t.layers.build && t.layers.build.predict) || [], ask = w.querySelector(".wk-ask");
-    const upd = () => { const k = rows.filter(r => !r.hidden).length; n.textContent = `${k} of ${rows.length}`; const done = k === rows.length; ans.hidden = !done; al.hidden = done;
-      const q = done ? null : PR[k];
-      if (q && ask && ask.dataset.i !== String(k)) { ask.dataset.i = k; ask.innerHTML = `<p class="wk-q"><span>Predict line ${k + 1}</span>${q.ask}</p>${pzHTML({ ...q, showLabel: "Just show the line", showNow: true })}`;
-        pzWire(ask, q, { rightText: q.right || "Right. Here is the line.", right: () => setTimeout(() => { rows[k].hidden = false; upd(); }, 650), show: () => { rows[k].hidden = false; upd(); } }); }
-      if (ask) ask.hidden = !q; nx.hidden = done || !!q; };
-    nx.onclick = () => { const r = rows.find(r => r.hidden); if (r) r.hidden = false; upd(); };
-    al.onclick = () => { rows.forEach(r => r.hidden = false); upd(); };
-    upd();
-  });
+  const PRx = (t && t.layers && t.layers.build && t.layers.build.predict) || [];
+  body.querySelectorAll('[data-wk="ex"]').forEach(w => wireWk(w, PRx, {}));
+  const WK = t && t.layers && t.layers.concept && t.layers.concept.walk;
+  body.querySelectorAll("[data-walk]").forEach(w => { const host = body.querySelector(".walk-dm"), F = WK.lines.map(l => l.frame);
+    wireWk(w, WK.predict || [], { onShow: k => { const d = host && host._demo; if (d && d.goto) d.goto(k ? (F[k - 1] == null ? 0 : F[k - 1]) : 0); } }); });   // stand-alone worked example (lessons without build.exampleTask)
   body.querySelectorAll(".goal").forEach(g => { if ((goalDone[g.dataset.topic] || new Set()).has(g.dataset.i) || goalMet(g, LabKit.value(g.dataset.key))) { g.classList.add("done"); g.querySelector(".goal-box").textContent = "✓"; const a = g.querySelector(".goal-after"); if (a) a.hidden = false; (goalDone[g.dataset.topic] = goalDone[g.dataset.topic] || new Set()).add(g.dataset.i); } });
-  body.querySelectorAll("[data-to-lab]").forEach(b => b.onclick = () => { const lab = pg.querySelector(".lab"); if (!lab) return; lab.scrollIntoView({ behavior: document.documentElement.hasAttribute("data-reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); lab.classList.add("ping"); setTimeout(() => lab.classList.remove("ping"), 1200); });
+  body.querySelectorAll("[data-to-lab]").forEach(b => b.onclick = () => labIntoView(pg));
+  body.querySelectorAll("[data-goal-check]").forEach(b => b.onclick = () => {   // "Check my move": confirms against what the model shows now
+    const g = b.closest(".goal"), fb = g.querySelector(".goal-fb"), v = LabKit.value(g.dataset.key);
+    if (g.classList.contains("done") || goalMet(g, v)) { goalCheck(g.dataset.key, v); fb.textContent = "Done ✓ The model shows it."; fb.dataset.k = "ok"; return; }
+    const ny = g.querySelector(".goal-ny");
+    fb.innerHTML = ny ? ny.innerHTML : g.dataset.eq !== undefined ? `Not yet. The model shows ${v === undefined ? "nothing for this yet" : esc(String(v))}; this move needs ${g.dataset.eq}.` : "Not yet. Make the move in the model above, then check again.";
+    fb.dataset.k = "no"; });
   goalTally();
-  const TK = (t && t.layers && t.layers.build && t.layers.build.tasks) || [];
+  const TK = t && t.layers && t.layers.build ? buildTasks(t) : [];
   body.querySelectorAll("[data-tks]").forEach(w => {
     const tiles = [...w.querySelectorAll(".tk")], tally = () => { const s = tiles.filter(x => x.dataset.state === "solved").length; w.querySelector(".pz-sum b").textContent = s; tiles.forEach((x, i) => { const b = w.querySelector(`.pz-bar [data-i="${i}"]`); if (b) b.dataset.s = x.dataset.state === "open" ? "" : x.dataset.state; }); };
-    tiles.forEach(x => { const k = TK[+x.dataset.tk].check, badge = x.querySelector(".pz-badge"), after = x.querySelector(".tk-after");
-      const fin = st => { after.hidden = false; x.dataset.state = st; badge.textContent = st === "solved" ? "Solved ✓" : "Answer shown"; tally(); };
-      pzWire(x, k, { rightText: "Correct.", right: () => fin(x.dataset.state === "shown" ? "shown" : "solved"), show: () => fin("shown") }); });
+    tiles.forEach(x => { const T = TK[+x.dataset.tk], badge = x.querySelector(".pz-badge"), after = x.querySelector(".tk-after"), wk = x.querySelector(".tk-wk");
+      let skipped = false, lines = null;
+      // The first way to finish counts: a right answer (or every prediction right) = solved; Show the answer / reading all lines = shown.
+      const fin = st => { if (x.dataset.state !== "open") return; after.hidden = false; x.dataset.state = st; badge.textContent = st === "solved" ? "Solved ✓" : "Answer shown"; tally(); if (lines) lines.all(); };
+      if (wk) lines = wireWk(wk, T.predict || [], { skip: () => { skipped = true; }, end: () => fin((T.predict || []).some(Boolean) && !skipped ? "solved" : "shown") });
+      pzWire(x.querySelector(".tk-chk"), T.check, { rightText: "Correct.", right: () => fin("solved"), show: () => fin("shown") }); });
     tally();
   });
   const K = t && t.layers && t.layers.formal && t.layers.formal.checks;
@@ -76262,9 +76612,10 @@ function renderTopic(main){
     <span class="sp"></span>
     ${st === "mastered" ? '<span class="pill m">Mastered</span>' : st === "avail" ? '<span class="pill a">Ready to study</span>' : '<span class="pill l">Prerequisites open</span>'}
     <button type="button" class="btn ${st === "mastered" ? "ghost" : "good"}" id="mast">${st === "mastered" ? "Unmark mastered" : "Mark as mastered"}</button>
+    ${next && st === "mastered" ? `<button type="button" class="btn next-btn" data-t="${next}" title="Next lesson: ${esc((T[next] || { title: next }).title)}"><span class="nb-k">Next lesson</span><span class="nb-t">${esc((T[next] || { title: next }).title)}</span> ▶</button>` : ""}
   </div>
   <div class="wrap">
-    ${layered ? `<div class="lyr-tabs" role="tablist" aria-label="Lesson level">${LAYERS.map(([k, name, sub], i) => `<button type="button" role="tab" class="lyr-tab" data-layer="${k}" aria-selected="${k === layer}" aria-controls="layer"><span class="lyr-n">${i + 1}</span><span><b>${name}</b><span>${sub}</span></span></button>`).join("")}</div>` : ""}
+    ${layered ? `<div class="lyr-tabs win" role="tablist" aria-label="Lesson level">${LAYERS.map(([k, name, sub], i) => `<button type="button" role="tab" class="lyr-tab" data-layer="${k}" aria-selected="${k === layer}" aria-controls="layer"><span class="lyr-n"><i>${i + 1}</i></span><span><b>${name}</b><span>${sub}</span></span></button>`).join("")}</div>` : ""}
     <header class="intro">
       <div><p class="eyebrow">${t.eyebrow}</p><h1>${t.hero}</h1>
         <p class="lede" id="lede">${layered ? ledeOf(layer) : t.lede}</p>
@@ -76282,7 +76633,8 @@ function renderTopic(main){
   pg.scrollTop = 0;
   $("#back", pg).onclick = () => go({ view: "math", field: f, topic: null });
   $("#navtoggle2", pg).onclick = () => main.parentElement.classList.toggle("navopen");
-  $("#mast", pg).onclick = () => { if (mastered.has(id)) mastered.delete(id); else mastered.add(id); saveMastered(); const y = pg.scrollTop; render(); const np = $(".topic"); if (np) np.scrollTop = y; };
+  $("#mast", pg).onclick = () => { if (mastered.has(id)) mastered.delete(id); else mastered.add(id); saveMastered(); const y = pg.scrollTop, now = mastered.has(id); render(); const np = $(".topic"); if (np) np.scrollTop = y;
+    const nb = np && np.querySelector(".next-btn"); if (nb && now) nb.classList.add("nudge"); };   // just mastered: the Next button glows once
   if (layered) {
     const body = $("#layer", pg);
     const draw = L => {
@@ -76290,12 +76642,13 @@ function renderTopic(main){
       pg.querySelectorAll(".lyr-tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.layer === L)));
       $("#lede", pg).innerHTML = ledeOf(L);
       body.innerHTML = layerHTML(t, L);
+      const hlObjs = L === "concept" || L === "build" ? (((t.layers[L] || {}).objects) || []) : null;   // colour cues on Concept and Intermediate
+      if (hlObjs && (t.layers.concept.objects || t.layers.build.objects)) { body.dataset.hl = JSON.stringify(hlObjs); hlText(body); const ld = $("#lede", pg); ld.dataset.hl = body.dataset.hl; hlText(ld); } else { delete body.dataset.hl; delete $("#lede", pg).dataset.hl; }
       if (window.InquireDemo) InquireDemo.mountAll(body);
       wireBlocks(body, pg, t);
       body.querySelectorAll("[data-lab]").forEach(b => b.onclick = () => {   // "Try it" chips: drive the lab, then bring it into view
         if (!LabKit.drive(b.dataset.lab)) return;
-        const lab = pg.querySelector(".lab"), calm = document.documentElement.hasAttribute("data-reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches;
-        lab.scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "start" }); lab.classList.add("ping"); setTimeout(() => lab.classList.remove("ping"), 1200);
+        labIntoView(pg);
       });
       body.querySelectorAll("[data-ans]").forEach(b => b.onclick = () => { const a = b.nextElementSibling; a.hidden = !a.hidden; b.textContent = a.hidden ? "Show answer" : "Hide answer"; });
       window.dispatchEvent(new CustomEvent("inquire:layer", { detail: { topic: id, layer: L } }));

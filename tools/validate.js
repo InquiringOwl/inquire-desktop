@@ -214,8 +214,13 @@ for (const [id, t] of Object.entries(T)) {
         if (arr(LW, 'concept.stakes.items', S.items, 2)) S.items.forEach((x, i) => { checkText(LW, `concept.stakes.items[${i}].role`, x.role); nonEmpty(LW, `concept.stakes.items[${i}].text`, x.text); checkHtml(LW, `concept.stakes.items[${i}].text`, x.text); });
         if (S.try !== undefined) tryOk('concept.stakes.try', S.try); }
       if (arr(LW, 'concept.timeline', C.timeline, 3)) { if (C.timeline.length > 5) err(LW, 'concept.timeline has more than 5 beats'); C.timeline.forEach((x, i) => { checkText(LW, `concept.timeline[${i}].when`, x.when); nonEmpty(LW, `concept.timeline[${i}].what`, x.what); checkHtml(LW, `concept.timeline[${i}].what`, x.what); }); }
+      if (C.walk !== undefined) { const K = C.walk || {}; nonEmpty(LW, 'concept.walk.prompt', K.prompt); checkHtml(LW, 'concept.walk.prompt', K.prompt); nonEmpty(LW, 'concept.walk.answer', K.answer); checkHtml(LW, 'concept.walk.answer', K.answer);
+        if (arr(LW, 'concept.walk.lines', K.lines, 2)) K.lines.forEach((l, i) => { nonEmpty(LW, `concept.walk.lines[${i}].math`, l.math); checkHtml(LW, `concept.walk.lines[${i}].math`, l.math); if (l.note !== undefined) checkHtml(LW, `concept.walk.lines[${i}].note`, l.note); if (l.frame !== undefined && !Number.isInteger(l.frame)) err(LW, `concept.walk.lines[${i}].frame must be a frame number`); });
+        if (K.predict !== undefined && (!Array.isArray(K.predict) || K.predict.length > (K.lines || []).length)) err(LW, 'concept.walk.predict must have at most one item per line');
+        if (K.demo !== undefined && !['dots', 'range', 'tens'].includes((K.demo || {}).kind)) err(LW, 'concept.walk.demo.kind must be dots, range or tens'); }
       (C.examples || []).forEach((x, i) => { if (x.figure !== undefined) checkText(LW, `concept.examples[${i}].figure`, x.figure); else err(LW, `concept.examples[${i}].figure is missing (the tile's headline number)`); if (x.try !== undefined) tryOk(`concept.examples[${i}].try`, x.try); });
     }
+    for (const [k, o] of [['concept', C], ['build', B]]) if (o && o.objects !== undefined && (!Array.isArray(o.objects) || o.objects.some(w => typeof w !== 'string' || !/^[A-Za-z][A-Za-z' -]*$/.test(w)))) err(LW, `${k}.objects must be a list of words (the things counted, as written on the page)`);
     if (B) {
       nonEmpty(LW, 'build.lede', B.lede);
       for (const k of ['intro', 'bridge']) { nonEmpty(LW, `build.${k}`, B[k]); checkHtml(LW, `build.${k}`, B[k]); }

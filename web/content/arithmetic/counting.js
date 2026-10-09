@@ -67,6 +67,33 @@ ARITH["counting"] = {
       heading: "What are counting and the natural numbers?",
       question: { text: "How many?", sub: `Every time you check a count, you do the same three things. Watch each one happen in the model above, then try it yourself.`, figure: { sym: `<i>n</i>`, value: "17", cap: "the count", echo: "n" } },
       ideasTitle: "Three ideas, all in the model",
+      objects: ["dot", "dots", "seat", "seats", "friend", "friends", "tablet", "tablets", "bottle", "sponge", "sponges", "drawer", "cases", "stacks", "deer", "ballots", "batches", "twenties", "tens", "fives", "bills", "tokens", "token", "sheep", "marks", "notches", "bone"],
+      walk: { title: "Count it together: a row of seats",
+        lead: `One situation, step by step. Try each question before you show the next line.`,
+        prompt: `Your group of 9 friends is going to a show. Your row has seats numbered 14 to 22. Is there a seat for every friend?`,
+        demo: { kind: "range", from: 14, to: 22, gaps: true, unit: "seat", alt: "Seats 14 to 22. Step by step each seat gets a counting number, 1 to 9; the last number, 9, is the count; then the 8 spaces between seats are marked." },
+        lines: [
+          { math: `14, 15, 16, …, 22`, note: `Here is the row. Each box is one seat.`, frame: 0 },
+          { math: `14 → 1,  15 → 2`, note: `Give the first seat the number 1, the next seat 2.`, frame: 2 },
+          { math: `22 → 9`, note: `Keep going, one seat and one number at a time. No seat is skipped. No seat gets two numbers.`, frame: 9 },
+          { math: `<span class="c1"><i>n</i></span> = 9`, note: `The last number you said is how many seats there are: 9. Yes, a seat for every friend.`, frame: 10 },
+          { math: `22 − 14 = 8`, note: `A shortcut gives 8. It counts the spaces between seats, not the seats.`, frame: 11 },
+          { math: `22 − 14 + 1 = 9`, note: `Add back the first seat, and the shortcut agrees: 9 seats.`, frame: 10 }
+        ],
+        predict: [null,
+          { ask: `Seat 14 gets the number 1. What number does seat 15 get?`, parts: [{ label: "seat 15 gets", ans: 2 }], hint: `One more seat, one more number.` },
+          { ask: `Keep matching. What number does seat 22 get?`, parts: [{ label: "seat 22 gets", ans: 9 }], hint: `Say them in order: 14 gets 1, 15 gets 2, 16 gets 3 … all the way to 22.` },
+          { ask: `So how many seats are in the row?`, choices: [
+            { t: "9, the last number said", ok: true },
+            { t: "22, the last seat number", why: "22 is the seat's name, not the count. The count is the last counting number you said." },
+            { t: "We have to add the numbers up", why: "No adding needed. The last number said is already the total." }
+          ], hint: `Look at the number seat 22 got.` },
+          { ask: `A friend says: "22 − 14 = 8, so there are 8 seats." Why is that one short?`, choices: [
+            { t: "It counts the spaces between seats", ok: true },
+            { t: "Seat 14 should not count", why: "Seat 14 is in the row. It got the number 1." },
+            { t: "Subtracting is always wrong", why: "22 − 14 really is 8. It just counts something else: the spaces." }
+          ], hint: `Seats 14 and 15 are two seats, with one space between them.` }],
+        answer: `The row has <span class="m c1">9</span> seats, one for each of the 9 friends.` },
       ideas: [
         { c: "c1", title: "One number for each dot", term: "one-to-one matching", text: `Touch each dot once and say the next number. No dot gets two numbers. No dot gets skipped.`,
           demo: { kind: "dots", slots: 5, lit: 5, sweep: true, alt: "Five dots light up one at a time and are numbered 1 to 5." }, try: { label: "Press Count aloud", lab: "play" } },
@@ -75,7 +102,7 @@ ARITH["counting"] = {
         { c: "c2", title: "There is always a next one", term: "successor", text: `After any number comes one more. After 99 comes 100. After a million comes a million and one. The dashed dot is the next one.`,
           demo: { kind: "dots", slots: 8, grow: [4, 5, 6], alt: "A dashed dot waits after the last dot. When it fills in, a new dashed dot appears after it." }, try: { label: "Add one more dot", lab: "plus" } }
       ],
-      matters: { title: "Why counting comes first", text: `<p>Counting is the first thing in math you have to get exactly right. Almost everything else is built on it. Adding is counting on. Multiplying is counting groups. Measuring is counting units.</p><p>So when a count is right, the math built on it can be trusted. When a count is off by just one, every answer that uses it is off too.</p>` },
+      matters: { title: "Why counting comes first", text: `<p>Counting is the first thing in math you have to get <b>exactly right</b>. Almost everything else is built on it.</p><ul class="why-chips"><li><b>Adding</b> is counting on</li><li><b>Multiplying</b> is counting groups</li><li><b>Measuring</b> is counting units</li></ul><p>So when a count is right, the math built on it can be <b>trusted</b>. When a count is <b>off by just one</b>, every answer that uses it is off too.</p>` },
       stakes: { title: "Where counting goes wrong", lead: `Skip one thing, or count one twice, and your total is off by one.`, items: [
         { role: "Pharmacy", text: `A bottle that is one tablet light.` },
         { role: "Operating room", text: `A sponge left inside a patient. The team counts before closing, and closing waits until the count is right. With 19 counted out of 20, the dashed dot is where the last sponge should be.` },
@@ -113,27 +140,17 @@ ARITH["counting"] = {
     build: {
       task: { text: "Count it so the total can be trusted.", sub: `The same five moves work for any group, from 9 seats in a row to 1,214 ballots. Try each one in the model above as you go.`,
         figure: { sym: `<i>n</i>`, value: "17", cap: "in the model", echo: "n" },
-        jump: [{ label: "The method", to: "b-method" }, { label: "Worked example", to: "b-example" }, { label: "Everyday tasks", to: "b-tasks" }] },
+        jump: [{ label: "The method", to: "b-method" }, { label: "Everyday tasks", to: "b-tasks" }] },
       keysTitle: "What the model shows",
       keyTry: [{ label: "Set the count to 30", lab: "set:30" }, { label: "Press +1", lab: "plus" }, null],
-      goalsIntro: `Three of the steps have a move for you to make in the model. Each one ticks itself off when the model shows it.`,
+      goalsIntro: `Three of the steps have a move for you to make in the model. Make the move, then press <b>Check my move</b>. A move also ticks itself off as soon as the model shows it.`,
+      objects: ["object", "objects", "dot", "dots", "seat", "seats", "rider", "riders", "day", "days", "item", "items", "stitch", "stitches", "reps", "fives", "frame", "frames", "ballots"],
       stepGoal: [null,
-        { key: "aloud", min: 1, text: `Press <b>Count aloud</b> and watch each dot get exactly one number.`, after: `One number per dot, in order. That is one-to-one matching.` },
+        { key: "aloud", min: 1, notYet: `Not yet. Press <b>Count aloud</b> in the model and let it give every dot a number.`, text: `Press <b>Count aloud</b> and watch each dot get exactly one number.`, after: `One number per dot, in order. That is one-to-one matching.` },
         null,
-        { key: "counted", eq: 23, text: `Set the slider to 23 yourself, then press <b>Count aloud</b>. The last number said should be 23.`, after: `The last number said is the count: <span class="m c1"><i>n</i> = 23</span>.` },
+        { key: "counted", eq: 23, notYet: `Not yet. Set the slider to 23, then press <b>Count aloud</b> and let it finish.`, text: `Set the slider to 23 yourself, then press <b>Count aloud</b>. The last number said should be 23.`, after: `The last number said is the count: <span class="m c1"><i>n</i> = 23</span>.` },
         { key: "n", eq: 34, text: `Make the model show 34 dots. How many full frames is that, and how many left over?`, after: `3 full frames and 4 more: <span class="m">30 + 4 = 34</span>.` }],
-      predict: [null,
-        { ask: `Match the seats to 1, 2, 3, …, starting with seat 14. Which number does seat 22 get?`, parts: [{ label: "seat 22 gets", ans: 9 }], hint: `Seat 14 gets 1, seat 15 gets 2. Keep going one seat at a time.` },
-        null,
-        { ask: `A shortcut some people try: what is 22 − 14?`, parts: [{ label: "22 − 14", ans: 8 }], hint: `Count up from 14 to 22 in steps of one.` },
-        { ask: `You counted 9 seats, but 22 − 14 is 8. Why is the shortcut one short?`, choices: [
-          { t: "It counts the gaps between the seats, not the seats.", ok: true },
-          { t: "Seat 14 should not be counted.", why: "Seat 14 is in the row, so it gets a number. Look again at the matching in line 2." },
-          { t: "Subtraction always gives one too few.", why: "Not always: 22 − 14 = 8 is right as a subtraction. The question is what it counts." }
-        ], hint: `Seats 14 and 15 have one gap between them but are two seats.` }],
-      matters: { title: "Why a method beats a guess", text: `<p>Anyone can count a handful of things. Mistakes start when the group is big, or the things look alike, or someone talks to you halfway through.</p><p>A method is the same few moves every time. It lets you stop, pick up where you left off, and check your own count.</p>` },
-      exampleTip: `Try it yourself first, then show one line at a time.`,
-      exampleTry: { label: "Set the model to 9", lab: "set:9" },
+      matters: { title: "Why a method beats a guess", text: `<p>Anyone can count a handful of things. Mistakes start when the group is big, or the things look alike, or someone talks to you halfway through.</p><ul class="why-chips"><li><b>Big</b> groups</li><li><b>Look-alike</b> things</li><li><b>Interruptions</b></li></ul><p>A method is <b>the same few moves every time</b>. It lets you stop, pick up where you left off, and check your own count.</p>` },
       lede: `To count, match each object to the next counting number, one at a time, and read the last number as the total.`,
       intro: `<p>The model above shows objects as dots in a ten-frame. Each dot gets one counting number, and the <span class="c1">count</span> is the last number said. Adding one more dot moves the count to its <span class="c2">successor</span>, one more.</p>`,
       stepWhy: [
@@ -146,17 +163,30 @@ ARITH["counting"] = {
       bridge: `<p>The theater row used the two habits that matter most: match each item once, and when counting a range, include both ends. Here is where the same moves show up.</p>`,
       tasksTitle: "Everyday tasks: solve them",
       tasks: [
-        { task: "Checking that everyone is back on the bus", check: { q: `Riders sit in seats 12 through 40, every seat full. How many riders should be back on the bus?`, parts: [{ label: "riders", ans: 29 }], hint: `Both seat 12 and seat 40 count, so use <span class="m"><i>b</i> − <i>a</i> + 1</span>.` }, figure: "1 per rider", link: `Give each person one number as they board, the way each seat got one number from 1 to 9 in the worked example.` },
-        { task: "Counting the days of a trip on a calendar", check: { q: `A trip runs from the 3rd to the 10th of the month, counting both days. How many days is the trip?`, parts: [{ label: "days", ans: 8 }], hint: `List them: 3rd, 4th, … 10th. Or use <span class="m"><i>b</i> − <i>a</i> + 1</span>.` }, figure: "8 days", link: `A trip from the 3rd to the 10th, both days included, is <span class="m">10 − 3 + 1 = 8</span> days. It is the same rule as the last line of the worked example.` },
-        { task: "Making sure a bag has the right number of items", check: { q: `You take items out one at a time and say 1, 2, 3, … The bag is empty when you say 14. How many items were in the bag?`, parts: [{ label: "items", ans: 14 }], hint: `The last number said is the count.` }, figure: "1 at a time", link: `Take items out one at a time and count as you go (steps 1 and 2). The last number said is how many there are (step 4).` },
-        { task: "Counting stitches or rows when knitting", check: { q: `A row has 47 stitches, with a marker after every 10. How many full groups of 10 are there, and how many stitches are left over?`, parts: [{ label: "full groups", ans: 4 }, { label: "left over", ans: 7 }], hint: `Count by tens: 10, 20, 30, 40. Then count the rest by ones.` }, figure: "10 a group", try: { label: "Show 30 in frames", lab: "set:30" }, link: `Place a marker every 10 stitches, like filling a ten-frame (step 5). A lost count means recounting one group, not the whole row.` },
-        { task: "Counting reps and sets during exercise", check: { q: `You count reps by fives: 5, 10, 15, … and stop at 45. How many fives did you say?`, parts: [{ label: "fives", ans: 9 }], hint: `Count the numbers you said, one for each five.` }, figure: "by fives", link: `Count by fives or tens when the numbers are large, as in practice item 1, and say each number once per rep.` }
+        { task: "Checking that everyone is back on the bus", check: { q: `Riders sit in seats 12 through 40, every seat full. How many riders should be back on the bus?`, parts: [{ label: "riders", ans: 29 }], hint: `Both seat 12 and seat 40 count, so use <span class="m"><i>b</i> − <i>a</i> + 1</span>.` }, figure: "1 per rider",
+          demo: { kind: "range", from: 12, to: 40, gaps: true, unit: "seat", alt: "Seats 12 to 40 get counting numbers 1 to 29; the gaps between seats number one fewer, 28." },
+          lines: [{ math: `12, 13, 14, …, 40`, note: "Every seat from 12 to 40 has one rider." }, { math: `40 − 12 = 28`, note: "The difference counts the gaps between seats, one short." }, { math: `40 − 12 + 1 = 29`, note: "Both end seats count, so add one." }],
+          predict: [null, { ask: `First the shortcut: what is 40 − 12?`, parts: [{ label: "40 − 12", ans: 28 }], hint: `40 − 10 = 30, then take away 2 more.` }], link: `Give each person one number as they board, the way each seat got one number from 1 to 9 in the theater row on the Concept tab.` },
+        { task: "Counting the days of a trip on a calendar", check: { q: `A trip runs from the 3rd to the 10th of the month, counting both days. How many days is the trip?`, parts: [{ label: "days", ans: 8 }], hint: `List them: 3rd, 4th, … 10th. Or use <span class="m"><i>b</i> − <i>a</i> + 1</span>.` }, figure: "8 days",
+          demo: { kind: "range", from: 3, to: 10, gaps: true, unit: "day", alt: "Calendar days 3 to 10 get counting numbers 1 to 8; the 7 gaps between them are the nights." },
+          lines: [{ math: `3, 4, 5, 6, 7, 8, 9, 10`, note: "List the days, both ends included." }, { math: `10 − 3 = 7`, note: "The difference counts the nights between the days." }, { math: `10 − 3 + 1 = 8`, note: "Add one for the first day: 8 days." }],
+          predict: [null, { ask: `What is 10 − 3? (It counts something, but not the days.)`, parts: [{ label: "10 − 3", ans: 7 }], hint: `Count up from 3 to 10 in steps of one.` }], link: `A trip from the 3rd to the 10th, both days included, is <span class="m">10 − 3 + 1 = 8</span> days. It is the same rule as the last line of the theater row on the Concept tab.` },
+        { task: "Making sure a bag has the right number of items", check: { q: `You take items out one at a time and say 1, 2, 3, … The bag is empty when you say 14. How many items were in the bag?`, parts: [{ label: "items", ans: 14 }], hint: `The last number said is the count.` }, figure: "1 at a time",
+          demo: { kind: "dots", slots: 14, lit: 14, sweep: true, big: true, ms: 260, alt: "Fourteen items each get the next number as they come out of the bag; the last number said, 14, is the count." },
+          lines: [{ math: `1, 2, 3, …, 14`, note: "One number for each item as it comes out." }, { math: `<span class="c1"><i>n</i></span> = 14`, note: "The last number said is the count." }], link: `Take items out one at a time and count as you go (steps 1 and 2). The last number said is how many there are (step 4).` },
+        { task: "Counting stitches or rows when knitting", check: { q: `A row has 47 stitches, with a marker after every 10. How many full groups of 10 are there, and how many stitches are left over?`, parts: [{ label: "full groups", ans: 4 }, { label: "left over", ans: 7 }], hint: `Count by tens: 10, 20, 30, 40. Then count the rest by ones.` }, figure: "10 a group",
+          demo: { kind: "tens", n: 47, unit: "stitch", alt: "Four groups of ten stitches are counted 10, 20, 30, 40, then 7 more stitches: 47." },
+          lines: [{ math: `10, 20, 30, 40`, note: "Count the full groups by tens: 4 groups." }, { math: `41, 42, 43, 44, 45, 46, 47`, note: "Count the rest by ones: 7 left over." }, { math: `4 × 10 + 7 = 47`, note: "4 tens and 7 ones make 47." }],
+          predict: [null, { ask: `After the 4 full groups (40 stitches), how many stitches are left in the row of 47?`, parts: [{ label: "left over", ans: 7 }], hint: `Count on from 40 to 47.` }], try: { label: "Show 30 in frames", lab: "set:30" }, link: `Place a marker every 10 stitches, like filling a ten-frame (step 5). A lost count means recounting one group, not the whole row.` },
+        { task: "Counting reps and sets during exercise", check: { q: `You count reps by fives: 5, 10, 15, … and stop at 45. How many fives did you say?`, parts: [{ label: "fives", ans: 9 }], hint: `Count the numbers you said, one for each five.` }, figure: "by fives",
+          demo: { kind: "range", from: 5, to: 45, step: 5, unit: "five", alt: "The numbers 5, 10, 15 up to 45 each get a counting number, 1 to 9: nine fives." },
+          lines: [{ math: `5, 10, 15, 20, 25, 30, 35, 40, 45`, note: "Write every number you said." }, { math: `1, 2, 3, 4, 5, 6, 7, 8, 9`, note: "Match each one to a counting number." }, { math: `45 ÷ 5 = 9`, note: "Each five is one number said: 9 fives." }], link: `Count by fives or tens when the numbers are large, as in practice item 1, and say each number once per rep.` }
       ]
     },
     formal: {
       question: { text: "What does “how many” mean, exactly?", sub: `You can count, and you can count so the total holds up. Here are the words a textbook uses for the same ideas, and how to write a counting problem out in full.`,
         figure: { sym: `|<i>A</i>|`, value: "17", cap: "the cardinality", echo: "n" },
-        jump: [{ label: "Vocabulary", to: "f-vocab" }, { label: "Writing it out", to: "f-setup" }, { label: "Common mistakes", to: "f-mist" }, { label: "Practice", to: "f-prac" }] },
+        jump: [{ label: "Vocabulary", to: "f-vocab" }, { label: "Where it goes wrong", to: "f-mist" }, { label: "Writing it out", to: "f-setup" }, { label: "Practice", to: "f-prac" }] },
       vocabTitle: "From your words to the textbook's",
       vocabIntro: `<p>Each card is an idea you already used in the Concept and Intermediate tabs, with its proper name and its exact meaning.</p>`,
       vocab: [
@@ -167,7 +197,7 @@ ARITH["counting"] = {
         { c: "c2", sym: `<i>S</i>(<i>n</i>) = <i>n</i> + 1`, term: "Successor function", def: `Sends each natural number to the next one. Different numbers have different successors, and the first natural number is not the successor of any number.`, was: "there is always a next one" },
         { c: "c2", sym: `<i>P</i>(1), <i>P</i>(<i>k</i>) ⇒ <i>P</i>(<i>k</i> + 1)`, term: "Axiom of induction", def: `A set of natural numbers that contains the first natural number, and contains the successor of each of its members, contains every natural number.`, was: "after every number comes one more, without end" }
       ],
-      matters: { title: "Why the exact words matter", text: `<p>In everyday talk, “counting numbers” and “natural numbers” mean the same thing. In a textbook, one word can decide whether 0 is included, and that changes answers. How many natural numbers are less than 10? It is 9 if ℕ starts at 1, and 10 if it starts at 0.</p><p>Exact words let you read any book, follow a proof, and write an answer someone else can check.</p>` },
+      matters: { title: "Why the exact words matter", text: `<p>In everyday talk, “counting numbers” and “natural numbers” mean the same thing. In a textbook, <b>one word can decide whether 0 is included</b>, and that changes answers.</p><ul class="why-chips"><li>How many natural numbers are less than 10?</li><li><b>9</b> if ℕ starts at 1</li><li><b>10</b> if ℕ starts at 0</li></ul><p>Exact words let you read any book, follow a proof, and write an answer <b>someone else can check</b>.</p>` },
       setupIntro: `<p>The theater row from the Intermediate tab, written the way a textbook would.</p>`,
       mistakesTitle: "Where formal answers go wrong",
       mistakesLead: `Most wrong answers here are off by one. The set is named carelessly, an end is dropped, or the gaps are counted instead of the things.`,
