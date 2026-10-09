@@ -16,6 +16,7 @@ L["integers"] = k => {
   k.button("Replay", restart, "btn ghost");
   let lo = -12, hi = 12;
   k.loop(dt => {
+    k.publish("result", op === "+" ? a + b : op === "-" ? a - b : a * b);   // lesson figures + Your move goals
     clock += dt; c.begin(); const { w, h } = c;
     const res = op === "+" ? a + b : op === "-" ? a - b : a * b;
     // hops: list of [from, to]
@@ -64,6 +65,7 @@ L["factors"] = k => {
   c.cv.addEventListener("pointerdown", e => { const p = c.xy(e); rects.forEach((r, i) => { if (p.x >= r.x - 6 && p.x <= r.x + r.w + 6 && p.y >= r.y - 20 && p.y <= r.y + r.h + 24) pick = i; }); });
   k.hint("Click a rectangle to select its factor pair");
   k.loop(() => {
+    { let c = 0; for (let i = 1; i <= n; i++) if (n % i === 0) c++; k.publish("count", c); }   // lesson figures + Your move goals
     c.begin(); const { w, h } = c;
     const pairs = []; for (let a = 1; a * a <= n; a++) if (n % a === 0) pairs.push([a, n / a]);
     const sel = pick % pairs.length;
@@ -106,6 +108,7 @@ L["exponents"] = k => {
   k.check("Log scale", false, v => log = v);
   const val = (B, N) => (B === 0 && N <= 0) ? (N === 0 ? 1 : NaN) : Math.pow(B, N);
   k.loop(dt => {
+    k.publish("power", b === 0 && n < 0 ? null : Math.pow(b, n));   // lesson figures + Your move goals
     grow = Math.min(1, grow + dt * 1.6);
     c.begin(); const { w, h } = c;
     // expanded product
@@ -156,6 +159,7 @@ L["modular"] = k => {
   k.slider(`<span class="c3"><i>b</i></span>`, 0, 40, 1, b, v => { b = v; re(); });
   k.button("Replay", re, "btn ghost");
   k.loop(dt => {
+    k.publish("result", (op === "+" ? a + b : a * b) % m); k.publish("total", op === "+" ? a + b : a * b); k.publish("laps", Math.floor((op === "+" ? a + b : a * b) / m));   // lesson figures + Your move goals
     clock += dt; c.begin(); const { w, h } = c;
     const total = op === "+" ? a + b : a * b;
     const cx = w / 2, cy = h / 2 + 14, R = Math.min(w, h) / 2 - 60;
@@ -226,7 +230,7 @@ L["primes"] = k => {
       const depth = f.length;
       const rowH = Math.min(58, (h - 60) / Math.max(1, depth));
       const stepX = Math.min(70, (w - 120) / Math.max(1, depth));
-      let x = 60 + (w - 120 - stepX * (depth - 1)) / 2 - stepX * .3, y = 34, cur = N;
+      let x = 60 + (w - 120 - stepX * (depth - 1)) / 2 - stepX * .3, y = 64, cur = N;   // the root sits below the mode buttons
       const fsz = Math.max(12, Math.min(18, rowH * .32));
       for (let i = 0; i < depth; i++) {
         const isLast = i === depth - 1;
@@ -258,6 +262,7 @@ L["fractions"] = k => {
   k.slider(`<span class="c4"><i>k</i></span>`, 1, 6, 1, s, v => s = v);
   void sn;
   k.loop(dt => {
+    k.publish("value", n / dd); k.publish("top", n * s); k.publish("bottom", dd * s); k.publish("pair", 100 * n + dd);   // lesson figures + Your move goals
     dn = lerp(dn, n, Math.min(1, dt * 10));
     c.begin(); const { w, h } = c;
     const units = Math.max(1, Math.ceil(n / dd));
@@ -295,6 +300,7 @@ L["roots"] = k => {
   k.button("Next guess", () => it = Math.min(it + 1, 6));
   k.button("Reset guesses", () => it = 0, "btn ghost");
   k.loop(dt => {
+    k.publish("floor", Math.floor(Math.sqrt(A))); k.publish("guesses", it);   // lesson figures + Your move goals
     dA = lerp(dA, A, Math.min(1, dt * 8));
     c.begin(); const { w, h } = c;
     const r = Math.sqrt(A), s = Math.floor(r), extra = A - s * s;
@@ -337,6 +343,7 @@ L["gcf-lcm"] = k => {
   k.slider(`<span class="c3"><i>b</i></span>`, 1, 60, 1, b, v => { b = v; t0 = clock; });
   k.button("Replay", () => t0 = clock, "btn ghost");
   k.loop(dt => {
+    { let x = a, y = b; while (y) [x, y] = [y, x % y]; k.publish("gcf", x); k.publish("lcm", a * b / x); k.publish("pair", 100 * a + b); }   // lesson figures + Your move goals
     clock += dt; c.begin(); const { w, h } = c;
     const sq = []; let x = 0, y = 0, W = a, H = b; const steps = [];
     while (W > 0 && H > 0) { if (W >= H) { const q = Math.floor(W / H); for (let i = 0; i < q; i++) sq.push([x + i * H, y, H]); steps.push([W, H, q, W - q * H]); x += q * H; W -= q * H; } else { const q = Math.floor(H / W); for (let i = 0; i < q; i++) sq.push([x, y + i * W, W]); steps.push([H, W, q, H - q * W]); y += q * W; H -= q * W; } }
@@ -366,6 +373,7 @@ L["decimals"] = k => {
   k.button("+0.1", () => { v = Math.min(100, v + 10); sync(); }, "btn-s"); k.button("+0.01", () => { v = Math.min(100, v + 1); sync(); }, "btn-s"); k.button("−0.01", () => { v = Math.max(0, v - 1); sync(); }, "btn-s");
   const sl = k.ctl.querySelector("input[type=range]"); const sync = () => { sl.value = v; sl.dispatchEvent(new Event("input")); };
   k.loop(dt => {
+    k.publish("decimal", v / 100);   // lesson figures + Your move goals
     dv = lerp(dv, v, Math.min(1, dt * 12));
     c.begin(); const { w, h } = c;
     const size = Math.min(h - 110, w * .5), cell = size / 10, ox = 36, oy = 40;
@@ -403,6 +411,7 @@ L["mixed-numbers"] = k => {
   k.slider(`numerator`, 1, 40, 1, n, v => { n = v; fill = 0; });
   k.slider(`<span class="c2">denominator <i>d</i></span>`, 2, 8, 1, dd, v => { dd = v; fill = 0; });
   k.loop(dt => {
+    k.publish("whole", Math.floor(n / dd)); k.publish("rem", n % dd); k.publish("pair", 100 * n + dd);   // lesson figures + Your move goals
     fill = Math.min(n, fill + dt * (k.reduce ? 999 : Math.max(6, n / 1.5)));
     c.begin(); const { w, h } = c;
     const pies = Math.ceil(n / dd), cols = Math.min(pies, Math.max(1, Math.floor((w - 40) / 110))), rows = Math.ceil(pies / cols);

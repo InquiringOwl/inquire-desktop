@@ -1,32 +1,67 @@
-# content: 21f2d8e608cc
+# content: 18878d3e1a33
 # primes: Prime Numbers & Prime Factorization
-same("example", 2*2*2*45, 360); same("example", 3*3*5, 45)
-check("example", factorint(360) == {2: 3, 3: 2, 5: 1}, "360 = 2^3 3^2 5")
-same("example", 8*9*5, 360)
-same("example", len(divisors(360)), 24)
-same("example", (3 + 1)*(2 + 1)*(1 + 1), 24)
-check("practice[0]", not isprime(51) and 3*17 == 51 and 5 + 1 == 6, "51 = 3*17")
+# One situation on every tab: 72 cookies (six dozen, a tray of 8 rows of 9) and its box sizes.
+_box72 = divisors(72)
+
+# example (and the Formal "writing it out" setup)
+same("example", 6 * 12, 72); same("example", 8 * 9, 72)
+check("example", factorint(8) == {2: 3} and factorint(9) == {3: 2}, "8 = 2^3, 9 = 3^2")
+check("example", factorint(72) == {2: 3, 3: 2}, "72 = 2^3 3^2")
+same("example", 2 * 36, 72); check("example", factorint(36) == {2: 2, 3: 2}, "36 = 2*2*3*3, no new prime")
+same("example", (3 + 1) * (2 + 1), len(_box72)); same("example", len(_box72), 12)
+same("example", 3 * 2, 6)
+check("example", all(72 % s == 0 for s in [1, 8, 9]) and all(s % 2 or s % 3 for s in [1, 8, 9]), "1, 8, 9 divide 72 and lack a 2 or a 3")
+same("example", _box72, [1, 2, 3, 4, 6, 8, 9, 12, 18, 24, 36, 72])
+
+# practice
+check("practice[0]", not isprime(51) and 3*17 == 51 and 5 + 1 == 6, "51 = 3*17, digit sum 6")
+check("practice[0]", 51 // 3 == 17 and 51 // 17 == 3 and min(factorint(51)) == 3, "3 tables of 17 / 17 tables of 3")
 check("practice[1]", factorint(84) == {2: 2, 3: 1, 7: 1}, "84 = 2^2*3*7")
-check("practice[1]", 84 // 2 == 42 and 42 // 2 == 21 and 21 // 3 == 7, "chain")
+check("practice[1]", 84 // 2 == 42 and 42 // 2 == 21 and 21 // 3 == 7 and max(factorint(84)) == 7, "chain, largest prime 7")
 check("practice[2]", isprime(211), "211 should be prime")
 check("practice[2]", abs(sqrt(211).evalf() - 14.5) < 0.05, "sqrt 211 ≈ 14.5")
-check("practice[2]", all(211 % p for p in [2, 3, 5, 7, 11, 13]) and list(primerange(2, 15)) == [2, 3, 5, 7, 11, 13], "no prime ≤ 14 divides")
+check("practice[2]", all(211 % p for p in [2, 3, 5, 7, 11, 13]) and list(primerange(2, 15)) == [2, 3, 5, 7, 11, 13] and prevprime(floor(sqrt(211)) + 1) == 13, "no prime ≤ 14 divides; largest to test 13")
 check("practice[3]", factorint(1001) == {7: 1, 11: 1, 13: 1}, "1001 = 7*11*13")
 same("practice[3]", Rational(1001, 7), 143); same("practice[3]", 11*13, 143)
-
-# practice[0] reworded: tables
-check("practice[0]", 51 // 3 == 17 and 51 // 17 == 3, "3 tables of 17 / 17 tables of 3")
-# practice[4]: 200 = 2^3 5^2, 12 stack sizes
-check("practice[4]", factorint(200) == {2: 3, 5: 2}, "200 = 2^3 5^2")
+check("practice[4]", factorint(200) == {2: 3, 5: 2} and factorint(100) == {2: 2, 5: 2} and 2 * 100 == 200, "200 = 2^3 5^2")
 same("practice[4]", (3 + 1) * (2 + 1), 12)
 same("practice[4]", divisors(200), [1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 200])
+
 # why / mistakes
 same("why", (7 * 13, 8 * 13), (91, 104))
 same("why", Rational(91, 104), Rational(7, 8))
 check("why", isprime(97), "97 prime")
-check("mistakes", abs(sqrt(91).evalf() - 9.5) < 0.05 and 7 * 13 == 91, "sqrt 91 ≈ 9.5")
+check("mistakes", abs(sqrt(91).evalf() - 9.5) < 0.05 and 7 * 13 == 91 and all(91 % p for p in [2, 3, 5]), "sqrt 91 ≈ 9.5; 2, 3, 5 fail")
+check("mistakes", 3 * 17 == 51 and 2*2*2 == 8 and 3*3 == 9, "51, 8, 9")
+same("mistakes", divisor_count(72), (3 + 1) * (2 + 1))
+check("mistakes", 3 * 2 != divisor_count(72), "multiplying exponents is wrong")
 
-# layers (concept examples, formal setup)
+# Concept walk: 72 cookies, tray 8 x 9
+same("concept.walk tray", 8 * 9, 72)
+same("concept.walk predict[1]", factorint(8)[2], 3)
+check("concept.walk 9", not isprime(9) and 3 * 3 == 9 and 9 % 2 == 1, "9 odd, not prime")
+same("concept.walk predict[3]", 2*2*2*3*3, 72)
+check("concept.walk exponents", factorint(72) == {2: 3, 3: 2}, "factorization")
+same("concept.walk other start", 2*2*18, 72); same("concept.walk other start", 2*2*2*9, 72)
+check("concept.walk other start", factorint(36) == {2: 2, 3: 2}, "factorization")
+_both = [s for s in _box72 if s % 2 == 0 and s % 3 == 0]
+same("concept.walk shortcut", len(_both), 3 * 2)
+same("concept.walk shortcut", sorted(set(_box72) - set(_both)), sorted([1, 2, 4, 8, 3, 9]))
+check("concept.walk no 5", 72 % 5 != 0, "5 does not divide 72")
+same("concept.walk predict[6]", (3 + 1) * (2 + 1), 12)
+same("concept.walk answer", (min(_box72), max(_box72), len(_box72)), (1, 72, 12))
+same("concept.walk demo", 8 * 9, 72)
+
+# layers.concept: idea cards, stakes
+check("layers.concept", [d for d in divisors(7)] == [1, 7], "7 chairs: only 1 row of 7 (or 7 of 1)")
+check("layers.concept", list(primerange(2, 21)) == [2, 3, 5, 7, 11, 13, 17, 19], "primes up to 20")
+same("layers.concept", 3 * 4, 12); same("layers.concept", 2 * 2 * 3, 12)
+check("layers.concept", divisor_count(1) == 1, "1 has one factor")
+check("layers.concept", 7 * 13 == 91 and 91 % 2 == 1, "91 odd and composite")
+check("layers.concept", abs(sqrt(91).evalf() - 9.5) < 0.05 and all(91 % p for p in [2, 3, 5]) and 91 % 7 == 0, "91 test")
+check("layers.concept", factorint(360) == {2: 3, 3: 2, 5: 1}, "hero/figure 360 = 2^3 3^2 5")
+
+# layers.examples
 check("layers.examples", isprime(61) and isprime(53), "61, 53 prime")
 same("layers.examples", 61 * 53, 3233)
 check("layers.examples", len(str(2**2047)) == 617 and len(str(2**2048 - 1)) == 617, "2048-bit number has 617 digits")
@@ -40,7 +75,40 @@ check("layers.examples", len({(4 * k) % 100 for k in range(1, 200)}) == 25, "onl
 check("layers.examples", abs(sqrt(221).evalf() - 14.9) < 0.05 and list(primerange(2, 15)) == [2, 3, 5, 7, 11, 13], "sqrt 221 ≈ 14.9, six primes")
 same("layers.examples", 13 * 17, 221)
 check("layers.examples", all(221 % q for q in [2, 3, 5, 7, 11]), "13 is the first divisor")
-check("layers.setup", abs(sqrt(360).evalf() - 18.97) < 0.005 and list(primerange(2, 19)) == [2, 3, 5, 7, 11, 13, 17], "sqrt 360 ≈ 18.97")
-same("layers.setup", 360 // 2 // 2 // 2, 45)
-same("layers.setup", 45 // 3 // 3, 5)
-same("layers.setup", (3 + 1) * (2 + 1) * (1 + 1), 24)
+check("layers.examples", 3233 <= 999999 and 221 <= 999999, "tile chips fit the lab's n range 2..999999")
+
+# layers.setup (72)
+check("layers.setup", abs(sqrt(72).evalf() - 8.49) < 0.005 and list(primerange(2, 9)) == [2, 3, 5, 7], "sqrt 72 ≈ 8.49")
+same("layers.setup", 72 // 2 // 2 // 2, 9)
+same("layers.setup", 9 // 3 // 3, 1)
+check("layers.setup", factorint(72) == {2: 3, 3: 2}, "factorization")
+same("layers.setup", divisor_count(72), (3 + 1) * (2 + 1))
+same("layers.setup", (3 + 1) * (2 + 1), 12)
+check("layers.formal", factorint(6) == {2: 1, 3: 1} and 1 * 2 * 3 == 6 and 1 * 1 * 2 * 3 == 6, "6 = 2*3 with 1s")
+
+# Intermediate goals (n in the factor tree, 2..999999)
+check("build.stepGoal[0]", factorint(96) == {2: 5, 3: 1} and 2 <= 96 <= 999999, "96 = 2^5 3, reachable")
+check("build.stepGoal[2]", isprime(97) and abs(sqrt(97).evalf() - 9.8) < 0.05 and all(97 % p for p in [2, 3, 5, 7]) and 2 <= 97 <= 999999, "97 prime, sqrt ≈ 9.8")
+same("build.stepGoal[4]", 2*2*2*2*3*5, 240); same("build.stepGoal[4]", 2*2*2*2, 16); same("build.stepGoal[4]", 16*3*5, 240)
+check("build.stepGoal[4]", factorint(240) == {2: 4, 3: 1, 5: 1} and sum(factorint(240).values()) == 6 and 240 <= 999999, "six primes")
+check("build.chips", factorint(675) == {3: 3, 5: 2} and factorint(5040) == {2: 4, 3: 2, 5: 1, 7: 1} and factorint(1024) == {2: 10}, "chip numbers")
+check("build.chips", not ({96, 97, 240} & {360, 12, 91, 3233, 221, 1024, 675, 5040, 104, 72, 8, 9, 36, 6}), "no chip or walk number is a goal")
+
+# Everyday tasks
+same("build.tasks[0].check", Rational(91, 104), Rational(7, 8))
+check("build.tasks[0].lines", factorint(91) == {7: 1, 13: 1} and 9 + 1 == 10 and 91 % 2 and 91 % 3, "91 = 7*13; digit sum 10")
+same("build.tasks[0].lines", [104 // 2, 104 // 4, 104 // 8], [52, 26, 13]); same("build.tasks[0].lines", 2*2*2*13, 104)
+same("build.tasks[0].predict", 104 // 2 // 2 // 2, 13)
+same("build.tasks[0].demo", Rational(7, 8), Rational(91, 104))
+same("build.tasks[1].check", divisor_count(48), 10)
+same("build.tasks[1].lines", 6 * 8, 48); check("build.tasks[1].lines", factorint(48) == {2: 4, 3: 1}, "factorization")
+same("build.tasks[1].lines", (4 + 1) * (1 + 1), 10); same("build.tasks[1].lines", divisors(48), [1, 2, 3, 4, 6, 8, 12, 16, 24, 48])
+same("build.tasks[1].predict", factorint(6)[2] + factorint(8)[2], 4)
+same("build.tasks[1].link", (3 + 1) * (2 + 1), divisor_count(72))
+same("build.tasks[2].check", min(factorint(77)), 7)
+same("build.tasks[2].lines", 7 + 7, 14); check("build.tasks[2].lines", 77 % 2 and 77 % 3 and 77 % 5 and 7 * 11 == 77, "77 tests")
+check("build.tasks[2].link", abs(sqrt(77).evalf() - 8.8) < 0.05 and list(primerange(2, 9)) == [2, 3, 5, 7], "sqrt 77 ≈ 8.8")
+same("build.tasks[2].demo", 7 * 11, 77)
+same("build.tasks[3].check", sorted(factorint(35)), [5, 7])
+check("build.tasks[3].lines", 35 % 2 and 3 + 5 == 8 and 35 % 3 and 35 // 5 == 7 and 5 * 7 == 35, "35 tests")
+same("build.tasks[3].predict", 35 // 5, 7)

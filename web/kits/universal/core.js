@@ -77,7 +77,7 @@ const alpha = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba($
 const reduce = W.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const coarse = W.matchMedia && W.matchMedia("(pointer: coarse)").matches;
 let uid = 0;
-const live = { loops: new Set(), ros: new Set(), timers: new Set(), offs: new Set(), values: {} };
+const live = { loops: new Set(), ros: new Set(), timers: new Set(), offs: new Set(), values: {}, auto: {} };
 const exts = [];
 const addCSS = (id, text) => { if (document.getElementById(id)) return; const s = document.createElement("style"); s.id = id; s.textContent = text; document.head.appendChild(s); };
 
@@ -152,6 +152,15 @@ function make(stage, ro, ctl){
   // Let the page drive this lab: k.expose({ set: v => …, play: () => … }). Concept-tab "Try it" chips call
   // LabKit.drive("set:19,play") (comma-separated, name[:argument]); see docs/subjects/LAYERS.md.
   kit.expose = actions => { live.expose = actions; };
+  // Every control also drives itself (1.18.5): a chip may name a control by its key, the first word of its label
+  // ("<i>a</i>" → a, "Round to" → round, "Next pair" → nextpair for buttons; a repeated key gets 2, 3 …), and the
+  // control publishes its value under that key. slider/number: "a:7" (the raw slider value); select: "op:1" (option
+  // index); check: "log:1" / "log:0" / "log" (toggle); button: "nextpair"; k.modes: "mode:2" (button index).
+  // Commands the lab exposes itself (k.expose) win over these.
+  const autoKey = (label, button) => { let t = String(label).replace(/<[^>]*>/g, " ").replace(/&[a-z]+;/g, " ").toLowerCase();
+    t = button ? t.replace(/[^a-z]+/g, "") : (t.replace(/[^a-z0-9]+/g, " ").trim().split(" ")[0] || "");
+    if (!/^[a-z]/.test(t)) return ""; let k = t, i = 2; while (live.auto[k] && live.auto[k].el && live.auto[k].el.isConnected) k = t + i++; return k; };   // a control rebuilt for another mode keeps its key
+  const autoCtl = (key, fn, v, el) => { if (!key) return; fn.el = el; live.auto[key] = fn; if (v !== undefined) kit.publish(key, v); };
   // Tell the page a live value: k.publish("n", 17). The Concept tab's question figure ({echo: "n"}) follows it;
   // fires "inquire:lab-value" {key, value} only when the value changes; LabKit.value(key) reads the latest.
   kit.publish = (key, v) => { if (live.values[key] === v) return; live.values[key] = v; window.dispatchEvent(new CustomEvent("inquire:lab-value", { detail: { key, value: v } })); };
@@ -163,8 +172,9 @@ function make(stage, ro, ctl){
     kit.ctl.appendChild(w);
     const inp = w.querySelector("input"), val = w.querySelector(".val");
     const show = () => { val.textContent = fmtFn ? fmtFn(+inp.value) : String(inp.value).replace("-", MI); };
-    inp.addEventListener("input", () => { show(); onInput(+inp.value); }); show();
-    return { el: inp, get v(){ return +inp.value; }, set(v){ inp.value = v; show(); }, setMax(m){ inp.max = m; if (+inp.value > m) { inp.value = m; } show(); }, setMin(m){ inp.min = m; if (+inp.value < m) inp.value = m; show(); } };
+    inp.addEventListener("input", () => { show(); onInput(+inp.value); kit.publish(sk, +inp.value); }); show();
+    const sk = autoKey(label); autoCtl(sk, v => { inp.value = v; inp.dispatchEvent(new Event("input")); }, +inp.value, inp);
+    return { el: inp, get v(){ return +inp.value; }, set(v){ inp.value = v; show(); kit.publish(sk, +inp.value); }, setMax(m){ inp.max = m; if (+inp.value > m) { inp.value = m; } show(); }, setMin(m){ inp.min = m; if (+inp.value < m) inp.value = m; show(); } };
   };
   kit.number = (label, min, max, value, onChange, width) => {
     const id = "lab" + (++uid);
@@ -173,28 +183,34 @@ function make(stage, ro, ctl){
     kit.ctl.appendChild(w);
     const inp = w.querySelector("input"); if (width) inp.style.width = width;
     const read = () => { let v = Math.round(+inp.value); if (!isFinite(v)) v = value; v = Math.max(min, Math.min(max, v)); return v; };
-    inp.addEventListener("change", () => { const v = read(); inp.value = v; onChange(v); });
-    return { el: inp, get v(){ return read(); }, set(v){ inp.value = v; } };
+    inp.addEventListener("change", () => { const v = read(); inp.value = v; onChange(v); kit.publish(nk, v); });
+    const nk = autoKey(label); autoCtl(nk, v => { inp.value = v; inp.dispatchEvent(new Event("change")); }, read(), inp);
+    return { el: inp, get v(){ return read(); }, set(v){ inp.value = v; kit.publish(nk, read()); } };
   };
   kit.select = (label, options, value, onChange) => {
     const id = "lab" + (++uid);
     const w = document.createElement("div"); w.className = "ctl";
     w.innerHTML = `<label for="${id}">${label}</label><select id="${id}">${options.map(([v, t]) => `<option value="${v}"${String(v) === String(value) ? " selected" : ""}>${t}</option>`).join("")}</select>`;
     kit.ctl.appendChild(w);
-    const s = w.querySelector("select"); s.addEventListener("change", () => onChange(s.value));
-    return { el: s, get v(){ return s.value; }, set(v){ s.value = v; } };
+    const s = w.querySelector("select"); s.addEventListener("change", () => { onChange(s.value); kit.publish(qk, s.selectedIndex); });
+    const qk = autoKey(label); autoCtl(qk, v => { s.selectedIndex = Math.max(0, Math.min(s.options.length - 1, Math.round(+v) || 0)); s.dispatchEvent(new Event("change")); }, s.selectedIndex, s);
+    return { el: s, get v(){ return s.value; }, set(v){ s.value = v; kit.publish(qk, s.selectedIndex); } };
   };
-  kit.button = (label, onClick, cls = "btn") => { const b = document.createElement("button"); b.type = "button"; b.className = cls; b.textContent = label; b.addEventListener("click", onClick); kit.ctl.appendChild(b); return b; };
+  kit.button = (label, onClick, cls = "btn") => { const b = document.createElement("button"); b.type = "button"; b.className = cls; b.textContent = label; b.addEventListener("click", onClick); kit.ctl.appendChild(b); autoCtl(autoKey(label, true), () => b.click(), undefined, b); return b; };
   kit.check = (label, value, onChange) => {
     const id = "lab" + (++uid);
     const w = document.createElement("div"); w.className = "ctl";
     w.innerHTML = `<input type="checkbox" id="${id}"${value ? " checked" : ""}><label for="${id}" style="font-family:var(--sans)">${label}</label>`;
-    kit.ctl.appendChild(w); const c = w.querySelector("input"); c.addEventListener("change", () => onChange(c.checked)); return c;
+    kit.ctl.appendChild(w); const c = w.querySelector("input"); c.addEventListener("change", () => { onChange(c.checked); kit.publish(ck, c.checked ? 1 : 0); });
+    const ck = autoKey(label); autoCtl(ck, v => { c.checked = v === "" ? !c.checked : !!+v; c.dispatchEvent(new Event("change")); }, c.checked ? 1 : 0, c); return c;
   };
   kit.modes = (list, active, onPick) => {
     const w = document.createElement("div"); w.className = "modes"; w.setAttribute("role", "group");
     list.forEach(([k, t]) => { const b = document.createElement("button"); b.type = "button"; b.textContent = t; b.dataset.k = k; b.setAttribute("aria-pressed", String(k === active)); b.onclick = () => { w.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); onPick(k); }; w.appendChild(b); });
-    stage.appendChild(w); return w;
+    stage.appendChild(w); const bs = [...w.querySelectorAll("button")];
+    autoCtl(live.auto.mode ? "" : "mode", v => { const b = bs[Math.max(0, Math.min(bs.length - 1, Math.round(+v) || 0))]; if (b) b.click(); }, Math.max(0, list.findIndex(x => x[0] === active)));
+    bs.forEach((b, i) => b.addEventListener("click", () => kit.publish("mode", i)));
+    return w;
   };
 
   // Controls per mode: k.group("graph", () => { k.slider(…); … }) records the controls that block adds;
@@ -308,12 +324,12 @@ function make(stage, ro, ctl){
   exts.forEach(fn => fn(kit));
   return kit;
 }
-function stopAll(){ live.expose = null; live.values = {}; live.loops.forEach(L => L.on = false); live.loops.clear(); live.ros.forEach(o => o.disconnect()); live.ros.clear(); live.timers.forEach(id => clearInterval(id)); live.timers.clear(); live.offs.forEach(f => { try { f(); } catch (_) {} }); live.offs.clear(); document.body.classList.remove("kv-scrubbing"); }
+function stopAll(){ live.expose = null; live.values = {}; live.auto = {}; live.loops.forEach(L => L.on = false); live.loops.clear(); live.ros.forEach(o => o.disconnect()); live.ros.clear(); live.timers.forEach(id => clearInterval(id)); live.timers.clear(); live.offs.forEach(f => { try { f(); } catch (_) {} }); live.offs.clear(); document.body.classList.remove("kv-scrubbing"); }
 function drive(cmd){
-  const ex = live.expose; if (!ex) return false; let did = false;
-  String(cmd).split(",").forEach(part => { const [name, ...rest] = part.trim().split(":"); if (typeof ex[name] === "function") { ex[name](rest.join(":")); did = true; } });
+  const ex = live.expose || {}; let did = false;
+  String(cmd).split(",").forEach(part => { const [name, ...rest] = part.trim().split(":"); const fn = typeof ex[name] === "function" ? ex[name] : live.auto[name]; if (typeof fn === "function") { fn(rest.join(":")); did = true; } });
   return did;
 }
-W.LabKit = { make, stopAll, rules, extend: fn => exts.push(fn), css: addCSS, C, F, alpha, drive, value: key => live.values[key], commands: () => Object.keys(live.expose || {}), values: () => Object.keys(live.values) };   // commands/values: what the open lab exposes and publishes (interact.js checks every chip and goal against them)
+W.LabKit = { make, stopAll, rules, extend: fn => exts.push(fn), css: addCSS, C, F, alpha, drive, value: key => live.values[key], commands: () => [...new Set([...Object.keys(live.expose || {}), ...Object.keys(live.auto)])], values: () => Object.keys(live.values) };   // commands/values: what the open lab exposes and publishes (interact.js checks every chip and goal against them)
 W.LABS = W.LABS || {};
 })();

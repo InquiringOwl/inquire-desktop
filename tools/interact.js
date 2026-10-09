@@ -44,16 +44,17 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await p.goto(URL0 + '#menu'); await wait(800);
 
   /* ---------- lesson layers (Concept · Intermediate · Formal) ---------- */
-  await p.goto(URL0 + '#addition'); await wait(900);
+  await p.goto(URL0 + '#counting'); await wait(900);   // tab behaviour on block lessons (every Arithmetic lesson is one since 1.18.6)
   ok(await p.$$eval('.lyr-tab', b => b.length) === 3, 'lesson layers: three tabs on a layered lesson');
   const lab0 = await p.$eval('#stage', e => e.innerHTML.length);
+  await p.click('.lyr-tab[data-layer=concept]'); await wait(450); const lede0 = await p.$eval('#lede', e => e.textContent);
   await p.click('.lyr-tab[data-layer=build]'); await wait(450);
-  ok(await p.$eval('.lyr-tab[data-layer=build]', e => e.getAttribute('aria-selected')) === 'true' && !!(await p.$('#layer .lyr-steps')), 'lesson layers: Intermediate shows the steps with reasons');
-  ok(/routine/i.test(await p.$eval('#lede', e => e.textContent)), 'lesson layers: the lede follows the tab');
+  ok(await p.$eval('.lyr-tab[data-layer=build]', e => e.getAttribute('aria-selected')) === 'true' && !!(await p.$('#layer .method')), 'lesson layers: Intermediate shows the method with reasons');
+  ok(await p.$eval('#lede', e => e.textContent) !== lede0, 'lesson layers: the lede follows the tab');
   ok(await p.$eval('#stage', e => e.innerHTML.length) === lab0, 'lesson layers: the lab is untouched by a tab switch');
   await p.click('.lyr-tab[data-layer=formal]'); await wait(450);
-  await p.click('#layer [data-ans="0"]'); ok(await p.$eval('#layer [data-ans="0"] + .a', e => !e.hidden), 'lesson layers: Formal practice answers open');
-  await p.goto(URL0 + '#subtraction'); await wait(900);
+  ok(await p.$$eval('#layer .pz', e => e.length) === 5, 'lesson layers: Formal shows five practice cards');
+  await p.goto(URL0 + '#place-value'); await wait(900);
   ok(await p.$eval('.lyr-tab[data-layer=formal]', e => e.getAttribute('aria-selected')) === 'true', 'lesson layers: the chosen tab is remembered on the next lesson');
   await p.focus('.lyr-tab[data-layer=formal]'); await p.keyboard.press('ArrowRight'); await wait(300);
   ok(await p.$eval('.lyr-tab[data-layer=concept]', e => e.getAttribute('aria-selected')) === 'true', 'lesson layers: arrow keys move between tabs');
@@ -151,6 +152,54 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await p.emulateMedia({ reducedMotion: 'reduce' }); await p.goto(URL0 + '#counting'); await wait(900); await p.click('.lyr-tab[data-layer=concept]'); await wait(450);
   ok(await p.$eval('#layer .idea:nth-child(2) .dm-big', e => e.textContent === '5' && e.getAttribute('opacity') === '1') && !(await p.$('#layer .dm-replay')), 'concept blocks: with reduced motion the storyboard shows its final frame, no replay button');
   await p.emulateMedia({ reducedMotion: 'no-preference' });
+
+  /* ---------- every other block lesson (layers.concept.ideas): the generic pass (1.18.5, the Arithmetic rollout) ----------
+     chips use commands the lab exposes; figures and goals use values it publishes; storyboards draw; the walk's boxes
+     line up and a right prediction reveals its line; colour cues show; the first task and the first practice card solve. */
+  const blockIds = await p.evaluate(() => Object.keys(window.ARITH).filter(id => id !== 'counting' && ((window.ARITH[id].layers || {}).concept || {}).ideas));
+  for (const id of blockIds) {
+    const e0 = errs.length;
+    await p.goto(URL0 + '#' + id); await wait(900);
+    await p.click('.lyr-tab[data-layer=concept]'); await wait(450);
+    const miss = await p.evaluate(id => { const Y = window.ARITH[id].layers, cmds = new Set(LabKit.commands()), vals = new Set(LabKit.values()), bad = [];
+      const walk = o => { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') { if (typeof o.lab === 'string') o.lab.split(',').forEach(c => { const n = c.split(':')[0].trim(); if (!cmds.has(n)) bad.push('command ' + n); }); Object.values(o).forEach(walk); } };
+      walk(Y);
+      [(Y.concept.question || {}).figure, ((Y.build || {}).task || {}).figure, ((Y.formal || {}).question || {}).figure].forEach(f => { if (f && f.echo && !vals.has(f.echo)) bad.push('figure ' + f.echo); });
+      ((Y.build || {}).stepGoal || []).forEach(g => { if (g && !vals.has(g.key)) bad.push('goal ' + g.key); });
+      return bad; }, id);
+    ok(!miss.length, `block ${id}: every chip, figure and goal matches what the lab exposes and publishes`, miss);
+    const nIdeas = await p.$$eval('#layer .idea', e => e.length), nSvg = await p.$$eval('#layer .ideas .dm svg', e => e.length);
+    ok(nIdeas >= 2 && nSvg === nIdeas, `block ${id}: ${nIdeas} idea cards, each with a storyboard`, [nIdeas, nSvg]);
+    for (const b of await p.$$('#layer .ideas .dm-try')) { await b.click(); await wait(250); }
+    ok(await p.$$eval('#layer .hl-n', e => e.length) > 5, `block ${id}: Concept colour cues show`);
+    if (await p.$('#c-walk')) { const W = '#c-walk';
+      ok(await p.$$eval(W + ' .walk-grid > *', e => { const [a, b] = e.map(x => x.getBoundingClientRect()); return Math.abs(a.top - b.top) < 1 && Math.abs(a.bottom - b.bottom) < 1; }), `block ${id}: the walk's two boxes share top and bottom edges`);
+      ok(!!(await p.$(W + ' .walk-dm svg')), `block ${id}: the walk has its picture`);
+      const before = await p.$$eval(W + ' .wk-row:not([hidden])', e => e.length);
+      const q = await p.evaluate(id => { const W = window.ARITH[id].layers.concept.walk, rows = document.querySelectorAll('#c-walk .wk-row:not([hidden])').length; return (W.predict || [])[rows] || null; }, id);
+      if (q && q.parts) { const ins = await p.$$(W + ' .wk-ask input'); for (let j = 0; j < ins.length; j++) await ins[j].fill(String(q.parts[j].ans)); await p.click(W + ' .wk-ask .pz-check'); await wait(900);
+        ok(await p.$$eval(W + ' .wk-row:not([hidden])', e => e.length) === before + 1, `block ${id}: a right prediction in the walk shows the next line`); }
+      else if (q && q.choices) { await p.click(`${W} .wk-ask .pz-opt[data-j="${q.choices.findIndex(c => c.ok)}"]`); await wait(900);
+        ok(await p.$$eval(W + ' .wk-row:not([hidden])', e => e.length) === before + 1, `block ${id}: a right pick in the walk shows the next line`); }
+      await p.click(W + ' [data-wk-all]'); await wait(100); ok(await p.$eval(W + ' .ans', e => !e.hidden), `block ${id}: Show all reaches the walk's answer`); }
+    if (await p.$('#layer .why.why-pair')) ok(await p.$eval('#layer .why', w => { const [a, b] = [w.querySelector('.matters'), w.querySelector('.stakes')].map(x => x.getBoundingClientRect()); return Math.abs(a.top - b.top) < 1; }), `block ${id}: why and where sit side by side`);
+    await p.click('.lyr-tab[data-layer=build]'); await wait(450);
+    if (await p.$('#layer .cq')) {
+      ok(await p.$$eval('#layer .hl-n', e => e.length) > 5, `block ${id}: Intermediate colour cues show`);
+      for (const b of await p.$$('#layer .keys .dm-try, #b-method .dm-try')) { await b.click(); await wait(200); }
+      await wait(1500);   // a chip may have started Play
+      ok(!(await p.$('#layer .goal.done')), `block ${id}: no Intermediate chip makes a Your move goal for the learner`, await p.$$eval('#layer .goal.done', e => e.map(g => g.dataset.key + '=' + (g.dataset.eq || g.dataset.min))));
+      const t0 = await p.evaluate(id => { const B = window.ARITH[id].layers.build, T = (B.tasks || []).find(x => x.check); return T ? (B.tasks.indexOf(T) + (B.exampleTask ? 1 : 0)) : -1; }, id);
+      if (t0 >= 0) { const T = `#layer .tk[data-tk="${t0}"]`, ans = await p.evaluate(([id, i]) => { const B = window.ARITH[id].layers.build; return B.tasks[i - (B.exampleTask ? 1 : 0)].check.parts.map(x => x.ans); }, [id, t0]);
+        await p.click(T + ' summary'); const ins = await p.$$(T + ' .tk-chk input'); for (let j = 0; j < ins.length; j++) await ins[j].fill(String(ans[j])); await p.click(T + ' .tk-chk .pz-check'); await wait(150);
+        ok(await p.$eval(T, e => e.dataset.state === 'solved'), `block ${id}: the first everyday task solves with its own answer`); }
+      ok(await p.$$eval('#layer .tk-dm svg', e => e.length) >= 1, `block ${id}: tasks have pictures`); }
+    await p.click('.lyr-tab[data-layer=formal]'); await wait(450);
+    if (await p.$('#layer #f-prac .pz')) { const ans = await p.evaluate(id => window.ARITH[id].layers.formal.checks[0].parts.map(x => x.ans), id);
+      const ins = await p.$$('#layer .pz[data-pz="0"] input'); for (let j = 0; j < ins.length; j++) await ins[j].fill(String(ans[j])); await p.click('#layer .pz[data-pz="0"] .pz-check'); await wait(150);
+      ok(await p.$eval('#layer .pz[data-pz="0"]', e => e.dataset.state === 'solved'), `block ${id}: practice 1 solves with its own answer`); }
+    ok(errs.length === e0, `block ${id}: no page errors`, errs.slice(e0));
+  }
   await p.goto(URL0 + '#menu'); await wait(800);
 
   /* ---------- menu ---------- */

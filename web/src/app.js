@@ -1082,7 +1082,7 @@ function cqHTML(q, eyebrow, extra){
   const fig = q.figure, jump = (q.jump || []).length ? `<p class="cq-jump"><span>Jump to</span>${q.jump.map(j => `<button type="button" class="cq-go" data-jump="${esc(j.to)}">${esc(j.label)}</button>`).join("")}</p>` : "";
   return `<div class="cq win${fig ? "" : " nofig"}"><div class="win-h"><span class="dot"></span>${esc(eyebrow)}${fig && fig.echo ? `<span class="cq-live">Live from the model</span>` : ""}</div>
       <div class="cq-main"><h2>${esc(q.text)}</h2>${q.sub ? `<p>${q.sub}</p>` : ""}${extra || ""}${jump}</div>
-      ${fig ? `<div class="cq-fig" aria-hidden="true"><div class="cq-num"${fig.echo ? ` data-echo="${esc(fig.echo)}"` : ""}>${esc(fig.echo && LabKit.value(fig.echo) !== undefined ? String(LabKit.value(fig.echo)) : fig.value)}</div><div class="cq-cap"><span class="m c1">${fig.sym}</span> ${esc(fig.cap)}</div></div>` : ""}</div>`;
+      ${fig ? `<div class="cq-fig" aria-hidden="true"><div class="cq-num"${fig.echo ? ` data-echo="${esc(fig.echo)}" data-fb="${esc(fig.value)}"` : ""}>${esc(fig.echo ? echoText(LabKit.value(fig.echo), fig.value) : fig.value)}</div><div class="cq-cap"><span class="m c1">${fig.sym}</span> ${esc(fig.cap)}</div></div>` : ""}</div>`;
 }
 /* The "why" block in an Inquire console panel. With a second block (where it goes wrong) the two share the panel:
    side by side with a red rule between them (Concept), or stacked with the rule across (Formal, stack = true).
@@ -1091,14 +1091,19 @@ const whyKey = (label, tone) => `<div class="why-k${tone ? " " + tone : ""}"><i 
 const whyHTML = (M, where, stack) => !M && !where ? "" : `<section class="win why${M && where ? " why-pair" : ""}${stack ? " stack" : ""}">${M ? `<div class="matters">${whyKey("Why it matters")}<h2>${esc(M.title)}</h2>${M.text}</div>` : ""}${where || ""}</section>`;
 /* Answer checker shared by the Intermediate and Formal blocks. k = {parts: [{label, ans}], hint} for typed numbers
    (commas, spaces and words ignored) or {choices: [{t, ok, why}], hint} for a pick. */
+// Stable order for a pick: seeded by the question's text, so a learner sees the same order every visit.
+function pzOrder(k){ const n = k.choices.length, idx = [...Array(n).keys()]; let h = 0; for (const ch of String(k.ask || k.q || "") + k.choices.map(c => c.t).join("|")) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  for (let i = n - 1; i > 0; i--) { h = (h * 1103515245 + 12345) >>> 0; const j = h % (i + 1); [idx[i], idx[j]] = [idx[j], idx[i]]; } return idx; }
 function pzHTML(k){
-  const body = k.choices ? `<div class="pz-ch" role="group">${k.choices.map((c, j) => `<button type="button" class="pz-opt" data-j="${j}">${c.t}</button>`).join("")}</div>`
+  const order = k.choices ? pzOrder(k) : [];   // picks are shown in a stable shuffled order, so the right one is not always first
+  const body = k.choices ? `<div class="pz-ch" role="group">${order.map(j => `<button type="button" class="pz-opt" data-j="${j}">${k.choices[j].t}</button>`).join("")}</div>`
     : `<form class="pz-form" novalidate>${k.parts.map((x, j) => `<label class="pz-in"><span>${esc(x.label)}</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" data-j="${j}" aria-label="${esc(x.label)}"></label>`).join("")}<button type="submit" class="btn-s good pz-check">Check</button></form>`;
   return `${body}<p class="pz-fb" aria-live="polite"></p>${k.hint ? `<p class="pz-hint" hidden><b>Hint.</b> ${k.hint}</p>` : ""}
     <div class="pz-acts">${k.hint ? `<button type="button" class="pz-link" data-pz-hint>Need a hint?</button>` : ""}<button type="button" class="pz-link" data-pz-show${k.showNow ? "" : " hidden"}>${esc(k.showLabel || "Show the worked answer")}</button></div>`;
 }
 let pzNudge = "";   // a lesson's own first "Not yet" (layers.nudge, set by layerHTML); a question's k.nudge wins
-const pzNum = s => { const m = String(s).replace(/[,\s]/g, "").match(/-?\d+(\.\d+)?/); return m ? +m[0] : NaN; };
+const pzNum = s => { const m = String(s).replace(/[,\s]/g, "").replace(/[\u2212\u2013]/g, "-").match(/-?\d+(\.\d+)?/);   // a typed − (U+2212) or – counts as a minus sign
+   return m ? +m[0] : NaN; };
 // Wires one checker inside c. o.right() after a right answer, o.show() when the learner asks for the answer.
 function pzWire(c, k, o){
   const fb = c.querySelector(".pz-fb"), hint = c.querySelector(".pz-hint"), hb = c.querySelector("[data-pz-hint]"), show = c.querySelector("[data-pz-show]");
@@ -1151,7 +1156,7 @@ function buildHTML(t, B, col){
       <div class="wk-ask" hidden></div>
       <div class="wk-bar"><button type="button" class="btn-s" data-wk-next>Show the first line</button><button type="button" class="btn-s ghost" data-wk-all>Show all</button><span class="wk-n">0 of ${lines.length}</span></div></div>`;
   const task = (x, i) => x.check ? `<details class="tile tk${x.guided ? " tk-ex" : ""}" data-tk="${i}" data-state="open"${x.guided ? " open" : ""}><summary><span class="tile-role tile-task">${esc(x.task)}</span><span class="pz-badge">${x.guided ? "Worked example · solve it" : "Solve it"}</span></summary>
-      <div class="tile-body">${x.demo ? `<div class="dm tk-dm" data-spec="${esc(JSON.stringify(x.demo))}"></div>` : ""}<p class="tk-q">${x.check.q}</p>${x.tip ? `<p class="wk-tip">${x.tip}</p>` : ""}
+      <div class="tile-body">${x.demo ? `<div class="dm tk-dm" data-spec="${esc(JSON.stringify({ ...x.demo, hold: true }))}"></div>` : ""}<p class="tk-q">${x.check.q}</p>${x.tip ? `<p class="wk-tip">${x.tip}</p>` : ""}
       <div class="tk-chk">${pzHTML({ ...x.check, showLabel: "Show the answer" })}</div>
       ${wkHTML(x.lines || [], i)}
       <div class="tk-after" hidden>${x.answer ? `<p class="tk-ans"><b>Answer.</b> ${x.answer}</p>` : ""}${x.figure ? `<p class="tile-fig">${esc(x.figure)}</p>` : ""}${x.link ? `<p>${x.link}</p>` : ""}${chip(x.try)}</div></div></details>`
@@ -1260,7 +1265,7 @@ function wireBlocks(body, pg, t){
     tiles.forEach(x => { const T = TK[+x.dataset.tk], badge = x.querySelector(".pz-badge"), after = x.querySelector(".tk-after"), wk = x.querySelector(".tk-wk");
       let skipped = false, lines = null;
       // The first way to finish counts: a right answer (or every prediction right) = solved; Show the answer / reading all lines = shown.
-      const fin = st => { if (x.dataset.state !== "open") return; after.hidden = false; x.dataset.state = st; badge.textContent = st === "solved" ? "Solved ✓" : "Answer shown"; tally(); if (lines) lines.all(); };
+      const fin = st => { if (x.dataset.state !== "open") return; after.hidden = false; x.dataset.state = st; badge.textContent = st === "solved" ? "Solved ✓" : "Answer shown"; tally(); if (lines) lines.all(); const dm = x.querySelector(".tk-dm"); if (dm && dm._demo && dm._demo.release) dm._demo.release(); };   // the picture plays through to its answer
       if (wk) lines = wireWk(wk, T.predict || [], { skip: () => { skipped = true; }, end: () => fin((T.predict || []).some(Boolean) && !skipped ? "solved" : "shown") });
       pzWire(x.querySelector(".tk-chk"), T.check, { rightText: "Correct.", right: () => fin("solved"), show: () => fin("shown") }); });
     tally();
@@ -1281,8 +1286,10 @@ function wireBlocks(body, pg, t){
   });
 }
 // A question figure with {echo: key} shows the lab's live value (k.publish in the lab), with a short pulse when it changes.
+// A live figure: a lab value with thousands commas; null/undefined (e.g. a sum not worked out yet) shows the figure's own value ("?").
+function echoText(v, fb){ return v == null ? String(fb) : typeof v === "number" ? v.toLocaleString("en-US") : String(v); }
 window.addEventListener("inquire:lab-value", e => document.querySelectorAll(".cq-num[data-echo]").forEach(el => {
-  if (el.dataset.echo !== e.detail.key) return; const v = String(e.detail.value); if (el.textContent === v) return;
+  if (el.dataset.echo !== e.detail.key) return; const v = echoText(e.detail.value, el.dataset.fb || ""); if (el.textContent === v) return;
   el.textContent = v; el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump");
 }));
 /* Three-layer lessons (Arithmetic first, Oct 2026): Concept · Intermediate · Formal tabs change the text only; the lab stays.

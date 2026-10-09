@@ -124,3 +124,19 @@ test('InquireDemo bar and array: parts, unknowns, rows', () => {
   eq(D.check({ kind: 'bar', parts: [3, null], total: 2, alt: 'A bar model picture.' }).length, 1, 'total must exceed the known parts');
   eq(D.check({ kind: 'nope' }).length, 1); eq(D.check({ kind: 'dots', slots: 5, lit: 5, alt: 'Five dots in a row.' }), []);
 });
+test('InquireDemo.holdFrame: a task picture waits on the situation, not the answer', () => {
+  const D = ctx.InquireDemo;
+  eq(D.holdFrame({ kind: 'line', from: 0, to: 20, start: 8, jumps: [5] }), 0, 'jumps: only the start');
+  eq(D.holdFrame({ kind: 'line', from: 0, to: 20, points: [{ v: 3 }, { v: 7 }], show: 'dist' }), 2, 'points: both points, no bracket');
+  const b = { kind: 'bar', parts: [27, 15, 8] }; eq(D.seqFrames(b)[D.holdFrame(b)].big, null, 'bar: parts shown, total hidden'); eq(D.seqFrames(b)[D.holdFrame(b)].parts, 3);
+  const u = { kind: 'bar', parts: [340, null], total: 465 }; const f = D.seqFrames(u)[D.holdFrame(u)]; eq([f.brace, f.reveal, f.big], [true, false, null], 'unknown part: total shown, part still ?');
+  eq(D.holdFrame({ kind: 'columns', add: [1, 2] }), 0); eq(D.holdFrame({ kind: 'range', from: 1, to: 5 }), 0);
+});
+test('InquireDemo fraction: shade part by part, mixed labels, equivalent split', () => {
+  const D = ctx.InquireDemo;
+  const f = D.seqFrames({ kind: 'fraction', n: 3, d: 4, split: 2 }); eq(f.length, 4 + 1 + 1); eq(f[4].big, '3/4'); eq(f[5].big, '6/8'); eq(f[5].split, true);
+  eq(D.fracLabel(11, 4, true), '2 3/4'); eq(D.fracLabel(8, 4, true), '2'); eq(D.fracLabel(3, 4, true), '3/4'); eq(D.fracLabel(11, 4), '11/4');
+  eq(D.check({ kind: 'fraction', n: 3, d: 4, alt: 'Three of four parts shaded.' }), []);
+  ok(D.check({ kind: 'fraction', n: 30, d: 4, alt: 'Too many wholes to draw.' }).length > 0, 'more than 4 wholes is refused');
+  eq(D.holdFrame({ kind: 'fraction', n: 3, d: 4 }), 0);
+});

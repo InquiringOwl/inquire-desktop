@@ -76,6 +76,11 @@ function seqFrames(spec){
     for (let i = 0; i <= P; i++) out.push({ parts: i, brace: false, reveal: false, big: null });
     out.push({ parts: P, brace: true, reveal: false, big: b.unknown >= 0 ? null : b.total });
     if (b.unknown >= 0) out.push({ parts: P, brace: true, reveal: true, big: b.parts[b.unknown] });
+  } else if (spec.kind === "fraction") {
+    const lab = fracLabel(spec.n, spec.d, spec.mixed);
+    for (let i = 0; i <= spec.n; i++) out.push({ lit: i, split: false, big: null });
+    out.push({ lit: spec.n, split: false, big: lab });
+    if (spec.split) out.push({ lit: spec.n, split: true, big: `${spec.n * spec.split}/${spec.d * spec.split}` });
   } else if (spec.kind === "array") {
     for (let r = 0; r <= spec.rows; r++) out.push({ rows: r, big: null });
     out.push({ rows: spec.rows, big: spec.rows * spec.cols });
@@ -116,7 +121,15 @@ function barParts(spec){
   if (u >= 0) P[u] = spec.total - known;
   return { parts: P, unknown: u, total };
 }
-const KINDS = ["dots", "range", "tens", "line", "columns", "bar", "array"];
+// The frame a held picture waits on: the situation with no answer in it (see player, spec.hold).
+// "3/4", or "2 3/4" with mixed (an improper fraction as a whole number and a fraction)
+function fracLabel(n, d, mixed){ if (!mixed || n < d) return `${n}/${d}`; const w = Math.floor(n / d), r = n % d; return r ? `${w} ${r}/${d}` : String(w); }
+function holdFrame(spec){
+  if (spec.kind === "line") return (spec.jumps || []).length ? 0 : (spec.points || []).length;
+  if (spec.kind === "bar") { const b = barParts(spec); return b.parts.length + (b.unknown >= 0 ? 1 : 0); }
+  return 0;
+}
+const KINDS = ["dots", "range", "tens", "line", "columns", "bar", "array", "fraction"];
 function check(spec){
   const out = [], int = v => Number.isInteger(v), num = v => typeof v === "number" && isFinite(v);
   if (!spec || !KINDS.includes(spec.kind)) return [`kind must be one of ${KINDS.join(", ")}`];
@@ -144,10 +157,13 @@ function check(spec){
       if (P.some(x => x !== null && (!num(x) || x <= 0))) out.push("bar parts must be positive numbers");
       if (nul && (!num(spec.total) || spec.total <= P.filter(x => x != null).reduce((s, x) => s + x, 0))) out.push("bar with an unknown part needs a total larger than the known parts"); }
     if (spec.labels !== undefined && (!Array.isArray(spec.labels) || spec.labels.length !== (P || []).length)) out.push("bar.labels needs one label per part"); }
+  if (k === "fraction") { if (!int(spec.d) || spec.d < 1 || spec.d > 12) out.push("fraction.d must be 1 to 12");
+    else { if (!int(spec.n) || spec.n < 0 || Math.ceil(spec.n / spec.d) > 4) out.push("fraction.n must be 0 or more and fill at most 4 wholes");
+      if (spec.split !== undefined && (!int(spec.split) || spec.split < 2 || spec.split * spec.d > 24)) out.push("fraction.split must be 2 or more, with split × d at most 24"); } }
   if (k === "array" && (!int(spec.rows) || !int(spec.cols) || spec.rows < 1 || spec.cols < 1 || spec.rows > 10 || spec.cols > 12)) out.push("array needs rows 1–10 and cols 1–12");
   return out;
 }
-W.InquireDemo = { frames, slotStates, rangeCells, seqFrames, plural, colPlan, barParts, lineEnd, check, KINDS };
+W.InquireDemo = { fracLabel, frames, slotStates, rangeCells, seqFrames, plural, colPlan, barParts, lineEnd, check, KINDS, holdFrame };
 if (typeof document === "undefined") return;
 
 const NS = "http://www.w3.org/2000/svg";
@@ -155,8 +171,10 @@ const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag)
 const calm = () => document.documentElement.hasAttribute("data-reduce-motion") || (W.matchMedia && W.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
 // Plays frames on a host: once when scrolled into view, again on tap or ↻; final frame only under reduced motion.
+// spec.still: no autoplay, the page steps it with goto(i). spec.hold (an Everyday task that is a problem): it waits on
+// holdFrame(spec), the situation without the answer, until the page calls release() once the task is solved or shown.
 function player(host, svg, n, show, spec){
-  let timer = null, played = false;
+  let timer = null, played = false, ui = false;
   const stop = () => { clearTimeout(timer); timer = null; };
   const ms = spec.ms || 420;
   const play = () => {
@@ -167,12 +185,15 @@ function player(host, svg, n, show, spec){
     timer = setTimeout(step, ms);
   };
   const goto = i => { stop(); played = true; show(Math.max(0, Math.min(n - 1, i))); };
-  if (spec.still) { show(0); return { replay: () => {}, stop, goto }; }   // still: the page steps it with goto(i) (Concept "count it together")
+  const addUI = () => { if (ui || calm()) return; ui = true;
+    const btn = document.createElement("button"); btn.type = "button"; btn.className = "dm-replay"; btn.setAttribute("aria-label", "Replay the animation"); btn.textContent = "↻";
+    btn.addEventListener("click", play); host.appendChild(btn); svg.addEventListener("click", play); };
+  if (spec.still) { show(0); return { replay: () => {}, stop, goto }; }   // still: the page steps it with goto(i) (Concept walk)
+  if (spec.hold) { show(Math.min(n - 1, holdFrame(spec))); let out = false;
+    return { replay: play, stop, goto, release: () => { if (out) return; out = true; addUI(); play(); } }; }
   show(calm() ? n - 1 : 0);
   if (!calm()) {
-    const btn = document.createElement("button"); btn.type = "button"; btn.className = "dm-replay"; btn.setAttribute("aria-label", "Replay the animation"); btn.textContent = "↻";
-    btn.addEventListener("click", play); host.appendChild(btn);
-    svg.addEventListener("click", play);
+    addUI();
     if (W.IntersectionObserver) {
       const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting) && !played) { play(); io.disconnect(); } }, { threshold: 0.5 });
       io.observe(host);
@@ -232,27 +253,31 @@ function mountTens(host, spec){
 // ---- line, columns, bar, array (1.18.5) ----
 const COLV = { c1: "amber", c2: "cyan", c3: "pink", c4: "violet", c5: "green" };
 const fmtN = v => (v < 0 ? "−" : "") + Math.abs(v).toLocaleString("en-US");
+// A host narrower than 380 px (an idea card) gets a tighter picture, so its text stays readable.
+const narrow = host => host.clientWidth > 0 && host.clientWidth < 380;
 const svgFor = (host, spec, W, H) => { host.textContent = ""; const s = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": spec.alt || "Animation", preserveAspectRatio: "xMinYMid meet" }, host); s.style.maxHeight = Math.round(H * 1.25) + "px"; return s; };
 const bigCap = (svg, x, y) => [el("text", { class: "dm-big dq-big", x, y, opacity: 0 }, svg), el("text", { class: "dq-cap", x: x + 2, y: y + 20, opacity: 0 }, svg)];
-const setBig = (big, cap, v, text) => { big.textContent = v == null ? "" : fmtN(v); big.setAttribute("opacity", v == null ? 0 : 1); cap.textContent = v == null ? "" : text; cap.setAttribute("opacity", v == null ? 0 : 1); };
+const setBig = (big, cap, v, text) => { big.textContent = v == null ? "" : typeof v === "string" ? v.replace("-", "−") : fmtN(v); big.setAttribute("opacity", v == null ? 0 : 1); cap.textContent = v == null ? "" : text; cap.setAttribute("opacity", v == null ? 0 : 1); };
 function mountLine(host, spec){
-  const fr = seqFrames(spec), W = 540, H = 92, L = 18, Rr = W - 128, Y = 58, span = spec.to - spec.from, X = v => L + (Rr - L) * (v - spec.from) / span;
-  const svg = svgFor(host, spec, W, H);
+  const nw = narrow(host), fr = seqFrames(spec), W = nw ? 300 : 540, H = 92, L = nw ? 12 : 18, Rr = W - (nw ? 104 : 128), Y = 58, span = spec.to - spec.from, X = v => L + (Rr - L) * (v - spec.from) / span;
+  const svg = svgFor(host, spec, W, H); if (nw) svg.setAttribute("data-nw", "");
   el("line", { class: "dq-axis", x1: L - 10, y1: Y, x2: Rr + 10, y2: Y }, svg); el("path", { class: "dq-axis", d: `M${Rr + 4} ${Y - 4} L${Rr + 10} ${Y} L${Rr + 4} ${Y + 4}` }, svg);
-  const lab = spec.tick || niceTick(span), minor = span <= 40 && Number.isInteger(spec.from) ? 1 : lab;
+  const lab = spec.tick || niceTick(nw ? span * 2 : span), minor = span <= 40 && Number.isInteger(spec.from) ? 1 : lab;
   for (let v = Math.ceil(spec.from / minor) * minor; v <= spec.to + 1e-9; v += minor) { const major = Math.abs(v / lab - Math.round(v / lab)) < 1e-9;
     el("line", { class: "dq-tick", x1: X(v), y1: Y - (major ? 6 : 3), x2: X(v), y2: Y + (major ? 6 : 3) }, svg);
     if (major) el("text", { class: "dq-tl", x: X(v), y: Y + 20 }, svg).textContent = fmtN(+v.toFixed(6)); }
   const P = spec.points || [], J = spec.jumps || [];
   const brk = P.length >= 2 ? el("path", { class: "dq-brk", d: `M${X(P[0].v)} ${Y - 26} v-6 H${X(P[1].v)} v6`, opacity: 0 }, svg) : null;
   const pts = P.map(p => { const g = el("g", { class: "dq-g", opacity: 0, style: `--c:var(--${COLV[p.c || "c1"]})` }, svg);
-    el("circle", { class: "dq-pt", cx: X(p.v), cy: Y, r: 5.5 }, g); el("text", { class: "dq-pl", x: X(p.v), y: Y - 12 }, g).textContent = p.label != null ? p.label : fmtN(p.v); return g; });
-  let at = spec.start; const arcs = J.map(j => { const x0 = X(at), x1 = X(at + j), h = 14 + Math.min(20, Math.abs(x1 - x0) * .25), mx = (x0 + x1) / 2, g = el("g", { class: "dq-g", opacity: 0 }, svg);
+    el("circle", { class: "dq-pt", cx: X(p.v), cy: Y, r: 5.5 }, g); el("text", { class: "dq-pl", x: X(p.v), y: p.below ? Y + 33 : Y - 12 }, g).textContent = p.label != null ? p.label : fmtN(p.v); return g; });
+  let at = spec.start; const spans = [];   // an arc that overlaps an earlier one rises higher, so the labels never collide
+  const arcs = J.map(j => { const x0 = X(at), x1 = X(at + j), lo = Math.min(x0, x1), hi = Math.max(x0, x1), over = spans.filter(([a, b]) => a < hi - 1 && b > lo + 1).length;
+    spans.push([lo, hi]); const h = 12 + Math.min(14, (hi - lo) * .2) + over * 10, mx = (x0 + x1) / 2, g = el("g", { class: "dq-g", opacity: 0 }, svg);
     el("path", { class: "dq-arc", d: `M${x0} ${Y - 5} Q${mx} ${Y - 5 - 2 * h} ${x1} ${Y - 5}` }, g);
     const s = Math.sign(j); el("path", { class: "dq-arc", d: `M${x1 - 5 * s} ${Y - 11} L${x1} ${Y - 5} L${x1 - 7 * s} ${Y - 4}` }, g);
     el("text", { class: "dq-al", x: mx, y: Y - 9 - h }, g).textContent = (j > 0 ? "+" : "−") + Math.abs(j).toLocaleString("en-US"); at += j; return g; });
   const cur = spec.start != null ? el("circle", { class: "dq-pt dq-cur", cx: X(spec.start), cy: Y, r: 6 }, svg) : null;
-  const [big, cap] = bigCap(svg, Rr + 24, 46);
+  const [big, cap] = bigCap(svg, Rr + (nw ? 18 : 24), 46);
   const show = i => { const f = fr[i];
     pts.forEach((g, j) => g.setAttribute("opacity", j < f.pts ? 1 : 0)); arcs.forEach((g, j) => g.setAttribute("opacity", j < f.jumps ? 1 : 0));
     if (cur) cur.setAttribute("cx", X(spec.start + J.slice(0, f.jumps).reduce((s, j) => s + j, 0)));
@@ -263,13 +288,14 @@ function mountLine(host, spec){
 function mountColumns(host, spec){
   const pl = colPlan(spec), fr = seqFrames(spec), names = ["1s", "10s", "100s", "1,000s", "10,000s", "100,000s", "1,000,000s"];
   if (!pl.op) {   // place value: digits filled from the left, each with its value
-    const CW = 62, n = pl.n, W = 8 + n * CW + 140, H = 84, svg = svgFor(host, spec, W, H), cols = [];
+    const nw = narrow(host), CW = nw ? 50 : 62, n = pl.n, W = 8 + n * CW + (nw ? 104 : 140), H = 84, svg = svgFor(host, spec, W, H), cols = [];
     pl.ds.forEach((d, j) => { const x = 8 + j * CW + CW / 2, p = n - 1 - j, val = d * 10 ** p;
       if (j) el("line", { class: "dq-sep", x1: 8 + j * CW, y1: 4, x2: 8 + j * CW, y2: 74 }, svg);
       el("text", { class: "dq-ch", x, y: 14 }, svg).textContent = names[p] || "10^" + p;
-      const g = el("g", { class: "dq-g", opacity: 0 }, svg); el("text", { class: "dq-dg", x, y: 44, "data-k": "p" + (p % 4) }, g).textContent = String(d); el("text", { class: "dq-cv", x, y: 66 }, g).textContent = fmtN(val); cols.push(g); });
-    const [big, cap] = bigCap(svg, 8 + n * CW + 14, 44);
-    return player(host, svg, fr.length, i => { const f = fr[i]; cols.forEach((g, j) => g.setAttribute("opacity", j < f.k ? 1 : 0)); setBig(big, cap, f.big, spec.cap || "in all"); }, spec);
+      const dg = el("text", { class: "dq-dg dq-g", x, y: 44, "data-k": "p" + (p % 4), opacity: 0 }, svg), cv = el("text", { class: "dq-cv dq-g", x, y: 66, opacity: 0 }, svg);
+      dg.textContent = String(d); cv.textContent = fmtN(val); cols.push([dg, cv]); });
+    const [big, cap] = bigCap(svg, 8 + n * CW + 14, 44);   // held (a task): the digits are the question, so they stay; the values are the answer
+    return player(host, svg, fr.length, i => { const f = fr[i]; cols.forEach(([dg, cv], j) => { dg.setAttribute("opacity", j < f.k || spec.hold ? 1 : 0); cv.setAttribute("opacity", j < f.k ? 1 : 0); }); setBig(big, cap, f.big, spec.cap || "in all"); }, spec);
   }
   const CW = 26, n = pl.n, xR = 30 + n * CW, W = xR + 150, H = 100, svg = svgFor(host, spec, W, H), cx = i => xR - (i + .5) * CW;
   const hl = el("rect", { class: "dq-colhl", x: 0, y: 2, width: CW, height: 94, rx: 3, opacity: 0 }, svg);
@@ -293,8 +319,8 @@ function mountColumns(host, spec){
   return player(host, svg, fr.length, show, spec);
 }
 function mountBar(host, spec){
-  const b = barParts(spec), fr = seqFrames(spec), BW = 340, sc = BW / b.total, ws = b.parts.map(p => Math.max(40, p * sc)), tw = ws.reduce((s, w) => s + w, 0);
-  const L = 4, W = L + tw + 150, H = 96, svg = svgFor(host, spec, W, H), labs = spec.labels || [];
+  const nw = narrow(host), b = barParts(spec), fr = seqFrames(spec), BW = nw ? 200 : 340, sc = BW / b.total, ws = b.parts.map(p => Math.max(nw ? 34 : 40, p * sc)), tw = ws.reduce((s, w) => s + w, 0);
+  const L = 4, W = L + tw + (nw ? 128 : 150), H = 96, svg = svgFor(host, spec, W, H), labs = spec.labels || []; if (nw) svg.setAttribute("data-nw", "");
   const brace = el("g", { class: "dq-g", opacity: 0 }, svg), mid = L + tw / 2;
   el("path", { class: "dq-brk", d: `M${L} 30 q0 -7 7 -7 H${mid - 7} q7 0 7 -7 q0 7 7 7 H${L + tw - 7} q7 0 7 7` }, brace);
   el("text", { class: "dq-al dq-tot", x: mid, y: 11 }, brace).textContent = fmtN(b.total);
@@ -319,7 +345,19 @@ function mountArray(host, spec){
     setBig(big, cap, f.big, spec.cap || `${R} × ${Cn}${spec.unit ? " " + plural(spec.unit, 2) : ""}`); };
   return player(host, svg, fr.length, show, spec);
 }
-const MOUNTS = { range: mountRange, tens: mountTens, line: mountLine, columns: mountColumns, bar: mountBar, array: mountArray };
+function mountFraction(host, spec){   // fraction bars: a whole split into d equal parts, n shaded; split re-cuts every part into k
+  const nw = narrow(host), fr = seqFrames(spec), d = spec.d, bars = Math.max(1, Math.ceil(spec.n / d)), BW = nw ? 200 : 300, BH = 26, G = 8, L = 4;
+  const W = L + BW + (nw ? 128 : 150), H = Math.max(60, 10 + bars * (BH + G)), svg = svgFor(host, spec, W, H), cw = BW / d, cells = [], cuts = el("g", { class: "dq-g", opacity: 0 }, svg);
+  for (let b = 0; b < bars; b++) { const y = 6 + b * (BH + G);
+    for (let i = 0; i < d; i++) cells.push(el("rect", { class: "dq-cell", x: L + i * cw, y, width: cw, height: BH, "data-s": "off" }, svg));
+    if (spec.split) for (let i = 0; i < d; i++) for (let j = 1; j < spec.split; j++) { const x = L + i * cw + j * cw / spec.split; el("line", { class: "dq-cut", x1: x, y1: y + 2, x2: x, y2: y + BH - 2 }, cuts); } }
+  svg.appendChild(cuts);
+  const [big, cap] = bigCap(svg, L + BW + 16, Math.min(H - 22, 36));
+  const show = i => { const f = fr[i]; cells.forEach((c, j) => c.setAttribute("data-s", j < f.lit ? (j === f.lit - 1 && f.big == null ? "say" : "on") : "off")); cuts.setAttribute("opacity", f.split ? 1 : 0);
+    setBig(big, cap, f.big, f.split ? "same amount" : spec.cap || (spec.n > d ? "wholes" : "of the whole")); };
+  return player(host, svg, fr.length, show, spec);
+}
+const MOUNTS = { fraction: mountFraction, range: mountRange, tens: mountTens, line: mountLine, columns: mountColumns, bar: mountBar, array: mountArray };
 function mount(host, spec){
   const api = (MOUNTS[spec.kind] || mountDots)(host, spec);
   host._demo = api; return api;
@@ -352,6 +390,10 @@ function mountDots(host, spec){
     const step = () => { i++; if (i >= fr.length || !host.isConnected) return; show(fr[i]); timer = setTimeout(step, i === fr.length - 1 ? (spec.ms || 420) * 1.4 : (spec.ms || 420)); };
     timer = setTimeout(step, spec.ms || 420);
   };
+  if (spec.hold) { show(fr[0]); let out = false;   // an Everyday task's picture waits without the numbers until it is solved
+    return { replay: play, stop, goto: i => { stop(); show(fr[Math.max(0, Math.min(fr.length - 1, i))]); }, release: () => { if (out) return; out = true;
+      if (!calm()) { btn = document.createElement("button"); btn.type = "button"; btn.className = "dm-replay"; btn.setAttribute("aria-label", "Replay the animation"); btn.textContent = "↻"; btn.addEventListener("click", play); host.appendChild(btn); svg.addEventListener("click", play); }
+      play(); } }; }
   show(calm() ? last() : fr[0]);
   if (!calm()) {
     btn = document.createElement("button"); btn.type = "button"; btn.className = "dm-replay"; btn.setAttribute("aria-label", "Replay the animation"); btn.textContent = "↻";

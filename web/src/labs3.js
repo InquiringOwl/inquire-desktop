@@ -12,6 +12,7 @@ L["ratios"] = k => {
   k.slider(`<span class="c3"><i>b</i></span>`, 1, 8, 1, b, v => b = v);
   k.slider(`<span class="c4"><i>k</i></span>`, 1, 6, 1, s, v => s = v);
   k.loop(() => {
+    k.publish("first", a * s); k.publish("second", b * s); k.publish("total", (a + b) * s); k.publish("pair", 100 * a + b);   // lesson figures + Your move goals
     c.begin(); const { w, h } = c;
     const u = Math.min(64, (w - 170) / Math.max(a, b)), bh = 38, x0 = 120;
     const tape = (y, n, col, name) => { d.text(name, x0 - 14, y + bh / 2, { font: `600 13px ${F.ui}`, color: col, align: "right", base: "middle" }); for (let i = 0; i < n; i++) { d.rect(x0 + i * u, y, u - 3, bh, k.alpha(col, .35), col, 1.5); d.text(String(s), x0 + i * u + (u - 3) / 2, y + bh / 2 + 1, { font: `600 15px ${F.mono}`, color: C.text, align: "center", base: "middle" }); } d.text(`= ${n * s}`, x0 + n * u + 10, y + bh / 2, { font: `600 16px ${F.mono}`, color: col, base: "middle" }); };
@@ -41,15 +42,18 @@ L["ratios"] = k => {
 L["fraction-ops"] = k => {
   const { C, F, M, gcd, lcm } = k; const c = k.canvas(); const d = c.d;
   let n1 = 2, d1 = 3, n2 = 1, d2 = 4, op = "+";
-  const s1 = k.slider(`<span class="c2"><i>a</i></span>`, 1, 9, 1, n1, v => n1 = Math.min(v, d1));
+  const s1 = k.slider(`<span class="c2"><i>a</i></span>`, 1, 9, 1, n1, v => { n1 = Math.min(v, d1); if (v > d1) s1.set(n1); });   // a numerator never shows more than its denominator
   const t1 = k.slider(`<span class="c2">/</span>`, 1, 9, 1, d1, v => { d1 = v; if (n1 > d1) { n1 = d1; s1.set(n1); } });
   k.select("op", [["+", "+"], ["-", "−"], ["*", "×"], ["/", "÷"]], op, v => op = v);
-  const s2 = k.slider(`<span class="c3"><i>c</i></span>`, 1, 9, 1, n2, v => n2 = Math.min(v, d2));
+  const s2 = k.slider(`<span class="c3"><i>c</i></span>`, 1, 9, 1, n2, v => { n2 = Math.min(v, d2); if (v > d2) s2.set(n2); });
   const t2 = k.slider(`<span class="c3">/</span>`, 1, 9, 1, d2, v => { d2 = v; if (n2 > d2) { n2 = d2; s2.set(n2); } });
+  const fire = (sl, v) => { sl.el.value = v; sl.el.dispatchEvent(new Event("input")); };
+  k.expose({ b: v => fire(t1, v), d: v => fire(t2, v) });   // chips: "a:2,b:3,op:0,c:1,d:4" (a/b ? c/d; op 0 + 1 − 2 × 3 ÷)
   void t1; void t2;
   const simp = (p, q) => { const g = gcd(p, q) || 1; return [p / g, q / g]; };
   const mixed = (p, q) => { if (q === 1) return String(p); const wh = Math.trunc(p / q), r = Math.abs(p % q); return wh && r ? `${wh} ${r}/${q}` : null; };
   k.loop(() => {
+    { const g = (x, y) => y ? g(y, x % y) : Math.abs(x); let N, D; if (op === "+") { N = n1 * d2 + n2 * d1; D = d1 * d2; } else if (op === "-") { N = n1 * d2 - n2 * d1; D = d1 * d2; } else if (op === "*") { N = n1 * n2; D = d1 * d2; } else { N = n1 * d2; D = d1 * n2; } const G = g(N, D) || 1; k.publish("num", N / G); k.publish("den", D / G); k.publish("b", d1); k.publish("d", d2); k.publish("pair", n1 * 1000 + d1 * 100 + n2 * 10 + d2); }   // lesson figures + Your move goals
     c.begin(); const { w, h } = c;
     const bx = 60, bw = (w - 110) / 2, bh = 30;
     const bar = (y, parts, shaded, col, lineCol, label, units = 1, x = bx) => { for (let u = 0; u < units; u++) { const x0 = x + u * bw; d.rect(x0, y, bw - 4, bh, k.alpha(C.panel3, .8)); for (let i = 0; i < parts; i++) { const pw = (bw - 4) / parts, idx = u * parts + i; if (idx < shaded) d.rect(x0 + i * pw, y, pw, bh, k.alpha(col, .7)); if (i) d.line(x0 + i * pw, y, x0 + i * pw, y + bh, lineCol, 1.3); } d.rect(x0, y, bw - 4, bh, null, C.muted, 1.5); } d.text(label, x, y - 8, { font: `15px ${F.math}`, color: col }); };
@@ -111,18 +115,20 @@ L["decimal-ops"] = k => {
   k.modes([["mul", "Multiply"], ["add", "Add"]], mode, m => { mode = m; controls(); });
   controls();
   k.loop(() => {
+    k.publish("result", mode === "mul" ? Math.round(x * y * 100) / 100 : Math.round((ax + ay) * 100) / 100); k.publish("pair", mode === "mul" ? Math.round(x * 10) * 100 + Math.round(y * 10) : Math.round(ax * 100) * 1000 + Math.round(ay * 100));   // lesson figures + Your move goals
     c.begin(); const { w, h } = c;
-    const size = Math.min(h - 100, (w - 80) / (mode === "add" ? 2.2 : 1.6)), cell = size / 10, ox = 50, oy = 44;
+    const nar = mode === "mul" && w < 600, ox = mode === "mul" ? 76 : 30, oy = 72;   // clear of the mode buttons; on phones the words go under the grid
+    const size = Math.min(nar ? h - 200 : h - 130, nar ? w - ox - 24 : (w - ox - 30) / (mode === "add" ? 2.1 : 1.6)), cell = size / 10;
     if (mode === "mul") {
       const X = Math.round(x * 10), Y = Math.round(y * 10);
       for (let i = 0; i < 10; i++) for (let j = 0; j < 10; j++) { const a = i < X, b = j < Y; d.rect(ox + i * cell, oy + (9 - j) * cell, cell - 1, cell - 1, a && b ? k.alpha(C.amber, .8) : a ? k.alpha(C.cyan, .3) : b ? k.alpha(C.pink, .3) : k.alpha(C.panel3, .8)); }
       d.rect(ox, oy, size, size, null, C.muted, 1.5);
       d.text(`x = ${x.toFixed(1)}`, ox + X * cell / 2, oy + size + 20, { font: `15px ${F.math}`, color: C.cyan, align: "center" });
       d.text(`y = ${y.toFixed(1)}`, ox - 10, oy + size - Y * cell / 2, { font: `15px ${F.math}`, color: C.pink, align: "right", base: "middle" });
-      const tx = ox + size + 30;
-      d.text(`${X} tenths × ${Y} tenths`, tx, oy + 30, { font: `16px ${F.sans}`, color: C.text });
-      d.text(`= ${X * Y} hundredths`, tx, oy + 56, { font: `16px ${F.sans}`, color: C.amber });
-      d.text(`= ${(X * Y / 100).toFixed(2)}`, tx, oy + 82, { font: `22px ${F.mono}`, color: C.amber });
+      const tx = nar ? 12 : ox + size + 30, ty = nar ? oy + size + 16 : oy;
+      d.text(`${X} tenths × ${Y} tenths`, tx, ty + 30, { font: `16px ${F.sans}`, color: C.text });
+      d.text(`= ${X * Y} hundredths`, tx, ty + 56, { font: `16px ${F.sans}`, color: C.amber });
+      d.text(`= ${(X * Y / 100).toFixed(2)}`, tx, ty + 82, { font: `22px ${F.mono}`, color: C.amber });
       k.setRO(`<div><h2>Product</h2><div class="ro-big" style="margin-top:8px"><span class="c2">${x.toFixed(1)}</span> × <span class="c3">${y.toFixed(1)}</span> = <span class="num c1">${(X * Y / 100).toFixed(2)}</span></div></div>
         <div class="ro-rows"><div class="row">${M(`${X} × ${Y} = ${X * Y}`)}<span class="lbl">multiply as whole numbers first</span></div>
         <div class="row">${M("1 + 1 = 2 decimal places")}<span class="lbl">count the digits after the point in both factors, then place the point that many from the right</span></div></div>
@@ -145,6 +151,7 @@ L["percents"] = k => {
   k.slider(`<span class="c1"><i>p</i> %</span>`, 0, 100, 1, p, v => p = v);
   k.number(`<span class="c3">whole</span>`, 1, 1000000, N, v => N = v);
   k.loop(dt => {
+    k.publish("part", p * N / 100);   // lesson figures + Your move goals
     dp = lerp(dp, p, Math.min(1, dt * 10));
     c.begin(); const { w, h } = c;
     const size = Math.min(h - 130, w * .45), cell = size / 10, ox = 40, oy = 36;
@@ -182,6 +189,7 @@ L["sci-notation"] = k => {
   k.hint("Drag the slider across 42 powers of ten");
   const std = (v, e) => { if (e >= 0) return Number(v.toPrecision(3)).toLocaleString("en-US", { maximumFractionDigits: 2 }); return Number(v.toPrecision(3)).toFixed(Math.min(20, -e + 2)).replace(/0+$/, "").replace(/\.$/, ""); };
   k.loop(dt => {
+    k.publish("exp", Math.floor(L10 + 1e-9));   // lesson figures + Your move goals
     dL = lerp(dL, L10, Math.min(1, dt * 8));
     c.begin(); const { w, h } = c;
     const span = w < 600 ? 5 : 8, x0 = 20, x1 = w - 20, X = e => x0 + (x1 - x0) * ((e - dL) / span + .5);
@@ -190,7 +198,7 @@ L["sci-notation"] = k => {
     for (let e = Math.floor(dL - span / 2) - 1; e <= dL + span / 2 + 1; e++) {
       d.line(X(e), y - 12, X(e), y + 12, C.muted, 1.5);
       for (let m = 2; m < 10; m++) d.line(X(e + Math.log10(m)), y - 5, X(e + Math.log10(m)), y + 5, C.faint, 1);
-      const wd = d.powW("10", String(e).replace("-", "−"), 15, F.mono); d.pow("10", String(e).replace("-", "−"), X(e) - wd / 2, y + 34, { size: 15, family: F.mono, color: C.muted, ecolor: C.pink });
+      const wd = d.powW("10", String(e).replace("-", "−"), 15, F.mono); if (X(e) - wd / 2 >= 2 && X(e) + wd / 2 <= w - 2) d.pow("10", String(e).replace("-", "−"), X(e) - wd / 2, y + 34, { size: 15, family: F.mono, color: C.muted, ecolor: C.pink });
     }
     // objects
     let slot = 0;
@@ -222,6 +230,7 @@ L["proportions"] = k => {
   const sl = k.slider(`<span class="c1">c</span>`, 1, 40, 1, cq, v => cq = v);
   k.select("Scenario", [["recipe", "Recipe"], ["map", "Map scale"], ["fuel", "Fuel economy"], ["wage", "Hourly pay"]], sc, v => { sc = v; [ua, ub, a, b, cq] = SC[v]; na.set(a); nb.set(b); sl.set(cq); });
   k.loop(dt => {
+    k.publish("d", Math.round(b * cq / a * 100) / 100);   // lesson figures + Your move goals
     const x = b * cq / a; dx = lerp(dx, x, Math.min(1, dt * 8));
     c.begin(); const { w, h } = c;
     const top = Math.max(a, cq) * 1.15, x0 = 60, x1 = w - 40, X = v => x0 + (x1 - x0) * v / top;
@@ -263,6 +272,7 @@ L["averages"] = k => {
   const stats = arr => { const s = arr.slice().sort((a, b) => a - b), n = s.length, sum = s.reduce((a, b) => a + b, 0), mean = sum / n, med = n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2; const cnt = {}; s.forEach(v => cnt[v] = (cnt[v] || 0) + 1); const mx = Math.max(...Object.values(cnt)); const modes = mx > 1 ? Object.keys(cnt).filter(k2 => cnt[k2] === mx).map(Number) : []; return { s, n, sum, mean, med, modes, mx, range: s[n - 1] - s[0] }; };
   first = stats(START);
   k.loop(dt => {
+    { const s = data.slice().sort((x, y) => x - y), L = s.length; k.publish("count", L); k.publish("mean", L ? Math.round(s.reduce((u, v) => u + v, 0) / L * 100) / 100 : null); k.publish("median", !L ? null : L % 2 ? s[(L - 1) / 2] : (s[L / 2 - 1] + s[L / 2]) / 2); }   // lesson figures + Your move goals
     const S = stats(data); dm = lerp(dm || S.mean, S.mean, Math.min(1, dt * 8));
     c.begin(); const { w, h } = c;
     const x0 = 40, x1 = w - 40, y = h - 90, X = v => x0 + (x1 - x0) * v / 20, lv = layout();
@@ -297,6 +307,7 @@ L["percent-apps"] = k => {
   k.select("Compounded", [[1, "yearly"], [4, "quarterly"], [12, "monthly"], [365, "daily"]], n, v => n = +v);
   const money = v => "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   k.loop(() => {
+    k.publish("amount", Math.round(P * Math.pow(1 + r / 100 / n, n * t) * 100) / 100); k.publish("interest", Math.round((P * Math.pow(1 + r / 100 / n, n * t) - P) * 100) / 100); k.publish("simple", Math.round(P * r / 100 * t * 100) / 100);   // lesson figures + Your move goals
     c.begin(); const { w, h } = c;
     const R = r / 100, simple = y => P * (1 + R * y), comp = y => P * Math.pow(1 + R / n, n * y);
     const x0 = 70, x1 = w - 24, y0 = h - 40, y1 = 30, ymax = Math.max(comp(40), P * 1.2);
@@ -348,8 +359,10 @@ L["real-numbers"] = k => {
   const place = () => { const r = classify(inp.value); if (r) { custom = { label: inp.value.trim(), set: r[0], why: r[1] }; sel = -1; pulse = 0; } };
   wrap.querySelector("#rn-go").onclick = place; inp.addEventListener("keydown", e => { if (e.key === "Enter") place(); });
   c.cv.addEventListener("pointerdown", e => { const p = c.xy(e); hits.forEach(hh => { if (Math.abs(p.x - hh.x) < hh.w / 2 + 6 && Math.abs(p.y - hh.y) < 14) { sel = hh.i; custom = null; } }); });
+  k.expose({ pick: v => { sel = Math.max(0, Math.min(EX.length - 1, Math.round(+v) || 0)); custom = null; pulse = 0; } });   // chips: "pick:12" = EX[12]
   k.hint("Click any number to see which sets hold it");
   k.loop(dt => {
+    k.publish("pick", sel); k.publish("set", sel >= 0 ? "NWZQI".indexOf(EX[sel][1]) : -1);   // lesson figures + Your move goals
     pulse += dt; c.begin(); const { w, h } = c;
     const ox = 16, oy = 16, W = w - 32, H = h - 32;
     const rq = { x: ox + 14, y: oy + 34, w: W * .64 - 14, h: H - 48 };
@@ -365,14 +378,14 @@ L["real-numbers"] = k => {
       const child = { Q: rz, Z: rw, W: rnn }[set];
       const zone = child ? { x: child.x + child.w + 6, y: r.y + 30, w: r.x + r.w - child.x - child.w - 12, h: r.h - 40 } : { x: r.x + 8, y: r.y + 32, w: r.w - 16, h: r.h - 40 };
       if (zone.w < 50) { zone.x = r.x + 8; zone.w = r.w - 16; zone.y = child ? child.y + child.h + 4 : zone.y; zone.h = r.y + r.h - zone.y - 4; }
-      const cols = Math.max(1, Math.floor(zone.w / 90)), row = Math.floor(i / cols), col = i % cols;
-      return { x: zone.x + (col + .5) * zone.w / cols, y: zone.y + 12 + row * Math.min(30, zone.h / Math.ceil(total / cols)) };
+      const cols = Math.max(1, Math.floor(zone.w / (w < 600 ? 56 : 90))), row = Math.floor(i / cols), col = i % cols;
+      return { x: zone.x + (col + .5) * zone.w / cols, y: zone.y + 12 + row * Math.max(17, Math.min(30, zone.h / Math.ceil(total / cols))) };
     };
     hits.length = 0;
     const bySet = {}; EX.forEach(e => (bySet[e[1]] = bySet[e[1]] || []).push(e));
-    EX.forEach((e, i) => { const list = bySet[e[1]], j = list.indexOf(e); const p = spot(areas[e[1]], e[1], j, list.length); const on = i === sel; const tw = d.width(e[0], `17px ${F.math}`);
+    EX.forEach((e, i) => { const list = bySet[e[1]], j = list.indexOf(e); const p = spot(areas[e[1]], e[1], j, list.length); const on = i === sel; const fs = w < 600 ? 12.5 : 17, tw = d.width(e[0], `${fs}px ${F.math}`);   // smaller labels on phones so neighbours never touch
       if (on) d.rr(p.x - tw / 2 - 6, p.y - 13, tw + 12, 26, 5, k.alpha(C.text, .12), C.text, 1.5);
-      d.text(e[0], p.x, p.y + 1, { font: `17px ${F.math}`, color: { N: C.amber, W: C.green, Z: C.cyan, Q: C.pink, I: C.violet }[e[1]], align: "center", base: "middle" }); hits.push({ x: p.x, y: p.y, w: tw, i }); });
+      d.text(e[0], p.x, p.y + 1, { font: `${fs}px ${F.math}`, color: { N: C.amber, W: C.green, Z: C.cyan, Q: C.pink, I: C.violet }[e[1]], align: "center", base: "middle" }); hits.push({ x: p.x, y: p.y, w: tw, i }); });
     if (custom && custom.set !== "X") { const r = areas[custom.set]; const p = { x: r.x + r.w - 60, y: r.y + r.h - 24 }; const tw = d.width(custom.label, `600 18px ${F.math}`); const a = .5 + .5 * Math.sin(pulse * 4); d.rr(p.x - tw / 2 - 8, p.y - 14, tw + 16, 28, 6, k.alpha(C.amber, .25 + .2 * a), C.amber, 2); d.text(custom.label, p.x, p.y + 1, { font: `600 18px ${F.math}`, color: C.text, align: "center", base: "middle" }); }
     const cur = custom || (sel >= 0 ? { label: EX[sel][0], set: EX[sel][1], why: EX[sel][2] || "" } : null);
     const chain = { N: ["N", "W", "Z", "Q", "R"], W: ["W", "Z", "Q", "R"], Z: ["Z", "Q", "R"], Q: ["Q", "R"], I: ["I", "R"], X: [] }[cur ? cur.set : "X"];
@@ -417,6 +430,7 @@ L["units"] = k => {
     const given = `<span class="fb given"><span class="t">${nf(val)} ${U("given-n", p.u[0][0])}</span><span class="b">${p.u[1].length ? "1 " + U("given-d", p.u[1][0]) : "1"}</span></span>`;
     const facs = p.f.map((f, i) => `<span class="op">×</span><span class="fb"><span class="t"><span class="c2">${nf(f[0])}</span> ${U(i + "-n", f[1])}</span><span class="b"><span class="c2">${nf(f[2])}</span> ${U(i + "-d", f[3])}</span></span>`).join("");
     const done = Kc >= cs.length;
+    k.publish("k", Kc); k.publish("result", done ? +result.toFixed(p.d) : null);   // lesson figures + goals
     const outU = p.out[1].length ? `${p.out[0][0]}/${p.out[1][0]}` : p.out[0][0];
     dom.innerHTML = `<div class="chain">${given}${facs}<span class="op">=</span><span class="res">${done ? result.toLocaleString("en-US", { maximumFractionDigits: p.d }) + " " + outU : "?"}</span></div>
       <p style="text-align:center;color:var(--muted);margin-top:28px;font-size:14px">${done ? "Every unit except the target has cancelled." : `Cancel ${cs.length - Kc} more unit pair${cs.length - Kc === 1 ? "" : "s"}: press Step.`}</p>`;

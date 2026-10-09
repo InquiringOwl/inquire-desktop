@@ -1,93 +1,129 @@
-# Three-layer lessons (Concept · Intermediate · Formal)
+# Three-layer lessons (Concept · Intermediate · Formal): the writer brief
 
-Arithmetic first (Oct 2026, Devon). A lesson page shows three tabs above its header: **Concept**, **Intermediate**, **Formal**. The tabs change the text below the lab (and the header's lede); the lab never changes. The reference page is `web/content/arithmetic/addition.js`: read it whole before writing (it is the only page you read besides your own).
+Arithmetic first (Oct 2026, Devon). A lesson page shows three tabs above its header: **Concept**, **Intermediate**, **Formal**. A tab changes the header's lede and the text below the lab; the lab itself never changes.
+
+**Reference page: `web/content/arithmetic/counting.js`.** Read it whole before writing. Copy the skeleton from `docs/subjects/LESSON-TEMPLATE.js` (every field, in page order, with the rule for each). Read your own lesson's current file; keep its good material (legend, steps, example, mistakes, practice, careers, history) and rebuild it into the blocks below. Do not read CLAUDE.md, app.js or other lessons.
 
 ## Who it is for (pedagogy + andragogy)
 Adults who never saw why a topic matters, and returning learners who found it hard. Relevance is personal, so give varied, concrete situations (money, work, home, health, travel, building, cooking, games) and let readers find their own.
-- **Respect**: plain adult language. Never childish ("For a ten-year-old" is gone), never condescending ("simply", "just", "easy", "obviously"). **Concept voice (Oct 2026): 5th-grade reading level, adult tone.** Short common words, sentences under about 15 words, "you" plus a verb, contractions allowed. No exclamation marks, praise, "Let's", mascots or emoji. Give the real word (successor, one-to-one matching) as a tool to pick up. Test: could the sentence hang on a pharmacy wall and in a classroom?
+- **Respect**: plain adult language. Never childish, never condescending ("simply", "just", "easy", "obviously").
+- **Concept and Intermediate voice: 5th-grade reading level, adult tone.** Short common words, sentences under about 15 words, "you" plus a verb, contractions allowed. No exclamation marks, praise, "Let's", mascots or emoji. Give the real word (successor, regrouping) as a tool to pick up. Test: could the sentence hang on a pharmacy wall and in a classroom?
+- **Formal voice**: college-level precision, standard terms and order (OpenStax *Prealgebra 2e*), plain colour (no cues).
 - **Problem first**: every idea arrives as the answer to a real problem someone had or has.
-- **Why before how**: Concept explains purpose; Intermediate gives each step its reason; Formal gives precise language to explain it to others.
-- **Use what they know**: connect to everyday experience and to earlier lessons.
+- **Introduce every idea from something the learner can see or do**: the everyday version first, then the real term (the term chip on idea cards, "You met it as" on vocabulary cards). Every block points at something in the lab (a Try chip, a Your move goal, the live figure); nothing stands alone.
+- **One situation carried through all three tabs** (Counting: seats 14–22 for 9 friends): the Concept walk, the Intermediate method and the Formal write-up all use it.
+- **Show the work line by line** and ask the learner to **predict** the next line before revealing it, with a hint, a kind "Not yet" nudge and a way to just see it. **Name the classic trap** and prove why it is wrong (22 − 14 = 8 counts the gaps; add one for both ends).
 - Voice rules of `docs/universal/WRITER-CORE.md` still hold: short sentences, no em-dash asides, no "not X but Y", no stock phrases, every number right.
 
-## What each tab shows and where it comes from
-| Tab | Section | Field |
-|---|---|---|
-| **Concept** (new or returning: what and why) | header lede | `layers.concept.lede` (1–2 plain sentences: the question this topic answers) |
-| | What is [topic]? | `plain` (rewrite: 2–3 `<p>`, adult, one concrete everyday example with numbers, the key terms in `<b>`). Optional `layers.concept.heading` if "What is <title lower-case>?" reads badly (e.g. "What are ratios?") |
-| | Why it matters + Subjects that rely on it | `why` (rewrite and expand: 2–3 `<p>`; what goes wrong without it, what it lets you do, how later math builds on it) + `fields` (keep or improve, 3–5) |
-| | A short history | `layers.concept.history`: 3 `<p>`, each starting `<b>The problem.</b>`, `<b>The solution.</b>`, `<b>What it changed.</b>` (practical: who needed it, for what, and how that reaches the reader today). `layers.concept.sources`: 2–4 `{title, url}` (https) you actually opened |
-| | Where you will meet it | `layers.concept.examples`: 5–6 `{role, scene, takeaway}` built from `careers`. `scene` (HTML) = a small, real situation with real numbers, worked in one or two lines; `takeaway` (text) = why the math mattered there |
-| **Intermediate** (how to do it) | header lede | `layers.build.lede` (the routine in one sentence) |
-| | Reading the model | `layers.build.intro` (one `<p>`: what the lab shows, how to read it) + `legend` (unchanged unless wrong) |
-| | How to … | `steps` (keep or tighten the items) + `layers.build.stepWhy`: one HTML string **per step, same count**: the reason the step works or why it is done in that order |
-| | Worked example | `example` (unchanged unless wrong) |
-| | Everyday tasks | `layers.build.bridge` (one `<p>` linking the worked example's pattern to daily life) + `layers.build.tasks`: 4–5 `{task (text), link (HTML)}`; each `link` points back to a step or number of the worked example or practice |
-| **Formal** (state it, reproduce it, explain it) | header lede | the existing `lede` (keep it precise) |
-| | Formal statement | `formal` (unchanged unless wrong) |
-| | Writing [the topic] | `layers.formal.setup = {title, items}`: 4–6 `{say, math}`: how to turn a situation into variables and an equation/expression, name the parts, justify the method (laws, place value…), compute, answer in a sentence with units. Use the worked example's numbers. `math` is one line of math markup |
-| | Common mistakes | `mistakes` (keep; add 1 if a common one is missing, e.g. units or wording traps) |
-| | Practice | `practice`: **5** items. Items 1–4 reworded as real situations (keep the numbers if possible so the checks barely change), each with `ctx` (text, 1–2 words: "Shopping", "Travel"…). Item 5: "Write an equation (or expression) with a letter for the unknown, then solve: …" |
+## Page order (every tab): what → why → where it goes wrong → the rest
+- **Concept**: the question → 2 to 4 idea cards → **the walk** ("___ it together") → history timeline → [why it matters │ where it goes wrong] side by side in one panel → "Where you will meet it" tiles.
+- **Intermediate**: the task → "What the model shows" key cards (the legend) → the method rail (step │ why, Your move goals) → why a method matters → everyday tasks you solve (with pictures and worked lines). With a Concept walk there is **no** Intermediate worked example.
+- **Formal**: the definition (boxed `.display` from `formal`) → vocabulary cards → [why exact words matter over where formal answers go wrong] stacked in one panel → "Writing a … problem" rail (the walk's situation in textbook form) → Your turn: 5 practice cards with typed answers.
 
-Also set `voice: "plain"`. Leave `careers`, `life`, `origin`, `prereqWhy`, `unlocksWhy`, `beyond`, `hero`, `title`, labs untouched (they are still used elsewhere). Put `layers: {…}` right before `prereqWhy`.
+## Lesson-level fields
+| Field | Rule |
+|---|---|
+| `voice: "plain"` | always |
+| `layers.nudge` | The first "Not yet." for every checker on the page, naming this lesson's usual slip ("Not yet. Check each column for a carry."). Optional; the default is "Not yet. Check your work and try again." A question's own `nudge` wins. |
+| `layers.concept.objects`, `layers.build.objects` | Every word form for the things counted or measured in that tab ("seat", "seats", "dollar", "dollars"). They show violet; numbers show amber automatically (colour cues, Concept + Intermediate only). Never add colour markup by hand for this. |
+
+## Concept blocks (`layers.concept`, opt in with `ideas`; renderer `conceptHTML`)
+| Block | Field | Rule |
+|---|---|---|
+| Header lede | `lede` | 1–2 plain sentences: the question this topic answers. |
+| Heading | `heading` | "What is …?" / "What are …?" |
+| The question | `question {text, sub, figure {sym, value, cap, echo}}` | `text` is 1–4 words ("How many?", "Which is bigger?"). `figure` shows a lab value live: `echo` = a key the lab publishes (see "Your lab"), `value` = its starting value. |
+| Idea cards | `ideasTitle`, `ideas [{c, title, term, text, demo, try}]` (2–4) | Title ≤ 6 words; `text` ≤ about 25 words; `c` = the lab's colour key for that idea; `term` = the real word (same as the legend's); `demo` = a storyboard; `try` = a chip that drives the lab. |
+| The walk | `walk {title, lead, prompt, demo, lines [{math, note, frame}], predict, answer}` | The worked example simplified for the Concept voice. **Title = "<Verb> it together: <the situation>"** with this lesson's own verb ("Add it together: two paychecks", "Place it together", "Line it up together"; "Work it together" when no verb fits). ONE continuous situation, 4–7 lines. `demo` is a still storyboard the page steps: each line's `frame` = the frame index it shows (validate refuses frames that do not exist). `predict[0]` is null when line 1 should show at once; later lines carry questions that walk through different tactics: a typed number (`parts`), a pick (`choices`, each wrong one with a `why`), the classic shortcut and why it fails, the fix. `answer` = one sentence. |
+| History | `timelineTitle`, `timelineLead`, `timeline [{when, what}]` (3–5) + `history` (3 `<p>`: **The problem.** / **The solution.** / **What it changed.**) + `sources` (2–4 https pages you opened) | Beats tie back to the lab or an idea card ("the dashed dot in the model"). See "History: verify everything". |
+| Why it matters | `matters {title, text}` | Serif lead sentence, then 1–2 short paragraphs; 1–3 `<b>` key phrases per paragraph; parallel facts as `<ul class="why-chips">` (2–3 chips). No hard numbers. |
+| Where it goes wrong | `stakes {title, lead, items [{role, text}], try}` | 3–4 real slips, each in one line (the role in bold, what goes wrong). Include the classic trap. `try` sets the lab to show the slip. |
+| Where you will meet it | `examplesTitle`, `examples [{role, figure, scene, takeaway, try}]` (5–6) | Built from `careers`. `figure` = the tile's headline number ("90 tablets"). `scene` = a real situation with real numbers worked in one or two lines (`<span class="m">` for math). `takeaway` = why the math mattered there. `try` only when the number fits the lab's range. |
+
+## Intermediate blocks (`layers.build`, opt in with `task`; renderer `buildHTML`)
+| Block | Field | Rule |
+|---|---|---|
+| Header lede | `lede` | The routine in one sentence. |
+| The task | `task {text, sub, figure, jump}` | `text` = a short instruction ("Add so every column is right."). `jump` = `[{label: "The method", to: "b-method"}, {label: "Everyday tasks", to: "b-tasks"}]`. |
+| What the model shows | `keysTitle`, `intro` (one `<p>`), `keyTry [chip or null]` (one per legend key) | The cards come from `legend` (fix it if wrong; colours = the lab's keys). |
+| The method | `steps` (the lesson's own, 3–6 items) + `stepWhy` (same count: why the step works or why in that order) + `stepTry [chip or null]` + `stepGoal [goal or null]` + `goalsIntro` | 2–3 **Your move** goals `{key, eq | min, text, after, notYet}`: the learner does it in the lab and the goal ticks itself when the lab publishes `key` with that value. A goal step has no chip (validate refuses both). `eq` values must be reachable in the lab. **A goal ticks as soon as the lab shows its value, even from a chip**, so pick goal numbers that no chip on the page (Concept or Intermediate, including Play/finish chips) and not the walk's own numbers leave in the lab; a goal must be the learner's own move (`interact.js` clicks every Intermediate chip and fails if a goal ticks). Use a value that pins the whole move (number-line `pair`, place-value `n`), not one any setting can hit (`k ≥ 1`). |
+| Why a method matters | `matters {title, text}` | Title Case title; like `concept.matters`. |
+| Everyday tasks (pictures wait without the answer until the task is solved or shown: InquireDemo `hold`) | `tasksTitle` ("Everyday tasks: solve them"), `bridge` (one `<p>`), `tasks [{task, check {q, parts [{label, ans}], hint}, figure, demo, lines [{math, note}], predict, link, try}]` (4–5) | Each is a real problem from `life` with its own storyboard and a worked solution line by line; `predict[0]` null, 1 question on a middle line. `link` ties it back to a step or the walk. |
+
+## Formal blocks (`layers.formal`, opt in with `question`; renderer `formalHTML`)
+| Block | Field | Rule |
+|---|---|---|
+| The definition | `question {text, sub, figure, jump}` | Jumps `f-vocab`, `f-mist`, `f-setup`, `f-prac`. The boxed statement is the one `<div class="display">` in `formal` (keep exactly one). |
+| Vocabulary | `vocabTitle`, `vocabIntro`, `vocab [{c, sym, term, def, was}]` (4–8) | `def` college-accurate; `was` = the everyday name from the Concept/Intermediate tabs. |
+| Why exact words matter | `matters {title, text}` | One concrete case where a word or symbol changes an answer. |
+| Where formal answers go wrong | `mistakesTitle`, `mistakesLead` + the lesson's `mistakes [{wrong, fix}]` (3–5) | Mistake → correction; add the classic trap if missing. |
+| Writing it out | `setupIntro`, `setup {title, items [{say, math}]}` (4–6) | The walk's situation rewritten textbook-style: name the quantities, the law or rule that justifies the method, compute, answer in a sentence with units. |
+| Your turn | `practiceTip`, `practiceDone`, `checks [{hint, parts [{label, ans}]}]` (one per practice item) + the lesson's `practice` (5 items, each with `ctx`) | Items 1–4 real situations, easy → hard; item 5: "Write an expression (or equation) with a letter for the unknown, then solve: …". Every `ans` must appear in that item's `a` (validate). `practiceDone` = "All 5 solved. You can <do this lesson's thing> the formal way." |
+
+## Your lab: chips, live figures and goals
+A chip `{label, lab: "a:7,b:12,play"}` runs commands in order (`name[:number]`, numbers only). A figure's `echo` and a goal's `key` must be values the lab publishes. **Use only what your lab provides** (below); `tools/interact.js` checks every chip, figure and goal on every block lesson and fails on a wrong name.
+
+**Every control drives itself** (core.js, 1.18.5): a slider, number box, select or checkbox answers to the first word of its label and publishes its value under that name; a button answers to its label's letters ("Next pair" → `nextpair`); a select takes the option **index** (`op:2`); a checkbox takes `1`/`0` (no number = toggle); mode buttons are `mode:i`. A slider publishes its **raw** value (decimals' 47 means 0.47). Steppers have `play`, `step`, `reset`. Labs add their own commands (`k.expose`) and result values (`k.publish`).
+
+| Lab | Commands (chips) | Published values (figures, goals) |
+|---|---|---|
+| counting | `set:n`, `plus`, `play` | `n`, `aloud` (Count aloud finished, times), `counted` (n at the end of a count) |
+| place-value | `set:n` (0–9999), `add:d` (d may be negative) | `n`, `thousands`, `hundreds`, `tens`, `ones` |
+| number-line | `a:v`, `b:v` (0–20), `swap` | `a`, `b`, `dist` (= \|a − b\|), `pair` (= 100·a + b, for a goal that needs both points: a = 19, b = 20 → 1920) |
+| addition, subtraction | `a:v`, `b:v` (0–999999; setting one resets the steps), `step`, `play`, `finish`, `reset`, `newnumbers` (random) | `a`, `b`, `k` (columns worked), `result` (a ± b once every column is worked, else null), `regroups` (carries or borrows in the problem). Subtraction puts the larger number on top. |
+| rounding | `x:v` (0–999), `round:0` nearest ten / `round:1` nearest hundred | `x`, `round`, `rounded` |
+| multiplication | `a:v`, `b:v` (1–99), `unit:0/1` (unit squares) | `a`, `b`, `product`, `pair` (= 100·a + b) |
+| properties | `mode:0` commutative / `1` associative / `2` distributive, `a`, `b`, `c` (1–9), `rearrange` | `mode`, `a`, `b`, `c`, `value` (a×b / a+b+c / a×(b+c) by mode) |
+| division | `dividend:v` (1–99999), `divisor:v` (1–99), `play`, `step`, `reset` | `dividend`, `divisor`, `quotient`, `remainder`, `k` (steps), `result` (the quotient once every step is shown, else null) |
+| integers | `a:v`, `b:v` (−10–10), `op:0` + / `1` − / `2` ×, `replay` | `a`, `b`, `op`, `result` |
+| exponents | `b:v` (0–10), `n:v` (−3–8), `log` (toggle log scale) | `b`, `n`, `power` (bⁿ) |
+| order-ops | `expression:i` (0 "3 + 4 × 2", 1 "(3 + 4) × 2", 2 "20 − 12 ÷ 4 × 2", 3 "8 ÷ 2 × (2 + 2)", 4 "48 ÷ (6 − 2) + 3 × 5", 5 "2 × (3 + 5)² − 10", 6 "7 − 2 − 1", 7 "5 + 2 × (9 − 3²) + 6 ÷ 3"), `play`, `step`, `reset` | `expression`, `k`, `result` (once fully evaluated, else null) |
+| factors | `n:v` (1–100), `nextpair` | `n`, `count` (how many factors) |
+| modular | `m:v` (2–24), `a:v`, `b:v` (0–40), `op:0` + / `1` ×, `replay` | `m`, `a`, `b`, `op`, `result` ((a op b) mod m), `total` (a op b), `laps` (whole times round the clock) |
+| roots | `a:v` (the area A, 1–150), `nextguess`, `resetguesses` | `a`, `floor` (⌊√A⌋), `guesses` |
+| fractions | `n:v` (0–12), `d:v` (1–12), `k:v` (1–6, the scale) | `n`, `d`, `k`, `value` (n/d), `top` (n·k), `bottom` (d·k), `pair` (= 100·n + d) |
+| primes | `mode:0` sieve / `1` factor tree, `play`, `nextprime`, `reset`, `n:v` (tree, 2–999999) | `mode`, `n` |
+| decimals | `value:v` (0–100 hundredths: 47 = 0.47) | `value`, `decimal` |
+| mixed-numbers | `numerator:v` (1–40), `denominator:v` (2–8) | `numerator`, `denominator`, `whole`, `rem`, `pair` (= 100·numerator + denominator) |
+| ratios | `a:v`, `b:v` (1–8), `k:v` (1–6, the scale) | `a`, `b`, `k`, `first` (a·k), `second` (b·k), `total`, `pair` (= 100·a + b) |
+| gcf-lcm | `a:v`, `b:v` (1–60), `replay` | `a`, `b`, `gcf`, `lcm`, `pair` (= 100·a + b) |
+| sci-notation | `size:v` (log₁₀ of metres, −15–27, 0.01 steps), `jump:i` (0 proton, 1 hydrogen atom, 2 DNA helix width, 3 flu virus, 4 red blood cell, 5 human hair width, 6 grain of sand, 7 ant, 8 person, 9 blue whale, 10 Eiffel Tower, 11 Mount Everest, 12 Earth (diameter), 13 Earth to Moon, 14 Sun (diameter), 15 Earth to Sun, 16 one light-year, 17 Milky Way (diameter), 18 observable universe) | `size`, `jump`, `exp` (the power of ten) |
+| percents | `p:v` (0–100), `whole:v` (1–1000000) | `p`, `whole`, `part` |
+| decimal-ops | `mode:0` multiply / `1` add; multiply: `x`, `y` (1–10 tenths: 3 = 0.3); add: `x`, `y` (0–100 hundredths) | `mode`, `x`, `y`, `result`, `pair` (multiply: 100·x + y in tenths, 0.8 × 0.7 → 807; add: 1000·x + y in hundredths, 0.68 + 0.57 → 68057) |
+| fraction-ops | `a:v` / `b:v` (first fraction a/b), `c:v` / `d:v` (second c/d), 1–9, numerator ≤ denominator; `op:0` + / `1` − / `2` × / `3` ÷ | `a`, `b`, `c`, `d`, `op`, `num`, `den` (the result in lowest terms), `pair` (= digits a b c d: 2/3 and 1/4 → 2314). Set `b` before `a` and `d` before `c` |
+| percent-apps | `p:v` (principal, 100–10000 by 100), `r:v` (rate %, 0–15 by 0.25), `t:v` (years, 0–40), `compounded:0` yearly / `1` quarterly / `2` monthly / `3` daily | `p`, `r`, `t`, `compounded`, `amount`, `interest`, `simple` (simple interest P·r·t) |
+| averages | `addpoint` (random value), `remove` (last), `addoutlier` (adds 20), `reset` (back to 3, 5, 5, 6, 8, 9, 12, 5, 7) | `count`, `mean` (2 decimals), `median` |
+| proportions | `scenario:0` recipe (3 cups → 36 cookies, c = 5) / `1` map (2 cm → 15 km, c = 7) / `2` fuel (4 gal → 118 mi, c = 11) / `3` wage (8 h → $148, c = 30), `a:v`, `b:v`, `c:v` (1–40) | `a`, `b`, `c`, `scenario`, `d` (= b·c/a, 2 decimals) |
+| real-numbers | `pick:i` (0 7, 1 1, 2 42, 3 √9, 4 0, 5 −3, 6 −12, 7 3/4, 8 −2.5, 9 0.333…, 10 0.125, 11 √2, 12 π, 13 e, 14 −√5, 15 0.101001…) | `pick`, `set` (the smallest set that holds it: 0 ℕ, 1 𝕎, 2 ℤ, 3 ℚ, 4 irrational) |
+| units | `conversion:i` (0 mi/h → m/s, 1 km/h → m/s, 2 dose by weight lb → mg, 3 gal/min → L/h, 4 in → cm, 5 seconds in a year), `value:v`, `play`, `step`, `reset` | `conversion`, `value`, `k`, `result` (once every unit has cancelled, else null) |
+
+## Storyboards (`InquireDemo`, `web/kits/categorical/demo.js`)
+Plain data; they play once in view, replay on tap, show the final frame under reduced motion, and step frame by frame in a walk. Colours are CSS variables (every theme works). Never GIFs. `alt` is a full sentence. validate runs `InquireDemo.check(spec)` on every one.
+| Kind | Spec | Frames |
+|---|---|---|
+| `dots` | `{slots, lit, sweep, big}` or `{slots, grow: [4, 5, 6]}` | sweep: rest + one per dot + big |
+| `range` | `{from, to, step, gaps, unit}` | numbered row (seats, days, pages); `gaps` marks the b − a slip |
+| `tens` | `{n (1–99), unit}` | full tens, then ones, then the total |
+| `line` | `{from, to, tick, points: [{v, c, label, below}], show: "dist"}` (`tick` = label spacing; `below: true` puts a point's label under the line, for two close points) or `{from, to, start, jumps: [5, -3], unit}` | points one by one (then the distance bracket), or the start then one hop per jump, then the end value |
+| `columns` | `{n}` (place value) · `{add: [a, b]}` · `{sub: [a, b]}` | n: one place per frame from the left, then the total; add/sub: empty, one column per frame (carries/regrouping shown), then the result |
+| `bar` | `{parts: [340, 125], labels, unit}` or `{parts: [340, null], total: 465, labels}` | parts one by one, brace + total, (reveal the unknown part) |
+| `array` | `{rows, cols, unit}` | one row per frame with running totals, then the product |
+| `fraction` | `{n, d, split, mixed}` | a bar cut into d parts (more bars when n > d, up to 4 wholes), one part shaded per frame, then n/d (or the mixed number "2 3/4" with `mixed`); `split: k` adds a frame re-cutting every part into k (n·k/d·k, "same amount") |
+Every kind takes `cap` (the small caption under the big number). Frame counts for a walk: `InquireDemo.seqFrames(spec).length` (`frames` for dots). A lesson that needs a new picture asks the reviewer for a new kind (demo.js + a test in `tests/universal.test.js`); never a new code path in a lesson.
 
 ## History: verify everything
-Use WebSearch/WebFetch. Prefer MacTutor (mathshistory.st-andrews.ac.uk), Britannica, Wikipedia with its citations, museum or university pages. Every date, name and place must be in a source you opened; list those in `sources`. If sources disagree or are vague, say "about", "by the …th century", or leave the claim out. No legends presented as fact (e.g. Gauss's school sum is told as a story "according to his biographer"). Keep it practical: merchants, builders, astronomers, tax collectors, sailors, cooks, engineers.
+Use WebSearch/WebFetch. Prefer MacTutor (mathshistory.st-andrews.ac.uk), Britannica, Wikipedia with its citations, museum or university pages. Every date, name and place must be in a source you opened; list those in `sources`. If sources disagree or are vague, say "about", "by the …th century", or leave the claim out. No legends presented as fact. Keep it practical: merchants, builders, astronomers, tax collectors, sailors, cooks, engineers, and tie it to what the learner just did in the lab.
 
-## Checks
-Add to `checks/arithmetic/<id>.py`: every number in `layers.concept.examples` scenes and `layers.formal.setup`, plus the new/reworded `practice` items (`same("layers.examples", …)`, `same("layers.setup", …)`, `same("practice[4]", …)`). The page hash now covers examples + setup, so stamp after: `python3 tools/mathcheck.py --stamp <id>`. Never weaken a check.
+## Checks (`checks/arithmetic/<id>.py`)
+Block lessons hash the whole `layers` object, so any text change needs a re-stamp, and the runner requires these labels (a longer label covers its prefix, e.g. `build.tasks[2].lines`): `example`, `practice[0..4]`, `concept.walk` (every number in its lines, predict answers and demo), `layers.examples` (every tile's numbers), `layers.setup`, `build.tasks[i]` for every task with a check or lines (answers, lines, predict answers, demo numbers), `build.exampleTask` if used, `build.stepGoal[i]` for every goal with `eq` (the target and that the lab can reach it). Put idea-card and stakes numbers under `layers.concept`. Compute independently with sympy/Python; never bend a check to match a page. Stamp after: `python3 tools/mathcheck.py --stamp <id>`.
 
-## Finish
-`node tools/build-web.js && node tools/validate.js` (0 errors; `layers` is validated) and `python3 tools/mathcheck.py <ids>`. Do not run the full mathcheck (too slow) or smoke; the reviewer runs browser checks.
+## Finish (on the device)
+`node tools/finish.js <id>` (build + validate + mathcheck <id> + labtest) must end `FINISH ok`. Do not run the full mathcheck or smoke; the reviewer runs the browser checks (`finish.js --browser`, `interact.js`, one sheet per lesson).
 
-## Page order and look for every lesson (Devon, Oct 2026: use for every lesson in this format)
-- **What → why → where.** Each tab first shows *what* (the question/task/definition, then the idea cards, key cards or vocabulary), then *why* it matters, then right after it *where it goes wrong*: concrete wrong and right cases that prove the why. Only then the rest (examples, writing it out, practice).
-- **Why + where share one console panel** (`whyHTML(matters, where, stack)` in app.js, class `.win.why`): small glowing labels "Why it matters" (theme `--frame`) and "Where it goes wrong" (red). Concept: side by side, a red vertical rule between them (stacks with a horizontal red rule under 1100 px). Formal: stacked, a red horizontal rule between (the mistakes list is too wide for half a panel). Intermediate has only the why, so its panel is reading width.
-- **Headers are console windows**: the question/task/definition is a `.win` with a `.win-h` strip (eyebrow + "Live from the model" when the figure follows the lab) and the live figure in its own readout cell. The Concept · Intermediate · Formal tabs are one `.win` strip of three segments; the open one is lit from below in `--frame`. Never style these with `--cyan`; themes recolour them through `--frame`.
-- **Section headings** in layered lessons carry a lit diamond and a fading rule in `--frame` (style.css, `.lyr-body h2`). **Why text**: the first paragraph is a serif lead; mark 1–3 key phrases per paragraph with `<b>` (they glow in the theme colour) and, where the why lists parallel facts, put them in `<ul class="why-chips">` (2–3 short chips). Don't bold whole paragraphs.
-- **Colour cues (Concept + Intermediate, every math lesson)**: the numbers of each situation glow amber and the objects being counted/measured show violet with an underline, so the learner's eye lands on "how many" and "of what" first. Numbers are found automatically; list the lesson's object words (every form used: "seat", "seats") in `layers.concept.objects` and `layers.build.objects`. Math in `.m` spans, headings (h2), labels, inputs and pictures are left alone (`hlText()` in app.js, `HL_SKIP`). Formal stays plain on purpose (precise symbols, no cues). Don't add colour markup by hand for this.
-- The topic bar shows a gold **Next lesson** button beside Mark as mastered (`.next-btn`) only once the lesson is mastered; it slides in and pulses right after Mark as mastered. The pager at the bottom is two mirrored console cards, ◀ Previous lesson left and Next lesson ▶ right (`.pg-b`); at either end of the field the empty side becomes "Back to <field> tree".
-- Buttons that send the learner to the lab (Try-it chips, Go to the model) call `labIntoView(pg)`, which lands the lab's top fully below the sticky topic bar.
+## Look (already built; for reference)
+- Headers are `.win` console windows (`--frame` colours; never `--cyan` for UI). Section headings carry a lit diamond. The why and where share one `.win.why` panel ("Why it matters" in `--frame`, "Where it goes wrong" in red): side by side in Concept, stacked in Formal, the why alone in Intermediate.
+- Paired boxes share top and bottom edges; rails fill the width in two columns (`ol.method.m2`: step left, why/goal/math right); an incomplete last row of cards is centred. Gold is reserved for the Next lesson button; green = solved, red = mistakes, amber numbers + violet objects = colour cues.
+- Lab buttons and chips call `labIntoView(pg)` so the lab clears the sticky topic bar.
 
-## Concept blocks (Oct 2026; Counting first)
-A lesson opts in by adding `layers.concept.ideas`; without it the Concept tab keeps the older layout (What is it · Why it matters · History · Where you will meet it). The rule: **every block must point at something you can see or do in the lab**, or be marked as outside the model (history, careers). Renderer `conceptHTML` in `web/src/app.js`; spec check in `tools/validate.js`; reference page `web/content/arithmetic/counting.js`.
-| Block | Field | Notes |
-|---|---|---|
-| The question | `concept.question {text, sub, figure {sym, value, cap, echo}}` | `figure` echoes the lab's big amber number in the same style. With `echo: "n"` it follows the lab live: the lab calls `k.publish("n", n)` (core.js) and `value` is only the fallback before the lab runs. |
-| Idea cards (2 to 4) | `concept.ideas [{c, title, term, text, demo, try}]` | Title ≤ 6 words, `text` ≤ about 25 words. `c` is the lab's colour key (c1 count, c2 successor). `term` is the real word, shown small, using the same words as the Intermediate legend. `demo` is a storyboard, `try` a chip. |
-| Why it comes first | `concept.matters {title, text}` | Left half of the why panel, What goes wrong on the right; large easy text: 2 short paragraphs on why getting this topic right matters, before the hard examples. No numbers, no lists. |
-| What goes wrong | `concept.stakes {title, lead, items [{role, text}], try}` | One strong callout; say plainly what the lab's dashed dot does and does not mean. |
-| Where you will meet it | `concept.examples [{role, figure, scene, takeaway, try}]` | The tile shows `figure` (the number) first; `scene` opens on tap. Add `try` only when the number fits the lab's range. Numbers stay in `checks/<field>/<id>.py`. |
-| A short history | `concept.timeline [{when, what}]` (3 to 5) + `history` + `sources`, optional `timelineTitle`, `timelineLead` | Comes right **after the idea cards** (before Why it comes first), so the story backs up what the learner just did: each beat should point back at an idea card or the lab. Beats in the open; the 3-paragraph story and sources fold under "Read the full story". |
-| Count it together | `concept.walk {title, lead, prompt, demo, lines [{math, note, frame}], predict, answer}` | The worked example, simplified for the Concept voice: ONE continuous situation, a picture (`demo`, played as a still that the page steps: `frame` = the storyboard frame each line shows), lines one at a time, and predict questions that walk through different tactics (match, the last number, a shortcut, why the shortcut fails, the fix). With a `walk`, Intermediate has no Worked example block. Numbers go in the check file. |
-Order on the page: question → ideas → count it together → history → [matters │ stakes] (one panel) → examples.
-Subjects-that-rely-on-it is not repeated here; Learning path below already lists it.
-
-**Storyboards** (`web/kits/categorical/demo.js`, `InquireDemo`): plain data, e.g. `{kind: "dots", slots: 5, lit: 5, sweep: true, big: true, alt}` or `{kind: "dots", slots: 8, grow: [4, 5, 6], alt}`. They play once when scrolled into view, replay on tap or ↻, and show the final frame under reduced motion (OS or Settings). Colours are CSS variables, so every theme works. Not GIFs: GIFs bake in the background, ignore Reduce motion and do not scale with Text size. A new lesson that needs another picture adds a `kind` to demo.js (with a test in `tests/universal.test.js`), not a new code path.
-
-**Try-it chips** drive the lab: the lab calls `k.expose({set, plus, play, …})` (`web/kits/universal/core.js`), a chip carries `lab: "set:12,play"` (commands in order, `name[:argument]`), and the page scrolls the lab into view. A chip whose lab does not expose the command does nothing, so expose before writing the chip. `tools/interact.js` has the Counting checks.
-
-
-## Intermediate blocks (Oct 2026; Counting first)
-The Intermediate tab in the same look as the Concept blocks, aimed at applying the idea. Its three hands-on parts (Your move goals, predict the next line, solvable tasks) share the answer checker with Formal practice (`pzHTML`/`pzWire` in app.js: typed numbers or a pick, hint, show answer, `inquire:quiz`). A lesson opts in with `layers.build.task`; without it the tab keeps the older layout. The text is the lesson's own (legend, steps, `stepWhy`, example, `bridge`, `tasks`); the new fields only frame it. Renderer `buildHTML` in `web/src/app.js`, check in `tools/validate.js`, tests in `tools/interact.js`.
-| Block | Field | Notes |
-|---|---|---|
-| The task | `build.task {text, sub, figure {sym, value, cap, echo}, jump [{label, to}]}` | Eyebrow "The task". A short instruction as the headline ("Count it so the total can be trusted."). `figure` like the Concept question (live with `echo`). `jump` links let returning learners skip ahead; `to` is `b-method`, `b-example` or `b-tasks`. |
-| Reading the model | `legend` + `build.intro`, `build.keysTitle`, `build.keyTry [chip or null]` | The legend drawn as cards (symbol large, in its colour key), one optional chip per key. |
-| The method | `steps` + `build.stepWhy`, `build.stepTry [chip or null]`, `build.stepGoal [goal or null]`, `goalsIntro` | A numbered rail: the step, then "Why" in small text, then a chip or a **Your move** goal. A goal `{key, eq | min, text, after}` ticks itself off when the lab publishes `key` with that value (`k.publish`; Counting sends `n`, `aloud` = times Count aloud finished, `counted` = n at the end of a count). A goal step has no chip (a chip would do the move for the learner; validate refuses both). "Your moves n of 3" tracker above the rail; each goal has **Check my move** (confirms against the model now, or says what is missing; optional `notYet` HTML for that message). Done goals stay done while the app is open. |
-| Why a method matters | `build.matters {title, text}` | Large easy text, 2 short paragraphs, like `concept.matters`. |
-| Worked example → first everyday task | `build.exampleTask {task, parts, hint, figure, link, demo}` + `example`, `build.exampleTip`, `build.exampleTry`, `build.predict [question or null]` | **With `exampleTask` (Counting, 1.18.4) there is no separate Worked example block**: the example is the first Everyday task (open, badge "Worked example · solve it"), `example.prompt` is its question, `parts` its answer boxes, and its lines come out one at a time under "Work it out line by line". Without `exampleTask` the old block stays. |
-| (old) Worked example | `example` + `build.exampleTip`, `build.exampleTry`, `build.predict [question or null]` | Starts with the problem and the first line. A line with a `predict` question `{ask, parts [{label, ans}] | choices [{t, ok, why}], hint}` waits until the learner answers it (or presses Just show the line); other lines use Show the next line. `predict[0]` is null. Wrong choices need a `why`. Put every number in the check file. |
-| Everyday tasks | `build.bridge` + `build.tasks [{task, figure, link, try, check, lines, predict, demo}]` | Each task may add `lines [{math, note}]` (its worked solution, shown line by line beside the answer boxes; Show all), `predict` (questions on some lines, like `build.predict`; "Just show the line" skips one) and `demo` (its own picture, an `InquireDemo` storyboard: `range` for numbered rows/days/pages with `gaps`, `tens` for groups of ten, `dots`; ~200 bytes of data each). The first way to finish counts: a right answer, or every prediction right = solved; Show the answer, Show all or Just show the line = shown. Every number in lines/predict/demo goes in the check file. Tiles like the Concept examples. With `check {q, parts, hint}` a tile is a problem: it opens full width with the question and answer boxes, and `figure`, `link` and `try` appear once it is solved or shown. "Solved n of 5" bar. Numbers go in the check file. |
-
-## Formal blocks (Oct 2026; Counting first)
-Topic header: the tab's lede sits right below the hero equation, in larger, brighter text (`.topic .intro .lede`). The Formal tab in the same look, for learners who want the academic vocabulary and the full written method. A lesson opts in with `layers.formal.question`; without it the tab keeps the older layout. The lesson's own `formal`, `formal.setup`, `mistakes` and `practice` stay as they are; the new fields frame them. Renderer `formalHTML` in `web/src/app.js`.
-| Block | Field | Notes |
-|---|---|---|
-| The definition | `formal.question {text, sub, figure, jump}` | Eyebrow "The definition" (`formal.eyebrow` to change). Figure like Concept (Counting shows the lab's n as \|A\|). Jump targets in page order: `f-vocab`, `f-mist`, `f-setup`, `f-prac`. |
-| Vocabulary | `formal.vocab [{c, sym, term, def, was}]` (3 to 8) + `vocabTitle`, `vocabIntro` | Everyday word → textbook term. `was` names the idea as the Concept/Intermediate tabs said it, so every card points back to something the learner already did. `def` must be college-accurate. |
-| Formal statement | `formal` (+ `statementTitle`) | Not a block of its own: its `<div class="display">` (the boxed definition) is shown inside The definition, and the full text folds under the vocabulary ("Read the formal statement in full"). Keep one `.display` box in `formal` for this. |
-| Why exact words matter | `formal.matters {title, text}` | Large easy text, like the other tabs; one concrete case where a word changes an answer. Numbers here are checked by hand (not hashed). |
-| Where formal answers go wrong | `mistakes` + `mistakesTitle`, `mistakesLead` | Right below Why exact words matter, in the same panel (red rule between). Mistake → correction pairs. |
-| Writing it out | `formal.setup` + `setupIntro` | The numbered rail with the math under each step; reuse the Intermediate worked example. |
-| Practice ("Your turn") | `practice` + `formal.checks [{hint, parts [{label, ans}]}]`, `practiceTip`, `practiceTitle`, `practiceDone` | Each card takes a typed answer (commas and units ignored), Check marks each part, a wrong try offers the worked answer, a second shows the hint; Need a hint? is always there. Progress bar: solved green, shown amber (not counted). Every `ans` must appear in that item's `a` (validate). Fires `inquire:quiz` for Achievements. A practice item without a check keeps Show answer. |
+## Lessons not yet converted
+Every Arithmetic lesson is a block lesson. Older-layout pages (Pre-Algebra onward) keep their tabs until converted with this brief; don't patch the old layout.

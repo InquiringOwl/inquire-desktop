@@ -263,7 +263,7 @@ for (const [id, t] of Object.entries(T)) {
       if (F.checks !== undefined) { if (!Array.isArray(F.checks) || F.checks.length > (t.practice || []).length) err(LW, 'formal.checks must be an array, at most one per practice item');
         else F.checks.forEach((k, i) => { const P = `formal.checks[${i}]`; if (k === null) return; if (k.hint !== undefined) { nonEmpty(LW, `${P}.hint`, k.hint); checkHtml(LW, `${P}.hint`, k.hint); }
           if (arr(LW, `${P}.parts`, k.parts, 1)) k.parts.forEach((x, j) => { checkText(LW, `${P}.parts[${j}].label`, x.label); if (typeof x.ans !== 'number' || !isFinite(x.ans)) err(LW, `${P}.parts[${j}].ans must be a number`);
-            else { const a = String((t.practice[i] || {}).a || '').replace(/<[^>]+>/g, '').replace(/(\d),(?=\d{3})/g, '$1'); if (!new RegExp(`(^|[^\\d.])${String(x.ans).replace('.', '\\.')}(?![\\d])`).test(a)) err(LW, `${P}.parts[${j}].ans ${x.ans} does not appear in practice[${i}].a (the checked answer)`); } }); }); }
+            else { const a = String((t.practice[i] || {}).a || '').replace(/<[^>]+>/g, '').replace(/(\d),(?=\d{3})/g, '$1').replace(/\u2212/g, '-'); if (!new RegExp(`(^|[^\\d.])${String(x.ans).replace('.', '\\.')}(?![\\d])`).test(a)) err(LW, `${P}.parts[${j}].ans ${x.ans} does not appear in practice[${i}].a (the checked answer)`); } }); }); }
       for (const k of ['vocabIntro', 'setupIntro', 'mistakesLead', 'practiceTip', 'practiceDone']) if (F[k] !== undefined) { nonEmpty(LW, `formal.${k}`, F[k]); checkHtml(LW, `formal.${k}`, F[k]); }
       for (const k of ['vocabTitle', 'mistakesTitle', 'statementTitle', 'eyebrow', 'practiceTitle']) if (F[k] !== undefined) checkText(LW, `formal.${k}`, F[k]);
     }

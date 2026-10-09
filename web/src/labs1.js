@@ -132,7 +132,7 @@ L["number-line"] = k => {
   const pin = v => Math.max(0, Math.min(20, Math.round(+v) || 0));
   k.expose({ a: v => { a = pin(v); sa.set(a); }, b: v => { b = pin(v); sb.set(b); }, swap: () => { [a, b] = [b, a]; sa.set(a); sb.set(b); } });   // chips: "a:7,b:12", "swap"
   k.loop(dt => {
-    k.publish("a", a); k.publish("b", b); k.publish("dist", Math.abs(a - b));   // live figure + Your move goals
+    k.publish("a", a); k.publish("b", b); k.publish("dist", Math.abs(a - b)); k.publish("pair", 100 * a + b);   // live figure + Your move goals; pair = both points at once (a = 19, b = 20 → 1920)
     da = lerp(da, a, Math.min(1, dt * 10)); db = lerp(db, b, Math.min(1, dt * 10));
     c.begin(); const { w, h } = c;
     const x0 = 40, x1 = w - 40, y = h * .62, X = v => x0 + (x1 - x0) * v / 20;
@@ -165,6 +165,7 @@ L["rounding"] = k => {
   k.slider(`<span class="c1"><i>x</i></span>`, 0, 999, 1, x, v => x = v);
   k.select("Round to", [[10, "nearest ten"], [100, "nearest hundred"]], 10, v => place = +v);
   k.loop(dt => {
+    k.publish("rounded", x - Math.floor(x / place) * place >= place / 2 ? Math.floor(x / place) * place + place : Math.floor(x / place) * place);   // lesson figures + Your move goals
     dx = lerp(dx, x, Math.min(1, dt * 12));
     c.begin(); const { w, h } = c;
     const lo = Math.floor(x / place) * place, hi = lo + place, mid = lo + place / 2;
@@ -227,7 +228,7 @@ function columnLab(k, op){
   }
   const place = i => ["ones","tens","hundreds","thousands","ten-thousands","hundred-thousands"][i] || "10^" + i;
   build();
-  const na = k.number(`<span class="c2"><i>a</i></span>`, 0, 999999, A, v => { A = v; build(); st.reset(); });
+  const na = k.number(`<span class="c2"><i>a</i></span>`, 0, 999999, A, v => { A = v; build(); na.set(A); nb.set(B); st.reset(); });   // subtraction may swap a and b: show what the lab works
   const nb = k.number(`<span class="c3"><i>b</i></span>`, 0, 999999, B, v => { B = v; build(); na.set(A); nb.set(B); st.reset(); });
   const st = k.stepper(() => plan.steps.length, () => {}, { ms: 1100 });
   k.button("New numbers", () => { A = 1000 + Math.floor(Math.random() * 9000); B = 100 + Math.floor(Math.random() * 9000); build(); na.set(A); nb.set(B); st.reset(); }, "btn ghost");
@@ -293,6 +294,7 @@ L["multiplication"] = k => {
   k.check("Unit squares", true, v => grid = v);
   const split = n => n >= 10 && n % 10 ? [n - n % 10, n % 10] : [n];
   k.loop(dt => {
+    k.publish("product", a * b); k.publish("pair", 100 * a + b);   // lesson figures + Your move goals
     da = lerp(da, a, Math.min(1, dt * 8)); db = lerp(db, b, Math.min(1, dt * 8));
     c.begin(); const { w, h } = c;
     const sc = Math.min((w - 110) / Math.max(da, 1), (h - 100) / Math.max(db, 1));
@@ -332,6 +334,7 @@ L["division"] = k => {
   k.number(`<span class="c3">divisor</span>`, 1, 99, B, v => { B = v; build(); st.reset(); }, "70px");
   const st = k.stepper(() => plan.phases.length, () => {}, { ms: 900 });
   k.loop(() => {
+    k.publish("quotient", plan.q); k.publish("remainder", plan.r); k.publish("k", st.k); k.publish("result", st.k >= plan.phases.length ? plan.q : null);   // lesson figures + Your move goals
     c.begin(); const { w, h } = c; const K = st.k; const n = plan.dg.length;
     const rows = 2 + plan.steps.length * 2;
     const ch = Math.min(38, (h - 40) / (rows + 1.2)), fs = Math.round(ch * .78), cw = fs * .62;
@@ -380,8 +383,9 @@ L["properties"] = k => {
   k.slider(`<span class="c4"><i>c</i></span>`, 1, 9, 1, cc, v => cc = v);
   k.button("Rearrange", () => { rotT = 1 - rotT; grpT = 1 - grpT; });
   k.loop(dt => {
+    k.publish("value", mode === "comm" ? a * b : mode === "assoc" ? a + b + cc : a * (b + cc));   // lesson figures + Your move goals
     rot = lerp(rot, rotT, Math.min(1, dt * 5)); grp = lerp(grp, grpT, Math.min(1, dt * 5));
-    c.begin(); const { w, h } = c; const cx = w / 2, cy = h / 2 + 20, g = c.g;
+    c.begin(); const { w, h } = c; const cx = w / 2, cy = h / 2 + 20, g = c.g, hy = w < 640 ? 46 : 0;   // headline below the mode buttons on phones
     let ro;
     if (mode === "comm") {
       const cell = Math.min(34, (Math.min(w, h) - 140) / 9);
@@ -391,7 +395,7 @@ L["properties"] = k => {
       g.strokeStyle = C.pink; g.beginPath(); g.moveTo(-(b / 2) * cell, -(a / 2) * cell - 12); g.lineTo((b / 2) * cell, -(a / 2) * cell - 12); g.stroke();
       g.restore();
       const rows = rotT ? b : a, cols = rotT ? a : b;
-      d.text(`${rows} rows of ${cols}`, cx, 50, { font: `24px ${F.math}`, color: C.text, align: "center" });
+      d.text(`${rows} rows of ${cols}`, cx, hy + 50, { font: `24px ${F.math}`, color: C.text, align: "center" });
       ro = `<div><h2>Commutative law</h2><div class="ro-big" style="margin-top:8px"><span class="c2">${a}</span> × <span class="c3">${b}</span> = <span class="c3">${b}</span> × <span class="c2">${a}</span> = ${a * b}</div></div>
        <div class="ro-rows"><div class="row">${M("<i>a</i> + <i>b</i> = <i>b</i> + <i>a</i>")}<span class="lbl">order does not change a sum</span></div><div class="row">${M("<i>a</i> × <i>b</i> = <i>b</i> × <i>a</i>")}<span class="lbl">rotating the array does not change how many dots</span></div></div>
        <div class="landmark"><div class="big">${M(`${a} − ${b} ≠ ${b} − ${a}`)}</div><div class="note">Subtraction and division are not commutative: ${a} − ${b} = ${a - b < 0 ? "−" + (b - a) : a - b}, but ${b} − ${a} = ${b - a < 0 ? "−" + (a - b) : b - a}.</div></div>`;
@@ -405,7 +409,7 @@ L["properties"] = k => {
       const L1 = grp < .5;
       if (L1) brk(gA, gB + b * unit - 2, y - 16, C.amber); else brk(gB, gC + cc * unit - 2, y - 16, C.amber);
       brk(gA - 4, gC + cc * unit + 2, y + bh + 20, C.muted);
-      d.text(L1 ? `(${a} + ${b}) + ${cc}` : `${a} + (${b} + ${cc})`, cx, 60, { font: `28px ${F.math}`, color: C.text, align: "center" });
+      d.text(L1 ? `(${a} + ${b}) + ${cc}` : `${a} + (${b} + ${cc})`, cx, hy + 60, { font: `28px ${F.math}`, color: C.text, align: "center" });
       d.text(`= ${L1 ? a + b : a} + ${L1 ? cc : b + cc} = ${a + b + cc}`, cx, y + bh + 56, { font: `20px ${F.math}`, color: C.muted, align: "center" });
       ro = `<div><h2>Associative law</h2><div class="ro-big" style="margin-top:8px">(<span class="c2">${a}</span> + <span class="c3">${b}</span>) + <span class="c4">${cc}</span> = <span class="c2">${a}</span> + (<span class="c3">${b}</span> + <span class="c4">${cc}</span>)</div></div>
        <div class="ro-rows"><div class="row">${M(`(${a} + ${b}) + ${cc} = ${a + b} + ${cc} = ${a + b + cc}`)}</div><div class="row">${M(`${a} + (${b} + ${cc}) = ${a} + ${b + cc} = ${a + b + cc}`)}</div>
@@ -421,7 +425,7 @@ L["properties"] = k => {
       if (W2 > 44) d.text(`${a}×${cc}=${a * cc}`, x0 + W1 + sp / 2 + W2 / 2, y0 + H / 2, { font: `600 16px ${F.mono}`, color: C.text, align: "center", base: "middle" });
       d.text(String(a), x0 - sp / 2 - 14, y0 + H / 2, { font: `600 16px ${F.mono}`, color: C.cyan, align: "right", base: "middle" });
       d.text(String(b), x0 - sp / 2 + W1 / 2, y0 - 12, { font: `600 16px ${F.mono}`, color: C.pink, align: "center" }); d.text(String(cc), x0 + W1 + sp / 2 + W2 / 2, y0 - 12, { font: `600 16px ${F.mono}`, color: C.violet, align: "center" });
-      d.text(grp < .5 ? `${a} × (${b} + ${cc})` : `${a}×${b} + ${a}×${cc}`, cx, 44, { font: `26px ${F.math}`, color: C.text, align: "center" });
+      d.text(grp < .5 ? `${a} × (${b} + ${cc})` : `${a}×${b} + ${a}×${cc}`, cx, hy + 44, { font: `26px ${F.math}`, color: C.text, align: "center" });
       ro = `<div><h2>Distributive law</h2><div class="ro-big" style="margin-top:8px"><span class="c2">${a}</span>(<span class="c3">${b}</span> + <span class="c4">${cc}</span>) = <span class="c2">${a}</span>·<span class="c3">${b}</span> + <span class="c2">${a}</span>·<span class="c4">${cc}</span></div></div>
        <div class="ro-rows"><div class="row">${M(`${a} × ${b + cc}`)} = <span class="v">${a * (b + cc)}</span><span class="lbl">the whole rectangle</span></div><div class="row">${M(`${a * b} + ${a * cc}`)} = <span class="v">${a * b + a * cc}</span><span class="lbl">the two pieces</span></div></div>
        <div class="landmark"><div class="big">${M("<i>a</i> + 0 = <i>a</i>,  <i>a</i> × 1 = <i>a</i>")}</div><div class="note">Identities: adding 0 or multiplying by 1 changes nothing. Inverses: <i>a</i> + (−<i>a</i>) = 0 and <i>a</i> × (1/<i>a</i>) = 1 for <i>a</i> ≠ 0.</div></div>`;
@@ -496,6 +500,7 @@ L["order-ops"] = k => {
   wrap.querySelector("#oo-go").onclick = load; txt.addEventListener("keydown", e => { if (e.key === "Enter") load(); });
   const st = k.stepper(() => states.length ? (states.length - 1) * 2 : 0, render, { ms: 900 });
   function render(){
+    k.publish("k", st.k); k.publish("result", states.length && st.k >= (states.length - 1) * 2 ? states[states.length - 1].t[0] : null);   // lesson figures + goals
     if (err || !states.length) { dom.innerHTML = `<div class="dom-expr" style="color:var(--pink);font-size:20px">Could not read that expression: ${err}. Use numbers, + − × ÷ ^ and parentheses.</div>`; k.setRO(`<div><h2>Result</h2></div>`); return; }
     const K = st.k, si = Math.floor(K / 2), phase = K % 2;
     const cur = states[Math.min(si, states.length - 1)];
