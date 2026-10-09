@@ -304,6 +304,7 @@ table.proof td:first-child{width:55%}
 .intro h1{font:400 clamp(28px,4.2vw,48px)/1.15 var(--math);margin:0;text-wrap:balance;letter-spacing:-.005em;max-width:100%;overflow-x:auto}
 .intro h1 .m{white-space:normal}
 .intro .lede{max-width:48ch;color:var(--muted);margin:0}
+.topic .intro .lede{font-size:clamp(18px,1.8vw,21px);line-height:1.5;max-width:60ch;color:var(--text);margin:14px 0 0}
 .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .lab{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px}
 .stage{position:relative;height:clamp(380px,60vh,620px);border:1px solid var(--line);border-radius:6px;overflow:hidden;
@@ -747,6 +748,13 @@ button.gl-chip.sm{cursor:pointer}
 .cq .eyebrow{margin-bottom:8px}
 .cq-fig{text-align:center;padding:0 8px}
 .cq-num{font:400 clamp(64px,9vw,96px)/1 var(--math);color:var(--amber)}
+.cq-num.bump{animation:cq-bump .35s ease-out}
+@keyframes cq-bump{from{transform:scale(1.12);text-shadow:0 0 18px rgba(242,184,75,.55)}to{transform:none;text-shadow:none}}
+[data-reduce-motion] .cq-num.bump{animation:none}
+@media (prefers-reduced-motion: reduce){.cq-num.bump{animation:none}}
+.matters{max-width:68ch;padding:4px 0}
+.notes .matters p,.matters p{font:400 clamp(20px,2.2vw,24px)/1.5 var(--sans);color:var(--text);margin:0 0 .6em}
+.notes .matters p:last-child{margin-bottom:0}
 .cq-cap{font:500 12px/1.3 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:4px}
 .cq-cap .m{font-size:15px;letter-spacing:0;text-transform:none;margin-right:4px}
 .ideas{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
@@ -797,6 +805,92 @@ button.gl-chip.sm{cursor:pointer}
 .hist-more summary{cursor:pointer;color:var(--frame);font:600 12.5px/1.2 var(--ui);letter-spacing:.1em;text-transform:uppercase;padding:6px 0}
 .hist-more summary:focus-visible{outline:2px solid var(--frame);outline-offset:2px}
 .hist-more[open] summary{margin-bottom:10px}
+.notes .hist-lead{color:var(--text);font-size:17px;max-width:62ch}
+.cq-jump{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:12px 0 0}
+.cq-jump>span{font:600 11px/1 var(--ui);letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.cq-go{all:unset;cursor:pointer;color:var(--frame);font:500 14px/1.3 var(--sans);border-bottom:1px solid color-mix(in srgb,var(--frame) 40%,transparent)}
+.cq-go:hover{border-bottom-color:var(--frame)}.cq-go:focus-visible{outline:2px solid var(--frame);outline-offset:2px}
+#b-method,#b-example,#b-tasks{scroll-margin-top:60px}
+.keys .key-sym{font:400 30px/1.1 var(--math);color:var(--c);margin:0 0 6px}
+.method{list-style:none;margin:0;padding:0;display:grid;gap:0;max-width:78ch;counter-reset:none}
+.method li{position:relative;display:grid;grid-template-columns:40px minmax(0,1fr);gap:16px;padding:0 0 22px}
+.method li:not(:last-child)::before{content:"";position:absolute;left:19px;top:40px;bottom:0;width:2px;background:color-mix(in srgb,var(--frame) 30%,var(--line))}
+.method-n{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--frame);color:var(--frame);font:500 17px/1 var(--ui);background:var(--panel)}
+.notes .method-do{color:var(--text);font-size:17px;margin:6px 0 6px}
+.notes .method-why{color:var(--muted);font-size:14.5px;margin:0 0 8px}
+.method-why span{font:600 10.5px/1 var(--ui);letter-spacing:.16em;text-transform:uppercase;color:var(--frame);margin-right:8px}
+.method .dm-try{margin-top:2px}
+.wk .wk-tip{color:var(--muted);font-size:14px;margin:8px 0 0}
+.wk-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
+.wk-bar .dm-try{margin:0 0 0 auto}
+.wk-n{font:500 12px/1 var(--mono);color:var(--faint)}
+[data-wk] [hidden]{display:none!important}
+.wk-row:not([hidden]){animation:vt-in .35s ease-out}
+[data-reduce-motion] .wk-row{animation:none!important}
+#f-vocab,#f-setup,#f-mist,#f-prac{scroll-margin-top:60px}
+.vocab .key-sym{font-size:22px;white-space:nowrap;overflow-x:auto}
+.notes .voc-was{margin:auto 0 0;padding-top:10px;border-top:1px dashed var(--line-2);font-size:14px;color:var(--muted)}
+.voc-was span{display:block;font:600 10.5px/1 var(--ui);letter-spacing:.16em;text-transform:uppercase;color:var(--c);margin-bottom:5px}
+.f-mist{max-width:none}
+.notes .prac-tip{color:var(--text);font-size:16px}
+.prac-count{font:500 12px/1 var(--mono);color:var(--faint);margin:0 0 10px}
+.f-def .display{white-space:normal;font-size:clamp(17px,1.7vw,20px);line-height:1.7;margin:14px 0 4px;border-left:3px solid var(--amber)}
+.f-full{margin-top:14px}.f-full .voice{margin-bottom:8px}
+.pz-prog{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin:0 0 14px}
+.pz-bar{display:flex;gap:4px}
+.pz-bar span{width:38px;height:6px;border-radius:3px;background:var(--line-2);transition:background .3s}
+.pz-bar span[data-s=solved]{background:var(--green)}.pz-bar span[data-s=shown]{background:color-mix(in srgb,var(--amber) 55%,var(--line-2))}
+.notes .pz-sum{margin:0;font:500 13px/1 var(--mono);color:var(--muted)}.pz-sum b{color:var(--green)}
+.pz{transition:border-color .3s}
+.pz[data-state=solved]{border-color:rgba(123,216,143,.55)}
+.pz-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}.pz-top .eyebrow{margin:0}
+.pz-badge{font:600 10.5px/1 var(--ui);letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.pz[data-state=solved] .pz-badge{color:var(--green)}.pz[data-state=shown] .pz-badge{color:var(--amber)}
+.pz-form{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px}
+.pz-in{display:grid;gap:4px;flex:1 1 110px;min-width:0}
+.pz-check{min-height:36px;box-sizing:border-box}
+.pz-in span{font:600 10.5px/1.2 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.pz-in input{font:400 17px/1.2 var(--math);color:var(--text);background:var(--void);border:1px solid var(--line-2);border-radius:4px;padding:7px 10px;width:100%;box-sizing:border-box}
+.pz-in input:focus{outline:2px solid var(--frame);outline-offset:0;border-color:transparent}
+.pz-in input[data-ok="1"]{border-color:var(--green);color:var(--green)}.pz-in input[data-ok="0"]{border-color:var(--red)}
+.notes .pz-fb{margin:0;min-height:1.3em;font-size:14px}.pz-fb[data-k=ok]{color:var(--green)}.pz-fb[data-k=no]{color:var(--amber)}
+.notes .pz-hint{margin:0;font-size:14px;color:var(--text);background:color-mix(in srgb,var(--frame) 8%,transparent);border-left:2px solid var(--frame);padding:6px 10px}
+.pz-acts{display:flex;flex-wrap:wrap;gap:6px 16px}
+.pz-link{all:unset;cursor:pointer;color:var(--frame);font:500 13px/1.3 var(--sans);border-bottom:1px solid color-mix(in srgb,var(--frame) 40%,transparent)}
+.pz-link[hidden]{display:none}.pz-link:focus-visible{outline:2px solid var(--frame);outline-offset:2px}
+.notes .pz-done{color:var(--green);font-size:18px;margin:14px 0 0}
+.goal{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;margin:4px 0 2px;padding:10px 12px;border:1px dashed color-mix(in srgb,var(--frame) 45%,var(--line));border-radius:6px;background:color-mix(in srgb,var(--frame) 5%,transparent);transition:border-color .3s,background .3s}
+.goal-box{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--frame);color:var(--frame);font:600 13px/1 var(--ui)}
+.goal.done{border-style:solid;border-color:rgba(123,216,143,.55);background:rgba(123,216,143,.06)}
+.goal.done .goal-box{border-color:var(--green);background:var(--green);color:var(--ink)}
+.notes .goal-t{margin:2px 0 0;color:var(--text);font-size:15px}
+.goal-t span{display:block;font:600 10.5px/1 var(--ui);letter-spacing:.16em;text-transform:uppercase;color:var(--frame);margin-bottom:5px}
+.goal.done .goal-t span{color:var(--green)}
+.notes .goal-after{margin:6px 0 0;color:var(--green);font-size:14.5px}
+.goal [data-to-lab]{align-self:center;white-space:nowrap}
+.goal.done [data-to-lab]{display:none}
+.wk-ask{padding:12px 16px;border-top:1px solid color-mix(in srgb,var(--line) 60%,transparent);background:color-mix(in srgb,var(--frame) 5%,transparent);display:grid;gap:8px}
+.notes .wk-q{margin:0;color:var(--text);font-size:16px}
+.wk-q span{display:block;font:600 10.5px/1 var(--ui);letter-spacing:.16em;text-transform:uppercase;color:var(--frame);margin-bottom:6px}
+.wk-ask .pz-form{max-width:420px}
+.pz-ch{display:grid;gap:6px}
+.pz-opt{all:unset;box-sizing:border-box;cursor:pointer;padding:9px 12px;border:1px solid var(--line-2);border-radius:4px;color:var(--text);font:400 15px/1.35 var(--sans);background:var(--panel)}
+.pz-opt:hover:not(:disabled){border-color:var(--frame)}.pz-opt:focus-visible{outline:2px solid var(--frame);outline-offset:1px}
+.pz-opt[data-ok="1"]{border-color:var(--green);color:var(--green);background:rgba(123,216,143,.07)}.pz-opt[data-ok="0"]{border-color:var(--red);opacity:.8}
+.pz-opt:disabled{cursor:default}
+.tk summary{grid-template-columns:minmax(0,1fr)}
+.tk .pz-badge{margin-top:4px}
+.tk[data-state=solved]{border-color:rgba(123,216,143,.55)}.tk[data-state=solved] .pz-badge{color:var(--green)}.tk[data-state=shown] .pz-badge{color:var(--amber)}
+.tk .pz-badge{color:var(--frame)}
+.notes .tk-q{color:var(--text);font-size:15px;margin:0 0 10px}
+.tk .tile-body{display:grid;gap:8px}
+.tk-after{border-top:1px dashed var(--line-2);padding-top:10px}
+.notes .tk-after .tile-fig{margin:0 0 4px;font:400 26px/1.15 var(--math);color:var(--amber)}
+.tk[open]{grid-column:1/-1}
+.tk[open] .tile-body{max-width:72ch}
+@media (max-width:760px){.goal{grid-template-columns:24px minmax(0,1fr)}.goal [data-to-lab]{grid-column:2;justify-self:start}}
+.notes .tile-task{font:500 15px/1.35 var(--sans);letter-spacing:0;text-transform:none;color:var(--text);padding-right:22px}
+@media (max-width:760px){.method li{grid-template-columns:32px minmax(0,1fr);gap:12px}.method-n{width:30px;height:30px;font-size:14px}.method li:not(:last-child)::before{left:15px;top:32px}.wk-bar .dm-try{margin-left:0}}
 @media (max-width:760px){.cq{grid-template-columns:minmax(0,1fr)}.cq-fig{text-align:left;padding:0}.stakes-list li,.tl li{grid-template-columns:minmax(0,1fr);gap:2px}.tile summary::after{margin-top:0;position:absolute;right:14px;top:12px}.tile{position:relative}}
 @media (prefers-reduced-motion:reduce){.dm-c,.dm-big,.lab.ping{transition:none}}
 [data-reduce-motion] .dm-c,[data-reduce-motion] .dm-big,[data-reduce-motion] .lab.ping{transition:none}
@@ -12275,7 +12369,7 @@ ARITH["counting"] = {
   layers: {
     concept: {
       heading: "What are counting and the natural numbers?",
-      question: { text: "How many?", sub: `Every time you check a count, you do the same three things. Watch each one happen in the model above, then try it yourself.`, figure: { sym: `<i>n</i>`, value: "17", cap: "the count" } },
+      question: { text: "How many?", sub: `Every time you check a count, you do the same three things. Watch each one happen in the model above, then try it yourself.`, figure: { sym: `<i>n</i>`, value: "17", cap: "the count", echo: "n" } },
       ideasTitle: "Three ideas, all in the model",
       ideas: [
         { c: "c1", title: "One number for each dot", term: "one-to-one matching", text: `Touch each dot once and say the next number. No dot gets two numbers. No dot gets skipped.`,
@@ -12285,6 +12379,7 @@ ARITH["counting"] = {
         { c: "c2", title: "There is always a next one", term: "successor", text: `After any number comes one more. After 99 comes 100. After a million comes a million and one. The dashed dot is the next one.`,
           demo: { kind: "dots", slots: 8, grow: [4, 5, 6], alt: "A dashed dot waits after the last dot. When it fills in, a new dashed dot appears after it." }, try: { label: "Add one more dot", lab: "plus" } }
       ],
+      matters: { title: "Why counting comes first", text: `<p>Counting is the first thing in math you have to get exactly right. Almost everything else is built on it. Adding is counting on. Multiplying is counting groups. Measuring is counting units.</p><p>So when a count is right, the math built on it can be trusted. When a count is off by just one, every answer that uses it is off too.</p>` },
       stakes: { title: "Where counting goes wrong", lead: `Skip one thing, or count one twice, and your total is off by one.`, items: [
         { role: "Pharmacy", text: `A bottle that is one tablet light.` },
         { role: "Operating room", text: `A sponge left inside a patient. The team counts before closing, and closing waits until the count is right. With 19 counted out of 20, the dashed dot is where the last sponge should be.` },
@@ -12292,11 +12387,13 @@ ARITH["counting"] = {
         { role: "Counting a range", text: `Seats 14 through 22 make 9 seats, not 8. Count both ends.` }
       ], try: { label: "Set the model to 19", lab: "set:19" } },
       examplesTitle: "Where you will meet it",
+      timelineTitle: "People have counted this way for thousands of years",
+      timelineLead: `Long before there were written numbers, people kept one mark or one token for each thing. It is the same matching you just tried in the model.`,
       timeline: [
         { when: "About 43,000 years ago", what: `Notches cut in a bone in southern Africa. They may be tallies. Scholars still debate it.` },
         { when: "From about 7500 BCE", what: `Farmers in the Near East count with small clay tokens: a cone for a small measure of barley, a disc for a sheep. One token for each thing, like one dot for each thing in the model.` },
         { when: "About 3200 BCE", what: `Marks pressed in clay become the first written records, according to archaeologist Denise Schmandt-Besserat.` },
-        { when: "1888 and 1889", what: `Richard Dedekind and Giuseppe Peano write the counting numbers as rules: a first number, and a next number after every number.` }
+        { when: "1888 and 1889", what: `Richard Dedekind and Giuseppe Peano write the counting numbers as rules: a first number, and a next number after every number. That next number is the dashed dot in the model.` }
       ],
       lede: `Counting answers the question "how many?" It works by matching each thing to one number, and the last number you say is the total.`,
       history: `<p><b>The problem.</b> Farmers and herders needed to know how many sheep or measures of grain they had, and who owed what. Before there were written numerals, the only way to record a number was to keep something that matched it, one mark or one object for each thing.</p>
@@ -12318,6 +12415,29 @@ ARITH["counting"] = {
       ]
     },
     build: {
+      task: { text: "Count it so the total can be trusted.", sub: `The same five moves work for any group, from 9 seats in a row to 1,214 ballots. Try each one in the model above as you go.`,
+        figure: { sym: `<i>n</i>`, value: "17", cap: "in the model", echo: "n" },
+        jump: [{ label: "The method", to: "b-method" }, { label: "Worked example", to: "b-example" }, { label: "Everyday tasks", to: "b-tasks" }] },
+      keysTitle: "What the model shows",
+      keyTry: [{ label: "Set the count to 30", lab: "set:30" }, { label: "Press +1", lab: "plus" }, null],
+      goalsIntro: `Three of the steps have a move for you to make in the model. Each one ticks itself off when the model shows it.`,
+      stepGoal: [null,
+        { key: "aloud", min: 1, text: `Press <b>Count aloud</b> and watch each dot get exactly one number.`, after: `One number per dot, in order. That is one-to-one matching.` },
+        null,
+        { key: "counted", eq: 23, text: `Set the slider to 23 yourself, then press <b>Count aloud</b>. The last number said should be 23.`, after: `The last number said is the count: <span class="m c1"><i>n</i> = 23</span>.` },
+        { key: "n", eq: 34, text: `Make the model show 34 dots. How many full frames is that, and how many left over?`, after: `3 full frames and 4 more: <span class="m">30 + 4 = 34</span>.` }],
+      predict: [null,
+        { ask: `Match the seats to 1, 2, 3, …, starting with seat 14. Which number does seat 22 get?`, parts: [{ label: "seat 22 gets", ans: 9 }], hint: `Seat 14 gets 1, seat 15 gets 2. Keep going one seat at a time.` },
+        null,
+        { ask: `A shortcut some people try: what is 22 − 14?`, parts: [{ label: "22 − 14", ans: 8 }], hint: `Count up from 14 to 22 in steps of one.` },
+        { ask: `You counted 9 seats, but 22 − 14 is 8. Why is the shortcut one short?`, choices: [
+          { t: "It counts the gaps between the seats, not the seats.", ok: true },
+          { t: "Seat 14 should not be counted.", why: "Seat 14 is in the row, so it gets a number. Look again at the matching in line 2." },
+          { t: "Subtraction always gives one too few.", why: "Not always: 22 − 14 = 8 is right as a subtraction. The question is what it counts." }
+        ], hint: `Seats 14 and 15 have one gap between them but are two seats.` }],
+      matters: { title: "Why a method beats a guess", text: `<p>Anyone can count a handful of things. Mistakes start when the group is big, or the things look alike, or someone talks to you halfway through.</p><p>A method is the same few moves every time. It lets you stop, pick up where you left off, and check your own count.</p>` },
+      exampleTip: `Try it yourself first, then show one line at a time.`,
+      exampleTry: { label: "Set the model to 9", lab: "set:9" },
       lede: `To count, match each object to the next counting number, one at a time, and read the last number as the total.`,
       intro: `<p>The model above shows objects as dots in a ten-frame. Each dot gets one counting number, and the <span class="c1">count</span> is the last number said. Adding one more dot moves the count to its <span class="c2">successor</span>, one more.</p>`,
       stepWhy: [
@@ -12328,15 +12448,41 @@ ARITH["counting"] = {
         `Groups of ten match how we write numbers: 4 full frames and 7 left over is 47 at once. If you lose your place, you recount one frame instead of the whole pile.`
       ],
       bridge: `<p>The theater row used the two habits that matter most: match each item once, and when counting a range, include both ends. Here is where the same moves show up.</p>`,
+      tasksTitle: "Everyday tasks: solve them",
       tasks: [
-        { task: "Checking that everyone is back on the bus", link: `Give each person one number as they board, the way each seat got one number from 1 to 9 in the worked example.` },
-        { task: "Counting the days of a trip on a calendar", link: `A trip from the 3rd to the 10th, both days included, is <span class="m">10 − 3 + 1 = 8</span> days. It is the same rule as the last line of the worked example.` },
-        { task: "Making sure a bag has the right number of items", link: `Take items out one at a time and count as you go (steps 1 and 2). The last number said is how many there are (step 4).` },
-        { task: "Counting stitches or rows when knitting", link: `Place a marker every 10 stitches, like filling a ten-frame (step 5). A lost count means recounting one group, not the whole row.` },
-        { task: "Counting reps and sets during exercise", link: `Count by fives or tens when the numbers are large, as in practice item 1, and say each number once per rep.` }
+        { task: "Checking that everyone is back on the bus", check: { q: `Riders sit in seats 12 through 40, every seat full. How many riders should be back on the bus?`, parts: [{ label: "riders", ans: 29 }], hint: `Both seat 12 and seat 40 count, so use <span class="m"><i>b</i> − <i>a</i> + 1</span>.` }, figure: "1 per rider", link: `Give each person one number as they board, the way each seat got one number from 1 to 9 in the worked example.` },
+        { task: "Counting the days of a trip on a calendar", check: { q: `A trip runs from the 3rd to the 10th of the month, counting both days. How many days is the trip?`, parts: [{ label: "days", ans: 8 }], hint: `List them: 3rd, 4th, … 10th. Or use <span class="m"><i>b</i> − <i>a</i> + 1</span>.` }, figure: "8 days", link: `A trip from the 3rd to the 10th, both days included, is <span class="m">10 − 3 + 1 = 8</span> days. It is the same rule as the last line of the worked example.` },
+        { task: "Making sure a bag has the right number of items", check: { q: `You take items out one at a time and say 1, 2, 3, … The bag is empty when you say 14. How many items were in the bag?`, parts: [{ label: "items", ans: 14 }], hint: `The last number said is the count.` }, figure: "1 at a time", link: `Take items out one at a time and count as you go (steps 1 and 2). The last number said is how many there are (step 4).` },
+        { task: "Counting stitches or rows when knitting", check: { q: `A row has 47 stitches, with a marker after every 10. How many full groups of 10 are there, and how many stitches are left over?`, parts: [{ label: "full groups", ans: 4 }, { label: "left over", ans: 7 }], hint: `Count by tens: 10, 20, 30, 40. Then count the rest by ones.` }, figure: "10 a group", try: { label: "Show 30 in frames", lab: "set:30" }, link: `Place a marker every 10 stitches, like filling a ten-frame (step 5). A lost count means recounting one group, not the whole row.` },
+        { task: "Counting reps and sets during exercise", check: { q: `You count reps by fives: 5, 10, 15, … and stop at 45. How many fives did you say?`, parts: [{ label: "fives", ans: 9 }], hint: `Count the numbers you said, one for each five.` }, figure: "by fives", link: `Count by fives or tens when the numbers are large, as in practice item 1, and say each number once per rep.` }
       ]
     },
     formal: {
+      question: { text: "What does “how many” mean, exactly?", sub: `You can count, and you can count so the total holds up. Here are the words a textbook uses for the same ideas, and how to write a counting problem out in full.`,
+        figure: { sym: `|<i>A</i>|`, value: "17", cap: "the cardinality", echo: "n" },
+        jump: [{ label: "Vocabulary", to: "f-vocab" }, { label: "Writing it out", to: "f-setup" }, { label: "Common mistakes", to: "f-mist" }, { label: "Practice", to: "f-prac" }] },
+      vocabTitle: "From your words to the textbook's",
+      vocabIntro: `<p>Each card is an idea you already used in the Concept and Intermediate tabs, with its proper name and its exact meaning.</p>`,
+      vocab: [
+        { c: "c1", sym: `ℕ`, term: "Natural numbers", def: `The set <span class="m">{1, 2, 3, …}</span>. Many texts, especially in set theory and computer science, start it at 0 instead.`, was: "the counting numbers 1, 2, 3, …" },
+        { c: "c1", sym: `𝕎`, term: "Whole numbers", def: `The set <span class="m">{0, 1, 2, …}</span>: the natural numbers together with 0.`, was: "the count of an empty group, 0" },
+        { c: "c1", sym: `<i>f</i> : <i>A</i> → {1, …, <i>n</i>}`, term: "Bijection (one-to-one correspondence)", def: `A pairing in which every element of <i>A</i> gets exactly one number and every number from 1 to <i>n</i> is used exactly once.`, was: "one number for each dot" },
+        { c: "c1", sym: `|<i>A</i>| = <i>n</i>`, term: "Cardinality", def: `The number of elements of a finite set <i>A</i>: the <i>n</i> for which a bijection between <i>A</i> and <span class="m">{1, …, <i>n</i>}</span> exists. Every such bijection gives the same <i>n</i>.`, was: "the count, the last number you say" },
+        { c: "c2", sym: `<i>S</i>(<i>n</i>) = <i>n</i> + 1`, term: "Successor function", def: `Sends each natural number to the next one. Different numbers have different successors, and the first natural number is not the successor of any number.`, was: "there is always a next one" },
+        { c: "c2", sym: `<i>P</i>(1), <i>P</i>(<i>k</i>) ⇒ <i>P</i>(<i>k</i> + 1)`, term: "Axiom of induction", def: `A set of natural numbers that contains the first natural number, and contains the successor of each of its members, contains every natural number.`, was: "after every number comes one more, without end" }
+      ],
+      matters: { title: "Why the exact words matter", text: `<p>In everyday talk, “counting numbers” and “natural numbers” mean the same thing. In a textbook, one word can decide whether 0 is included, and that changes answers. How many natural numbers are less than 10? It is 9 if ℕ starts at 1, and 10 if it starts at 0.</p><p>Exact words let you read any book, follow a proof, and write an answer someone else can check.</p>` },
+      setupIntro: `<p>The theater row from the Intermediate tab, written the way a textbook would.</p>`,
+      mistakesTitle: "Where formal answers go wrong",
+      mistakesLead: `Most wrong answers here are off by one. The set is named carelessly, an end is dropped, or the gaps are counted instead of the things.`,
+      checks: [
+        { hint: `Each bill adds 5 dollars. How many fives make 40?`, parts: [{ label: "bills", ans: 8 }] },
+        { hint: `The next ticket is the successor, <i>n</i> + 1. The ticket before 1,000 is the number whose successor is 1,000.`, parts: [{ label: "next ticket", ans: 100 }, { label: "ticket before 1,000", ans: 999 }] },
+        { hint: `The 7th and the 31st both count, so use <span class="m"><i>b</i> − <i>a</i> + 1</span>.`, parts: [{ label: "days", ans: 25 }] },
+        { hint: `Page 45 and page 112 are both read, so use <span class="m"><i>b</i> − <i>a</i> + 1</span>.`, parts: [{ label: "pages", ans: 68 }] },
+        { hint: `Name the set <span class="m">{101, 102, …, 136}</span>, then use the range rule.`, parts: [{ label: "rooms r", ans: 36 }] }
+      ],
+      practiceTip: `Type your answer and press Check. Work it the formal way: name the set, match it to 1, …, <i>n</i>, and state the count. Stuck? Each one has a hint.`,
       setup: { title: "Writing a counting problem", items: [
         { say: `<b>Name the set.</b> Say exactly what is being counted.`, math: `<span class="m"><i>A</i> = {14, 15, 16, …, 22}</span> &nbsp;(seat numbers in the row)` },
         { say: `<b>Match it to the counting numbers.</b> A one-to-one correspondence pairs each element with exactly one of 1, 2, …, <i>n</i>.`, math: `<span class="m"><i>f</i>(<i>s</i>) = <i>s</i> − 13</span>: &nbsp;14 ↦ 1, 15 ↦ 2, …, 22 ↦ 9` },
@@ -38456,7 +38602,7 @@ const alpha = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba($
 const reduce = W.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const coarse = W.matchMedia && W.matchMedia("(pointer: coarse)").matches;
 let uid = 0;
-const live = { loops: new Set(), ros: new Set(), timers: new Set(), offs: new Set() };
+const live = { loops: new Set(), ros: new Set(), timers: new Set(), offs: new Set(), values: {} };
 const exts = [];
 const addCSS = (id, text) => { if (document.getElementById(id)) return; const s = document.createElement("style"); s.id = id; s.textContent = text; document.head.appendChild(s); };
 
@@ -38531,6 +38677,9 @@ function make(stage, ro, ctl){
   // Let the page drive this lab: k.expose({ set: v => …, play: () => … }). Concept-tab "Try it" chips call
   // LabKit.drive("set:19,play") (comma-separated, name[:argument]); see docs/subjects/LAYERS.md.
   kit.expose = actions => { live.expose = actions; };
+  // Tell the page a live value: k.publish("n", 17). The Concept tab's question figure ({echo: "n"}) follows it;
+  // fires "inquire:lab-value" {key, value} only when the value changes; LabKit.value(key) reads the latest.
+  kit.publish = (key, v) => { if (live.values[key] === v) return; live.values[key] = v; window.dispatchEvent(new CustomEvent("inquire:lab-value", { detail: { key, value: v } })); };
 
   kit.slider = (label, min, max, step, value, onInput, fmtFn) => {
     const id = "lab" + (++uid);
@@ -38684,13 +38833,13 @@ function make(stage, ro, ctl){
   exts.forEach(fn => fn(kit));
   return kit;
 }
-function stopAll(){ live.expose = null; live.loops.forEach(L => L.on = false); live.loops.clear(); live.ros.forEach(o => o.disconnect()); live.ros.clear(); live.timers.forEach(id => clearInterval(id)); live.timers.clear(); live.offs.forEach(f => { try { f(); } catch (_) {} }); live.offs.clear(); document.body.classList.remove("kv-scrubbing"); }
+function stopAll(){ live.expose = null; live.values = {}; live.loops.forEach(L => L.on = false); live.loops.clear(); live.ros.forEach(o => o.disconnect()); live.ros.clear(); live.timers.forEach(id => clearInterval(id)); live.timers.clear(); live.offs.forEach(f => { try { f(); } catch (_) {} }); live.offs.clear(); document.body.classList.remove("kv-scrubbing"); }
 function drive(cmd){
   const ex = live.expose; if (!ex) return false; let did = false;
   String(cmd).split(",").forEach(part => { const [name, ...rest] = part.trim().split(":"); if (typeof ex[name] === "function") { ex[name](rest.join(":")); did = true; } });
   return did;
 }
-W.LabKit = { make, stopAll, rules, extend: fn => exts.push(fn), css: addCSS, C, F, alpha, drive };
+W.LabKit = { make, stopAll, rules, extend: fn => exts.push(fn), css: addCSS, C, F, alpha, drive, value: key => live.values[key] };
 W.LABS = W.LABS || {};
 })();
 
@@ -41310,7 +41459,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 /* ---------- counting: ten-frames ---------- */
 L["counting"] = k => {
   const { C, F, M } = k; const c = k.canvas(); const d = c.d;
-  let n = 17, shown = 0, acc = 0, say = -1, sayT = 0, playing = false;
+  let n = 17, shown = 0, acc = 0, say = -1, sayT = 0, playing = false, aloud = 0;
   const s = k.slider(`<i>n</i>`, 0, 40, 1, n, v => { n = v; say = -1; playing = false; pb.textContent = "Count aloud"; });
   k.button("+1 (successor)", () => { if (n < 40) { n++; s.set(n); } }, "btn ghost");
   const pb = k.button("Count aloud", () => { playing = !playing; say = playing ? 0 : -1; sayT = 0; pb.textContent = playing ? "Stop" : "Count aloud"; });
@@ -41322,8 +41471,9 @@ L["counting"] = k => {
     play: () => { playing = true; say = 0; sayT = 0; pb.textContent = "Stop"; }
   });
   k.loop(dt => {
+    k.publish("n", n);   // the Concept tab's "How many?" figure follows the slider
     acc += dt; if (acc > 0.05) { acc = 0; if (shown < n) shown++; else if (shown > n) shown--; }
-    if (playing) { sayT += dt; if (sayT > (k.reduce ? 0.2 : 0.55)) { sayT = 0; say++; if (say > n) { playing = false; pb.textContent = "Count aloud"; } } }
+    if (playing) { sayT += dt; if (sayT > (k.reduce ? 0.2 : 0.55)) { sayT = 0; say++; if (say > n) { playing = false; pb.textContent = "Count aloud"; k.publish("aloud", ++aloud); k.publish("counted", n); } } }   // Intermediate "Your move" goals
     c.begin(); const { w, h } = c;
     const cols = w > 720 ? 4 : 2, rows = 4 / cols;
     const cell = Math.min((w - 60) / (cols * 5 + (cols - 1) * 1.2), (h - 150) / (rows * 2 + (rows - 1) * 1.4));
@@ -75870,16 +76020,159 @@ function stubTopic(id){
    question → idea cards (each with a storyboard and a "Try it" chip that drives the lab) → what goes wrong → real scenes as tiles → history as a timeline. */
 function conceptHTML(t, C, col){
   const chip = x => x && x.lab ? `<button type="button" class="dm-try" data-lab="${esc(x.lab)}"><span aria-hidden="true">▶</span>${esc(x.label)}</button>` : "";
-  const q = C.question || { text: esc(t.title) }, fig = q.figure;
+  const q = C.question || { text: esc(t.title) };
   const hist = C.history ? `<details class="hist-more"><summary>Read the full story</summary><div class="lyr-hist">${C.history}</div>${(C.sources || []).length ? `<p class="lyr-src"><span>Sources</span>${C.sources.map(x => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>`).join(" · ")}</p>` : ""}</details>` : "";
   return `
-    <div class="cq"><div><p class="eyebrow">The question</p><h2>${esc(q.text)}</h2>${q.sub ? `<p>${q.sub}</p>` : ""}</div>
-      ${fig ? `<div class="cq-fig" aria-hidden="true"><div class="cq-num">${esc(fig.value)}</div><div class="cq-cap"><span class="m c1">${fig.sym}</span> ${esc(fig.cap)}</div></div>` : ""}</div>
+    ${cqHTML(q, "The question")}
     <div><h2>${esc(C.ideasTitle || "The big ideas")}</h2><div class="ideas">${C.ideas.map(x => `<div class="idea" style="--c:var(--${col(x.c || "c1")})"><h3>${esc(x.title)}${x.term ? `<span class="idea-term">${esc(x.term)}</span>` : ""}</h3>${x.demo ? `<div class="dm" data-spec="${esc(JSON.stringify(x.demo))}"></div>` : ""}<p>${x.text}</p>${chip(x.try)}</div>`).join("")}</div></div>
+    ${(C.timeline || []).length ? `<div class="c-hist"><h2>${esc(C.timelineTitle || "A short history")}</h2>${C.timelineLead ? `<p class="hist-lead">${C.timelineLead}</p>` : ""}<ol class="tl">${C.timeline.map(x => `<li><span class="tl-when">${esc(x.when)}</span><span class="tl-what">${x.what}</span></li>`).join("")}</ol>${hist}</div>` : ""}
+    ${mattersHTML(C.matters)}
     ${C.stakes ? `<div class="stakes"><h2>${esc(C.stakes.title)}</h2><p class="stakes-lead">${C.stakes.lead}</p><ul class="stakes-list">${C.stakes.items.map(x => `<li><b>${esc(x.role)}</b><span>${x.text}</span></li>`).join("")}</ul>${chip(C.stakes.try)}</div>` : ""}
-    <div><h2>${esc(C.examplesTitle || "Where you will meet it")}</h2><div class="tiles">${(C.examples || []).map(c => `<details class="tile"><summary><span class="tile-fig">${esc(c.figure || "")}</span><span class="tile-role">${esc(c.role)}</span></summary><div class="tile-body"><p>${c.scene}</p>${c.takeaway ? `<p class="lyr-take">${esc(c.takeaway)}</p>` : ""}${chip(c.try)}</div></details>`).join("")}</div></div>
-    ${(C.timeline || []).length ? `<div><h2>A short history</h2><ol class="tl">${C.timeline.map(x => `<li><span class="tl-when">${esc(x.when)}</span><span class="tl-what">${x.what}</span></li>`).join("")}</ol>${hist}</div>` : ""}`;
+    <div><h2>${esc(C.examplesTitle || "Where you will meet it")}</h2><div class="tiles">${(C.examples || []).map(c => `<details class="tile"><summary><span class="tile-fig">${esc(c.figure || "")}</span><span class="tile-role">${esc(c.role)}</span></summary><div class="tile-body"><p>${c.scene}</p>${c.takeaway ? `<p class="lyr-take">${esc(c.takeaway)}</p>` : ""}${chip(c.try)}</div></details>`).join("")}</div></div>`;
 }
+// Shared by the Concept and Intermediate blocks: the big question/task with the lab's live number beside it, and the large-text "why" block.
+function cqHTML(q, eyebrow, extra){
+  const fig = q.figure, jump = (q.jump || []).length ? `<p class="cq-jump"><span>Jump to</span>${q.jump.map(j => `<button type="button" class="cq-go" data-jump="${esc(j.to)}">${esc(j.label)}</button>`).join("")}</p>` : "";
+  return `<div class="cq"><div><p class="eyebrow">${esc(eyebrow)}</p><h2>${esc(q.text)}</h2>${q.sub ? `<p>${q.sub}</p>` : ""}${extra || ""}${jump}</div>
+      ${fig ? `<div class="cq-fig" aria-hidden="true"><div class="cq-num"${fig.echo ? ` data-echo="${esc(fig.echo)}"` : ""}>${esc(fig.echo && LabKit.value(fig.echo) !== undefined ? String(LabKit.value(fig.echo)) : fig.value)}</div><div class="cq-cap"><span class="m c1">${fig.sym}</span> ${esc(fig.cap)}</div></div>` : ""}</div>`;
+}
+const mattersHTML = M => M ? `<div class="matters"><h2>${esc(M.title)}</h2>${M.text}</div>` : "";
+/* Answer checker shared by the Intermediate and Formal blocks. k = {parts: [{label, ans}], hint} for typed numbers
+   (commas, spaces and words ignored) or {choices: [{t, ok, why}], hint} for a pick. */
+function pzHTML(k){
+  const body = k.choices ? `<div class="pz-ch" role="group">${k.choices.map((c, j) => `<button type="button" class="pz-opt" data-j="${j}">${c.t}</button>`).join("")}</div>`
+    : `<form class="pz-form" novalidate>${k.parts.map((x, j) => `<label class="pz-in"><span>${esc(x.label)}</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" data-j="${j}" aria-label="${esc(x.label)}"></label>`).join("")}<button type="submit" class="btn-s good pz-check">Check</button></form>`;
+  return `${body}<p class="pz-fb" aria-live="polite"></p>${k.hint ? `<p class="pz-hint" hidden><b>Hint.</b> ${k.hint}</p>` : ""}
+    <div class="pz-acts">${k.hint ? `<button type="button" class="pz-link" data-pz-hint>Need a hint?</button>` : ""}<button type="button" class="pz-link" data-pz-show${k.showNow ? "" : " hidden"}>${esc(k.showLabel || "Show the worked answer")}</button></div>`;
+}
+const pzNum = s => { const m = String(s).replace(/[,\s]/g, "").match(/-?\d+(\.\d+)?/); return m ? +m[0] : NaN; };
+// Wires one checker inside c. o.right() after a right answer, o.show() when the learner asks for the answer.
+function pzWire(c, k, o){
+  const fb = c.querySelector(".pz-fb"), hint = c.querySelector(".pz-hint"), hb = c.querySelector("[data-pz-hint]"), show = c.querySelector("[data-pz-show]");
+  let tries = 0, over = false;
+  const showHint = () => { if (hint) hint.hidden = false; if (hb) hb.hidden = true; };
+  const end = () => { over = true; if (hb) hb.hidden = true; show.hidden = true; };
+  const verdict = (all, partial, why) => { tries++;
+    window.dispatchEvent(new CustomEvent("inquire:quiz", { detail: { correct: all } }));
+    if (all) { fb.textContent = k.right || o.rightText || "Correct."; fb.dataset.k = "ok"; end(); o.right(); return; }
+    fb.textContent = why || (partial ? "One part is right. Check the other one." : tries === 1 ? (k.nudge || "Not yet. Check for an end you might have dropped.") : "Still off. Try the hint, or look at the answer.");
+    fb.dataset.k = "no"; show.hidden = false; if (tries >= 2) showHint(); };
+  const form = c.querySelector(".pz-form");
+  if (form) form.onsubmit = e => { e.preventDefault(); if (over) return;
+    const ins = [...form.querySelectorAll("input")]; if (ins.every(x => !x.value.trim())) { fb.textContent = "Type a number first."; fb.dataset.k = ""; return; }
+    const ok = ins.map((x, j) => { const r = Math.abs(pzNum(x.value) - k.parts[j].ans) < 1e-9; x.dataset.ok = r ? "1" : "0"; return r; });
+    if (ok.every(Boolean)) ins.forEach(x => x.readOnly = true);
+    verdict(ok.every(Boolean), ok.length > 1 && ok.some(Boolean)); };
+  c.querySelectorAll(".pz-opt").forEach(b => b.onclick = () => { if (over) return; const ch = k.choices[+b.dataset.j];
+    b.dataset.ok = ch.ok ? "1" : "0"; if (ch.ok) c.querySelectorAll(".pz-opt").forEach(x => x.disabled = true); verdict(!!ch.ok, false, ch.ok ? "" : ch.why); });
+  if (hb) hb.onclick = () => { showHint(); show.hidden = false; };
+  show.onclick = () => { end(); o.show(); };
+}
+// Step goals (Intermediate): done when the lab reports the value (k.publish). Remembered per lesson while the app is open.
+const goalDone = {};
+function goalMet(g, v){ if (v === undefined) return false; const d = g.dataset; return d.eq !== undefined ? +v === +d.eq : +v >= +(d.min || 1); }
+function goalTally(){ document.querySelectorAll("[data-goals]").forEach(w => { const gs = [...w.querySelectorAll(".goal")], n = gs.filter(g => g.classList.contains("done")).length, s = w.querySelector(".pz-sum b"); if (s) s.textContent = n; gs.forEach((g, i) => { const b = w.querySelector(`.pz-bar [data-i="${i}"]`); if (b) b.dataset.s = g.classList.contains("done") ? "solved" : ""; }); }); }
+function goalCheck(key, v){ let hit = false; document.querySelectorAll(`.goal[data-key="${key}"]:not(.done)`).forEach(g => { if (!goalMet(g, v)) return;
+  g.classList.add("done"); g.querySelector(".goal-box").textContent = "✓"; const a = g.querySelector(".goal-after"); if (a) a.hidden = false; (goalDone[g.dataset.topic] = goalDone[g.dataset.topic] || new Set()).add(g.dataset.i); hit = true; }); if (hit) goalTally(); }
+window.addEventListener("inquire:lab-value", e => goalCheck(e.detail.key, e.detail.value));
+/* Intermediate tab, blocks version (Counting first; docs/subjects/LAYERS.md → "Intermediate blocks"): a topic opts in with layers.build.task.
+   The task (live number, jump links) → key cards from the legend (with Try chips) → the method as a numbered rail (why + Try per step)
+   → why a method matters (large text) → the worked example, one line at a time → everyday tasks as tiles. */
+function buildHTML(t, B, col){
+  const chip = x => x && x.lab ? `<button type="button" class="dm-try" data-lab="${esc(x.lab)}"><span aria-hidden="true">▶</span>${esc(x.label)}</button>` : "";
+  const E = t.example, kt = B.keyTry || [], st = B.stepTry || [], sg = B.stepGoal || [], ng = sg.filter(Boolean).length, tasks = B.tasks || t.life.map(x => ({ task: x })), nt = tasks.filter(x => x.check).length;
+  const bar = (n, label) => `<div class="pz-prog"><div class="pz-bar">${Array.from({ length: n }, (_, i) => `<span data-i="${i}"></span>`).join("")}</div><p class="pz-sum">${label} <b>0</b> of ${n}</p></div>`;
+  let gi = 0;
+  const goal = (g, i) => { const j = gi++; return `<div class="goal" data-key="${esc(g.key)}"${g.eq !== undefined ? ` data-eq="${g.eq}"` : ""}${g.min !== undefined ? ` data-min="${g.min}"` : ""} data-topic="${esc(S.topic || "")}" data-i="${j}">
+      <span class="goal-box" aria-hidden="true">○</span><div><p class="goal-t"><span>Your move</span>${g.text}</p>${g.after ? `<p class="goal-after" hidden>${g.after}</p>` : ""}</div><button type="button" class="pz-link" data-to-lab>Go to the model ↑</button></div>`; };
+  const task = (x, i) => x.check ? `<details class="tile tk" data-tk="${i}" data-state="open"><summary><span class="tile-role tile-task">${esc(x.task)}</span><span class="pz-badge">Solve it</span></summary>
+      <div class="tile-body"><p class="tk-q">${x.check.q}</p>${pzHTML({ ...x.check, showLabel: "Show the answer" })}
+      <div class="tk-after" hidden>${x.figure ? `<p class="tile-fig">${esc(x.figure)}</p>` : ""}${x.link ? `<p>${x.link}</p>` : ""}${chip(x.try)}</div></div></details>`
+    : `<details class="tile"><summary>${x.figure ? `<span class="tile-fig">${esc(x.figure)}</span>` : ""}<span class="tile-role tile-task">${esc(x.task)}</span></summary><div class="tile-body">${x.link ? `<p>${x.link}</p>` : ""}${chip(x.try)}</div></details>`;
+  return `
+    ${cqHTML(B.task, "The task")}
+    <div><h2>${esc(B.keysTitle || "Reading the model")}</h2>${B.intro || ""}<div class="ideas keys">${t.legend.map((k, i) => `<div class="idea" style="--c:var(--${col(k.c)})"><div class="key-sym m">${k.sym}</div><h3>${esc(k.name)}</h3><p>${k.desc}</p>${chip(kt[i])}</div>`).join("")}</div></div>
+    <div id="b-method"${ng ? " data-goals" : ""}><h2>${esc(t.steps.title)}</h2>${ng ? `${B.goalsIntro ? `<p class="prac-tip">${B.goalsIntro}</p>` : ""}${bar(ng, "Moves done")}` : ""}<ol class="method">${t.steps.items.map((s, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div><p class="method-do">${s}</p>${B.stepWhy && B.stepWhy[i] ? `<p class="method-why"><span>Why</span>${B.stepWhy[i]}</p>` : ""}${sg[i] ? goal(sg[i], i) : chip(st[i])}</div></li>`).join("")}</ol></div>
+    ${mattersHTML(B.matters)}
+    <div id="b-example"><h2>${esc(B.exampleTitle || "Worked example")}</h2><div class="ex wk" data-wk="1">
+      <div class="prompt"><p class="eyebrow">Problem</p>${E.prompt}${B.exampleTip ? `<p class="wk-tip">${B.exampleTip}</p>` : ""}</div>
+      <div class="tbl"><table>${E.lines.map((l, i) => `<tr class="wk-row"${i ? " hidden" : ""}><td>${l.math}</td><td>${esc(l.note || "")}</td></tr>`).join("")}</table></div>
+      <div class="wk-ask" hidden></div>
+      <div class="wk-bar"><button type="button" class="btn-s" data-wk-next>Show the next line</button><button type="button" class="btn-s ghost" data-wk-all>Show all</button><span class="wk-n">1 of ${E.lines.length}</span>${chip(B.exampleTry)}</div>
+      <div class="ans" hidden><b>Answer.</b> ${E.answer}</div></div></div>
+    <div id="b-tasks"${nt ? " data-tks" : ""}><h2>${esc(B.tasksTitle || "Everyday tasks")}</h2>${B.bridge || ""}${nt ? bar(nt, "Solved") : ""}<div class="tiles">${tasks.map(task).join("")}</div></div>`;
+}
+/* Formal tab, blocks version (Counting first; docs/subjects/LAYERS.md → "Formal blocks"): a topic opts in with layers.formal.question.
+   The definition (live |A|, jump links) → vocabulary cards (everyday word → textbook term) → the formal statement → why exact words matter
+   → writing a problem out (numbered rail with the math) → where formal answers go wrong → practice with a progress count. */
+function formalHTML(t, F, col){
+  const P = t.practice, K = F.checks || [];
+  const def = (String(t.formal).match(/<div class="display">[\s\S]*?<\/div>/) || [""])[0];   // the boxed definition goes up into "The definition"
+  const full = `<details class="hist-more f-full"><summary>${esc(F.statementTitle || "Read the formal statement in full")}</summary><span class="voice f">College level</span>${t.formal}</details>`;
+  const card = (p, i) => { const k = K[i];
+    if (!k) return `<div class="pq">${p.ctx ? `<p class="eyebrow lyr-ctx">${esc(p.ctx)}</p>` : ""}<div class="q"><span class="n">${String(i+1).padStart(2,"0")}</span>${p.q}</div><button type="button" class="btn-s" data-ans="${i}">Show answer</button><div class="a" hidden>${p.a}</div></div>`;
+    return `<div class="pq pz" data-pz="${i}" data-state="open">
+      <div class="pz-top">${p.ctx ? `<p class="eyebrow lyr-ctx">${esc(p.ctx)}</p>` : "<span></span>"}<span class="pz-badge">Unsolved</span></div>
+      <div class="q"><span class="n">${String(i+1).padStart(2,"0")}</span>${p.q}</div>
+      ${pzHTML(k)}
+      <div class="a" hidden>${p.a}</div></div>`; };
+  return `
+    ${cqHTML(F.question, F.eyebrow || "The definition", def ? `<div class="f-def">${def}</div>` : "")}
+    ${(F.vocab || []).length ? `<div id="f-vocab"><h2>${esc(F.vocabTitle || "The vocabulary")}</h2>${F.vocabIntro || ""}<div class="ideas vocab">${F.vocab.map(v => `<div class="idea" style="--c:var(--${col(v.c || "c1")})"><div class="key-sym m">${v.sym}</div><h3>${esc(v.term)}</h3><p>${v.def}</p>${v.was ? `<p class="voc-was"><span>You met it as</span>${v.was}</p>` : ""}</div>`).join("")}</div>${full}</div>` : `<div><h2>Formal statement</h2><span class="voice f">College level</span>${t.formal}</div>`}
+    ${mattersHTML(F.matters)}
+    ${F.setup ? `<div id="f-setup"><h2>${esc(F.setup.title)}</h2>${F.setupIntro || ""}<ol class="method">${F.setup.items.map((x, i) => `<li><span class="method-n" aria-hidden="true">${i + 1}</span><div><p class="method-do">${x.say}</p>${x.math ? `<div class="lyr-math">${x.math}</div>` : ""}</div></li>`).join("")}</ol></div>` : ""}
+    <div id="f-mist" class="stakes f-mist"><h2>${esc(F.mistakesTitle || "Common mistakes")}</h2>${F.mistakesLead ? `<p class="stakes-lead">${F.mistakesLead}</p>` : ""}<div class="mist">${t.mistakes.map(m => `<div><div class="w">${m.wrong}</div><div class="f">${m.fix}</div></div>`).join("")}</div></div>
+    <div id="f-prac"><h2>${esc(F.practiceTitle || "Your turn")}</h2>${F.practiceTip ? `<p class="prac-tip">${F.practiceTip}</p>` : ""}
+      ${K.length ? `<div class="pz-prog" data-pz-prog><div class="pz-bar">${P.map((_, i) => `<span data-i="${i}"></span>`).join("")}</div><p class="pz-sum">Solved <b>0</b> of ${P.length}</p></div>` : ""}
+      <div class="prac" data-pzs>${P.map(card).join("")}</div>
+      ${K.length ? `<p class="pz-done" hidden>${F.practiceDone || `All ${P.length} solved. You can write a count the formal way.`}</p>` : ""}</div>`;
+}
+// Wires the Intermediate blocks after they are drawn: jump links and the one-line-at-a-time worked example.
+function wireBlocks(body, pg, t){
+  body.querySelectorAll("[data-jump]").forEach(b => b.onclick = () => { const el = body.querySelector("#" + b.dataset.jump); if (el) el.scrollIntoView({ behavior: document.documentElement.hasAttribute("data-reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); });
+  body.querySelectorAll("[data-wk]").forEach(w => {
+    const rows = [...w.querySelectorAll(".wk-row")], n = w.querySelector(".wk-n"), nx = w.querySelector("[data-wk-next]"), al = w.querySelector("[data-wk-all]"), ans = w.querySelector(".ans");
+    const PR = (t && t.layers && t.layers.build && t.layers.build.predict) || [], ask = w.querySelector(".wk-ask");
+    const upd = () => { const k = rows.filter(r => !r.hidden).length; n.textContent = `${k} of ${rows.length}`; const done = k === rows.length; ans.hidden = !done; al.hidden = done;
+      const q = done ? null : PR[k];
+      if (q && ask && ask.dataset.i !== String(k)) { ask.dataset.i = k; ask.innerHTML = `<p class="wk-q"><span>Predict line ${k + 1}</span>${q.ask}</p>${pzHTML({ ...q, showLabel: "Just show the line", showNow: true })}`;
+        pzWire(ask, q, { rightText: q.right || "Right. Here is the line.", right: () => setTimeout(() => { rows[k].hidden = false; upd(); }, 650), show: () => { rows[k].hidden = false; upd(); } }); }
+      if (ask) ask.hidden = !q; nx.hidden = done || !!q; };
+    nx.onclick = () => { const r = rows.find(r => r.hidden); if (r) r.hidden = false; upd(); };
+    al.onclick = () => { rows.forEach(r => r.hidden = false); upd(); };
+    upd();
+  });
+  body.querySelectorAll(".goal").forEach(g => { if ((goalDone[g.dataset.topic] || new Set()).has(g.dataset.i) || goalMet(g, LabKit.value(g.dataset.key))) { g.classList.add("done"); g.querySelector(".goal-box").textContent = "✓"; const a = g.querySelector(".goal-after"); if (a) a.hidden = false; (goalDone[g.dataset.topic] = goalDone[g.dataset.topic] || new Set()).add(g.dataset.i); } });
+  body.querySelectorAll("[data-to-lab]").forEach(b => b.onclick = () => { const lab = pg.querySelector(".lab"); if (!lab) return; lab.scrollIntoView({ behavior: document.documentElement.hasAttribute("data-reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); lab.classList.add("ping"); setTimeout(() => lab.classList.remove("ping"), 1200); });
+  goalTally();
+  const TK = (t && t.layers && t.layers.build && t.layers.build.tasks) || [];
+  body.querySelectorAll("[data-tks]").forEach(w => {
+    const tiles = [...w.querySelectorAll(".tk")], tally = () => { const s = tiles.filter(x => x.dataset.state === "solved").length; w.querySelector(".pz-sum b").textContent = s; tiles.forEach((x, i) => { const b = w.querySelector(`.pz-bar [data-i="${i}"]`); if (b) b.dataset.s = x.dataset.state === "open" ? "" : x.dataset.state; }); };
+    tiles.forEach(x => { const k = TK[+x.dataset.tk].check, badge = x.querySelector(".pz-badge"), after = x.querySelector(".tk-after");
+      const fin = st => { after.hidden = false; x.dataset.state = st; badge.textContent = st === "solved" ? "Solved ✓" : "Answer shown"; tally(); };
+      pzWire(x, k, { rightText: "Correct.", right: () => fin(x.dataset.state === "shown" ? "shown" : "solved"), show: () => fin("shown") }); });
+    tally();
+  });
+  const K = t && t.layers && t.layers.formal && t.layers.formal.checks;
+  body.querySelectorAll("[data-pzs]").forEach(g => {   // Formal practice: type an answer, Check, hint, worked answer, progress
+    const prog = body.querySelector("[data-pz-prog]"), done = body.querySelector(".pz-done");
+    const tally = () => { const cards = [...g.querySelectorAll(".pz")], solved = cards.filter(c => c.dataset.state === "solved").length;
+      if (prog) { prog.querySelector(".pz-sum b").textContent = solved; cards.forEach(c => { const s = prog.querySelector(`[data-i="${c.dataset.pz}"]`); if (s) s.dataset.s = c.dataset.state; }); }
+      if (done) done.hidden = solved < cards.length; };
+    g.querySelectorAll(".pz").forEach(c => {
+      const k = K && K[+c.dataset.pz]; if (!k) return;
+      const ans = c.querySelector(".a"), badge = c.querySelector(".pz-badge");
+      const reveal = st => { ans.hidden = false; c.dataset.state = st; badge.textContent = st === "solved" ? "Solved ✓" : "Answer shown"; tally(); };
+      pzWire(c, k, { rightText: "Correct. Here is the full write-up.", right: () => reveal(c.dataset.state === "shown" ? "shown" : "solved"), show: () => reveal("shown") });
+    });
+    tally();
+  });
+}
+// A question figure with {echo: key} shows the lab's live value (k.publish in the lab), with a short pulse when it changes.
+window.addEventListener("inquire:lab-value", e => document.querySelectorAll(".cq-num[data-echo]").forEach(el => {
+  if (el.dataset.echo !== e.detail.key) return; const v = String(e.detail.value); if (el.textContent === v) return;
+  el.textContent = v; el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump");
+}));
 /* Three-layer lessons (Arithmetic first, Oct 2026): Concept · Intermediate · Formal tabs change the text only; the lab stays.
    A topic opts in with t.layers = { concept: {lede, what, why, history, sources, examples}, build: {lede, intro, stepWhy, bridge, tasks}, formal: {lede, setup} };
    the rest comes from the usual fields (fields, legend, steps, example, formal, mistakes, practice). Spec: docs/subjects/LAYERS.md. */
@@ -75887,6 +76180,8 @@ function layerHTML(t, L){
   const Y = t.layers, C = Y.concept || {}, B = Y.build || {}, F = Y.formal || {};
   const col = c => ({c1:"amber",c2:"cyan",c3:"pink",c4:"violet",c5:"green"}[c]);
   if (L === "concept" && C.ideas) return conceptHTML(t, C, col);
+  if (L === "build" && B.task) return buildHTML(t, B, col);
+  if (L === "formal" && F.question) return formalHTML(t, F, col);
   if (L === "concept") return `
     <div><h2>${C.heading || `What is ${esc(t.title.toLowerCase())}?`}</h2><span class="voice">Plain language</span>${C.what || t.plain}</div>
     <div><h2>Why it matters</h2>${C.why || t.why}
@@ -75972,8 +76267,8 @@ function renderTopic(main){
     ${layered ? `<div class="lyr-tabs" role="tablist" aria-label="Lesson level">${LAYERS.map(([k, name, sub], i) => `<button type="button" role="tab" class="lyr-tab" data-layer="${k}" aria-selected="${k === layer}" aria-controls="layer"><span class="lyr-n">${i + 1}</span><span><b>${name}</b><span>${sub}</span></span></button>`).join("")}</div>` : ""}
     <header class="intro">
       <div><p class="eyebrow">${t.eyebrow}</p><h1>${t.hero}</h1>
+        <p class="lede" id="lede">${layered ? ledeOf(layer) : t.lede}</p>
         <div class="meta"><span class="pill l">${esc(t.grade)}</span><span class="pill l">About ${t.hours} h to master</span>${layered ? "" : `<span class="pill l">${esc(voiceTxt)}</span>`}</div></div>
-      <p class="lede" id="lede">${layered ? ledeOf(layer) : t.lede}</p>
     </header>
     <section class="lab" aria-label="Interactive model">
       <div class="stage" id="stage"></div>
@@ -75996,6 +76291,7 @@ function renderTopic(main){
       $("#lede", pg).innerHTML = ledeOf(L);
       body.innerHTML = layerHTML(t, L);
       if (window.InquireDemo) InquireDemo.mountAll(body);
+      wireBlocks(body, pg, t);
       body.querySelectorAll("[data-lab]").forEach(b => b.onclick = () => {   // "Try it" chips: drive the lab, then bring it into view
         if (!LabKit.drive(b.dataset.lab)) return;
         const lab = pg.querySelector(".lab"), calm = document.documentElement.hasAttribute("data-reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches;

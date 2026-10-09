@@ -77,7 +77,7 @@ const alpha = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba($
 const reduce = W.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const coarse = W.matchMedia && W.matchMedia("(pointer: coarse)").matches;
 let uid = 0;
-const live = { loops: new Set(), ros: new Set(), timers: new Set(), offs: new Set() };
+const live = { loops: new Set(), ros: new Set(), timers: new Set(), offs: new Set(), values: {} };
 const exts = [];
 const addCSS = (id, text) => { if (document.getElementById(id)) return; const s = document.createElement("style"); s.id = id; s.textContent = text; document.head.appendChild(s); };
 
@@ -152,6 +152,9 @@ function make(stage, ro, ctl){
   // Let the page drive this lab: k.expose({ set: v => …, play: () => … }). Concept-tab "Try it" chips call
   // LabKit.drive("set:19,play") (comma-separated, name[:argument]); see docs/subjects/LAYERS.md.
   kit.expose = actions => { live.expose = actions; };
+  // Tell the page a live value: k.publish("n", 17). The Concept tab's question figure ({echo: "n"}) follows it;
+  // fires "inquire:lab-value" {key, value} only when the value changes; LabKit.value(key) reads the latest.
+  kit.publish = (key, v) => { if (live.values[key] === v) return; live.values[key] = v; window.dispatchEvent(new CustomEvent("inquire:lab-value", { detail: { key, value: v } })); };
 
   kit.slider = (label, min, max, step, value, onInput, fmtFn) => {
     const id = "lab" + (++uid);
@@ -305,12 +308,12 @@ function make(stage, ro, ctl){
   exts.forEach(fn => fn(kit));
   return kit;
 }
-function stopAll(){ live.expose = null; live.loops.forEach(L => L.on = false); live.loops.clear(); live.ros.forEach(o => o.disconnect()); live.ros.clear(); live.timers.forEach(id => clearInterval(id)); live.timers.clear(); live.offs.forEach(f => { try { f(); } catch (_) {} }); live.offs.clear(); document.body.classList.remove("kv-scrubbing"); }
+function stopAll(){ live.expose = null; live.values = {}; live.loops.forEach(L => L.on = false); live.loops.clear(); live.ros.forEach(o => o.disconnect()); live.ros.clear(); live.timers.forEach(id => clearInterval(id)); live.timers.clear(); live.offs.forEach(f => { try { f(); } catch (_) {} }); live.offs.clear(); document.body.classList.remove("kv-scrubbing"); }
 function drive(cmd){
   const ex = live.expose; if (!ex) return false; let did = false;
   String(cmd).split(",").forEach(part => { const [name, ...rest] = part.trim().split(":"); if (typeof ex[name] === "function") { ex[name](rest.join(":")); did = true; } });
   return did;
 }
-W.LabKit = { make, stopAll, rules, extend: fn => exts.push(fn), css: addCSS, C, F, alpha, drive };
+W.LabKit = { make, stopAll, rules, extend: fn => exts.push(fn), css: addCSS, C, F, alpha, drive, value: key => live.values[key] };
 W.LABS = W.LABS || {};
 })();

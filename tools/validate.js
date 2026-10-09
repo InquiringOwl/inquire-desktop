@@ -206,6 +206,10 @@ for (const [id, t] of Object.entries(T)) {
         C.ideas.forEach((x, i) => { const P = `concept.ideas[${i}]`; checkText(LW, `${P}.title`, x.title); nonEmpty(LW, `${P}.text`, x.text); checkHtml(LW, `${P}.text`, x.text);
           if (x.term !== undefined) checkText(LW, `${P}.term`, x.term); if (x.c !== undefined && !/^c[1-5]$/.test(x.c)) err(LW, `${P}.c must be c1 to c5`);
           if (x.demo !== undefined) demoOk(`${P}.demo`, x.demo); if (x.try !== undefined) tryOk(`${P}.try`, x.try); }); }
+      if (C.timelineTitle !== undefined) checkText(LW, 'concept.timelineTitle', C.timelineTitle);
+      if (C.timelineLead !== undefined) { nonEmpty(LW, 'concept.timelineLead', C.timelineLead); checkHtml(LW, 'concept.timelineLead', C.timelineLead); }
+      if (C.matters !== undefined) { const M = C.matters || {}; checkText(LW, 'concept.matters.title', M.title); nonEmpty(LW, 'concept.matters.text', M.text); checkHtml(LW, 'concept.matters.text', M.text); }
+      if (C.question && C.question.figure && C.question.figure.echo !== undefined && !/^[A-Za-z_]\w*$/.test(C.question.figure.echo)) err(LW, 'concept.question.figure.echo must be a lab value name (k.publish key)');
       if (C.stakes !== undefined) { const S = C.stakes || {}; checkText(LW, 'concept.stakes.title', S.title); nonEmpty(LW, 'concept.stakes.lead', S.lead); checkHtml(LW, 'concept.stakes.lead', S.lead);
         if (arr(LW, 'concept.stakes.items', S.items, 2)) S.items.forEach((x, i) => { checkText(LW, `concept.stakes.items[${i}].role`, x.role); nonEmpty(LW, `concept.stakes.items[${i}].text`, x.text); checkHtml(LW, `concept.stakes.items[${i}].text`, x.text); });
         if (S.try !== undefined) tryOk('concept.stakes.try', S.try); }
@@ -217,6 +221,43 @@ for (const [id, t] of Object.entries(T)) {
       for (const k of ['intro', 'bridge']) { nonEmpty(LW, `build.${k}`, B[k]); checkHtml(LW, `build.${k}`, B[k]); }
       if (arr(LW, 'build.stepWhy', B.stepWhy, 1)) { if (t.steps && t.steps.items && B.stepWhy.length !== t.steps.items.length) err(LW, `build.stepWhy has ${B.stepWhy.length} items but steps.items has ${t.steps.items.length}`); B.stepWhy.forEach((x, i) => { nonEmpty(LW, `build.stepWhy[${i}]`, x); checkHtml(LW, `build.stepWhy[${i}]`, x); }); }
       if (arr(LW, 'build.tasks', B.tasks, 3)) B.tasks.forEach((x, i) => { checkText(LW, `build.tasks[${i}].task`, x.task); nonEmpty(LW, `build.tasks[${i}].link`, x.link); checkHtml(LW, `build.tasks[${i}].link`, x.link); });
+      // Intermediate blocks (buildHTML in app.js; docs/subjects/LAYERS.md → "Intermediate blocks"): opt in with build.task
+      if (B.task !== undefined) {
+        const LABRE = /^[a-z]+(:[-\d.]+)?(,[a-z]+(:[-\d.]+)?)*$/, JUMPS = ['b-method', 'b-example', 'b-tasks'];
+        const tryOk = (P, x) => { if (x === null) return; if (!x || typeof x !== 'object') { err(LW, `${P} must be {label, lab} or null`); return; } checkText(LW, `${P}.label`, x.label); if (!LABRE.test(x.lab || '')) err(LW, `${P}.lab must look like "set:19,play" (commands the lab exposes)`); };
+        const T = B.task || {}; checkText(LW, 'build.task.text', T.text); if (T.sub !== undefined) { nonEmpty(LW, 'build.task.sub', T.sub); checkHtml(LW, 'build.task.sub', T.sub); }
+        if (T.figure && T.figure.echo !== undefined && !/^[A-Za-z_]\w*$/.test(T.figure.echo)) err(LW, 'build.task.figure.echo must be a lab value name (k.publish key)');
+        (T.jump || []).forEach((j, i) => { checkText(LW, `build.task.jump[${i}].label`, j.label); if (!JUMPS.includes(j.to)) err(LW, `build.task.jump[${i}].to must be one of ${JUMPS.join(', ')}`); });
+        for (const [k, n] of [['keyTry', (t.legend || []).length], ['stepTry', ((t.steps || {}).items || []).length]]) if (B[k] !== undefined) { if (!Array.isArray(B[k]) || B[k].length > n) err(LW, `build.${k} must be an array of at most ${n} items (one per ${k === 'keyTry' ? 'legend key' : 'step'}, null for none)`); else B[k].forEach((x, i) => tryOk(`build.${k}[${i}]`, x)); }
+        if (B.matters !== undefined) { const M = B.matters || {}; checkText(LW, 'build.matters.title', M.title); nonEmpty(LW, 'build.matters.text', M.text); checkHtml(LW, 'build.matters.text', M.text); }
+        if (B.exampleTip !== undefined) { nonEmpty(LW, 'build.exampleTip', B.exampleTip); checkHtml(LW, 'build.exampleTip', B.exampleTip); }
+        if (B.exampleTry !== undefined) tryOk('build.exampleTry', B.exampleTry);
+        (B.tasks || []).forEach((x, i) => { if (x.figure !== undefined) checkText(LW, `build.tasks[${i}].figure`, x.figure); if (x.try !== undefined) tryOk(`build.tasks[${i}].try`, x.try); });
+        const chk = (P, k) => { if (!k || typeof k !== 'object') { err(LW, `${P} must be an object`); return; } if (k.hint !== undefined) { nonEmpty(LW, `${P}.hint`, k.hint); checkHtml(LW, `${P}.hint`, k.hint); }
+          if (k.choices !== undefined) { if (arr(LW, `${P}.choices`, k.choices, 2)) { if (k.choices.filter(c => c.ok).length !== 1) err(LW, `${P}.choices needs exactly one ok: true`); k.choices.forEach((c, j) => { nonEmpty(LW, `${P}.choices[${j}].t`, c.t); checkHtml(LW, `${P}.choices[${j}].t`, c.t); if (!c.ok && c.why === undefined) err(LW, `${P}.choices[${j}] needs a why (shown when it is picked)`); }); } }
+          else if (arr(LW, `${P}.parts`, k.parts, 1)) k.parts.forEach((x, j) => { checkText(LW, `${P}.parts[${j}].label`, x.label); if (typeof x.ans !== 'number' || !isFinite(x.ans)) err(LW, `${P}.parts[${j}].ans must be a number (add it to the check file too)`); }); };
+        if (B.predict !== undefined) { if (!Array.isArray(B.predict) || B.predict.length > ((t.example || {}).lines || []).length) err(LW, 'build.predict must have at most one item per example line');
+          else { if (B.predict[0]) err(LW, 'build.predict[0] must be null: the first line is shown with the problem'); B.predict.forEach((q, i) => { if (q === null) return; nonEmpty(LW, `build.predict[${i}].ask`, q.ask); checkHtml(LW, `build.predict[${i}].ask`, q.ask); chk(`build.predict[${i}]`, q); }); } }
+        if (B.stepGoal !== undefined) { if (!Array.isArray(B.stepGoal) || B.stepGoal.length > ((t.steps || {}).items || []).length) err(LW, 'build.stepGoal must have at most one item per step');
+          else B.stepGoal.forEach((g, i) => { if (g === null) return; const P = `build.stepGoal[${i}]`; if (!/^[A-Za-z_]\w*$/.test(g.key || '')) err(LW, `${P}.key must be a value the lab publishes (k.publish)`); if (g.eq === undefined && g.min === undefined) err(LW, `${P} needs eq or min`); for (const k of ['eq', 'min']) if (g[k] !== undefined && typeof g[k] !== 'number') err(LW, `${P}.${k} must be a number`); nonEmpty(LW, `${P}.text`, g.text); checkHtml(LW, `${P}.text`, g.text); if (g.after !== undefined) checkHtml(LW, `${P}.after`, g.after); if ((B.stepTry || [])[i]) err(LW, `${P}: drop stepTry[${i}] (a chip would do the move for the learner)`); }); }
+        (B.tasks || []).forEach((x, i) => { if (x.check !== undefined) { nonEmpty(LW, `build.tasks[${i}].check.q`, (x.check || {}).q); checkHtml(LW, `build.tasks[${i}].check.q`, (x.check || {}).q); chk(`build.tasks[${i}].check`, x.check); } });
+        for (const k of ['goalsIntro']) if (B[k] !== undefined) { nonEmpty(LW, `build.${k}`, B[k]); checkHtml(LW, `build.${k}`, B[k]); }
+      }
+    }
+    if (F && F.question !== undefined) {   // Formal blocks (formalHTML in app.js; docs/subjects/LAYERS.md → "Formal blocks")
+      const Q = F.question || {}, JUMPS = ['f-vocab', 'f-setup', 'f-mist', 'f-prac'];
+      checkText(LW, 'formal.question.text', Q.text); if (Q.sub !== undefined) { nonEmpty(LW, 'formal.question.sub', Q.sub); checkHtml(LW, 'formal.question.sub', Q.sub); }
+      if (Q.figure && Q.figure.echo !== undefined && !/^[A-Za-z_]\w*$/.test(Q.figure.echo)) err(LW, 'formal.question.figure.echo must be a lab value name (k.publish key)');
+      (Q.jump || []).forEach((j, i) => { checkText(LW, `formal.question.jump[${i}].label`, j.label); if (!JUMPS.includes(j.to)) err(LW, `formal.question.jump[${i}].to must be one of ${JUMPS.join(', ')}`); });
+      if (arr(LW, 'formal.vocab', F.vocab, 3)) { if (F.vocab.length > 8) err(LW, 'formal.vocab has more than 8 cards');
+        F.vocab.forEach((v, i) => { const P = `formal.vocab[${i}]`; checkText(LW, `${P}.term`, v.term); for (const k of ['sym', 'def']) { nonEmpty(LW, `${P}.${k}`, v[k]); checkHtml(LW, `${P}.${k}`, v[k]); } if (v.was !== undefined) checkText(LW, `${P}.was`, v.was); if (v.c !== undefined && !/^c[1-5]$/.test(v.c)) err(LW, `${P}.c must be c1 to c5`); }); }
+      if (F.matters !== undefined) { const M = F.matters || {}; checkText(LW, 'formal.matters.title', M.title); nonEmpty(LW, 'formal.matters.text', M.text); checkHtml(LW, 'formal.matters.text', M.text); }
+      if (F.checks !== undefined) { if (!Array.isArray(F.checks) || F.checks.length > (t.practice || []).length) err(LW, 'formal.checks must be an array, at most one per practice item');
+        else F.checks.forEach((k, i) => { const P = `formal.checks[${i}]`; if (k === null) return; if (k.hint !== undefined) { nonEmpty(LW, `${P}.hint`, k.hint); checkHtml(LW, `${P}.hint`, k.hint); }
+          if (arr(LW, `${P}.parts`, k.parts, 1)) k.parts.forEach((x, j) => { checkText(LW, `${P}.parts[${j}].label`, x.label); if (typeof x.ans !== 'number' || !isFinite(x.ans)) err(LW, `${P}.parts[${j}].ans must be a number`);
+            else { const a = String((t.practice[i] || {}).a || '').replace(/<[^>]+>/g, '').replace(/(\d),(?=\d{3})/g, '$1'); if (!new RegExp(`(^|[^\\d.])${String(x.ans).replace('.', '\\.')}(?![\\d])`).test(a)) err(LW, `${P}.parts[${j}].ans ${x.ans} does not appear in practice[${i}].a (the checked answer)`); } }); }); }
+      for (const k of ['vocabIntro', 'setupIntro', 'mistakesLead', 'practiceTip', 'practiceDone']) if (F[k] !== undefined) { nonEmpty(LW, `formal.${k}`, F[k]); checkHtml(LW, `formal.${k}`, F[k]); }
+      for (const k of ['vocabTitle', 'mistakesTitle', 'statementTitle', 'eyebrow', 'practiceTitle']) if (F[k] !== undefined) checkText(LW, `formal.${k}`, F[k]);
     }
     if (F) {
       if (!F.setup || typeof F.setup !== 'object') err(LW, 'formal.setup must be {title, items}');

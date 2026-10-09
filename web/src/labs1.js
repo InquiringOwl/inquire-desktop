@@ -6,7 +6,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 /* ---------- counting: ten-frames ---------- */
 L["counting"] = k => {
   const { C, F, M } = k; const c = k.canvas(); const d = c.d;
-  let n = 17, shown = 0, acc = 0, say = -1, sayT = 0, playing = false;
+  let n = 17, shown = 0, acc = 0, say = -1, sayT = 0, playing = false, aloud = 0;
   const s = k.slider(`<i>n</i>`, 0, 40, 1, n, v => { n = v; say = -1; playing = false; pb.textContent = "Count aloud"; });
   k.button("+1 (successor)", () => { if (n < 40) { n++; s.set(n); } }, "btn ghost");
   const pb = k.button("Count aloud", () => { playing = !playing; say = playing ? 0 : -1; sayT = 0; pb.textContent = playing ? "Stop" : "Count aloud"; });
@@ -18,8 +18,9 @@ L["counting"] = k => {
     play: () => { playing = true; say = 0; sayT = 0; pb.textContent = "Stop"; }
   });
   k.loop(dt => {
+    k.publish("n", n);   // the Concept tab's "How many?" figure follows the slider
     acc += dt; if (acc > 0.05) { acc = 0; if (shown < n) shown++; else if (shown > n) shown--; }
-    if (playing) { sayT += dt; if (sayT > (k.reduce ? 0.2 : 0.55)) { sayT = 0; say++; if (say > n) { playing = false; pb.textContent = "Count aloud"; } } }
+    if (playing) { sayT += dt; if (sayT > (k.reduce ? 0.2 : 0.55)) { sayT = 0; say++; if (say > n) { playing = false; pb.textContent = "Count aloud"; k.publish("aloud", ++aloud); k.publish("counted", n); } } }   // Intermediate "Your move" goals
     c.begin(); const { w, h } = c;
     const cols = w > 720 ? 4 : 2, rows = 4 / cols;
     const cell = Math.min((w - 60) / (cols * 5 + (cols - 1) * 1.2), (h - 150) / (rows * 2 + (rows - 1) * 1.4));
